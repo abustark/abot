@@ -501,33 +501,33 @@ const firebaseConfig = {
     const db = firebase.firestore(); // Initialize the Firestore database
     
     const MODEL_CONFIG = {
-                // --- NEW DEFAULT ---
-                'groq/openai/gpt-oss-120b': { name: 'GPT-oss 120b', color: 'groq-yellow' },
+    // --- NEW DEFAULT ---
+    'groq/openai/gpt-oss-120b': { name: 'GPT-oss', color: 'groq-yellow' },
 
-                // --- GOOGLE (GEMINI) ---
-                'google/gemini-2.5-pro': { name: 'Gemini 2.5 Pro', color: 'gemini' },
-                'google/gemini-2.5-flash': { name: 'Gemini 2.5 Flash', color: 'gemini-pro' },
+    // --- GOOGLE (GEMINI) ---
+    'google/gemini-2.5-pro': { name: 'Gemini 2.5 Pro', color: 'gemini' },
+    'google/gemini-2.5-flash': { name: 'Gemini 2.5 Flash', color: 'gemini-pro' },
 
-                // --- OTHER GROQ ---
-                'groq/deepseek-r1-distill-llama-70b': { name: 'DeepSeek R1 70b', color: 'groq-yellow' },
-                'groq/llama-3.1-8b-instant': { name: 'Llama 3.1', color: 'groq-yellow' },
-                'groq/meta-llama/llama-4-maverick-17b-128e-instruct': { name: 'Llama 4 Maverick', color: 'groq-yellow' },
-                'groq/meta-llama/llama-4-scout-17b-16e-instruct': { name: 'Llama 4 Scout', color: 'groq-yellow' },
-                'groq/moonshotai/kimi-k2-instruct': { name: 'Kimi K2', color: 'groq-yellow' },
+    // --- OTHER GROQ ---
+    'groq/deepseek-r1-distill-llama-70b': { name: 'DeepSeek R1 70B', color: 'groq-yellow' },
+    'groq/llama-3.1-8b-instant': { name: 'Llama 3.1', color: 'groq-yellow' },
+    'groq/meta-llama/llama-4-maverick-17b-128e-instruct': { name: 'Llama 4 Maverick', color: 'groq-yellow' },
+    'groq/meta-llama/llama-4-scout-17b-16e-instruct': { name: 'Llama 4 Scout', color: 'groq-yellow' },
+    'groq/moonshotai/kimi-k2-instruct': { name: 'Kimi K2', color: 'groq-yellow' },
 
-                // --- NVIDIA ---
-                'nvidia/openai/gpt-oss-20b': { name: 'GPT-oss 20b', color: 'nvidia-green' },
-                'nvidia/nvidia/nvidia-nemotron-nano-9b-v2': { name: 'nvidia nim', color: 'nvidia-green' },
-                'nvidia/mistralai/mistral-nemotron': { name: 'Mistral', color: 'nvidia-green' },
-                'nvidia/deepseek-ai/deepseek-r1-0528': { name: 'DeepSeek R1', color: 'nvidia-green' },
-                'nvidia/qwen/qwen2.5-coder-32b-instruct': { name: 'qwen 2.5 CODER', color: 'nvidia-green' },
+    // --- NVIDIA ---
+    'nvidia/openai/gpt-oss-20b': { name: 'GPT-oss 20b', color: 'nvidia-green' },
+    'nvidia/nvidia/nvidia-nemotron-nano-9b-v2': { name: 'Nvidia Nim', color: 'nvidia-green' },
+    'nvidia/mistralai/mistral-nemotron': { name: 'Mistral', color: 'nvidia-green' },
+    'nvidia/deepseek-ai/deepseek-r1-0528': { name: 'DeepSeek R1', color: 'nvidia-green' },
+    'nvidia/qwen/qwen2.5-coder-32b-instruct': { name: 'Qwen 2.5 Coder', color: 'nvidia-green' },
 
-                // --- OPENROUTER ---
-                'deepseek/deepseek-chat-v3-0324:free': { name: 'DeepSeek V3', color: 'deepseek-v3' },
-                'qwen/qwen3-coder:free': { name: 'qwen 3 CODER', color: 'qwen-32b' },
-                'z-ai/glm-4.5-air:free': { name: 'GLM 4.5(z.ai)', color: 'llama-blue' },
-                'cognitivecomputations/dolphin-mistral-24b-venice-edition:free': { name: 'venice ai', color: 'mistral-orange' },
-            };
+    // --- OPENROUTER ---
+    'deepseek/deepseek-chat-v3-0324:free': { name: 'DeepSeek V3', color: 'deepseek-v3' },
+    'qwen/qwen3-coder:free': { name: 'Qwen 3 Coder', color: 'qwen-32b' },
+    'z-ai/glm-4.5-air:free': { name: 'GLM 4.5', color: 'llama-blue' },
+    'cognitivecomputations/dolphin-mistral-24b-venice-edition:free': { name: 'Venice AI', color: 'mistral-orange' },
+};
 
             
             const dom = {
