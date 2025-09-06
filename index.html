@@ -1263,12 +1263,14 @@ const userMessage = { role: 'user', content: message, model: currentChat.model }
     }
 
     try {
+        const cleanedMessages = messagesToSend.map(({ role, content }) => ({ role, content }));
+
         const idToken = await currentUser.getIdToken(true);
         
         const response = await fetch('/api/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` },
-            body: JSON.stringify({ model: currentChat.model, messages: messagesToSend }),
+            body: JSON.stringify({ model: currentChat.model, messages: cleanedMessages }),
             signal: abortController.signal
         });
 
