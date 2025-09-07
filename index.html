@@ -1838,10 +1838,7 @@ dom.modelSelectorBtn.addEventListener('click', e => {
             dom.googleSigninBtn = document.getElementById('google-signin-btn');
                         if (dom.googleSigninBtn) {
                 dom.googleSigninBtn.addEventListener('click', () => {
-                    // --- FIX FOR UI FLASH ---
-                    // Immediately disable the button to provide feedback and prevent double-clicks.
-                    dom.googleSigninBtn.disabled = true;
-
+                    
                     // This command will ALWAYS open the pop-up because it's designed for a user click.
                     if (tokenClient) {
                         tokenClient.requestAccessToken();
