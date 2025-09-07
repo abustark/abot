@@ -1804,32 +1804,46 @@ dom.modelSelectorBtn.addEventListener('click', e => {
             
                     // --- ATTACH EVENT LISTENERS FOR AUTH FORMS ---
 
+                        // This is the new, correct, and robust implementation for a custom Google Sign-In button.
+
             // 1. Define the callback function that Firebase will use after a successful sign-in.
+            // This function receives the access token from the Google pop-up.
             async function handleCredentialResponse(response) {
                 try {
-                    const id_token = response.credential;
-                    const credential = firebase.auth.GoogleAuthProvider.credential(id_token);
+                    // We need to create a credential from the token Google gives us.
+                    const credential = firebase.auth.GoogleAuthProvider.credential(null, response.access_token);
                     await auth.signInWithCredential(credential);
-                    // The onAuthStateChanged listener handles switching to the app view.
+                    // The onAuthStateChanged listener will handle switching to the app view.
                 } catch (error) {
                     console.error("Google credential sign-in error:", error);
-                    handleAuthError(error);
+                    handleAuthError(error); // Use our existing error handler.
                 }
             }
 
-            // 2. Attach standard listeners.
+            // 2. Initialize Google's Token Client.
+            // This client is specifically designed to handle the pop-up flow for a button click.
+            let tokenClient;
+            if (window.google && google.accounts && google.accounts.id) {
+                tokenClient = google.accounts.oauth2.initTokenClient({
+                    client_id: "784623545561-f9qumqjcsek7g368657cloq8rqc0kurj.apps.googleusercontent.com",
+                    scope: 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
+                    callback: handleCredentialResponse, // The function to call on success
+                });
+            }
+
+            // 3. Attach standard listeners.
             dom.showSignup.addEventListener('click', (e) => { e.preventDefault(); showSignupView(); });
             dom.showLogin.addEventListener('click', (e) => { e.preventDefault(); showLoginView(); });
             dom.showForgotPassword.addEventListener('click', (e) => { e.preventDefault(); showForgotPasswordView(); });
             dom.backToLogin.addEventListener('click', (e) => { e.preventDefault(); showLoginView(); });
             
-            // 3. Attach listener for YOUR custom Google button.
+            // 4. Attach the listener for YOUR custom Google button.
             dom.googleSigninBtn = document.getElementById('google-signin-btn');
             if (dom.googleSigninBtn) {
                 dom.googleSigninBtn.addEventListener('click', () => {
-                    if (window.google && google.accounts && google.accounts.id) {
-                         // Manually trigger the modern Google pop-up.
-                        google.accounts.id.prompt();
+                    // This command will ALWAYS open the pop-up because it's tied to a user click.
+                    if (tokenClient) {
+                        tokenClient.requestAccessToken();
                     }
                 });
             }
