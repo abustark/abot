@@ -1804,24 +1804,27 @@ dom.modelSelectorBtn.addEventListener('click', e => {
             
                     // --- ATTACH EVENT LISTENERS FOR AUTH FORMS ---
 
-                                                // This is the simplified, correct, and non-crashing implementation.
+                                                            // This is the definitive, reliable implementation using the traditional pop-up window.
 
-            // 1. Define the callback function that handles the credential from the GSI prompt.
+            // 1. Define the callback function that Firebase will use after a successful sign-in.
             async function handleCredentialResponse(response) {
                 try {
-                    const credential = firebase.auth.GoogleAuthProvider.credential(response.credential);
+                    // This creates a Firebase credential from the token the pop-up provides.
+                    const credential = firebase.auth.GoogleAuthProvider.credential(null, response.access_token);
                     await auth.signInWithCredential(credential);
                 } catch (error) {
                     console.error("Google credential sign-in error:", error);
                     handleAuthError(error);
                 }
             }
-            
-            // 2. Initialize Google's GSI library.
+
+            // 2. Initialize Google's Token Client, which manages the pop-up.
+            let tokenClient;
             if (window.google && google.accounts && google.accounts.id) {
-                google.accounts.id.initialize({
+                tokenClient = google.accounts.oauth2.initTokenClient({
                     client_id: "784623545561-f9qumqjcsek7g368657cloq8rqc0kurj.apps.googleusercontent.com",
-                    callback: handleCredentialResponse
+                    scope: 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
+                    callback: handleCredentialResponse,
                 });
             }
 
@@ -1835,14 +1838,14 @@ dom.modelSelectorBtn.addEventListener('click', e => {
             dom.googleSigninBtn = document.getElementById('google-signin-btn');
             if (dom.googleSigninBtn) {
                 dom.googleSigninBtn.addEventListener('click', () => {
-                    // This command triggers the modern slide-in prompt.
-                    if (window.google && google.accounts && google.accounts.id) {
-                        google.accounts.id.prompt();
+                    // This command will ALWAYS open the pop-up because it's designed for a user click.
+                    if (tokenClient) {
+                        tokenClient.requestAccessToken();
                     }
                 });
             }
-            
-            dom.guestSigninBtn.addEventListener('click', signInAsGuest);
+
+            dom.guestSigninBtn.addEventListener('click', signInAsGuest);  
             
             dom.forgotPasswordForm.addEventListener('submit', (e) => {
                 e.preventDefault();
