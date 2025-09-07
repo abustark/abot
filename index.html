@@ -1804,46 +1804,24 @@ dom.modelSelectorBtn.addEventListener('click', e => {
             
                     // --- ATTACH EVENT LISTENERS FOR AUTH FORMS ---
 
-                                    // This is the new, definitive, and hybrid implementation for a custom Google Sign-In button.
+                                                // This is the simplified, correct, and non-crashing implementation.
 
-            // 1. Define the callback function that handles the credential from either flow.
-            async function handleGoogleSignIn(googleResponse) {
+            // 1. Define the callback function that handles the credential from the GSI prompt.
+            async function handleCredentialResponse(response) {
                 try {
-                    let credential;
-                    // The One-Tap prompt returns an ID token directly in the 'credential' field.
-                    if (googleResponse.credential) {
-                        credential = firebase.auth.GoogleAuthProvider.credential(googleResponse.credential);
-                    } 
-                    // The pop-up flow returns an access token that we must use instead.
-                    else if (googleResponse.access_token) {
-                        credential = firebase.auth.GoogleAuthProvider.credential(null, googleResponse.access_token);
-                    }
-                    
-                    if (credential) {
-                        await auth.signInWithCredential(credential);
-                    }
+                    const credential = firebase.auth.GoogleAuthProvider.credential(response.credential);
+                    await auth.signInWithCredential(credential);
                 } catch (error) {
                     console.error("Google credential sign-in error:", error);
                     handleAuthError(error);
                 }
             }
-
-            // 2. Initialize BOTH the ID client (for One-Tap) and the Token client (for pop-up fallback).
-            let idClient;
-            let tokenClient;
+            
+            // 2. Initialize Google's GSI library.
             if (window.google && google.accounts && google.accounts.id) {
-                // For the One-Tap slide-in prompt
-                idClient = google.accounts.id;
-                idClient.initialize({
+                google.accounts.id.initialize({
                     client_id: "784623545561-f9qumqjcsek7g368657cloq8rqc0kurj.apps.googleusercontent.com",
-                    callback: handleGoogleSignIn
-                });
-
-                // For the pop-up window fallback
-                tokenClient = google.accounts.oauth2.initTokenClient({
-                    client_id: "784623545561-f9qumqjcsek7g368657cloq8rqc0kurj.apps.googleusercontent.com",
-                    scope: 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
-                    callback: handleGoogleSignIn,
+                    callback: handleCredentialResponse
                 });
             }
 
@@ -1853,22 +1831,13 @@ dom.modelSelectorBtn.addEventListener('click', e => {
             dom.showForgotPassword.addEventListener('click', (e) => { e.preventDefault(); showForgotPasswordView(); });
             dom.backToLogin.addEventListener('click', (e) => { e.preventDefault(); showLoginView(); });
             
-            // 4. Attach the listener for YOUR custom Google button with the hybrid logic.
+            // 4. Attach the listener for YOUR custom Google button.
             dom.googleSigninBtn = document.getElementById('google-signin-btn');
             if (dom.googleSigninBtn) {
                 dom.googleSigninBtn.addEventListener('click', () => {
-                    if (idClient && tokenClient) {
-                        // First, try the modern One-Tap prompt.
-                        idClient.prompt((notification) => {
-                            // This callback is triggered if the prompt is NOT shown.
-                            if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-                                // If the reason is the cool-down ('suppressed_by_user'), then we fall back.
-                                if (notification.getNotDisplayedReason() === 'suppressed_by_user') {
-                                    console.log("One-Tap suppressed, falling back to pop-up.");
-                                    tokenClient.requestAccessToken();
-                                }
-                            }
-                        });
+                    // This command triggers the modern slide-in prompt.
+                    if (window.google && google.accounts && google.accounts.id) {
+                        google.accounts.id.prompt();
                     }
                 });
             }
