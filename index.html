@@ -1804,30 +1804,46 @@ dom.modelSelectorBtn.addEventListener('click', e => {
             
                     // --- ATTACH EVENT LISTENERS FOR AUTH FORMS ---
 
-                        // This is the new, correct, and robust implementation for a custom Google Sign-In button.
+                                    // This is the new, definitive, and hybrid implementation for a custom Google Sign-In button.
 
-            // 1. Define the callback function that Firebase will use after a successful sign-in.
-            // This function receives the access token from the Google pop-up.
-            async function handleCredentialResponse(response) {
+            // 1. Define the callback function that handles the credential from either flow.
+            async function handleGoogleSignIn(googleResponse) {
                 try {
-                    // We need to create a credential from the token Google gives us.
-                    const credential = firebase.auth.GoogleAuthProvider.credential(null, response.access_token);
-                    await auth.signInWithCredential(credential);
-                    // The onAuthStateChanged listener will handle switching to the app view.
+                    let credential;
+                    // The One-Tap prompt returns an ID token directly in the 'credential' field.
+                    if (googleResponse.credential) {
+                        credential = firebase.auth.GoogleAuthProvider.credential(googleResponse.credential);
+                    } 
+                    // The pop-up flow returns an access token that we must use instead.
+                    else if (googleResponse.access_token) {
+                        credential = firebase.auth.GoogleAuthProvider.credential(null, googleResponse.access_token);
+                    }
+                    
+                    if (credential) {
+                        await auth.signInWithCredential(credential);
+                    }
                 } catch (error) {
                     console.error("Google credential sign-in error:", error);
-                    handleAuthError(error); // Use our existing error handler.
+                    handleAuthError(error);
                 }
             }
 
-            // 2. Initialize Google's Token Client.
-            // This client is specifically designed to handle the pop-up flow for a button click.
+            // 2. Initialize BOTH the ID client (for One-Tap) and the Token client (for pop-up fallback).
+            let idClient;
             let tokenClient;
             if (window.google && google.accounts && google.accounts.id) {
+                // For the One-Tap slide-in prompt
+                idClient = google.accounts.id;
+                idClient.initialize({
+                    client_id: "784623545561-f9qumqjcsek7g368657cloq8rqc0kurj.apps.googleusercontent.com",
+                    callback: handleGoogleSignIn
+                });
+
+                // For the pop-up window fallback
                 tokenClient = google.accounts.oauth2.initTokenClient({
                     client_id: "784623545561-f9qumqjcsek7g368657cloq8rqc0kurj.apps.googleusercontent.com",
                     scope: 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
-                    callback: handleCredentialResponse, // The function to call on success
+                    callback: handleGoogleSignIn,
                 });
             }
 
@@ -1837,17 +1853,26 @@ dom.modelSelectorBtn.addEventListener('click', e => {
             dom.showForgotPassword.addEventListener('click', (e) => { e.preventDefault(); showForgotPasswordView(); });
             dom.backToLogin.addEventListener('click', (e) => { e.preventDefault(); showLoginView(); });
             
-            // 4. Attach the listener for YOUR custom Google button.
+            // 4. Attach the listener for YOUR custom Google button with the hybrid logic.
             dom.googleSigninBtn = document.getElementById('google-signin-btn');
             if (dom.googleSigninBtn) {
                 dom.googleSigninBtn.addEventListener('click', () => {
-                    // This command will ALWAYS open the pop-up because it's tied to a user click.
-                    if (tokenClient) {
-                        tokenClient.requestAccessToken();
+                    if (idClient && tokenClient) {
+                        // First, try the modern One-Tap prompt.
+                        idClient.prompt((notification) => {
+                            // This callback is triggered if the prompt is NOT shown.
+                            if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+                                // If the reason is the cool-down ('suppressed_by_user'), then we fall back.
+                                if (notification.getNotDisplayedReason() === 'suppressed_by_user') {
+                                    console.log("One-Tap suppressed, falling back to pop-up.");
+                                    tokenClient.requestAccessToken();
+                                }
+                            }
+                        });
                     }
                 });
             }
-
+            
             dom.guestSigninBtn.addEventListener('click', signInAsGuest);
             
             dom.forgotPasswordForm.addEventListener('submit', (e) => {
