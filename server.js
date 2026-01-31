@@ -2,32 +2,116 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 const admin = require('firebase-admin');
+const fs = require('fs');
+const path = require('path');
 
-if (process.env.RENDER === 'true') {
-    const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
-    if (!serviceAccountJson) {
-        throw new Error("FIREBASE_SERVICE_ACCOUNT_JSON environment variable not set. Server cannot start.");
-    }
-    const serviceAccount = JSON.parse(serviceAccountJson);
-    admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount)
-    });
-    console.log("Firebase Admin SDK initialized successfully from environment variable.");
-} else {
+// Initialize Firebase Admin SDK
+let serviceAccount;
+const keyFilePath = path.join(__dirname, 'service-account-key.json');
+
+// Try to load from JSON file first (easier for local dev)
+if (fs.existsSync(keyFilePath)) {
     try {
-        const serviceAccount = require('./service-account-key.json');
-        admin.initializeApp({
-            credential: admin.credential.cert(serviceAccount)
-        });
-        console.log("Firebase Admin SDK initialized successfully from local file.");
+        serviceAccount = require(keyFilePath);
+        console.log("Firebase Admin SDK: Using service-account-key.json file.");
     } catch (error) {
-        console.error("CRITICAL ERROR: Could not initialize Firebase Admin SDK. Make sure 'service-account-key.json' is in the root directory.", error);
+        console.error("Error reading service-account-key.json:", error);
         process.exit(1);
     }
 }
+// Fall back to environment variable
+else if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
+    try {
+        serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
+        console.log("Firebase Admin SDK: Using FIREBASE_SERVICE_ACCOUNT_JSON env variable.");
+    } catch (error) {
+        console.error("Error parsing FIREBASE_SERVICE_ACCOUNT_JSON:", error);
+        process.exit(1);
+    }
+} else {
+    console.error("CRITICAL ERROR: No Firebase credentials found!");
+    console.error("Either create a 'service-account-key.json' file or set FIREBASE_SERVICE_ACCOUNT_JSON in .env");
+    process.exit(1);
+}
+
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount)
+});
+console.log("Firebase Admin SDK initialized successfully.");
 
 const app = express();
 const port = 3000;
+
+// Security: Add helmet for security headers
+const helmet = require('helmet');
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: [
+                "'self'",
+                "'unsafe-inline'", // Required for inline scripts
+                "https://cdn.jsdelivr.net",
+                "https://cdnjs.cloudflare.com",
+                "https://www.gstatic.com",
+                "https://accounts.google.com"
+            ],
+            styleSrc: [
+                "'self'",
+                "'unsafe-inline'",
+                "https://fonts.googleapis.com",
+                "https://cdnjs.cloudflare.com"
+            ],
+            fontSrc: ["'self'", "https://fonts.gstatic.com"],
+            imgSrc: ["'self'", "data:", "https://i.pravatar.cc", "https://*.googleusercontent.com"],
+            connectSrc: [
+                "'self'",
+                "https://generativelanguage.googleapis.com",
+                "https://api.groq.com",
+                "https://integrate.api.nvidia.com",
+                "https://openrouter.ai",
+                "https://accounts.google.com",
+                "https://www.googleapis.com",
+                "https://firestore.googleapis.com",
+                "https://identitytoolkit.googleapis.com",
+                "https://securetoken.googleapis.com",
+                "wss://firestore.googleapis.com",
+                "https://cdnjs.cloudflare.com",
+                "https://cdn.jsdelivr.net",
+                "https://fonts.googleapis.com",
+                "https://fonts.gstatic.com",
+                "https://www.gstatic.com"
+            ],
+            frameSrc: ["https://accounts.google.com"],
+            objectSrc: ["'none'"],
+            upgradeInsecureRequests: []
+        }
+    },
+    crossOriginEmbedderPolicy: false, // Required for some CDN resources
+}));
+
+// Security: Rate limiting
+const rateLimit = require('express-rate-limit');
+
+// General rate limit: 100 requests per 15 minutes per IP
+const generalLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100,
+    message: { error: 'Too many requests, please try again later.' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+// Stricter limit for chat API: 30 requests per 15 minutes
+const chatLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 30,
+    message: { error: 'Rate limit exceeded for chat API. Please wait before sending more messages.' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+app.use(generalLimiter);
 app.use(express.static('.'));
 app.use(cors());
 app.use(express.json());
@@ -62,12 +146,40 @@ app.get('/api/firebase-config', (req, res) => {
         projectId: process.env.FIREBASE_PROJECT_ID,
         storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
         messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
-        appId: process.env.FIREBASE_APP_ID
+        appId: process.env.FIREBASE_APP_ID,
+        googleClientId: process.env.GOOGLE_CLIENT_ID
     });
 });
 
-app.post('/api/chat', checkAuth, async (req, res) => {
+app.post('/api/chat', chatLimiter, checkAuth, async (req, res) => {
     const { model, messages } = req.body;
+
+    // Security: Input validation
+    const ALLOWED_PROVIDERS = ['google/', 'groq/', 'nvidia/', 'deepseek/', 'qwen/', 'z-ai/', 'cognitivecomputations/'];
+
+    if (!model || typeof model !== 'string') {
+        return res.status(400).json({ error: 'Invalid model parameter' });
+    }
+
+    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+        return res.status(400).json({ error: 'Invalid messages parameter' });
+    }
+
+    // Validate model starts with an allowed provider
+    const isValidProvider = ALLOWED_PROVIDERS.some(provider => model.startsWith(provider));
+    if (!isValidProvider) {
+        return res.status(400).json({ error: 'Invalid model provider' });
+    }
+
+    // Validate each message has required fields
+    for (const msg of messages) {
+        if (!msg.role || !['system', 'user', 'assistant'].includes(msg.role)) {
+            return res.status(400).json({ error: 'Invalid message role' });
+        }
+        if (typeof msg.content !== 'string') {
+            return res.status(400).json({ error: 'Invalid message content' });
+        }
+    }
 
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
@@ -81,7 +193,7 @@ app.post('/api/chat', checkAuth, async (req, res) => {
     const isGroq = model.startsWith('groq/');
     const isNvidia = model.startsWith('nvidia/');
 
-   try {
+    try {
         if (isGoogle) {
             const apiKey = process.env.GEMINI_API_KEY;
             if (!apiKey) throw new Error('GEMINI_API_KEY not configured.');
@@ -113,7 +225,7 @@ app.post('/api/chat', checkAuth, async (req, res) => {
 
             const apiUrl = "https://api.groq.com/openai/v1/chat/completions";
             const groqModelName = model.substring(model.indexOf('/') + 1);
-                        
+
             const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: {
@@ -136,7 +248,7 @@ app.post('/api/chat', checkAuth, async (req, res) => {
                 if (done) break;
                 res.write(decoder.decode(value));
             }
-                        
+
         } else if (isNvidia) {
             const apiKey = process.env.NVIDIA_API_KEY;
             if (!apiKey) throw new Error('NVIDIA_API_KEY not configured.');
@@ -167,7 +279,7 @@ app.post('/api/chat', checkAuth, async (req, res) => {
                 if (done) break;
                 res.write(decoder.decode(value));
             }
-        
+
         } else { // Default to OpenRouter
             const apiKey = process.env.OPENROUTER_API_KEY;
             if (!apiKey) throw new Error('OPENROUTER_API_KEY not configured.');

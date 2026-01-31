@@ -13,7 +13,9 @@
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
-    "firebase-admin": "^13.4.0"
+    "express-rate-limit": "^8.2.1",
+    "firebase-admin": "^12.7.0",
+    "helmet": "^8.1.0"
   },
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.16",
@@ -32,5 +34,8 @@
   "bugs": {
     "url": "https://github.com/abustark/ai-chat-hub/issues"
   },
-  "homepage": "https://github.com/abustark/ai-chat-hub#readme"
+  "homepage": "https://github.com/abustark/ai-chat-hub#readme",
+  "overrides": {
+    "fast-xml-parser": "^5.3.4"
+  }
 }
