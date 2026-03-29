@@ -39,6 +39,33 @@ export default async function handler(req, res) {
 
     const { model, messages } = req.body;
 
+    // Security: Input validation
+    const ALLOWED_PROVIDERS = ['google/', 'groq/', 'nvidia/', 'deepseek/', 'qwen/', 'z-ai/', 'cognitivecomputations/'];
+
+    if (!model || typeof model !== 'string') {
+        return res.status(400).json({ error: 'Invalid model parameter' });
+    }
+
+    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+        return res.status(400).json({ error: 'Invalid messages parameter' });
+    }
+
+    // Validate model starts with an allowed provider
+    const isValidProvider = ALLOWED_PROVIDERS.some(provider => model.startsWith(provider));
+    if (!isValidProvider) {
+        return res.status(400).json({ error: 'Invalid model provider' });
+    }
+
+    // Validate each message has required fields
+    for (const msg of messages) {
+        if (!msg.role || !['system', 'user', 'assistant'].includes(msg.role)) {
+            return res.status(400).json({ error: 'Invalid message role' });
+        }
+        if (typeof msg.content !== 'string') {
+            return res.status(400).json({ error: 'Invalid message content' });
+        }
+    }
+
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');

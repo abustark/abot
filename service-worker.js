@@ -3,7 +3,7 @@
  * Provides offline caching for local assets only
  */
 
-const CACHE_NAME = 'abot-cache-v3';
+const CACHE_NAME = 'abot-cache-v9';
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -47,50 +47,51 @@ self.addEventListener('activate', (event) => {
     );
 });
 
-// Fetch event - ONLY handle same-origin local requests
+// Fetch event
 self.addEventListener('fetch', (event) => {
     const url = new URL(event.request.url);
 
-    // IMPORTANT: Only intercept same-origin requests
-    // Let ALL external requests (CDN, Firebase, Google, etc.) pass through normally
-    if (url.origin !== self.location.origin) {
-        return; // Don't call event.respondWith - let the browser handle it
-    }
+    // Only intercept same-origin requests
+    if (url.origin !== self.location.origin) return;
 
     // Skip API requests
-    if (url.pathname.startsWith('/api/')) {
-        return;
-    }
+    if (url.pathname.startsWith('/api/')) return;
 
     // Only handle GET requests
-    if (event.request.method !== 'GET') {
+    if (event.request.method !== 'GET') return;
+
+    // STRATEGY: Network-First for main page (navigation), Cache-First for assets
+    if (event.request.mode === 'navigate' || url.pathname === '/' || url.pathname === '/index.html') {
+        event.respondWith(
+            fetch(event.request)
+                .then((networkResponse) => {
+                    if (networkResponse && networkResponse.ok) {
+                        const responseToCache = networkResponse.clone();
+                        caches.open(CACHE_NAME).then((cache) => {
+                            cache.put(event.request, responseToCache);
+                        });
+                    }
+                    return networkResponse;
+                })
+                .catch(() => caches.match('/index.html')) // Offline fallback
+        );
         return;
     }
 
+    // Default: Cache-First for static assets
     event.respondWith(
         caches.match(event.request)
             .then((cachedResponse) => {
-                if (cachedResponse) {
-                    return cachedResponse;
-                }
-                return fetch(event.request)
-                    .then((networkResponse) => {
-                        if (networkResponse && networkResponse.ok) {
-                            const responseToCache = networkResponse.clone();
-                            caches.open(CACHE_NAME).then((cache) => {
-                                cache.put(event.request, responseToCache);
-                            });
-                        }
-                        return networkResponse;
-                    })
-                    .catch(() => {
-                        // Only return offline fallback for navigation requests
-                        if (event.request.mode === 'navigate') {
-                            return caches.match('/index.html');
-                        }
-                        // For other local assets, just fail
-                        return new Response('Offline', { status: 503 });
-                    });
+                if (cachedResponse) return cachedResponse;
+                return fetch(event.request).then((networkResponse) => {
+                    if (networkResponse && networkResponse.ok) {
+                        const responseToCache = networkResponse.clone();
+                        caches.open(CACHE_NAME).then((cache) => {
+                            cache.put(event.request, responseToCache);
+                        });
+                    }
+                    return networkResponse;
+                });
             })
     );
 });

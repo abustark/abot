@@ -24,7 +24,57 @@
 
     <style>
         html {
-            font-size: 15px;
+            font-size: 14px;
+        }
+
+        /* Premium Theme Overrides */
+        :root {
+            /* Light Mode */
+            --bg-main: #f9fafb;
+            --bg-sidebar: #ffffff;
+            --border-color: #e5e7eb;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+        }
+
+        .dark {
+            /* Dark Mode (Premium Charcoal/Black) */
+            --bg-main: #171717;
+            /* Deepest black/gray */
+            --bg-sidebar: #212121;
+            /* Slightly lighter */
+            --border-color: #333333;
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+        }
+
+        /* Sidebar & Panels override */
+        .sidebar,
+        .bg-white.dark\:bg-gray-900 {
+            background-color: var(--bg-sidebar) !important;
+            border-color: var(--border-color) !important;
+        }
+
+        /* Main Chat Area override */
+        #chatHistoryContainer,
+        #app-container {
+            background-color: var(--bg-main) !important;
+        }
+
+        /* Input area override */
+        textarea,
+        input {
+            background-color: transparent !important;
+        }
+
+        .dark textarea,
+        .dark input {
+            color: var(--text-primary);
         }
 
         * {
@@ -436,7 +486,7 @@
 
         <!-- Sidebar for Chat History -->
         <aside id="sidebar"
-            class="bg-white dark:bg-gray-900 w-64 flex-shrink-0 flex flex-col border-r border-gray-200 dark:border-gray-700 transform -translate-x-full fixed md:static h-full z-20 sidebar md:translate-x-0">
+            class="w-64 flex-shrink-0 flex flex-col border-r transform -translate-x-full fixed md:static h-full z-20 sidebar md:translate-x-0 transition-transform duration-300">
 
             <div class="p-4 border-b border-gray-200 dark:border-gray-700 space-y-4">
                 <!-- NEW Code to Add -->
@@ -514,7 +564,7 @@
                 class="relative bg-white dark:bg-gray-800 shadow-sm py-2 px-4 flex items-center justify-between z-10">
                 <div class="flex items-center">
                     <button id="sidebarToggle"
-                        class="mr-3 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 md:hidden">
+                        class="mr-3 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-colors p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -527,8 +577,17 @@
                             ABot</h1>
                     </div>
                 </div>
-                <div class="flex items-center space-x-2 p-1 rounded-full bg-gray-200 dark:bg-gray-700/50">
-                    <div id="modelIndicatorPill" class="flex items-center pl-3 pr-2 py-1 text-sm font-medium"></div>
+                <div class="flex items-center space-x-2 p-1 rounded-lg">
+                    <button id="headerNewChatBtn" title="New Chat"
+                        class="p-1.5 rounded-md text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                                clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                    <div class="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-2"></div>
+                    <div id="modelIndicatorPill" class="flex items-center px-2 py-1 text-sm font-medium"></div>
                     <button id="themeToggle"
                         class="p-1.5 rounded-full bg-white dark:bg-gray-800/80 hover:bg-gray-100 dark:hover:bg-gray-600/80 transition-colors">
                         <svg id="sunIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-500"
@@ -792,6 +851,25 @@
         <script type="module">
             // This is the main entry point for our entire application.
             function main() {
+                // Register Service Worker
+                if ('serviceWorker' in navigator) {
+                    window.addEventListener('load', () => {
+                        navigator.serviceWorker.register('/service-worker.js')
+                            .then(reg => {
+                                console.log('[App] SW registered');
+                                reg.onupdatefound = () => {
+                                    const installingWorker = reg.installing;
+                                    installingWorker.onstatechange = () => {
+                                        if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                            console.log('[App] New content available; please refresh.');
+                                            showToast('New update available! Please refresh.', 'success');
+                                        }
+                                    };
+                                };
+                            })
+                            .catch(err => console.log('[App] SW registration failed', err));
+                    });
+                }
 
                 const COLOR_MAP = {
                     // Google
@@ -1335,6 +1413,74 @@
                     });
                 };
 
+                // --- Message Action Helpers ---
+                window.deleteMessage = (chatId, msgIndex) => {
+                    const chat = chats[chatId];
+                    if (!chat || !chat.messages[msgIndex]) return;
+
+                    // Simple confirm (reusing modal structure manually or just cloning button logic)
+                    dom.deleteModal.querySelector('#modal-title').textContent = "Delete Message";
+                    dom.deleteModalBody.textContent = "Are you sure you want to delete this message? This cannot be undone.";
+
+                    const confirmBtn = dom.deleteConfirmBtn;
+                    confirmBtn.textContent = "Delete";
+                    confirmBtn.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
+                    confirmBtn.classList.add('bg-red-600', 'hover:bg-red-700');
+
+                    // Clone and replace to handle click
+                    const newBtn = confirmBtn.cloneNode(true);
+                    confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
+                    dom.deleteConfirmBtn = newBtn;
+
+                    newBtn.addEventListener('click', async () => {
+                        try {
+                            chat.messages.splice(msgIndex, 1);
+                            await db.collection('users').doc(auth.currentUser.uid).collection('chats').doc(chatId).update({ messages: chat.messages });
+                            // Determine if we need to update active view
+                            if (activeChatId === chatId) renderActiveChat();
+
+                            // Close modal
+                            dom.deletePanel.style.opacity = '0';
+                            dom.deletePanel.style.transform = 'scale(0.95)';
+                            setTimeout(() => dom.deleteModal.classList.add('hidden'), 200);
+                            showToast("Message deleted.");
+                        } catch (e) {
+                            console.error(e);
+                            showToast("Failed to delete message", "error");
+                        }
+                    }, { once: true });
+
+                    dom.deleteModal.classList.remove('hidden');
+                    setTimeout(() => {
+                        dom.deletePanel.style.opacity = '1';
+                        dom.deletePanel.style.transform = 'scale(1)';
+                    }, 10);
+                };
+
+                window.editMessage = (chatId, msgIndex) => {
+                    const chat = chats[chatId];
+                    const msg = chat?.messages[msgIndex];
+                    if (!msg) return;
+
+                    // Simple prompt for now
+                    const newContent = prompt("Edit your message:", msg.content);
+                    if (newContent !== null && newContent.trim() !== "" && newContent !== msg.content) {
+                        const oldContent = msg.content;
+                        msg.content = newContent;
+                        // Optimistic update
+                        if (activeChatId === chatId) renderActiveChat();
+
+                        db.collection('users').doc(auth.currentUser.uid).collection('chats').doc(chatId).update({ messages: chat.messages })
+                            .then(() => showToast("Message edited"))
+                            .catch(err => {
+                                console.error(err);
+                                msg.content = oldContent; // Revert
+                                if (activeChatId === chatId) renderActiveChat();
+                                showToast("Failed to edit", "error");
+                            });
+                    }
+                };
+
 
                 const renderActiveChat = () => {
                     if (!activeChatId || !chats[activeChatId]) {
@@ -1344,7 +1490,7 @@
                     }
                     const chat = chats[activeChatId];
                     dom.chatHistory.innerHTML = '';
-                    chat.messages.forEach(msg => appendMessage(msg, true));
+                    chat.messages.forEach((msg, index) => appendMessage(msg, true, { index }));
                     // Update header elements
                     dom.chatTitle.textContent = chat.name;
                     dom.chatTitleInput.value = chat.name;
@@ -1405,22 +1551,6 @@
                     const modelConf = MODEL_CONFIG[messageModel || currentChat.model] || { name: 'AI', color: 'indigo-600' };
                     const colorClasses = generateColorClasses(modelConf.color);
 
-                    const bubbleClasses = isUser ? `user-bubble ${colorClasses.userBubbleBg}` : `bot-bubble bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 shadow-sm`;
-
-                    const justifyClass = isUser ? 'justify-end' : 'justify-start';
-
-                    let userAvatarSrc = 'https://i.pravatar.cc/40?u=guest';
-                    if (auth.currentUser && !auth.currentUser.isAnonymous) {
-                        userAvatarSrc = auth.currentUser.photoURL || `https://i.pravatar.cc/40?u=${auth.currentUser.uid}`;
-                    }
-
-                    const avatarHtml = isUser
-                        ? `<img src="${userAvatarSrc}" alt="User Avatar" class="w-8 h-8 rounded-full ml-4 flex-shrink-0">`
-                        : `<div class="w-8 h-8 rounded-full ${colorClasses.bg} flex items-center justify-center mr-4 flex-shrink-0"><span class="text-white text-xs font-bold">${modelConf.name.substring(0, 2)}</span></div>`;
-
-                    const messageEl = document.createElement('div');
-                    if (!isHistory) messageEl.className = 'message-enter';
-
                     let messageContent;
                     if (isUser) {
                         messageContent = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -1437,80 +1567,94 @@
                         }
                     }
 
-                    const copyButtonHtml = `<button class="copy-message-btn p-1.5 rounded-md text-gray-400 self-center"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" /></svg></button>`;
+                    // --- Action Buttons ---
+                    const copyBtnHtml = `<button class="copy-message-btn p-1.5 rounded-md text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors" title="Copy"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" /></svg></button>`;
 
-                    const bubbleHtml = `<div class="${bubbleClasses} chat-bubble p-4 text-sm"><div class="prose dark:prose-invert max-w-none ${isUser ? colorClasses.userBubbleTextColorClass : ''}">${messageContent}</div><div class="text-xs ${isUser ? colorClasses.userBubbleTimestampColorClass : 'text-gray-400 dark:text-gray-500'} mt-2 text-right">${getTimestamp()}</div></div>`;
-
-                    let finalLayout = '';
-                    if (isUser) {
-                        finalLayout = `${copyButtonHtml} ${bubbleHtml} ${avatarHtml}`;
-                    } else {
-                        finalLayout = `${avatarHtml} ${bubbleHtml} ${copyButtonHtml}`;
+                    let actionButtonsHtml = '';
+                    if (typeof options.index === 'number') {
+                        actionButtonsHtml = `
+                            ${isUser ? `<button class="edit-msg-btn p-1.5 text-gray-400 hover:text-blue-500 transition-colors" title="Edit"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button>` : ''}
+                            <button class="delete-msg-btn p-1.5 text-gray-400 hover:text-red-500 transition-colors" title="Delete"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.958L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+                         `;
                     }
 
-                    messageEl.innerHTML = `<style>.prose pre{position:relative;}.copy-code-btn{position:absolute;top:.5rem;right:.5rem;background-color:#4a5568;color:white;padding:.25rem .5rem;border-radius:.25rem;font-size:.75rem;opacity:0;transition:opacity .2s}.prose pre:hover .copy-code-btn{opacity:1}</style><div class="message-container flex items-end gap-x-2 ${justifyClass}">${finalLayout}</div>`;
+                    const messageEl = document.createElement('div');
+                    messageEl.className = 'w-full'; // Wrapper
+                    if (!isHistory) messageEl.classList.add('message-enter');
+
+                    if (isUser) {
+                        // --- USER MESSAGE LAYOUT (Clean Bubble, Right Aligned) ---
+                        messageEl.innerHTML = `
+                            <div class="message-container w-full flex justify-end mb-6 group relative pl-10">
+                                <div class="absolute right-full mr-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center bg-white dark:bg-gray-800 rounded-lg shadow-sm border dark:border-gray-700 px-1">
+                                    ${copyBtnHtml}
+                                    ${actionButtonsHtml}
+                                </div>
+                                <div class="max-w-[90%] md:max-w-[80%] bg-gray-100 dark:bg-gray-800 rounded-[24px] rounded-tr-sm px-5 py-3 text-[15px] text-gray-900 dark:text-gray-100 shadow-sm">
+                                   <div class="prose dark:prose-invert max-w-none whitespace-pre-wrap">${messageContent}</div>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        // --- AI MESSAGE LAYOUT (Full Width, Header, No Background) ---
+                        // Note: Using colorClasses.text matches the theme color
+                        messageEl.innerHTML = `
+                            <div class="message-container w-full flex flex-col mb-10 group">
+                                <div class="flex items-center gap-3 mb-2 select-none">
+                                    <div class="w-7 h-7 rounded-sm ${colorClasses.bg} flex items-center justify-center flex-shrink-0 shadow-sm">
+                                         <span class="text-white text-[10px] font-bold">${modelConf.name.substring(0, 2)}</span>
+                                    </div>
+                                    <span class="text-xs font-bold uppercase tracking-wider ${colorClasses.text}">${modelConf.name}</span>
+                                    <span class="text-xs text-gray-400 dark:text-gray-500">${getTimestamp()}</span>
+                                </div>
+                                <div class="pl-0 md:pl-10 w-full overflow-hidden">
+                                    <div class="prose dark:prose-invert max-w-none text-gray-800 dark:text-gray-200 text-[15px] leading-7">
+                                        ${messageContent}
+                                    </div>
+                                    <div class="flex items-center gap-1 mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                         ${copyBtnHtml}
+                                         ${actionButtonsHtml}
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    // Attach Event Listeners
+                    if (typeof options.index === 'number') {
+                        messageEl.querySelector('.delete-msg-btn')?.addEventListener('click', (e) => { e.stopPropagation(); window.deleteMessage(activeChatId, options.index); });
+                        messageEl.querySelector('.edit-msg-btn')?.addEventListener('click', (e) => { e.stopPropagation(); window.editMessage(activeChatId, options.index); });
+                    }
 
                     const copyBtn = messageEl.querySelector('.copy-message-btn');
                     if (copyBtn) {
-
                         copyBtn.addEventListener('click', (event) => {
-                            // Find the chat bubble associated with this button by traversing up to the message container
-                            const messageContainer = event.currentTarget.closest('.message-container');
-                            if (!messageContainer) return;
-
-                            // Find the prose element within the bubble, which holds the rendered message content
-                            const proseContent = messageContainer.querySelector('.prose');
-                            if (!proseContent) return;
-
-                            // Use the textContent of the prose element, which is the clean, un-rendered text
-                            const textToCopy = proseContent.textContent || '';
-
-                            navigator.clipboard.writeText(textToCopy).then(() => {
-                                showToast("Copied to clipboard!");
-                            }).catch(err => {
-                                showToast("Failed to copy.", "error");
-                                console.error('Failed to copy text: ', err);
-                            });
+                            const proseContent = messageEl.querySelector('.prose'); // Simpler selection
+                            const textToCopy = proseContent ? proseContent.textContent : '';
+                            navigator.clipboard.writeText(textToCopy).then(() => showToast("Copied!")).catch(() => showToast("Failed to copy", "error"));
                         });
                     }
 
                     dom.chatHistory.appendChild(messageEl);
 
-                    if (!isUser && isHistory) {
+                    // Syntax Highlighting for AI messages
+                    if (!isUser) {
                         messageEl.querySelectorAll('pre code').forEach(block => {
                             hljs.highlightElement(block);
-
+                            // Add Copy Code button (simplified logic)
                             const pre = block.parentElement;
-                            const langClass = Array.from(block.classList).find(cls => cls.startsWith('language-'));
-                            const language = langClass ? langClass.replace('language-', '') : 'text';
-
-                            const header = document.createElement('div');
-                            header.className = 'code-block-header';
-
-                            const langNameSpan = document.createElement('span');
-                            langNameSpan.className = 'code-lang-name';
-                            langNameSpan.textContent = language;
-
-                            const copyBtn = document.createElement('button');
-                            copyBtn.className = 'copy-code-btn';
-                            const copyIconHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>`;
-                            const checkIconHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>`;
-                            copyBtn.innerHTML = copyIconHTML;
-
-                            copyBtn.addEventListener('click', () => {
-                                navigator.clipboard.writeText(block.textContent).then(() => {
-                                    copyBtn.innerHTML = checkIconHTML;
-                                    setTimeout(() => { copyBtn.innerHTML = copyIconHTML; }, 2000);
-                                });
+                            const copyCodeBtn = document.createElement('button');
+                            copyCodeBtn.className = 'copy-code-btn absolute top-2 right-2 bg-gray-700 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity';
+                            copyCodeBtn.textContent = 'Copy Code';
+                            pre.classList.add('group'); // Enable hover
+                            copyCodeBtn.addEventListener('click', () => {
+                                navigator.clipboard.writeText(block.textContent);
+                                copyCodeBtn.textContent = 'Copied!';
+                                setTimeout(() => copyCodeBtn.textContent = 'Copy Code', 2000);
                             });
-
-                            header.appendChild(langNameSpan);
-                            header.appendChild(copyBtn);
-                            pre.insertBefore(header, block);
+                            pre.appendChild(copyCodeBtn);
                         });
                     }
-
-                    dom.chatHistoryContainer.scrollTop = dom.chatHistoryContainer.scrollHeight;
                 };
 
                 /* NEW Code to Add (This replaces the old start of the function) */
@@ -1541,7 +1685,7 @@
 
                     // Create the user message object, now including the current model.
                     const userMessage = { role: 'user', content: message, model: currentChat.model };
-                    appendMessage(userMessage);
+                    appendMessage(userMessage, false, { index: currentChat.messages.length });
                     currentChat.messages.push(userMessage);
 
                     // Save the user's message to Firestore immediately to prevent data loss on refresh.
@@ -1994,7 +2138,22 @@
                     });
 
                     // --- Core Interaction Listeners ---
-                    dom.newChatBtn.addEventListener('click', createNewChat);
+                    // Wrapper to handle new chat logic reuse
+                    async function createNewChatWrapper() {
+                        const currentUser = auth.currentUser;
+                        if (!currentUser) {
+                            console.error("Cannot create new chat: No user is signed in.");
+                            return;
+                        }
+                        await createNewChat(); // Call the existing createNewChat function
+                        // createNewChat already handles switching and rendering
+                    }
+
+                    // New chat (Sidebar)
+                    dom.newChatBtn?.addEventListener('click', createNewChatWrapper);
+                    // New chat (Header)
+                    document.getElementById('headerNewChatBtn')?.addEventListener('click', createNewChatWrapper);
+
                     dom.modelSelectorPanel.addEventListener('keydown', handleModelSelectorNavigation);
                     dom.messageInput.addEventListener('input', function () { this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px'; });
                     dom.messageInput.addEventListener('keydown', e => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), sendMessage()));
@@ -2020,6 +2179,60 @@
 
 
                     dom.searchChats.addEventListener('input', (e) => renderChatList(e.target.value));
+
+                    // --- Global Keyboard Shortcuts (Debugged) ---
+                    // --- Global Keyboard Shortcuts ---
+                    window.addEventListener('keydown', (e) => {
+                        // Ctrl+Enter: Send message
+                        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && document.activeElement === dom.messageInput) {
+                            e.preventDefault();
+                            sendMessage();
+                            return;
+                        }
+
+                        // Alt+N: New Chat (Browser safe)
+                        if (e.altKey && e.key.toLowerCase() === 'n') {
+                            e.preventDefault();
+                            createNewChatWrapper(); // Use the wrapper
+                            return;
+                        }
+
+                        // Alt+/: Focus Search (Browser safe)
+                        if (e.altKey && (e.key === '/' || e.key === '?')) {
+                            e.preventDefault();
+                            dom.searchChats.focus();
+                            return;
+                        }
+
+                        // Esc: Close Modals
+                        if (e.key === 'Escape') {
+                            if (!dom.guestLimitModal.classList.contains('hidden')) {
+                                document.getElementById('guestLimitCancelBtn').click();
+                                return;
+                            }
+                            if (!dom.deleteModal.classList.contains('hidden')) {
+                                document.getElementById('deleteCancelBtn').click();
+                                return;
+                            }
+                            if (!dom.promptModal.classList.contains('hidden')) {
+                                closePromptModal();
+                                return;
+                            }
+                            if (!dom.modelSelectorPanel.classList.contains('hidden')) {
+                                dom.modelSelectorBtn.click();
+                                return;
+                            }
+                            if (!dom.sidebar.classList.contains('-translate-x-full') && window.innerWidth < 768) {
+                                closeSidebar();
+                                return;
+                            }
+                            if (document.activeElement === dom.messageInput || document.activeElement === dom.searchChats) {
+                                document.activeElement.blur();
+                            }
+                        }
+                    }, true);
+
+
 
                     // --- Inline Chat Title Rename Listeners ---
                     const switchToTitleView = () => {
