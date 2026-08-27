@@ -3,13 +3,13 @@
  * Provides offline caching for local assets only
  */
 
-const CACHE_NAME = 'abot-cache-v10'; // v10: modular JS build (Phase 2)
+const CACHE_NAME = 'abot-cache-v11'; // v11: Phase 3 tokens + busted CSS URL
 const STATIC_ASSETS = [
     '/',
     '/index.html',
     '/favicon.png',
     '/logo.png',
-    '/dist/output.css',
+    '/dist/output.css?v=p3b',
     '/js/app.js',
     '/js/config.js',
     '/js/dom.js',

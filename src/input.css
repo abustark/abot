@@ -138,3 +138,132 @@
     to { visibility: hidden; }
   }
 }
+
+/* ---------------------------------------------------------------------------
+   App component styles (restored in Phase 3.2 fix — these lived in an inline
+   <style> block and were accidentally removed with the legacy theme vars).
+   Kept OUTSIDE @layer so Tailwind never purges them. Retuned to tokens.
+--------------------------------------------------------------------------- */
+
+/* App loader spinner (indigo -> coral) */
+.loader-circle-22 {
+    width: 70px;
+    height: 70px;
+    position: relative;
+    border: 8px solid transparent;
+    border-radius: 50%;
+    animation: spinner-3--border-opacity 0.7s linear infinite;
+    animation-delay: 0.24s;
+}
+.loader-circle-22:before,
+.loader-circle-22:after {
+    content: '';
+    display: block;
+    position: absolute;
+    border: 8px solid transparent;
+    border-radius: 50%;
+    box-sizing: border-box;
+    animation: spinner-3--border-opacity 0.7s linear infinite;
+}
+.loader-circle-22:before { top: 12px; left: 12px; right: 12px; bottom: 12px; }
+.loader-circle-22:after { top: 2px; left: 2px; right: 2px; bottom: 2px; animation-delay: 0.12s; }
+@keyframes spinner-3--border-opacity {
+    from { border-color: rgb(var(--c-coral)); }
+    to { border-color: rgb(var(--c-coral) / 0); }
+}
+
+/* Chat bubbles */
+.chat-bubble { max-width: 85%; transition: transform 0.2s ease, opacity 0.3s ease; }
+.user-bubble { border-radius: 18px 4px 18px 18px; }
+.bot-bubble { border-radius: 4px 18px 18px 18px; }
+.chat-bubble .prose p { margin: 0; }
+
+/* Typing indicator */
+.typing-indicator span {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: currentColor;
+    animation: bounce 1.4s infinite;
+}
+.typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+.typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.16s; }
+@keyframes bounce {
+    0%, 80%, 100% { transform: scale(0); }
+    40% { transform: scale(1.0); }
+}
+
+.sidebar { transition: transform 0.3s ease; }
+
+/* Message entrance */
+.message-enter { animation: messageEnter 0.3s ease forwards; }
+@keyframes messageEnter {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Voice input pulse */
+.voice-pulse { animation: voicePulse 2s infinite; }
+@keyframes voicePulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.12); opacity: 0.85; }
+}
+
+/* Active chat list item — warm card + coral inset (spec 2.2) */
+.chat-list-item.active { background-color: rgb(var(--c-card)); box-shadow: inset 2px 0 0 rgb(var(--c-coral)); }
+
+/* Modals */
+.modal-transition { transition: opacity 0.2s ease, transform 0.2s ease; }
+
+/* Streaming cursor (class used by chat.js) */
+@keyframes blink { 50% { opacity: 0; } }
+.blinking-cursor {
+    display: inline-block;
+    width: 2px;
+    height: 1em;
+    background-color: rgb(var(--c-coral));
+    margin-left: 2px;
+    animation: blink 1s step-end infinite;
+    vertical-align: bottom;
+}
+
+/* Polite fade for appended timestamps etc. */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.fade-in-polite { animation: fadeIn 0.5s ease-out; }
+
+/* Copy button reveal on hover */
+.message-container:hover .copy-message-btn { opacity: 1; }
+.copy-message-btn { opacity: 0; transition: opacity 0.2s ease-out; }
+
+/* Code block chrome (dark in both themes, per tokens) */
+.prose pre { position: relative; }
+.code-block-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: rgb(var(--c-code-bg));
+    padding: 0.3rem 0.75rem;
+    border-top-left-radius: 0.375rem;
+    border-top-right-radius: 0.375rem;
+}
+.code-lang-name {
+    font-family: 'JetBrains Mono', monospace;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+    color: rgb(var(--c-muted));
+}
+.copy-code-btn {
+    background-color: transparent;
+    color: rgb(var(--c-muted));
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+    transition: color 0.2s;
+}
+.copy-code-btn:hover { color: rgb(var(--c-ink)); }
+.prose pre > code {
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+}
