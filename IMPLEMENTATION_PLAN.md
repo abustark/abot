@@ -4,7 +4,7 @@
 >
 > **Production target:** Vercel (`api/chat.js` serverless) · Firebase Auth + Firestore · free-tier AI providers (Google, Groq, NVIDIA, OpenRouter)
 >
-> **Status:** ▶️ In execution — **Phase 0 ✅ done** · **Phase 1 ✅ done** · Phase 2 next (needs approval)
+> **Status:** ▶️ In execution — **Phase 0 ✅** · **Phase 1 ✅** · **Phase 2 ✅** · Phase 3 next (needs approval)
 
 ---
 
@@ -80,7 +80,9 @@
 4. **Firebase:** add `firestore.rules` file + deployment instructions (auth-based reads/writes) — final rules need your Firebase console access.
 5. **`.gitignore`:** ensure `.env`, `service-account-key.json` never land (already clean in history ✅).
 
-### Phase 2 — Frontend De-monolithization
+### Phase 2 — Frontend De-monolithization ✅ **DONE 2026-08-27** (commits 22b0bf1, 5175109, 414f338)
+> **Delivered:** 8 ES modules in `js/` (behavior-frozen: token parity 56/57, the 1 deviation is the documented innerHTML→DOM-APIs XSS fix), `index.html` 2555→883 lines, CSP `script-src` without `'unsafe-inline'` (2 pre-render blocks sha256-pinned), SW v10 precaching modules, verification tooling in `tools/`. Gates: `verify-parity` + `smoke-node` (jsdom, logged-out+logged-in paths) all green. Real-browser flows deferred to owner (sandbox has no browser).
+<!-- ORIGINAL TASK LIST (reference)
 1. Convert inline scripts → ES modules wired into the existing `js/` structure: `config.js`, `auth.js`, `chat.js`, `ui.js`, `utils.js`, `app.js` (update dead reference code to the *real* extracted modules).
 2. `<script type="module" src="js/app.js">` — zero inline JS.
 3. **CSP tightened:** `scriptSrc 'self'` only (drop `'unsafe-inline'`) in `server.js` + `vercel.json`.
