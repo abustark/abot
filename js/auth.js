@@ -235,7 +235,7 @@ state.auth.onAuthStateChanged(async (user) => {
 
         // --- USER IS LOGGED OUT ---
         dom.appContainer.style.display = 'none';
-        if (window.VANTA && !state.vantaEffect) {
+        if (localStorage.getItem('abot-vanta') === 'true' && window.VANTA && !state.vantaEffect) {
             try {
                 state.vantaEffect = VANTA.NET({
                     el: "#vanta-bg",

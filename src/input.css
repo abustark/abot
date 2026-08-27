@@ -267,3 +267,34 @@
     border-top-left-radius: 0 !important;
     border-top-right-radius: 0 !important;
 }
+
+/* Phase 3: long-message collapse */
+.msg-collapsible.collapsed {
+    max-height: 20rem;
+    overflow: hidden;
+    position: relative;
+}
+.msg-collapsible.collapsed::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 4.5rem;
+    background: linear-gradient(to bottom, rgb(var(--c-canvas) / 0), rgb(var(--c-canvas)));
+    pointer-events: none;
+}
+
+/* Search match jump highlight */
+.search-highlight {
+    outline: 2px solid rgb(var(--c-coral));
+    outline-offset: 4px;
+    border-radius: 8px;
+    transition: outline-color 0.6s ease;
+}
+
+mark {
+    background: rgb(var(--c-amber) / 0.35);
+    color: inherit;
+    border-radius: 2px;
+}

@@ -57,8 +57,7 @@
 </head>
 
 <!-- Vanta.js and Three.js for animated background -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.net.min.js"></script>
+<!-- three.js + vanta.net are lazy-loaded only when "Ambient background" is enabled (Settings) -->
 
 
 <body
@@ -230,7 +229,7 @@
                         <span id="userEmailDisplay"
                             class="font-medium text-sm text-body truncate">user@example.com</span>
                     </div>
-                    <button id="signoutBtn" title="Sign Out"
+                    <button id="signoutBtn" aria-label="Sign out" title="Sign Out"
                         class="p-2 rounded-md hover:bg-card transition-colors flex-shrink-0 ml-2">
                         <svg class="w-5 h-5 text-muted" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
                             fill="currentColor">
@@ -240,7 +239,29 @@
                         </svg>
                     </button>
                 </div>
-                <button id="importChatBtn" title="Import Chat"
+                    <div class="flex items-center justify-between mt-3">
+                        <button id="settingsToggleBtn"
+                            class="p-2 rounded-md text-muted hover:text-ink hover:bg-card transition-colors" aria-label="Settings"
+                            title="Settings">
+                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                        <span class="text-xs text-muted">ABot</span>
+                    </div>
+                    <div id="settingsPanel" class="hidden mt-2 p-3 rounded-card bg-card border border-hairline space-y-2">
+                        <label class="flex items-center justify-between text-sm text-body cursor-pointer">
+                            <span>Show timestamps</span>
+                            <input type="checkbox" id="timestampsToggle" class="accent-coral h-4 w-4">
+                        </label>
+                        <label class="flex items-center justify-between text-sm text-body cursor-pointer">
+                            <span>Ambient background</span>
+                            <input type="checkbox" id="vantaToggle" class="accent-coral h-4 w-4">
+                        </label>
+                    </div>
+                <button id="importChatBtn" title="Import Chat" aria-label="Import chat"
                     class="mt-4 w-full flex items-center justify-center p-2 rounded-md text-sm border border-hairline hover:bg-card transition-colors">
                     <svg class="w-4 h-4 mr-2 text-muted" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
                         fill="currentColor">
@@ -260,7 +281,7 @@
             <header
                 class="relative bg-canvas dark:bg-card shadow-sm py-2 px-4 flex items-center justify-between z-10">
                 <div class="flex items-center">
-                    <button id="sidebarToggle"
+                    <button id="sidebarToggle" aria-label="Toggle sidebar"
                         class="mr-3 text-muted hover:text-ink transition-colors p-1 rounded-md hover:bg-card">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
@@ -275,7 +296,7 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-2 p-1 rounded-lg">
-                    <button id="headerNewChatBtn" title="New Chat"
+                    <button id="headerNewChatBtn" aria-label="New chat" title="New Chat"
                         class="p-1.5 rounded-md text-muted hover:text-ink hover:bg-card transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd"
@@ -285,7 +306,7 @@
                     </button>
                     <div class="w-px h-6 bg-hairline mx-2"></div>
                     <div id="modelIndicatorPill" class="flex items-center px-2 py-1 text-sm font-medium"></div>
-                    <button id="themeToggle"
+                    <button id="themeToggle" aria-label="Toggle dark mode"
                         class="p-1.5 rounded-full bg-canvas dark:bg-card hover:bg-card transition-colors">
                         <svg id="sunIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-500"
                             viewBox="0 0 20 20" fill="currentColor">
@@ -315,7 +336,7 @@
                             <input type="text" id="chatTitleInput"
                                 class="text-base font-medium bg-transparent border-b-2 border-coral focus:outline-none w-full hidden">
                         </div>
-                        <button id="renameChatBtn"
+                        <button id="renameChatBtn" aria-label="Rename chat"
                             class="p-1.5 rounded-md text-muted hover:text-ink hover:bg-card transition-colors">
                             <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
                                 fill="currentColor">
@@ -347,7 +368,16 @@
                                 class="modal-transition absolute top-full right-0 mt-2 w-auto max-w-5xl bg-canvas dark:bg-card border border-hairline rounded-lg shadow-lg z-20 hidden origin-top-right p-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2"
                                 style="opacity: 0; transform: translateY(-10px) scale(0.98);"></div>
                         </div>
-                        <button id="promptBtn"
+                        <button id="searchToggleBtn"
+                            class="p-2 rounded-md text-muted hover:text-ink hover:bg-card transition-colors" aria-label="Search in messages"
+                            title="Search in messages">
+                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                        <button id="promptBtn" aria-label="Open prompt library"
                             class="p-2 rounded-md hover:bg-card transition-colors">
                             <svg class="w-5 h-5 text-muted" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
                                 fill="currentColor">
@@ -359,8 +389,15 @@
                     </div>
                 </div>
 
+                <div id="searchPanel" class="hidden border-b border-hairline bg-canvas dark:bg-card px-4 py-3">
+                    <input type="search" id="messageSearchInput" placeholder="Search messages..."
+                        aria-label="Search messages"
+                        class="w-full bg-surface dark:bg-card border border-hairline text-body placeholder:text-muted text-sm rounded-btn px-3 py-2 focus:ring-coral/40 focus:border-coral focus:outline-none">
+                    <div id="searchResults" class="mt-2 max-h-64 overflow-y-auto scrollbar-custom space-y-1"></div>
+                </div>
+
                 <div id="chatHistoryContainer" class="relative flex-1 overflow-y-auto p-3 md:p-6 scrollbar-custom">
-                    <div id="chatHistory" class="max-w-3xl mx-auto space-y-6"></div>
+                    <div id="chatHistory" class="max-w-3xl mx-auto space-y-6" aria-live="polite" aria-label="Chat messages"></div>
 
                 </div>
 
@@ -372,7 +409,7 @@
                             <textarea id="messageInput"
                                 class="flex-1 bg-transparent px-3 py-2 resize-none focus:outline-none text-body"
                                 placeholder="Message AI assistant..." rows="1"></textarea>
-                            <button id="voiceBtn"
+                            <button id="voiceBtn" aria-label="Voice input"
                                 class="p-2 text-muted hover:text-coral">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
                                     fill="currentColor">
@@ -382,14 +419,14 @@
                                 </svg>
                             </button>
                             <div class="relative flex items-center">
-                                <button id="sendBtn" class="p-2 text-white rounded-lg transition-colors">
+                                <button id="sendBtn" aria-label="Send message" class="p-2 text-white rounded-lg transition-colors">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
                                         fill="currentColor">
                                         <path
                                             d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
                                     </svg>
                                 </button>
-                                <button id="stopBtn"
+                                <button id="stopBtn" aria-label="Stop generating"
                                     class="p-2 text-white bg-danger hover:bg-danger/90 rounded-lg transition-colors hidden">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
                                         fill="currentColor">
@@ -532,7 +569,7 @@
 
         <!-- Toast Notification -->
         <div id="toast-notification"
-            class="fixed top-5 right-5 z-50 flex items-center w-full max-w-xs p-4 text-body bg-canvas rounded-lg shadow-lg dark:bg-card hidden"
+            role="status" aria-live="polite" class="fixed top-5 right-5 z-50 flex items-center w-full max-w-xs p-4 text-body bg-canvas rounded-lg shadow-lg dark:bg-card hidden"
             role="alert" style="transform: translateX(150%); transition: transform 0.4s ease;">
             <div id="toast-icon" class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg">
                 <!-- Icon will be dynamically inserted here -->

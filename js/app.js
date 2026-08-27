@@ -16,6 +16,8 @@ import { dom } from './dom.js';
 import { generateColorClasses } from './config.js';
 import { importChat } from './chat.js';
 import { initDomExtras } from './dom.js';
+import { setVantaEnabled } from './ui.js';
+import { renderSearchResults } from './chat.js';
 import { initFirebase, initAuth, registerInitApp } from './auth.js';
 import { initMessageActions } from './chat.js';
 import { linkGuestToGoogle } from './auth.js';
@@ -250,6 +252,30 @@ function initApp() {
 
     // New chat (Sidebar)
     dom.newChatBtn?.addEventListener('click', createNewChatWrapper);
+
+    // --- Phase 3: search + settings wiring ---
+    dom.searchToggleBtn?.addEventListener('click', () => {
+        dom.searchPanel.classList.toggle('hidden');
+        if (!dom.searchPanel.classList.contains('hidden')) dom.messageSearchInput?.focus();
+    });
+    let searchDebounce = null;
+    dom.messageSearchInput?.addEventListener('input', (e) => {
+        clearTimeout(searchDebounce);
+        searchDebounce = setTimeout(() => renderSearchResults(e.target.value.trim()), 200);
+    });
+
+    dom.settingsToggleBtn?.addEventListener('click', () => dom.settingsPanel.classList.toggle('hidden'));
+    if (dom.timestampsToggle) {
+        dom.timestampsToggle.checked = localStorage.getItem('abot-show-timestamps') !== 'false';
+        dom.timestampsToggle.addEventListener('change', () => {
+            localStorage.setItem('abot-show-timestamps', dom.timestampsToggle.checked ? 'true' : 'false');
+            renderActiveChat();
+        });
+    }
+    if (dom.vantaToggle) {
+        dom.vantaToggle.checked = localStorage.getItem('abot-vanta') === 'true';
+        dom.vantaToggle.addEventListener('change', () => setVantaEnabled(dom.vantaToggle.checked));
+    }
     // New chat (Header)
     document.getElementById('headerNewChatBtn')?.addEventListener('click', createNewChatWrapper);
 

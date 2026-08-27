@@ -71,6 +71,16 @@ export const dom = {
     appLoader: document.getElementById('app-loader'),
 };
 
+// --- Phase 3 additions (search + settings) ---
+dom.searchToggleBtn = document.getElementById('searchToggleBtn');
+dom.searchPanel = document.getElementById('searchPanel');
+dom.messageSearchInput = document.getElementById('messageSearchInput');
+dom.searchResults = document.getElementById('searchResults');
+dom.settingsToggleBtn = document.getElementById('settingsToggleBtn');
+dom.settingsPanel = document.getElementById('settingsPanel');
+dom.timestampsToggle = document.getElementById('timestampsToggle');
+dom.vantaToggle = document.getElementById('vantaToggle');
+
 export function initDomExtras() {
 dom.promptLibrary = document.getElementById('promptLibrary');
 

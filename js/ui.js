@@ -10,6 +10,7 @@ import { SYSTEM_PROMPTS } from './config.js';
 import { dom } from './dom.js';
 import { generateColorClasses } from './config.js';
 import { state } from './state.js';
+import { showToast } from './utils.js';
 export const closeSidebar = () => { dom.sidebar.classList.add('-translate-x-full'); dom.sidebarOverlay.classList.add('hidden'); };
 
 export const applyModelColorTheme = (colorName) => {
@@ -112,3 +113,48 @@ const showGuestLimitModal = () => {
     }, 10);
 };
 export { closeGuestLimitModal, showGuestLimitModal };
+
+// --- Phase 3: ambient background (lazy three.js/vanta, default OFF) ---
+let vantaScriptsLoading = null;
+const ensureVanta = () => {
+    if (window.VANTA) return Promise.resolve();
+    if (!vantaScriptsLoading) {
+        vantaScriptsLoading = new Promise((resolve, reject) => {
+            const three = document.createElement('script');
+            three.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js';
+            three.onload = () => {
+                const vanta = document.createElement('script');
+                vanta.src = 'https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.net.min.js';
+                vanta.onload = resolve;
+                vanta.onerror = () => reject(new Error('vanta load failed'));
+                document.head.appendChild(vanta);
+            };
+            three.onerror = () => reject(new Error('three load failed'));
+            document.head.appendChild(three);
+        });
+    }
+    return vantaScriptsLoading;
+};
+
+export const setVantaEnabled = async (enabled) => {
+    localStorage.setItem('abot-vanta', enabled ? 'true' : 'false');
+    if (enabled) {
+        try {
+            await ensureVanta();
+        } catch (e) {
+            showToast('Could not load background effect', 'error');
+            return;
+        }
+        if (window.VANTA && !state.vantaEffect) {
+            state.vantaEffect = VANTA.NET({
+                el: '#vanta-bg',
+                mouseControls: true, touchControls: true, gyroControls: false,
+                scale: 1.00, scaleMobile: 1.20, color: 0xcc785c,
+                backgroundColor: 0x181715, points: 12.00, maxDistance: 18.00
+            });
+        }
+    } else if (state.vantaEffect) {
+        state.vantaEffect.destroy();
+        state.vantaEffect = null;
+    }
+};

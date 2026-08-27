@@ -278,6 +278,7 @@ export const createNewChat = async () => {
 export const appendMessage = (message, isHistory = false, options = {}) => {
     const { role, content: text, model: messageModel } = message;
     const isUser = role === 'user';
+    const showTs = localStorage.getItem('abot-show-timestamps') !== 'false';
     const currentChat = state.chats[state.activeChatId];
     if (!currentChat) return;
 
@@ -302,18 +303,30 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
     }
 
     // --- Action Buttons ---
-                    const copyBtnHtml = `<button class="copy-message-btn p-1.5 rounded-md text-muted hover:text-body transition-colors" title="Copy"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" /></svg></button>`;
+                    const copyBtnHtml = `<button class="copy-message-btn p-1.5 rounded-md text-muted hover:text-body transition-colors" title="Copy" aria-label="Copy message"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" /></svg></button>`;
+
+    let reactButtonsHtml = '';
+    if (!isUser && typeof options.index === 'number') {
+        const upActive = message.reaction === 'up' ? 'text-coral' : 'text-muted';
+        const downActive = message.reaction === 'down' ? 'text-coral' : 'text-muted';
+        const pinActive = message.pinned ? 'text-coral' : 'text-muted';
+        reactButtonsHtml = `
+                                    <button class="react-up-btn p-1.5 rounded-md transition-colors hover:text-coral ${upActive}" aria-label="Good response" title="Good response">👍</button>
+                                    <button class="react-down-btn p-1.5 rounded-md transition-colors hover:text-coral ${downActive}" aria-label="Bad response" title="Bad response">👎</button>
+                                    <button class="pin-btn p-1.5 rounded-md transition-colors hover:text-coral ${pinActive}" aria-label="Pin message" title="Pin message">📌</button>`;
+    }
 
     let actionButtonsHtml = '';
     if (typeof options.index === 'number') {
         actionButtonsHtml = `
-                            ${isUser ? `<button class="edit-msg-btn p-1.5 text-muted hover:text-coral transition-colors" title="Edit"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button>` : ''}
-                            <button class="delete-msg-btn p-1.5 text-muted hover:text-danger transition-colors" title="Delete"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.958L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+                            ${isUser ? `<button class="edit-msg-btn p-1.5 text-muted hover:text-coral transition-colors" title="Edit" aria-label="Edit message"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button>` : ''}
+                            <button class="delete-msg-btn p-1.5 text-muted hover:text-danger transition-colors" title="Delete" aria-label="Delete message"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.958L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
                          `;
     }
 
     const messageEl = document.createElement('div');
     messageEl.className = 'w-full'; // Wrapper
+    if (typeof options.index === 'number') messageEl.dataset.msgIndex = String(options.index);
     if (!isHistory) messageEl.classList.add('message-enter');
 
     if (isUser) {
@@ -339,14 +352,16 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
                                          <span class="text-white text-[10px] font-bold">${modelConf.name.substring(0, 2)}</span>
                                     </div>
                                     <span class="text-xs font-bold uppercase tracking-wider ${colorClasses.text}">${modelConf.name}</span>
-                                    <span class="text-xs text-muted">${getTimestamp()}</span>
+                                    ${message.pinned ? '<span class="text-[10px]" role="img" aria-label="Pinned">📌</span>' : ''}
+                                    ${showTs ? `<span class="text-xs text-muted msg-timestamp">${getTimestamp()}</span>` : ''}
                                 </div>
                                 <div class="pl-0 md:pl-10 w-full overflow-hidden">
-                                    <div class="prose dark:prose-invert max-w-none text-ink text-[15px] leading-7">
+                                    <div class="prose dark:prose-invert max-w-none text-ink text-[15px] leading-7 msg-collapsible">
                                         ${messageContent}
                                     </div>
-                                    <div class="flex items-center gap-1 mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div class="flex items-center gap-1 mt-3 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                                          ${copyBtnHtml}
+                                         ${reactButtonsHtml}
                                          ${actionButtonsHtml}
                                     </div>
                                 </div>
@@ -358,6 +373,9 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
     if (typeof options.index === 'number') {
         messageEl.querySelector('.delete-msg-btn')?.addEventListener('click', (e) => { e.stopPropagation(); window.deleteMessage(state.activeChatId, options.index); });
         messageEl.querySelector('.edit-msg-btn')?.addEventListener('click', (e) => { e.stopPropagation(); window.editMessage(state.activeChatId, options.index); });
+        messageEl.querySelector('.react-up-btn')?.addEventListener('click', (e) => { e.stopPropagation(); toggleReaction(state.activeChatId, options.index, 'up'); });
+        messageEl.querySelector('.react-down-btn')?.addEventListener('click', (e) => { e.stopPropagation(); toggleReaction(state.activeChatId, options.index, 'down'); });
+        messageEl.querySelector('.pin-btn')?.addEventListener('click', (e) => { e.stopPropagation(); togglePin(state.activeChatId, options.index); });
     }
 
     const copyBtn = messageEl.querySelector('.copy-message-btn');
@@ -389,6 +407,111 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
             pre.appendChild(copyCodeBtn);
         });
     }
+
+    if (!isUser && isHistory) maybeCollapse(messageEl);
+};
+
+// ---------------------------------------------------------------------------
+// Phase 3: message meta (reactions / pins), collapse, search
+// ---------------------------------------------------------------------------
+const COLLAPSE_THRESHOLD = 320; // px
+
+function maybeCollapse(messageEl) {
+    const target = messageEl.querySelector('.msg-collapsible');
+    if (!target || target.dataset.collapsedChecked) return;
+    target.dataset.collapsedChecked = '1';
+    if (target.scrollHeight <= COLLAPSE_THRESHOLD) return;
+    target.classList.add('collapsed');
+    const btn = document.createElement('button');
+    btn.className = 'collapse-toggle text-sm text-coral hover:underline mt-1';
+    btn.textContent = 'Show more';
+    btn.setAttribute('aria-expanded', 'false');
+    btn.addEventListener('click', () => {
+        const collapsed = target.classList.toggle('collapsed');
+        btn.textContent = collapsed ? 'Show more' : 'Show less';
+        btn.setAttribute('aria-expanded', String(!collapsed));
+    });
+    target.after(btn);
+}
+
+const persistMessageMeta = async (chatId) => {
+    try {
+        const uid = state.auth.currentUser.uid;
+        await state.db.collection('users').doc(uid).collection('chats').doc(chatId)
+            .update({ messages: state.chats[chatId].messages });
+    } catch (e) {
+        console.error('Failed to save message meta');
+        showToast('Could not save', 'error');
+    }
+};
+
+export const toggleReaction = (chatId, msgIndex, type) => {
+    const msg = state.chats[chatId]?.messages[msgIndex];
+    if (!msg) return;
+    msg.reaction = (msg.reaction === type) ? null : type;
+    renderActiveChat();
+    persistMessageMeta(chatId);
+};
+
+export const togglePin = (chatId, msgIndex) => {
+    const msg = state.chats[chatId]?.messages[msgIndex];
+    if (!msg) return;
+    msg.pinned = !msg.pinned;
+    renderActiveChat();
+    persistMessageMeta(chatId);
+};
+
+export const performMessageSearch = (term) => {
+    const results = [];
+    if (!term || term.length < 2) return results;
+    const needle = term.toLowerCase();
+    for (const chatId of Object.keys(state.chats)) {
+        const chat = state.chats[chatId];
+        (chat.messages || []).forEach((msg, index) => {
+            const content = (msg.content || '').toLowerCase();
+            const pos = content.indexOf(needle);
+            if (pos !== -1) {
+                const start = Math.max(0, pos - 40);
+                const end = Math.min(msg.content.length, pos + term.length + 40);
+                const snippet = (start > 0 ? '…' : '') + msg.content.slice(start, end) + (end < msg.content.length ? '…' : '');
+                results.push({ chatId, chatName: chat.name || 'Chat', index, snippet, role: msg.role });
+            }
+        });
+    }
+    return results.slice(0, 30);
+};
+
+export const renderSearchResults = (term) => {
+    if (!dom.searchResults) return;
+    if (!term || term.length < 2) { dom.searchResults.innerHTML = ''; return; }
+    const results = performMessageSearch(term);
+    if (!results.length) {
+        dom.searchResults.innerHTML = '<div class="text-sm text-muted px-2 py-1">No matches found.</div>';
+        return;
+    }
+    const esc = (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    dom.searchResults.innerHTML = results.map((r) => `
+        <button class="search-result w-full text-left px-3 py-2 rounded-btn bg-canvas dark:bg-card border border-hairline hover:border-coral transition-colors"
+            data-chat-id="${esc(r.chatId)}" data-msg-index="${r.index}">
+            <span class="block text-xs font-medium text-coral">${esc(r.chatName)}</span>
+            <span class="block text-sm text-body truncate">${esc(r.snippet)}</span>
+        </button>`).join('');
+    dom.searchResults.querySelectorAll('.search-result').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const chatId = btn.dataset.chatId;
+            const idx = parseInt(btn.dataset.msgIndex, 10);
+            switchChat(chatId);
+            dom.searchPanel.classList.add('hidden');
+            requestAnimationFrame(() => {
+                const el = dom.chatHistory.querySelector(`[data-msg-index="${idx}"]`);
+                if (el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    el.classList.add('search-highlight');
+                    setTimeout(() => el.classList.remove('search-highlight'), 2000);
+                }
+            });
+        });
+    });
 };
 
 /* NEW Code to Add (This replaces the old start of the function) */
@@ -549,6 +672,8 @@ export const sendMessage = async () => {
                                 const contentHolder = latestBotMessageSpan.querySelector('.content-span');
                                 if (contentHolder) {
                                     contentHolder.innerHTML = marked.parse(fullReply);
+                                    const __mc = contentHolder.closest('.message-container');
+                                    if (__mc) maybeCollapse(__mc);
                                 }
                             }
                         }
@@ -658,15 +783,46 @@ export const sendMessage = async () => {
     }
 };
 
+const renderEmptyState = () => {
+    const suggestions = [
+        { title: 'Explain something', sub: 'Break down a hard concept in simple words', prompt: 'Explain how large language models work, in simple terms.' },
+        { title: 'Help me write', sub: 'Draft a polished email or message', prompt: 'Help me write a short, friendly follow-up email to a client.' },
+        { title: 'Debug my code', sub: 'Paste code and get a fix', prompt: 'I will paste some code — help me find and fix the bug.' },
+        { title: 'Brainstorm ideas', sub: 'Get creative options fast', prompt: 'Brainstorm 10 names for a warm, minimal AI chat app.' },
+    ];
+    dom.chatHistory.innerHTML = `
+        <div class="flex flex-col items-center justify-center text-center py-16 px-4">
+            <h2 class="font-display text-2xl md:text-3xl text-ink mb-2">How can I help today?</h2>
+            <p class="text-muted text-sm mb-8">Pick a suggestion or type your own prompt below.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-2xl">
+                ${suggestions.map(sg => `
+                    <button class="suggestion-card text-left p-4 rounded-card bg-card border border-hairline hover:border-coral transition-colors" data-prompt="${sg.prompt.replace(/"/g, '&quot;')}">
+                        <span class="block text-sm font-medium text-ink">${sg.title}</span>
+                        <span class="block text-xs text-muted mt-1">${sg.sub}</span>
+                    </button>`).join('')}
+            </div>
+        </div>`;
+    dom.chatHistory.querySelectorAll('.suggestion-card').forEach(card => {
+        card.addEventListener('click', () => { dom.messageInput.value = card.dataset.prompt; dom.messageInput.focus(); });
+    });
+};
+
 export const renderActiveChat = () => {
     if (!state.activeChatId || !state.chats[state.activeChatId]) {
-        dom.chatHistory.innerHTML = '<div class="text-center text-muted mt-10">Select a chat or start a new one.</div>';
+        renderEmptyState();
         dom.chatTitle.textContent = "No Chat Selected";
+        dom.chatTitleInput.value = "";
+        dom.modelSelectorLabel.textContent = 'Select Model';
+        dom.modelIndicatorPill.textContent = 'Select Model';
         return;
     }
     const chat = state.chats[state.activeChatId];
     dom.chatHistory.innerHTML = '';
-    chat.messages.forEach((msg, index) => appendMessage(msg, true, { index }));
+    if (!chat.messages || chat.messages.length === 0) {
+        renderEmptyState();
+    } else {
+        chat.messages.forEach((msg, index) => appendMessage(msg, true, { index }));
+    }
     // Update header elements
     dom.chatTitle.textContent = chat.name;
     dom.chatTitleInput.value = chat.name;
