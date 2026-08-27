@@ -40,7 +40,7 @@ const MODULES = ['config.js', 'dom.js', 'state.js', 'utils.js', 'ui.js', 'auth.j
 const GLOBALS = new Set(['document', 'window', 'navigator', 'localStorage', 'sessionStorage', 'console', 'setTimeout', 'setInterval', 'clearInterval', 'clearTimeout', 'fetch', 'AbortController', 'URL', 'Blob', 'FileReader', 'FormData', 'alert', 'confirm', 'location', 'history', 'crypto', 'TextDecoder', 'CustomEvent', 'requestAnimationFrame', 'getComputedStyle', 'MutationObserver', 'Notification', 'speechRecognition', 'webkitSpeechRecognition', 'firebase', 'marked', 'hljs', 'VANTA', 'google', 'prompt', 'Event', 'Infinity', 'NaN', 'undefined', 'JSON', 'Math', 'Object', 'Array', 'String', 'Number', 'Boolean', 'Date', 'Promise', 'Error', 'RegExp', 'Map', 'Set', 'parseInt', 'parseFloat', 'isNaN', 'encodeURIComponent', 'decodeURIComponent', 'atob', 'btoa', 'globalThis', 'state', '_initApp']);
 
 const INFRA_OK = new Set(['main', 'registerInitApp', '_initApp', 'ExpressionStatement', // Phase 2 infra
-  'renderEmptyState', 'maybeCollapse', 'persistMessageMeta', 'toggleReaction', 'togglePin', 'performMessageSearch', 'renderSearchResults', 'ensureVanta', 'setVantaEnabled', 'vantaScriptsLoading', 'COLLAPSE_THRESHOLD' // Phase 3 features (documented additions)
+  'renderEmptyState', 'maybeCollapse', 'persistMessageMeta', 'toggleReaction', 'togglePin', 'performMessageSearch', 'renderSearchResults', 'ensureVanta', 'setVantaEnabled', 'vantaScriptsLoading', 'COLLAPSE_THRESHOLD', 'PROVIDER_COLORS', 'getProviderColor', 'startAuthVanta', 'runtimeErrorToasted' // Phase 3+3.5 features (documented additions)
 ]); // ExpressionStatement = the app.js DOMContentLoaded wiring (1 known line) // hand-written app.js main() + auth infra
 
 function tokenize(text) {

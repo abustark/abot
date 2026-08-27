@@ -131,7 +131,7 @@
                                 </div>
                             </div>
                             <button type="submit"
-                                class="w-full text-white bg-coral hover:bg-coral-active focus:ring-4 focus:ring-coral/30 font-medium rounded-lg text-sm px-5 py-3 text-center">Login</button>
+                                class="w-full text-white bg-coral hover:bg-coral-active focus:ring-4 focus:ring-coral/30 font-medium rounded-lg text-sm px-5 py-3 text-center transition-all duration-fast ease-out active:scale-[0.98]">Login</button>
                         </form>
                         <p class="text-sm text-center mt-5"><a href="#" id="show-signup"
                                 class="font-semibold text-coral hover:underline">Don't have an
@@ -153,7 +153,7 @@
                                 </button>
                             </div>
                             <button type="submit"
-                                class="w-full text-white bg-coral hover:bg-coral-active focus:ring-4 focus:ring-coral/30 font-medium rounded-lg text-sm px-5 py-3 text-center">Sign
+                                class="w-full text-white bg-coral hover:bg-coral-active focus:ring-4 focus:ring-coral/30 font-medium rounded-lg text-sm px-5 py-3 text-center transition-all duration-fast ease-out active:scale-[0.98]">Sign
                                 Up</button>
                         </form>
                         <p class="text-sm text-center mt-5"><a href="#" id="show-login"
@@ -168,7 +168,7 @@
                             <input type="email" id="forgot-password-email" autocomplete="email" placeholder="Email Address" required
                                 class="bg-canvas dark:bg-card border border-hairline text-body placeholder:text-muted text-sm rounded-lg focus:ring-coral/40 focus:border-coral block w-full p-3">
                             <button type="submit"
-                                class="w-full text-white bg-coral hover:bg-coral-active focus:ring-4 focus:ring-coral/30 font-medium rounded-lg text-sm px-5 py-3 text-center">Send
+                                class="w-full text-white bg-coral hover:bg-coral-active focus:ring-4 focus:ring-coral/30 font-medium rounded-lg text-sm px-5 py-3 text-center transition-all duration-fast ease-out active:scale-[0.98]">Send
                                 Reset Link</button>
                         </form>
                         <p class="text-sm text-center mt-5"><a href="#" id="back-to-login"
@@ -199,13 +199,13 @@
 
         <!-- Sidebar for Chat History -->
         <aside id="sidebar"
-            class="w-64 flex-shrink-0 flex flex-col bg-surface border-r border-hairline transform -translate-x-full fixed md:static h-full z-20 sidebar md:translate-x-0 transition-transform duration-300">
+            class="w-64 flex-shrink-0 flex flex-col bg-surface border-r border-hairline transform -translate-x-full fixed md:static h-full z-20 sidebar md:translate-x-0 transition-transform duration-300 ease-drawer">
 
             <div class="p-4 border-b border-hairline space-y-4">
                 <!-- NEW Code to Add -->
                 <div class="relative">
                     <button id="newChatBtn"
-                        class="w-full text-white bg-coral hover:bg-coral-active active:bg-coral-active py-2 rounded-lg font-medium flex items-center justify-center transition-colors">
+                        class="w-full text-white bg-coral hover:bg-coral-active active:bg-coral-active active:scale-[0.98] py-2 rounded-lg font-medium flex items-center justify-center transition-all duration-fast ease-out">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20"
                             fill="currentColor">
                             <path fill-rule="evenodd"
@@ -583,7 +583,7 @@
 
         <!-- Toast Notification -->
         <div id="toast-notification"
-            role="status" aria-live="polite" class="fixed top-5 right-5 z-50 flex items-center w-full max-w-xs p-4 text-body bg-canvas rounded-lg shadow-lg dark:bg-card hidden"
+            role="status" aria-live="polite" class="fixed top-5 right-5 z-50 flex items-center w-full max-w-xs p-4 text-body bg-canvas rounded-lg shadow-lg dark:bg-card hidden transition-transform duration-200 ease-out"
             role="alert" style="transform: translateX(150%); transition: transform 0.4s ease;">
             <div id="toast-icon" class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg">
                 <!-- Icon will be dynamically inserted here -->
