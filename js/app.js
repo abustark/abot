@@ -158,7 +158,7 @@ function initApp() {
             const colorClasses = generateColorClasses(model.color);
 
             const optionEl = document.createElement('button');
-                            optionEl.className = `w-full flex items-center justify-between text-left p-3 rounded-lg text-sm transition-colors duration-150 ${isActive ? 'bg-indigo-100 dark:bg-gray-700 font-semibold text-gray-900 dark:text-gray-50' : 'bg-gray-50 dark:bg-gray-900/70 hover:bg-gray-100 dark:hover:bg-gray-800'}`;
+                            optionEl.className = `w-full flex items-center justify-between text-left p-3 rounded-lg text-sm transition-colors duration-150 ${isActive ? 'bg-coral-soft font-semibold text-ink' : 'hover:bg-card'}`;
             optionEl.dataset.modelKey = key;
 
             let checkmarkSvg = '';
@@ -169,7 +169,7 @@ function initApp() {
             optionEl.innerHTML = `
             <div class="flex items-center space-x-3">
                 <span class="w-2.5 h-2.5 rounded-full ${colorClasses.bg}"></span>
-                <span class="font-medium text-gray-800 dark:text-gray-100">${model.name}</span>
+                <span class="font-medium text-ink">${model.name}</span>
             </div>
             ${checkmarkSvg}
         `;
@@ -206,7 +206,7 @@ function initApp() {
                 dom.modelSelectorPanel.style.opacity = '1';
                 dom.modelSelectorPanel.style.transform = 'translateY(0) scale(1)';
                 // Focus the currently active model or the first one
-                const activeOrFirstButton = dom.modelSelectorPanel.querySelector('button[class*="dark:bg-gray-700"]') || dom.modelSelectorPanel.querySelector('button');
+                const activeOrFirstButton = dom.modelSelectorPanel.querySelector('button[class*="bg-coral-soft"]') || dom.modelSelectorPanel.querySelector('button');
                 if (activeOrFirstButton) {
                     activeOrFirstButton.focus();
                 }
@@ -398,7 +398,7 @@ function initApp() {
         const confirmBtn = dom.deleteConfirmBtn;
         confirmBtn.textContent = "Sign Out";
         confirmBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
-        confirmBtn.classList.add('bg-indigo-600', 'hover:bg-indigo-700');
+        confirmBtn.classList.add('bg-coral', 'hover:bg-coral-active');
 
         // 3. Set Action
         const newBtn = confirmBtn.cloneNode(true);

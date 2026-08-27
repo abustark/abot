@@ -53,7 +53,7 @@ export const renderPromptLibrary = () => {
         const isActive = currentPrompt === p.prompt;
 
         button.textContent = p.title;
-                        button.className = `px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${isActive ? 'bg-indigo-600 text-white shadow-sm' : 'bg-gray-200 dark:bg-gray-700/80 hover:bg-gray-300 dark:hover:bg-gray-600'}`;
+                        button.className = `px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${isActive ? 'bg-coral text-white shadow-sm' : 'bg-card text-body hover:bg-hairline'}`;
 
         button.addEventListener('click', (e) => {
             e.preventDefault(); // Prevent form submission if it's inside a form

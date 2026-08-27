@@ -10,8 +10,8 @@ import { state } from './state.js';
 export const showToast = (message, type = 'success') => {
     dom.toastMessage.textContent = message;
 
-    const successClasses = ['bg-green-100', 'dark:bg-green-800', 'text-green-500', 'dark:text-green-200'];
-    const errorClasses = ['bg-red-100', 'dark:bg-red-800', 'text-red-500', 'dark:text-red-200'];
+    const successClasses = ['text-ok'];
+    const errorClasses = ['text-danger'];
 
     dom.toastIcon.classList.remove(...successClasses, ...errorClasses);
 

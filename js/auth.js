@@ -216,7 +216,7 @@ state.auth.onAuthStateChanged(async (user) => {
             dom.importChatBtn.style.display = 'flex';
         }
 
-                        dom.chatList.innerHTML = `<div class="p-2 space-y-2"><div class="h-9 bg-gray-200 dark:bg-gray-700/50 rounded-md animate-pulse"></div><div class="h-9 bg-gray-200 dark:bg-gray-700/50 rounded-md animate-pulse w-5/6"></div><div class="h-9 bg-gray-200 dark:bg-gray-700/50 rounded-md animate-pulse w-4/6"></div></div>`;
+                        dom.chatList.innerHTML = `<div class="p-2 space-y-2"><div class="skeleton h-9"></div><div class="skeleton h-9 w-5/6"></div><div class="skeleton h-9 w-4/6"></div></div>`;
         const chatsLoaded = await loadUserChatsFromFirestore(user.uid);
 
         if (chatsLoaded) {

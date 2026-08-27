@@ -31,15 +31,16 @@ export const COLOR_MAP = {
 export const generateColorClasses = (colorName) => {
     const config = COLOR_MAP[colorName] || { name: 'indigo-600', isLight: false };
     const color = config.name;
+    // Phase 3: primary actions are always coral; the model identity lives in
+    // small accents (selector dot), not button colors. Bubbles are warm card.
     return {
-                        bg: `bg-${color}`,
-                        hoverBg: `hover:bg-${color}/90`,
-                        text: `text-${color}`,
-                        border: `border-${color}`,
-                        userBubbleBg: `bg-${color}`,
-        // These are the new, intelligent text color classes
-        userBubbleTextColorClass: config.isLight ? 'text-gray-900' : 'text-white',
-        userBubbleTimestampColorClass: config.isLight ? 'text-black/60' : 'text-white/70'
+                        bg: 'bg-coral',
+                        hoverBg: 'hover:bg-coral-active',
+                        text: 'text-coral',
+                        border: 'border-coral',
+                        userBubbleBg: 'bg-card',
+        userBubbleTextColorClass: 'text-ink',
+        userBubbleTimestampColorClass: 'text-muted'
     };
 };
 
