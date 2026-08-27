@@ -7,7 +7,7 @@
 
 // Entry point. Execution order mirrors the original main() statement order:
 // SW registration -> firebase init -> dom extras -> message actions -> auth wiring.
-import { MODEL_CONFIG } from './config.js';
+import { MODEL_CONFIG, getProviderColor } from './config.js';
 import { closeGuestLimitModal } from './ui.js';
 import { closePromptModal } from './ui.js';
 import { closeSidebar } from './ui.js';
@@ -157,7 +157,7 @@ function initApp() {
         Object.keys(MODEL_CONFIG).forEach(key => {
             const model = MODEL_CONFIG[key];
             const isActive = key === currentChatModel;
-            const colorClasses = generateColorClasses(model.color);
+            const providerColor = getProviderColor(key);
 
             const optionEl = document.createElement('button');
                             optionEl.className = `w-full flex items-center justify-between text-left p-3 rounded-lg text-sm transition-colors duration-150 ${isActive ? 'bg-coral-soft font-semibold text-ink' : 'hover:bg-card'}`;
@@ -165,12 +165,12 @@ function initApp() {
 
             let checkmarkSvg = '';
             if (isActive) {
-                                checkmarkSvg = `<svg class="w-4 h-4 ${colorClasses.text}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.052-.143z" clip-rule="evenodd" /></svg>`;
+                                checkmarkSvg = `<svg class="w-4 h-4 text-coral" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.052-.143z" clip-rule="evenodd" /></svg>`;
             }
 
             optionEl.innerHTML = `
             <div class="flex items-center space-x-3">
-                <span class="w-2.5 h-2.5 rounded-full ${colorClasses.bg}"></span>
+                <span class="w-2.5 h-2.5 rounded-full ${providerColor.dot}"></span>
                 <span class="font-medium text-ink">${model.name}</span>
             </div>
             ${checkmarkSvg}
@@ -264,7 +264,10 @@ function initApp() {
         searchDebounce = setTimeout(() => renderSearchResults(e.target.value.trim()), 200);
     });
 
-    dom.settingsToggleBtn?.addEventListener('click', () => dom.settingsPanel.classList.toggle('hidden'));
+    dom.settingsToggleBtn?.addEventListener('click', () => {
+        const hidden = dom.settingsPanel.classList.toggle('hidden');
+        dom.settingsToggleBtn.setAttribute('aria-expanded', String(!hidden));
+    });
     if (dom.timestampsToggle) {
         dom.timestampsToggle.checked = localStorage.getItem('abot-show-timestamps') !== 'false';
         dom.timestampsToggle.addEventListener('change', () => {

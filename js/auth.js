@@ -190,6 +190,19 @@ dom.loginForm.addEventListener('submit', (e) => {
 });
 
 // --- CENTRAL AUTH STATE CONTROLLER ---
+// Phase 3.5: password visibility toggles
+document.querySelectorAll('[data-toggle-password]').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const input = document.getElementById(btn.dataset.togglePassword);
+        if (!input) return;
+        const show = input.type === 'password';
+        input.type = show ? 'text' : 'password';
+        btn.querySelector('.eye-open')?.classList.toggle('hidden', show);
+        btn.querySelector('.eye-off')?.classList.toggle('hidden', !show);
+        btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+    });
+});
+
 state.auth.onAuthStateChanged(async (user) => {
     if (user && state.isAppInitialized) return;
 

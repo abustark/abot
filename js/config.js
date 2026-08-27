@@ -46,6 +46,24 @@ export const generateColorClasses = (colorName) => {
 
 // Initialize the Firestore database
 
+// --- Provider identity colors (owner spec: OpenRouter=yellow, Groq=purple,
+// Gemini=blue, NVIDIA=green; OpenRouter-hosted models inherit yellow) ---
+export const PROVIDER_COLORS = {
+    google:               { dot: 'bg-sky-500',     text: 'text-sky-500',     label: 'Google Gemini' },
+    groq:                 { dot: 'bg-purple-500',  text: 'text-purple-500',  label: 'Groq' },
+    nvidia:               { dot: 'bg-emerald-500', text: 'text-emerald-500', label: 'NVIDIA' },
+    openrouter:           { dot: 'bg-yellow-400',  text: 'text-yellow-400',  label: 'OpenRouter' },
+    deepseek:             { dot: 'bg-yellow-400',  text: 'text-yellow-400',  label: 'OpenRouter · DeepSeek' },
+    qwen:                 { dot: 'bg-yellow-400',  text: 'text-yellow-400',  label: 'OpenRouter · Qwen' },
+    'z-ai':               { dot: 'bg-yellow-400',  text: 'text-yellow-400',  label: 'OpenRouter · GLM' },
+    cognitivecomputations:{ dot: 'bg-yellow-400',  text: 'text-yellow-400',  label: 'OpenRouter · Venice' },
+};
+
+export const getProviderColor = (model) => {
+    const provider = String(model || '').split('/')[0].toLowerCase();
+    return PROVIDER_COLORS[provider] || { dot: 'bg-coral', text: 'text-coral', label: 'ABot' };
+};
+
 export const MODEL_CONFIG = {
     // --- NEW DEFAULT ---
     'groq/openai/gpt-oss-120b': { name: 'GPT-oss', color: 'groq-yellow' },

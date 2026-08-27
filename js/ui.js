@@ -5,7 +5,7 @@
  * Verify with: node tools/verify-parity.js
  */
 
-import { COLOR_MAP } from './config.js';
+import { COLOR_MAP, getProviderColor } from './config.js';
 import { SYSTEM_PROMPTS } from './config.js';
 import { dom } from './dom.js';
 import { generateColorClasses } from './config.js';
@@ -13,34 +13,18 @@ import { state } from './state.js';
 import { showToast } from './utils.js';
 export const closeSidebar = () => { dom.sidebar.classList.add('-translate-x-full'); dom.sidebarOverlay.classList.add('hidden'); };
 
-export const applyModelColorTheme = (colorName) => {
-    const colorClasses = generateColorClasses(colorName);
-    const elementsToColor = [dom.newChatBtn, dom.sendBtn];
+export const applyModelColorTheme = (model) => {
+    // Phase 3.5: provider-colored dot (buttons stay coral — actions are brand,
+    // model identity lives in accents). `model` is the full model string.
+    const provider = getProviderColor(model);
 
-                    const oldBgColors = Object.values(COLOR_MAP).map(c => `bg-${c.name}`);
-                    const oldHoverBgColors = Object.values(COLOR_MAP).map(c => `hover:bg-${c.name}/90`);
-
-    // Update New Chat and Send buttons
-    elementsToColor.forEach(el => {
-        if (!el) return;
-        el.classList.remove(...oldBgColors, ...oldHoverBgColors);
-        el.classList.add(colorClasses.bg, colorClasses.hoverBg);
-    });
-
-    // Update the new model selector dot
     if (dom.modelSelectorDot) {
-        dom.modelSelectorDot.classList.remove(...oldBgColors);
-        dom.modelSelectorDot.classList.add(colorClasses.bg);
+        dom.modelSelectorDot.className = `w-2.5 h-2.5 rounded-full ${provider.dot} transition-colors`;
     }
 
-    // Update the old pill (can be removed later if not used)
     const pill = dom.modelIndicatorPill;
     if (pill) {
-
-                        const oldTextColors = Object.values(COLOR_MAP).map(c => `text-${c.name}`);
-                        const oldBorderColors = Object.values(COLOR_MAP).map(c => `border-${c.name}`);
-        pill.classList.remove(...oldTextColors, ...oldBorderColors);
-        pill.classList.add(colorClasses.text, colorClasses.border);
+        pill.className = `flex items-center px-2 py-1 text-sm font-medium ${provider.text}`;
     }
 };
 

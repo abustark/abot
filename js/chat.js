@@ -5,7 +5,7 @@
  * Verify with: node tools/verify-parity.js
  */
 
-import { GUEST_MESSAGE_LIMIT } from './config.js';
+import { GUEST_MESSAGE_LIMIT, getProviderColor } from './config.js';
 import { MODEL_CONFIG } from './config.js';
 import { applyModelColorTheme } from './ui.js';
 import { closeSidebar } from './ui.js';
@@ -285,6 +285,7 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
     // CORE LOGIC: Use the message's own model, or fall back to the chat's current model.
     const modelConf = MODEL_CONFIG[messageModel || currentChat.model] || { name: 'AI', color: 'indigo-600' };
     const colorClasses = generateColorClasses(modelConf.color);
+    const providerColor = getProviderColor(messageModel || currentChat.model);
 
     let messageContent;
     if (isUser) {
@@ -348,10 +349,10 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
         messageEl.innerHTML = `
                             <div class="message-container w-full flex flex-col mb-10 group">
                                 <div class="flex items-center gap-3 mb-2 select-none">
-                                    <div class="w-7 h-7 rounded-sm ${colorClasses.bg} flex items-center justify-center flex-shrink-0 shadow-sm">
+                                    <div class="w-7 h-7 rounded-sm ${providerColor.dot} flex items-center justify-center flex-shrink-0 shadow-sm">
                                          <span class="text-white text-[10px] font-bold">${modelConf.name.substring(0, 2)}</span>
                                     </div>
-                                    <span class="text-xs font-bold uppercase tracking-wider ${colorClasses.text}">${modelConf.name}</span>
+                                    <span class="text-xs font-bold uppercase tracking-wider ${providerColor.text}">${modelConf.name}</span>
                                     ${message.pinned ? '<span class="text-[10px]" role="img" aria-label="Pinned">📌</span>' : ''}
                                     ${showTs ? `<span class="text-xs text-muted msg-timestamp">${getTimestamp()}</span>` : ''}
                                 </div>
@@ -828,5 +829,5 @@ export const renderActiveChat = () => {
     dom.chatTitleInput.value = chat.name;
     dom.modelSelectorLabel.textContent = MODEL_CONFIG[chat.model]?.name || 'Select Model';
     dom.modelIndicatorPill.textContent = MODEL_CONFIG[chat.model]?.name || 'Select Model';
-    applyModelColorTheme(MODEL_CONFIG[chat.model]?.color || 'indigo-600');
+    applyModelColorTheme(chat.model);
 };
