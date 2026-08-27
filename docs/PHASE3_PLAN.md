@@ -145,4 +145,4 @@ Per-model chat names keep current color-coding, re-mapped to the two accents + m
 
 ---
 
-**Your approval needed on 3 open decisions (next message):** display font, default theme, reaction storage scope.
+**Decisions locked (owner, 2026-08-27):** display font = **Source Serif 4** · default theme = **dark default** (deep warm dark; cream light one click away) · reactions/pins = **Firestore** (cross-device sync, 1 write per action).
