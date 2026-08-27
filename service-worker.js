@@ -3,13 +3,21 @@
  * Provides offline caching for local assets only
  */
 
-const CACHE_NAME = 'abot-cache-v9';
+const CACHE_NAME = 'abot-cache-v10'; // v10: modular JS build (Phase 2)
 const STATIC_ASSETS = [
     '/',
     '/index.html',
     '/favicon.png',
     '/logo.png',
-    '/dist/output.css'
+    '/dist/output.css',
+    '/js/app.js',
+    '/js/config.js',
+    '/js/dom.js',
+    '/js/state.js',
+    '/js/utils.js',
+    '/js/ui.js',
+    '/js/auth.js',
+    '/js/chat.js'
 ];
 
 // Install event - cache static assets
