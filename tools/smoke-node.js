@@ -139,6 +139,20 @@ async function main() {
   if (!sendBtn) throw new Error('sendBtn missing from DOM');
   console.log('✓ logged-in path OK (initApp wiring completed, app shell visible)');
 
+  // ---- DOM contract: every dom.js registry entry must resolve to a real element ----
+  // (Phase 3 restyles markup; this guarantees JS never loses its handles)
+  const domMod = await import('file://' + path.join(esmDir, 'dom.js'));
+  const OPTIONAL_DOM = new Set(['googleSigninBtn']); // guarded by if(dom.x) in code
+  let contractFailures = 0;
+  for (const [key, val] of Object.entries(domMod.dom)) {
+    if (val === null || val === undefined) {
+      if (!OPTIONAL_DOM.has(key)) { errors.push(`DOM contract: dom.${key} is null (id missing from index.html?)`); contractFailures++; }
+    } else if (!(val instanceof window.Element) && typeof val !== 'string') {
+      errors.push(`DOM contract: dom.${key} is not an Element (${typeof val})`); contractFailures++;
+    }
+  }
+  if (!contractFailures) console.log(`✓ DOM contract OK (${Object.keys(domMod.dom).length} registry entries resolve)`);
+
   // ---- double-fire auth callback (idempotence guard mirrors original isAppInitialized lock) ----
   for (const cb of authCallbacks) {
     try { await cb(fakeUser); } catch (e) { errors.push('auth re-callback threw: ' + (e && e.message || e)); }

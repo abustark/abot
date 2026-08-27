@@ -487,6 +487,15 @@ document.addEventListener('DOMContentLoaded', main);
 `);
 }
 
+// dom.js — strip vestigial registry entries (ids that don't exist in the DOM and
+// are referenced nowhere; leftovers from removed features)
+{
+  let domText = generated.get('dom.js');
+  domText = domText.replace(/^\s*chatNameToDelete: document\.getElementById\('chatNameToDelete'\),\n/m, '');
+  domText = domText.replace(/^\s*scrollToBottomBtn: document\.getElementById\('scrollToBottomBtn'\)\n/m, '');
+  generated.set('dom.js', domText);
+}
+
 // auth.js — append registerInitApp infra + rewrite initApp references
 {
   let authText = generated.get('auth.js');

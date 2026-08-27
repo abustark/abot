@@ -1,3 +1,140 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ---------------------------------------------------------------------------
+   ABot design tokens — Claude-style calm (docs/PHASE3_PLAN.md §1)
+   RGB triplets so Tailwind opacity modifiers work: bg-coral/20 etc.
+   Light values = claude DESIGN.md light theme; .dark flips the surfaces.
+--------------------------------------------------------------------------- */
+@layer base {
+  :root {
+    --c-canvas: 250 249 245;   /* #faf9f5 */
+    --c-surface: 245 240 232;  /* #f5f0e8 */
+    --c-card: 239 233 222;     /* #efe9de */
+    --c-hairline: 230 223 216; /* #e6dfd8 */
+    --c-ink: 20 20 19;         /* #141413 */
+    --c-body: 61 61 58;        /* #3d3d3a */
+    --c-muted: 108 106 100;    /* #6c6a64 */
+    --c-coral: 204 120 92;     /* #cc785c */
+    --c-coral-active: 169 88 62; /* #a9583e */
+    --c-coral-soft: 243 233 226;
+    --c-ok: 93 184 114;        /* #5db872 */
+    --c-warn: 212 160 23;      /* #d4a017 */
+    --c-danger: 198 69 69;     /* #c64545 */
+    --c-teal: 93 184 166;      /* #5db8a6 */
+    --c-amber: 232 165 90;     /* #e8a55a */
+    --c-code-bg: 31 30 27;     /* #1f1e1b — code blocks stay dark in both themes */
+    color-scheme: light;
+  }
+
+  .dark {
+    --c-canvas: 24 23 21;      /* #181715 */
+    --c-surface: 31 30 27;     /* #1f1e1b */
+    --c-card: 37 35 32;        /* #252320 */
+    --c-hairline: 55 51 45;
+    --c-ink: 250 249 245;      /* #faf9f5 */
+    --c-body: 232 228 220;
+    --c-muted: 160 157 150;    /* #a09d96 */
+    --c-coral: 204 120 92;
+    --c-coral-active: 216 140 110;
+    --c-coral-soft: 58 44 38;
+    --c-ok: 93 184 114;
+    --c-warn: 212 160 23;
+    --c-danger: 198 69 69;
+    --c-teal: 93 184 166;
+    --c-amber: 232 165 90;
+    color-scheme: dark;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: rgb(var(--c-canvas));
+    color: rgb(var(--c-body));
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Phase 0 fix A2: visible keyboard focus everywhere */
+  :focus-visible {
+    outline: 2px solid rgb(var(--c-coral));
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  ::selection {
+    background-color: rgb(var(--c-coral) / 0.28);
+  }
+
+  /* Warm thin scrollbars (defines the previously-dead .scrollbar-custom class) */
+  .scrollbar-custom {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(var(--c-muted) / 0.45) transparent;
+  }
+  .scrollbar-custom::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .scrollbar-custom::-webkit-scrollbar-thumb {
+    background-color: rgb(var(--c-muted) / 0.45);
+    border-radius: 9999px;
+  }
+  .scrollbar-custom::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  /* Calm-motion respect: kill all animation for users who ask for it */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* Serif display voice (auth headline, empty state, wordmark) */
+  .font-display {
+    font-family: 'Source Serif 4', Georgia, serif;
+    letter-spacing: -0.01em;
+  }
+
+  /* Skeleton shimmer — surface-tinted, calm (3.5 wires these into loaders) */
+  .skeleton {
+    border-radius: 8px;
+    background: linear-gradient(
+      90deg,
+      rgb(var(--c-card) / 0.6) 25%,
+      rgb(var(--c-card)) 45%,
+      rgb(var(--c-card) / 0.6) 65%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.4s ease-in-out infinite;
+  }
+  @keyframes skeleton-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* Streaming cursor — 2px coral bar */
+  .stream-cursor::after {
+    content: '';
+    display: inline-block;
+    width: 2px;
+    height: 1em;
+    margin-left: 2px;
+    vertical-align: text-bottom;
+    background-color: rgb(var(--c-coral));
+    animation: cursor-blink 1s steps(2, start) infinite;
+  }
+  @keyframes cursor-blink {
+    to { visibility: hidden; }
+  }
+}

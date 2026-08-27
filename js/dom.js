@@ -58,7 +58,6 @@ export const dom = {
     deleteOverlay: document.getElementById('deleteOverlay'),
     deletePanel: document.getElementById('deletePanel'),
     deleteModalBody: document.getElementById('deleteModalBody'),
-    chatNameToDelete: document.getElementById('chatNameToDelete'),
     deleteCancelBtn: document.getElementById('deleteCancelBtn'),
     deleteConfirmBtn: document.getElementById('deleteConfirmBtn'),
     guestLimitModal: document.getElementById('guestLimitModal'),
@@ -70,7 +69,6 @@ export const dom = {
     toastIcon: document.getElementById('toast-icon'),
     toastMessage: document.getElementById('toast-message'),
     appLoader: document.getElementById('app-loader'),
-    scrollToBottomBtn: document.getElementById('scrollToBottomBtn')
 };
 
 export function initDomExtras() {
