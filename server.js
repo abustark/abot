@@ -63,11 +63,9 @@ app.use(helmet({
             ],
             styleSrc: [
                 "'self'",
-                "'unsafe-inline'",
-                "https://fonts.googleapis.com",
-                "https://cdnjs.cloudflare.com"
+                "'unsafe-inline'"
             ],
-            fontSrc: ["'self'", "https://fonts.gstatic.com"],
+            fontSrc: ["'self'"],
             imgSrc: ["'self'", "data:", "https://i.pravatar.cc", "https://*.googleusercontent.com"],
             connectSrc: [
                 "'self'",
@@ -81,10 +79,6 @@ app.use(helmet({
                 "https://identitytoolkit.googleapis.com",
                 "https://securetoken.googleapis.com",
                 "wss://firestore.googleapis.com",
-                "https://cdnjs.cloudflare.com",
-                "https://cdn.jsdelivr.net",
-                "https://fonts.googleapis.com",
-                "https://fonts.gstatic.com",
                 "https://www.gstatic.com"
             ],
             frameSrc: ["https://accounts.google.com"],
@@ -117,7 +111,12 @@ const sendRootFile = (filename) => (req, res) => res.sendFile(path.join(__dirnam
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 app.get('/index.html', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 app.get('/favicon.png', sendRootFile('favicon.png'));
+app.get('/favicon-32.png', sendRootFile('favicon-32.png'));
+app.get('/icon-192.png', sendRootFile('icon-192.png'));
+app.get('/icon-512.png', sendRootFile('icon-512.png'));
+app.get('/apple-touch-icon.png', sendRootFile('apple-touch-icon.png'));
 app.get('/logo.png', sendRootFile('logo.png'));
+app.get('/manifest.json', sendRootFile('manifest.json'));
 app.get('/service-worker.js', (req, res) => {
     res.setHeader('Service-Worker-Allowed', '/');
     res.sendFile(path.join(__dirname, 'service-worker.js'));
@@ -131,6 +130,11 @@ app.use('/js', express.static(path.join(__dirname, 'js'), {
     dotfiles: 'ignore',
     index: false,
     maxAge: '1h'
+}));
+app.use('/vendor', express.static(path.join(__dirname, 'vendor'), {
+    dotfiles: 'ignore',
+    index: false,
+    maxAge: '7d'
 }));
 // Everything else under the repo root is NOT served (404 by default).
 

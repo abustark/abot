@@ -3,13 +3,13 @@
  * Provides offline caching for local assets only
  */
 
-const CACHE_NAME = 'abot-cache-v11'; // v11: Phase 3 tokens + busted CSS URL
+const CACHE_NAME = 'abot-cache-v12'; // v12: Phase 4 self-hosted fonts + vendored libs
 const STATIC_ASSETS = [
     '/',
     '/index.html',
     '/favicon.png',
     '/logo.png',
-    '/dist/output.css?v=p3b',
+    '/dist/output.css?v=p4',
     '/js/app.js',
     '/js/config.js',
     '/js/dom.js',
@@ -17,7 +17,14 @@ const STATIC_ASSETS = [
     '/js/utils.js',
     '/js/ui.js',
     '/js/auth.js',
-    '/js/chat.js'
+    '/js/chat.js',
+    '/vendor/marked.min.js',
+    '/vendor/highlight.min.js',
+    '/vendor/atom-one-dark.css',
+    '/manifest.json',
+    '/dist/fonts/inter-latin-400-normal.woff2',
+    '/dist/fonts/inter-latin-600-normal.woff2',
+    '/dist/fonts/source-serif-4-latin-400-normal.woff2'
 ];
 
 // Install event - cache static assets

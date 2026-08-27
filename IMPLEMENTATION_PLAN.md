@@ -4,7 +4,7 @@
 >
 > **Production target:** Vercel (`api/chat.js` serverless) · Firebase Auth + Firestore · free-tier AI providers (Google, Groq, NVIDIA, OpenRouter)
 >
-> **Status:** ▶️ In execution — **Phase 0 ✅** · **Phase 1 ✅** · **Phase 2 ✅** · **Phase 3 ✅** · Phase 4 next (perf/PWA polish)
+> **Status:** ▶️ In execution — **Phase 0 ✅** · **Phase 1 ✅** · **Phase 2 ✅** · **Phase 3 ✅** · **Phase 4 ✅** · Phase 5 (end-to-end verification) remains — browser-gated items deferred to owner
 
 ---
 
@@ -101,7 +101,9 @@
 7. Dark/light theme parity, mobile pass, focus states, reduced-motion support.
 8. If any section is ambiguous: generate mockup with image-to-code skill, analyze, implement.
 
-### Phase 4 — Performance & PWA Polish
+### Phase 4 — Performance & PWA Polish ✅ **DONE 2026-08-27**
+> **Delivered:** self-hosted fonts (latin subsets + preloads), vendored+pinned marked/highlight.js (defer), firebase scripts deferred (0 sync render-blocking), favicon 380 KB→1.2 KB + full icon set, manifest.json (installable PWA), SW v12, CSP tightened further, Vanta pinned 0.5.24. Details: `docs/audits/perf-pwa.md`. Lighthouse on deployed URL = owner step (no browser in sandbox).
+<!-- ORIGINAL (reference)
 1. Trim CDN deps (marked.js/dompurify kept; drop vanta/three), self-host critical fonts, preconnect hints.
 2. Lighthouse pass (perf/a11y/best-practices) — targets recorded in plan review.
 3. Service worker + manifest final check (offline shell, install-ability).
