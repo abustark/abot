@@ -110,10 +110,10 @@
                 <div class="bg-canvas dark:bg-card p-6 rounded-lg border border-hairline">
                     <div id="login-view">
                         <form id="login-form" class="space-y-4">
-                            <input type="email" id="login-email" placeholder="Email Address" required
+                            <input type="email" id="login-email" autocomplete="email" placeholder="Email Address" required
                                 class="bg-canvas dark:bg-card border border-hairline text-body placeholder:text-muted text-sm rounded-lg focus:ring-coral/40 focus:border-coral block w-full p-3">
                             <div>
-                                <input type="password" id="login-password" placeholder="Password" required
+                                <input type="password" id="login-password" autocomplete="current-password" placeholder="Password" required
                                     class="bg-canvas dark:bg-card border border-hairline text-body placeholder:text-muted text-sm rounded-lg focus:ring-coral/40 focus:border-coral block w-full p-3">
                                 <div class="text-right mt-2">
                                     <a href="#" id="show-forgot-password"
@@ -130,9 +130,9 @@
                     </div>
                     <div id="signup-view" style="display: none;">
                         <form id="signup-form" class="space-y-4">
-                            <input type="email" id="signup-email" placeholder="Email Address" required
+                            <input type="email" id="signup-email" autocomplete="email" placeholder="Email Address" required
                                 class="bg-canvas dark:bg-card border border-hairline text-body placeholder:text-muted text-sm rounded-lg focus:ring-coral/40 focus:border-coral block w-full p-3">
-                            <input type="password" id="signup-password" placeholder="Password (min. 6 characters)"
+                            <input type="password" id="signup-password" autocomplete="new-password" placeholder="Password (min. 6 characters)"
                                 required
                                 class="bg-canvas dark:bg-card border border-hairline text-body placeholder:text-muted text-sm rounded-lg focus:ring-coral/40 focus:border-coral block w-full p-3">
                             <button type="submit"
@@ -148,7 +148,7 @@
                         <p class="text-sm text-muted mb-4">Enter your email and we'll send you a
                             link to reset your password.</p>
                         <form id="forgot-password-form" class="space-y-4">
-                            <input type="email" id="forgot-password-email" placeholder="Email Address" required
+                            <input type="email" id="forgot-password-email" autocomplete="email" placeholder="Email Address" required
                                 class="bg-canvas dark:bg-card border border-hairline text-body placeholder:text-muted text-sm rounded-lg focus:ring-coral/40 focus:border-coral block w-full p-3">
                             <button type="submit"
                                 class="w-full text-white bg-coral hover:bg-coral-active focus:ring-4 focus:ring-coral/30 font-medium rounded-lg text-sm px-5 py-3 text-center">Send
@@ -290,9 +290,9 @@
                         </svg>
                     </button>
                     <div class="flex items-center">
-                        <h1
+                        <div
                             class="text-xl font-bold font-display text-ink ml-3">
-                            ABot</h1>
+                            ABot</div>
                     </div>
                 </div>
                 <div class="flex items-center space-x-2 p-1 rounded-lg">

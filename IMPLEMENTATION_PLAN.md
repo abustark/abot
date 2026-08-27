@@ -4,7 +4,7 @@
 >
 > **Production target:** Vercel (`api/chat.js` serverless) · Firebase Auth + Firestore · free-tier AI providers (Google, Groq, NVIDIA, OpenRouter)
 >
-> **Status:** ▶️ In execution — **Phase 0 ✅** · **Phase 1 ✅** · **Phase 2 ✅** · Phase 3 next (needs approval)
+> **Status:** ▶️ In execution — **Phase 0 ✅** · **Phase 1 ✅** · **Phase 2 ✅** · **Phase 3 ✅** · Phase 4 next (perf/PWA polish)
 
 ---
 
@@ -89,7 +89,9 @@
 4. Service worker cache-busting version bump + precache `dist/output.css`, `js/*.js`.
 5. *Behavior-freeze rule:* no visual/UX changes in this phase — pure refactor, verified by playwright flows matching Phase 0 screenshots.
 
-### Phase 3 — UI/UX Revamp (Claude-style calm) *(the big one — spec check-in before code)*
+### Phase 3 — UI/UX Revamp (Claude-style calm) ✅ **DONE 2026-08-27**
+> **Delivered:** full token system (Claude palette, Source Serif 4 display, warm dark default), all screens restyled, empty state + skeletons, search-in-messages (client-side), reactions + pins (Firestore), collapse long messages, timestamps toggle, Vanta → optional toggle (default OFF, lazy-loaded, coral/charcoal retune), full a11y closure (A1–A6). Spec: `docs/PHASE3_PLAN.md` · Final audit: `docs/audits/ui-final.md`.
+<!-- ORIGINAL (reference)
 1. **Design system:** extract tokens from `awesome-design/references/claude/DESIGN.md` into `src/input.css` + `tailwind.config.js` — warm neutral palette (`#faf9f5`-family light / deep warm dark), serif-display + humanist-sans pairing, generous line-height, soft radii, subtle borders over shadows.
 2. **taste-skill process:** audit-first on every screen; direction statement; pre-flight checklist before considered done.
 3. **Screens:** auth, sidebar, chat history, composer, model selector, modals, empty state.
