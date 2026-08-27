@@ -53,7 +53,9 @@ app.use(helmet({
             defaultSrc: ["'self'"],
             scriptSrc: [
                 "'self'",
-                "'unsafe-inline'", // Required for inline scripts (removed in Phase 2)
+                // hash-pinned pre-render blocks: theme flicker guard + SW registration
+                "'sha256-2ZlTh5XhLKMq+T7gRcJnqOEzBgpEkLeVTox22opwovI='",
+                "'sha256-fq//prnuaShEK0q5xr96arIXZPwXofVQB6ZwTWEYAs4='",
                 "https://cdn.jsdelivr.net",
                 "https://cdnjs.cloudflare.com",
                 "https://www.gstatic.com",
@@ -121,6 +123,11 @@ app.get('/service-worker.js', (req, res) => {
     res.sendFile(path.join(__dirname, 'service-worker.js'));
 });
 app.use('/dist', express.static(path.join(__dirname, 'dist'), {
+    dotfiles: 'ignore',
+    index: false,
+    maxAge: '1h'
+}));
+app.use('/js', express.static(path.join(__dirname, 'js'), {
     dotfiles: 'ignore',
     index: false,
     maxAge: '1h'
