@@ -11,7 +11,7 @@ import { applyModelColorTheme } from './ui.js';
 import { closeSidebar } from './ui.js';
 import { dom } from './dom.js';
 import { generateColorClasses } from './config.js';
-import { getTimestamp } from './utils.js';
+import { getTimestamp, isSpeaking, speakText, stopSpeaking } from './utils.js';
 import { showGuestLimitModal } from './ui.js';
 import { showToast } from './utils.js';
 import { state } from './state.js';
@@ -61,6 +61,31 @@ export const renameChat = async (chatId, newName) => {
     if (String(chatId) === String(state.activeChatId)) {
         renderActiveChat(); // Redraws the main header and content area
     }
+};
+
+export const exportChatMarkdown = (chatId) => {
+    if (!state.chats[chatId]) return;
+    const chat = state.chats[chatId];
+    const lines = [];
+    lines.push(`# ${chat.name}`, '');
+    lines.push(`_Exported from ABot on ${new Date().toLocaleString()}_`, '', '---', '');
+    (chat.messages || []).forEach((msg) => {
+        const modelLabel = msg.role === 'assistant'
+            ? (MODEL_CONFIG[msg.model]?.name || msg.model || 'AI')
+            : null;
+        lines.push(msg.role === 'user' ? '### 🧑 You' : `### 🤖 ${modelLabel}`, '', msg.content, '', '---', '');
+    });
+    const blob = new Blob([lines.join('\n')], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const safeName = chat.name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    a.download = `abot_chat_${safeName}.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('Chat exported as Markdown!');
 };
 
 export const exportChat = (chatId) => {
@@ -148,7 +173,7 @@ export const renderChatList = (searchTerm = '') => {
     filteredChats.sort((a, b) => b.id - a.id).forEach(chat => {
         const chatItemContainer = document.createElement('div');
                         chatItemContainer.className = `relative chat-list-item group ${String(chat.id) === String(state.activeChatId) ? 'active' : ''}`;
-                        chatItemContainer.innerHTML = `<div class="flex items-center justify-between w-full rounded-md ${String(chat.id) === String(state.activeChatId) ? '' : 'text-muted hover:bg-card'}"><a href="#" class="flex-1 px-4 py-2 text-sm truncate" data-chat-id="${chat.id}"><span class="chat-name-span">${chat.name}</span></a><input type="text" class="chat-rename-input hidden flex-1 mx-2 p-1 text-sm bg-surface dark:bg-card rounded" value="${chat.name}"><button class="chat-options-btn p-1 mr-2 rounded-md hover:bg-card opacity-0 group-hover:opacity-100 transition-opacity"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" /></svg></button></div><div class="absolute right-0 top-full mt-1 w-32 bg-canvas dark:bg-card border border-hairline rounded-md shadow-lg z-10 hidden chat-options-menu"><button class="rename-chat-btn w-full text-left px-3 py-1.5 text-sm hover:bg-card">Rename</button><button class="export-chat-btn w-full text-left px-3 py-1.5 text-sm hover:bg-card">Export</button><button class="delete-chat-btn w-full text-left px-3 py-1.5 text-sm text-danger hover:bg-card">Delete</button></div>`;
+                        chatItemContainer.innerHTML = `<div class="flex items-center justify-between w-full rounded-md ${String(chat.id) === String(state.activeChatId) ? '' : 'text-muted hover:bg-card'}"><a href="#" class="flex-1 px-4 py-2 text-sm truncate" data-chat-id="${chat.id}"><span class="chat-name-span">${chat.name}</span></a><input type="text" class="chat-rename-input hidden flex-1 mx-2 p-1 text-sm bg-surface dark:bg-card rounded" value="${chat.name}"><button class="chat-options-btn p-1 mr-2 rounded-md hover:bg-card opacity-0 group-hover:opacity-100 transition-opacity"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" /></svg></button></div><div class="absolute right-0 top-full mt-1 w-32 bg-canvas dark:bg-card border border-hairline rounded-md shadow-lg z-10 hidden chat-options-menu"><button class="rename-chat-btn w-full text-left px-3 py-1.5 text-sm hover:bg-card">Rename</button><button class="export-chat-btn w-full text-left px-3 py-1.5 text-sm hover:bg-card">Export JSON</button><button class="export-md-btn w-full text-left px-3 py-1.5 text-sm hover:bg-card">Export Markdown</button><button class="delete-chat-btn w-full text-left px-3 py-1.5 text-sm text-danger hover:bg-card">Delete</button></div>`;
         const nameSpan = chatItemContainer.querySelector('.chat-name-span');
         const renameInput = chatItemContainer.querySelector('.chat-rename-input');
         const saveRename = () => { renameChat(chat.id, renameInput.value); };
@@ -158,6 +183,7 @@ export const renderChatList = (searchTerm = '') => {
         chatItemContainer.querySelector('.chat-options-btn').addEventListener('click', e => { e.stopPropagation(); const menu = chatItemContainer.querySelector('.chat-options-menu'); document.querySelectorAll('.chat-options-menu').forEach(m => m !== menu && m.classList.add('hidden')); menu.classList.toggle('hidden'); });
         chatItemContainer.querySelector('.rename-chat-btn').addEventListener('click', e => { e.stopPropagation(); nameSpan.classList.add('hidden'); renameInput.classList.remove('hidden'); renameInput.focus(); renameInput.select(); chatItemContainer.querySelector('.chat-options-menu').classList.add('hidden'); });
         chatItemContainer.querySelector('.export-chat-btn').addEventListener('click', e => { e.stopPropagation(); exportChat(chat.id); chatItemContainer.querySelector('.chat-options-menu').classList.add('hidden'); });
+        chatItemContainer.querySelector('.export-md-btn').addEventListener('click', e => { e.stopPropagation(); exportChatMarkdown(chat.id); chatItemContainer.querySelector('.chat-options-menu').classList.add('hidden'); });
         chatItemContainer.querySelector('.delete-chat-btn').addEventListener('click', e => { e.stopPropagation(); deleteChat(chat.id); });
         dom.chatList.appendChild(chatItemContainer);
     });
@@ -234,6 +260,7 @@ window.editMessage = (chatId, msgIndex) => {
 }
 
 export const switchChat = (chatId) => {
+    stopSpeaking();
     state.activeChatId = String(chatId);
     renderActiveChat();
     renderChatList(dom.searchChats.value);
@@ -312,6 +339,7 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
         const downActive = message.reaction === 'down' ? 'text-coral' : 'text-muted';
         const pinActive = message.pinned ? 'text-coral' : 'text-muted';
         reactButtonsHtml = `
+                                    <button class="speak-btn p-1.5 rounded-md transition-colors hover:text-coral text-muted" aria-label="Read aloud" aria-pressed="false" title="Read aloud"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M13 4.5c0-1.104-.806-2.03-1.886-2.03H11L9.66 5.33A2.5 2.5 0 017.5 6.5H5A2.5 2.5 0 002.5 9v6A2.5 2.5 0 005 17.5h2.5a2.5 2.5 0 012.16 1.17l1.34 2.83h.114C12.194 21.5 13 20.574 13 19.47v-14.97z"/><path d="M16.5 8.5a.75.75 0 011.06 0 5 5 0 010 7 .75.75 0 11-1.06-1.06 3.5 3.5 0 000-4.88.75.75 0 010-1.06z"/><path d="M19.09 5.5a.75.75 0 011.06 0 9 9 0 010 13 .75.75 0 11-1.06-1.06 7.5 7.5 0 000-10.88.75.75 0 010-1.06z"/></svg></button>
                                     <button class="react-up-btn p-1.5 rounded-md transition-colors hover:text-coral ${upActive}" aria-label="Good response" title="Good response">👍</button>
                                     <button class="react-down-btn p-1.5 rounded-md transition-colors hover:text-coral ${downActive}" aria-label="Bad response" title="Bad response">👎</button>
                                     <button class="pin-btn p-1.5 rounded-md transition-colors hover:text-coral ${pinActive}" aria-label="Pin message" title="Pin message">📌</button>`;
@@ -374,6 +402,19 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
     if (typeof options.index === 'number') {
         messageEl.querySelector('.delete-msg-btn')?.addEventListener('click', (e) => { e.stopPropagation(); window.deleteMessage(state.activeChatId, options.index); });
         messageEl.querySelector('.edit-msg-btn')?.addEventListener('click', (e) => { e.stopPropagation(); window.editMessage(state.activeChatId, options.index); });
+        const speakBtn = messageEl.querySelector('.speak-btn');
+        speakBtn?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const msg = state.chats[state.activeChatId]?.messages[options.index];
+            if (!msg) return;
+            if (isSpeaking()) {
+                stopSpeaking();
+                speakBtn.setAttribute('aria-pressed', 'false');
+            } else {
+                speakText(msg.content, { onend: () => speakBtn.setAttribute('aria-pressed', 'false') });
+                speakBtn.setAttribute('aria-pressed', 'true');
+            }
+        });
         messageEl.querySelector('.react-up-btn')?.addEventListener('click', (e) => { e.stopPropagation(); toggleReaction(state.activeChatId, options.index, 'up'); });
         messageEl.querySelector('.react-down-btn')?.addEventListener('click', (e) => { e.stopPropagation(); toggleReaction(state.activeChatId, options.index, 'down'); });
         messageEl.querySelector('.pin-btn')?.addEventListener('click', (e) => { e.stopPropagation(); togglePin(state.activeChatId, options.index); });
@@ -539,6 +580,7 @@ export const sendMessage = async () => {
 
     let fullReply = "";
 
+    stopSpeaking(); // any ongoing narration ends when a new message is sent
     state.abortController = new AbortController(); // Create a new controller for this request
 
     // Create the user message object, now including the current model.
@@ -708,6 +750,9 @@ export const sendMessage = async () => {
         });
 
         currentChat.messages.push({ role: 'assistant', content: fullReply, model: currentChat.model });
+        if (localStorage.getItem('abot-auto-tts') === 'true' && fullReply) {
+            speakText(fullReply);
+        }
 
 
     } catch (error) {

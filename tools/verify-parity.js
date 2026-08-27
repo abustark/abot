@@ -37,10 +37,10 @@ const UNITS = [
 const MODULES = ['config.js', 'dom.js', 'state.js', 'utils.js', 'ui.js', 'auth.js', 'chat.js', 'app.js'];
 
 // allowed identifiers that are neither imports nor main-scope bindings
-const GLOBALS = new Set(['document', 'window', 'navigator', 'localStorage', 'sessionStorage', 'console', 'setTimeout', 'setInterval', 'clearInterval', 'clearTimeout', 'fetch', 'AbortController', 'URL', 'Blob', 'FileReader', 'FormData', 'alert', 'confirm', 'location', 'history', 'crypto', 'TextDecoder', 'CustomEvent', 'requestAnimationFrame', 'getComputedStyle', 'MutationObserver', 'Notification', 'speechRecognition', 'webkitSpeechRecognition', 'firebase', 'marked', 'hljs', 'VANTA', 'google', 'prompt', 'Event', 'Infinity', 'NaN', 'undefined', 'JSON', 'Math', 'Object', 'Array', 'String', 'Number', 'Boolean', 'Date', 'Promise', 'Error', 'RegExp', 'Map', 'Set', 'parseInt', 'parseFloat', 'isNaN', 'encodeURIComponent', 'decodeURIComponent', 'atob', 'btoa', 'globalThis', 'state', '_initApp']);
+const GLOBALS = new Set(['document', 'window', 'navigator', 'localStorage', 'sessionStorage', 'console', 'setTimeout', 'setInterval', 'clearInterval', 'clearTimeout', 'fetch', 'AbortController', 'URL', 'Blob', 'FileReader', 'FormData', 'alert', 'confirm', 'location', 'history', 'crypto', 'TextDecoder', 'CustomEvent', 'requestAnimationFrame', 'getComputedStyle', 'MutationObserver', 'Notification', 'speechRecognition', 'webkitSpeechRecognition', 'firebase', 'marked', 'hljs', 'VANTA', 'google', 'prompt', 'Event', 'speechSynthesis', 'SpeechSynthesisUtterance', 'Infinity', 'NaN', 'undefined', 'JSON', 'Math', 'Object', 'Array', 'String', 'Number', 'Boolean', 'Date', 'Promise', 'Error', 'RegExp', 'Map', 'Set', 'parseInt', 'parseFloat', 'isNaN', 'encodeURIComponent', 'decodeURIComponent', 'atob', 'btoa', 'globalThis', 'state', '_initApp']);
 
 const INFRA_OK = new Set(['main', 'registerInitApp', '_initApp', 'ExpressionStatement', // Phase 2 infra
-  'renderEmptyState', 'maybeCollapse', 'persistMessageMeta', 'toggleReaction', 'togglePin', 'performMessageSearch', 'renderSearchResults', 'ensureVanta', 'setVantaEnabled', 'vantaScriptsLoading', 'COLLAPSE_THRESHOLD', 'PROVIDER_COLORS', 'getProviderColor', 'startAuthVanta', 'runtimeErrorToasted' // Phase 3+3.5 features (documented additions)
+  'renderEmptyState', 'maybeCollapse', 'persistMessageMeta', 'toggleReaction', 'togglePin', 'performMessageSearch', 'renderSearchResults', 'ensureVanta', 'setVantaEnabled', 'vantaScriptsLoading', 'COLLAPSE_THRESHOLD', 'PROVIDER_COLORS', 'getProviderColor', 'startAuthVanta', 'runtimeErrorToasted', 'stripForSpeech', 'speakText', 'stopSpeaking', 'isSpeaking', 'ttsSpeaking', 'exportChatMarkdown' // Phase 3.5 + 6 features (documented additions)
 ]); // ExpressionStatement = the app.js DOMContentLoaded wiring (1 known line) // hand-written app.js main() + auth infra
 
 function tokenize(text) {
@@ -368,15 +368,6 @@ for (const f of MODULES) {
       else if (v && typeof v === 'object' && typeof v.type === 'string') linkParents(v, node);
     }
   })(a, null);
-
-  const markSet = (p, set) => { (function m(x) {
-    if (!x || typeof x.type !== 'string') return;
-    if (x.type === 'Identifier') set.add(x);
-    else if (x.type === 'RestElement') m(x.argument);
-    else if (x.type === 'AssignmentPattern') { m(x.left); linkParents(x.right, x); }
-    else if (x.type === 'ArrayPattern') x.elements.forEach((e) => e && m(e));
-    else if (x.type === 'ObjectPattern') x.properties.forEach((pr) => m(pr.value || pr.argument));
-  })(p); };
 
   (function refsWalk(node, locals) {
     if (!node || typeof node.type !== 'string') return;

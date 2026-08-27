@@ -216,7 +216,6 @@ function analyzeUnit(unit) {
   })({ type: 'Program', body: nodes }, null);
 
   const refs = [];
-  for (const node of refsCandidates) {}
   (function collect(node, localStack) {
     if (!node || typeof node.type !== 'string') return;
     if (node.type === 'Identifier' && !bindingPositions.has(node)) {

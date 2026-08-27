@@ -9,7 +9,7 @@ import { closeGuestLimitModal, startAuthVanta } from './ui.js';
 import { createNewChat } from './chat.js';
 import { dom } from './dom.js';
 import { loadUserChatsFromFirestore } from './chat.js';
-import { showToast } from './utils.js';
+import { showToast, stopSpeaking } from './utils.js';
 import { state } from './state.js';
 import { switchChat } from './chat.js';
 export function initFirebase() {
@@ -91,8 +91,7 @@ export const signInAsGuest = () => {
 };
 
 export const signOutUser = () => {
-    state.isAppInitialized = false; // Reset the app state
-    state.auth.signOut().catch((error) => console.error('Sign out error', error));
+    stopSpeaking();
 };
 
 export const linkGuestToGoogle = () => {

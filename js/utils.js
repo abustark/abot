@@ -62,3 +62,49 @@ export const startVoiceRecognition = () => {
     dom.voiceBtn.classList.add('voice-pulse', 'text-red-500');
     state.recognition.start();
 };
+
+// ---------------------------------------------------------------------------
+// Phase 6: text-to-speech (Web Speech API — client-side, zero API cost)
+// ---------------------------------------------------------------------------
+let ttsSpeaking = false;
+
+// Reduce markdown to speakable prose: drop code blocks, keep code snippets'
+// inner text out (reading code aloud is noise), unwrap links/emphasis.
+export const stripForSpeech = (raw) => {
+    let t = String(raw || '');
+    t = t.replace(/```[\s\S]*?```/g, ' (code block) ');
+    t = t.replace(/`([^`]+)`/g, '$1');
+    t = t.replace(/!\[([^\]]*)\]\([^)]*\)/g, '');
+    t = t.replace(/\[([^\]]+)\]\([^)]*\)/g, '$1');
+    t = t.replace(/^#{1,6}\s+/gm, '');
+    t = t.replace(/(\*\*|__)(.*?)\1/g, '$2');
+    t = t.replace(/(\*|_)(.*?)\1/g, '$2');
+    t = t.replace(/^\s*[-*+]\s+/gm, '');
+    t = t.replace(/\|/g, ' ');
+    return t.replace(/\n{2,}/g, '. ').replace(/\s+/g, ' ').trim();
+};
+
+export const isSpeaking = () => ttsSpeaking;
+
+export const stopSpeaking = () => {
+    if (typeof speechSynthesis !== 'undefined') speechSynthesis.cancel();
+    ttsSpeaking = false;
+};
+
+export const speakText = (raw, { onend } = {}) => {
+    if (typeof speechSynthesis === 'undefined') return;
+    speechSynthesis.cancel();
+    const text = stripForSpeech(raw);
+    if (!text) return;
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.rate = 1;
+    utter.lang = document.documentElement.lang || 'en';
+    const voices = speechSynthesis.getVoices();
+    const preferred = voices.find((v) => /en[-_]US/i.test(v.lang) && /google/i.test(v.name))
+        || voices.find((v) => /^en/i.test(v.lang));
+    if (preferred) utter.voice = preferred;
+    ttsSpeaking = true;
+    utter.onend = () => { ttsSpeaking = false; if (onend) onend(); };
+    utter.onerror = () => { ttsSpeaking = false; if (onend) onend(); };
+    speechSynthesis.speak(utter);
+};

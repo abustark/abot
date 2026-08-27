@@ -79,6 +79,7 @@ dom.searchResults = document.getElementById('searchResults');
 dom.settingsToggleBtn = document.getElementById('settingsToggleBtn');
 dom.settingsPanel = document.getElementById('settingsPanel');
 dom.timestampsToggle = document.getElementById('timestampsToggle');
+dom.ttsToggle = document.getElementById('ttsToggle');
 
 export function initDomExtras() {
 dom.promptLibrary = document.getElementById('promptLibrary');

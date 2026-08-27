@@ -26,7 +26,7 @@ import { renderActiveChat } from './chat.js';
 import { renderChatList } from './chat.js';
 import { saveSystemPrompt } from './ui.js';
 import { sendMessage } from './chat.js';
-import { showToast } from './utils.js';
+import { showToast, stopSpeaking } from './utils.js';
 import { signOutUser } from './auth.js';
 import { startVoiceRecognition } from './utils.js';
 import { state } from './state.js';
@@ -267,6 +267,13 @@ function initApp() {
         const hidden = dom.settingsPanel.classList.toggle('hidden');
         dom.settingsToggleBtn.setAttribute('aria-expanded', String(!hidden));
     });
+    if (dom.ttsToggle) {
+        dom.ttsToggle.checked = localStorage.getItem('abot-auto-tts') === 'true';
+        dom.ttsToggle.addEventListener('change', () => {
+            localStorage.setItem('abot-auto-tts', dom.ttsToggle.checked ? 'true' : 'false');
+            if (!dom.ttsToggle.checked) stopSpeaking();
+        });
+    }
     if (dom.timestampsToggle) {
         dom.timestampsToggle.checked = localStorage.getItem('abot-show-timestamps') !== 'false';
         dom.timestampsToggle.addEventListener('change', () => {
@@ -282,6 +289,7 @@ function initApp() {
     dom.messageInput.addEventListener('input', function () { this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px'; });
     dom.messageInput.addEventListener('keydown', e => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), sendMessage()));
     dom.stopBtn.addEventListener('click', () => {
+        stopSpeaking();
         // This listener is now ONLY responsible for UI and aborting.
         const allBotSpans = dom.chatHistory.querySelectorAll('span[id^="bot-msg-"]');
         if (allBotSpans.length > 0) {
@@ -513,4 +521,5 @@ function main() {
     }
 }
 
+window.addEventListener('beforeunload', stopSpeaking);
 document.addEventListener('DOMContentLoaded', main);

@@ -13,7 +13,13 @@ const ROOT = path.join(__dirname, '..');
 // Since Phase 2, index.html no longer contains the inline blocks. The extractor
 // reads the historical monolith from git (last commit before the rewire).
 const { execSync } = require('child_process');
-const REF = process.env.EXTRACT_REF || 'a31d318'; // Phase 0/1 commit with the monolith
+// Last commits that still contain the monolith (history may be pruned — try in order)
+const CANDIDATES = [process.env.EXTRACT_REF, '6cc93c8', 'a31d318', 'c242d2d'].filter(Boolean);
+let REF = null;
+for (const ref of CANDIDATES) {
+  try { execSync(`git cat-file -e ${ref}:index.html`, { cwd: ROOT }); REF = ref; break; } catch {}
+}
+if (!REF) throw new Error('No reachable commit contains the monolith index.html');
 const html = execSync(`git show ${REF}:index.html`, { cwd: ROOT, encoding: 'utf8' }).split('\n');
 const OUT = path.join(__dirname, '..', 'tmp');
 
