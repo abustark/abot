@@ -16,7 +16,7 @@
     <link rel="preload" href="/dist/fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/dist/fonts/inter-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/dist/fonts/source-serif-4-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link href="./dist/output.css?v=p4" rel="stylesheet">
+    <link href="./dist/output.css?v=p5" rel="stylesheet">
     <script src="/vendor/marked.min.js" defer></script>
     <link rel="stylesheet" href="/vendor/atom-one-dark.css">
     <script src="/vendor/highlight.min.js" defer></script>
@@ -47,7 +47,7 @@
         // Register Service Worker for offline caching
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/service-worker.js')
+                navigator.serviceWorker.register('/service-worker.js', { updateViaCache: 'none' })
                     .then((reg) => console.log('[SW] Registration successful:', reg.scope))
                     .catch((err) => console.log('[SW] Registration failed:', err));
             });
@@ -70,13 +70,14 @@
     </div>
 
     <!-- This is the background. It is separate and covers the full screen. -->
-    <div id="vanta-bg" class="fixed inset-0 -z-10"></div>
+
 
     <!-- This is the content, stacked on top of the background. -->
-    <section id="auth-section" class="relative z-10 flex items-center justify-center w-full min-h-screen p-4 bg-canvas"
+    <section id="auth-section" class="relative z-10 flex items-center justify-center w-full min-h-screen p-4 overflow-hidden"
         style="display: none;">
+        <div id="vanta-bg" class="absolute inset-0" aria-hidden="true"></div>
 
-        <div class="w-full max-w-md mx-auto">
+        <div class="relative z-10 w-full max-w-md mx-auto bg-canvas dark:bg-card border border-hairline rounded-modal p-8 shadow-sm">
             <div class="flex flex-col items-center justify-center mb-8">
                 <img src="./logo.png" alt="ABot Logo" class="h-24 w-24 mb-5">
                 <h1 class="text-3xl font-bold font-heading text-ink">Welcome to ABot</h1>
@@ -272,12 +273,7 @@
                             <span
                                 class="relative w-10 h-5 rounded-full bg-hairline transition-colors peer-checked:bg-coral peer-focus-visible:ring-2 peer-focus-visible:ring-coral/40 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:w-4 after:h-4 after:rounded-full after:bg-white after:shadow-sm after:transition-transform peer-checked:after:translate-x-5"></span>
                         </label>
-                        <label class="flex items-center justify-between text-sm text-body cursor-pointer select-none">
-                            <span>Ambient background</span>
-                            <input type="checkbox" id="vantaToggle" class="peer sr-only" aria-label="Ambient animated background">
-                            <span
-                                class="relative w-10 h-5 rounded-full bg-hairline transition-colors peer-checked:bg-coral peer-focus-visible:ring-2 peer-focus-visible:ring-coral/40 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:w-4 after:h-4 after:rounded-full after:bg-white after:shadow-sm after:transition-transform peer-checked:after:translate-x-5"></span>
-                        </label>
+
                     </div>
                 <button id="importChatBtn" title="Import Chat" aria-label="Import chat"
                     class="mt-4 w-full flex items-center justify-center p-2 rounded-md text-sm border border-hairline hover:bg-card transition-colors">

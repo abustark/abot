@@ -16,7 +16,6 @@ import { dom } from './dom.js';
 import { generateColorClasses } from './config.js';
 import { importChat } from './chat.js';
 import { initDomExtras } from './dom.js';
-import { setVantaEnabled } from './ui.js';
 import { renderSearchResults } from './chat.js';
 import { initFirebase, initAuth, registerInitApp } from './auth.js';
 import { initMessageActions } from './chat.js';
@@ -37,7 +36,7 @@ function registerServiceWorker() {
 // Register Service Worker
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')
+        navigator.serviceWorker.register('/service-worker.js', { updateViaCache: 'none' })
             .then(reg => {
                 console.log('[App] SW registered');
                 reg.onupdatefound = () => {
@@ -275,10 +274,7 @@ function initApp() {
             renderActiveChat();
         });
     }
-    if (dom.vantaToggle) {
-        dom.vantaToggle.checked = localStorage.getItem('abot-vanta') === 'true';
-        dom.vantaToggle.addEventListener('change', () => setVantaEnabled(dom.vantaToggle.checked));
-    }
+
     // New chat (Header)
     document.getElementById('headerNewChatBtn')?.addEventListener('click', createNewChatWrapper);
 
@@ -489,6 +485,19 @@ function initApp() {
 
     state.isAppInitialized = true;
 }
+
+// Phase 3.5b: surface runtime errors (diagnostic aid)
+let runtimeErrorToasted = false;
+window.addEventListener('error', (e) => {
+    console.error('[ABot] runtime error:', e.message, e.filename + ':' + e.lineno);
+    if (!runtimeErrorToasted) {
+        runtimeErrorToasted = true;
+        import('./utils.js').then(u => u.showToast('A background error occurred — details in console (F12)', 'error')).catch(() => {});
+    }
+});
+window.addEventListener('unhandledrejection', (e) => {
+    console.error('[ABot] unhandled promise rejection:', e.reason);
+});
 
 function main() {
     registerServiceWorker();

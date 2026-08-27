@@ -5,7 +5,7 @@
  * Verify with: node tools/verify-parity.js
  */
 
-import { closeGuestLimitModal } from './ui.js';
+import { closeGuestLimitModal, startAuthVanta } from './ui.js';
 import { createNewChat } from './chat.js';
 import { dom } from './dom.js';
 import { loadUserChatsFromFirestore } from './chat.js';
@@ -248,20 +248,7 @@ state.auth.onAuthStateChanged(async (user) => {
 
         // --- USER IS LOGGED OUT ---
         dom.appContainer.style.display = 'none';
-        if (localStorage.getItem('abot-vanta') === 'true' && window.VANTA && !state.vantaEffect) {
-            try {
-                state.vantaEffect = VANTA.NET({
-                    el: "#vanta-bg",
-                    mouseControls: true, touchControls: true, gyroControls: false,
-                    scale: 1.00, scaleMobile: 1.20, color: 0x8b5cf6,
-                    backgroundColor: 0x0f172a, points: 12.00, maxDistance: 18.00
-                });
-            } catch (e) {
-                console.error("Vanta.js initialization failed:", e);
-                const vantaBg = document.getElementById('vanta-bg');
-                if (vantaBg) { vantaBg.style.backgroundColor = '#0f172a'; }
-            }
-        }
+        startAuthVanta();
 
         dom.authSection.style.display = 'flex';
         state.chats = {};

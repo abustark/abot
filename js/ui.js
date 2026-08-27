@@ -98,7 +98,9 @@ const showGuestLimitModal = () => {
 };
 export { closeGuestLimitModal, showGuestLimitModal };
 
-// --- Phase 3: ambient background (lazy three.js/vanta, default OFF) ---
+// --- Phase 3.5b: ambient background for the AUTH SCREEN only ---
+// Lazy-loads three.js/vanta on first need; theme-aware colors (coral on
+// warm dark / warm cream). Destroyed on login (see auth.js).
 let vantaScriptsLoading = null;
 const ensureVanta = () => {
     if (window.VANTA) return Promise.resolve();
@@ -120,25 +122,25 @@ const ensureVanta = () => {
     return vantaScriptsLoading;
 };
 
-export const setVantaEnabled = async (enabled) => {
-    localStorage.setItem('abot-vanta', enabled ? 'true' : 'false');
-    if (enabled) {
+export const startAuthVanta = async () => {
+    try {
+        await ensureVanta();
+    } catch (e) {
+        return; // decorative only — fail silently
+    }
+    if (window.VANTA && !state.vantaEffect) {
+        const dark = document.documentElement.classList.contains('dark');
         try {
-            await ensureVanta();
-        } catch (e) {
-            showToast('Could not load background effect', 'error');
-            return;
-        }
-        if (window.VANTA && !state.vantaEffect) {
             state.vantaEffect = VANTA.NET({
                 el: '#vanta-bg',
                 mouseControls: true, touchControls: true, gyroControls: false,
-                scale: 1.00, scaleMobile: 1.20, color: 0xcc785c,
-                backgroundColor: 0x181715, points: 12.00, maxDistance: 18.00
+                scale: 1.00, scaleMobile: 1.20,
+                color: 0xcc785c,
+                backgroundColor: dark ? 0x181715 : 0xfaf9f5,
+                points: 12.00, maxDistance: 18.00
             });
+        } catch (e) {
+            console.error('Vanta init failed:', e);
         }
-    } else if (state.vantaEffect) {
-        state.vantaEffect.destroy();
-        state.vantaEffect = null;
     }
 };

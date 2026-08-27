@@ -55,7 +55,7 @@ app.use(helmet({
                 "'self'",
                 // hash-pinned pre-render blocks: theme flicker guard + SW registration
                 "'sha256-2ZlTh5XhLKMq+T7gRcJnqOEzBgpEkLeVTox22opwovI='",
-                "'sha256-fq//prnuaShEK0q5xr96arIXZPwXofVQB6ZwTWEYAs4='",
+                "'sha256-VWaPoUOlzYoe9zCTZaYlk6twkMHt+udfeNAaXcYGi+4='",
                 "https://cdn.jsdelivr.net",
                 "https://cdnjs.cloudflare.com",
                 "https://www.gstatic.com",
