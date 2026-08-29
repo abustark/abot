@@ -498,7 +498,7 @@ function initApp() {
 
 // Phase 6.5: client-state reset + build identity
 // Visit <site>/#reset to wipe SW/caches/storage and reload (recovery tool).
-window.ABOT_BUILD = '2026-08-30.1';
+window.ABOT_BUILD = '2026-08-30.2';
 console.log(`[ABot] build ${window.ABOT_BUILD}`);
 if (location.hash === '#reset') {
     (async () => {
@@ -516,6 +516,19 @@ if (location.hash === '#reset') {
         location.replace(location.pathname);
     })();
 }
+
+// Phase 6.5c: real-click recorder (capture phase — fires even when other
+// code stops propagation). #diag prints the last clicks so we can see
+// exactly which element a PHYSICAL tap lands on.
+window.__abotClicks = window.__abotClicks || [];
+document.addEventListener('click', (e) => {
+    const t = e.target;
+    const desc = t && t.tagName
+        ? t.tagName.toLowerCase() + (t.id ? '#' + t.id : '') + (typeof t.className === 'string' && t.className ? '.' + t.className.trim().split(/\s+/).slice(0, 2).join('.') : '')
+        : 'unknown';
+    window.__abotClicks.push({ x: e.clientX, y: e.clientY, at: desc, time: new Date().toLocaleTimeString() });
+    if (window.__abotClicks.length > 12) window.__abotClicks.shift();
+}, true);
 
 // Phase 3.5b: surface runtime errors (diagnostic aid)
 let runtimeErrorToasted = false;
@@ -576,6 +589,12 @@ async function runDiagnostics() {
     if (window.__abotErrors && window.__abotErrors.length) {
         results.push('--- captured errors ---');
         window.__abotErrors.slice(0, 6).forEach((e) => results.push('ERR  ' + e));
+    }
+    if (window.__abotClicks && window.__abotClicks.length) {
+        results.push('--- last REAL clicks (tap something, then run #diag) ---');
+        window.__abotClicks.slice(-8).forEach((c) => results.push(`CLICK ${c.time} @(${c.x},${c.y}) -> ${c.at}`));
+    } else {
+        results.push('--- no real clicks recorded yet: tap a button, then re-run #diag ---');
     }
 
     const click = (el) => el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
