@@ -202,6 +202,12 @@ document.querySelectorAll('[data-toggle-password]').forEach(btn => {
     });
 });
 
+// build badge on the auth screen (confirms which build the client runs)
+{
+    const badge = document.getElementById('build-badge');
+    if (badge) badge.textContent = `build ${window.ABOT_BUILD || '?'}`;
+}
+
 state.auth.onAuthStateChanged(async (user) => {
     if (user && state.isAppInitialized) return;
 

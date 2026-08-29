@@ -494,6 +494,27 @@ function initApp() {
     state.isAppInitialized = true;
 }
 
+// Phase 6.5: client-state reset + build identity
+// Visit <site>/#reset to wipe SW/caches/storage and reload (recovery tool).
+window.ABOT_BUILD = '2026-08-27.4';
+console.log(`[ABot] build ${window.ABOT_BUILD}`);
+if (location.hash === '#reset') {
+    (async () => {
+        try {
+            const regs = await navigator.serviceWorker?.getRegistrations?.() || [];
+            await Promise.all(regs.map((r) => r.unregister()));
+            const keys = await caches.keys();
+            await Promise.all(keys.map((k) => caches.delete(k)));
+            localStorage.clear();
+            sessionStorage.clear();
+            console.log('[ABot] client state cleared — reloading');
+        } catch (e) {
+            console.error('[ABot] reset failed:', e);
+        }
+        location.replace(location.pathname);
+    })();
+}
+
 // Phase 3.5b: surface runtime errors (diagnostic aid)
 let runtimeErrorToasted = false;
 window.addEventListener('error', (e) => {

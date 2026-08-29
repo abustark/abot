@@ -3,7 +3,7 @@
  * Provides offline caching for local assets only
  */
 
-const CACHE_NAME = 'abot-cache-v13'; // v12: Phase 4 self-hosted fonts + vendored libs
+const CACHE_NAME = 'abot-cache-v14'; // v12: Phase 4 self-hosted fonts + vendored libs
 const STATIC_ASSETS = [
     '/',
     '/index.html',
