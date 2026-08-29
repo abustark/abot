@@ -219,22 +219,24 @@ function initApp() {
         }
     });
 
-    document.addEventListener('click', () => {
-        // First, check if the panel is currently visible BEFORE starting to close it.
-        const isVisible = !dom.modelSelectorPanel.classList.contains('hidden');
-
-        // Start the closing animation for the model panel.
-        dom.modelSelectorPanel.style.opacity = '0';
-        dom.modelSelectorPanel.style.transform = 'scale(0.95)';
-        setTimeout(() => dom.modelSelectorPanel.classList.add('hidden'), 200);
-
-        // Now, use the 'isVisible' variable. If the panel was open, return focus to the button.
-        if (isVisible) {
+    document.addEventListener('click', (e) => {
+        // Close the model panel only if it is open AND the click landed outside
+        // it and outside its trigger button. (The old version scheduled a hide
+        // after ANY click — a tap elsewhere followed by the pill within 200ms
+        // made the panel flash open then close.)
+        const panel = dom.modelSelectorPanel;
+        const isVisible = !panel.classList.contains('hidden');
+        if (isVisible && !panel.contains(e.target) && !dom.modelSelectorBtn.contains(e.target)) {
+            panel.style.opacity = '0';
+            panel.style.transform = 'scale(0.95)';
+            setTimeout(() => panel.classList.add('hidden'), 200);
             dom.modelSelectorBtn.focus();
         }
 
         // Also, ensure the smaller chat options menus are closed.
-        document.querySelectorAll('.chat-options-menu').forEach(m => m.classList.add('hidden'));
+        if (!e.target.closest('.chat-list-item')) {
+            document.querySelectorAll('.chat-options-menu').forEach(m => m.classList.add('hidden'));
+        }
     });
 
     // --- Core Interaction Listeners ---
@@ -517,7 +519,9 @@ if (location.hash === '#reset') {
 
 // Phase 3.5b: surface runtime errors (diagnostic aid)
 let runtimeErrorToasted = false;
+window.__abotErrors = window.__abotErrors || [];
 window.addEventListener('error', (e) => {
+    window.__abotErrors.push(`${e.message} @ ${e.filename}:${e.lineno}`);
     console.error('[ABot] runtime error:', e.message, e.filename + ':' + e.lineno);
     if (!runtimeErrorToasted) {
         runtimeErrorToasted = true;
@@ -525,6 +529,7 @@ window.addEventListener('error', (e) => {
     }
 });
 window.addEventListener('unhandledrejection', (e) => {
+    window.__abotErrors.push('unhandled rejection: ' + (e.reason && (e.reason.stack || e.reason.message) || String(e.reason)));
     console.error('[ABot] unhandled promise rejection:', e.reason);
 });
 
@@ -540,6 +545,97 @@ function main() {
         const el = document.getElementById(id);
         if (el) el.textContent = new Date().getFullYear();
     }
+}
+
+// --- Phase 6.5b: #diag — in-page interaction self-test (mobile-friendly) ---
+async function runDiagnostics() {
+    const results = [];
+    const add = (name, pass, detail = '') => results.push(`${pass ? 'PASS' : 'FAIL'}  ${name}${detail ? ' — ' + detail : ''}`);
+    const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+    add('build', true, window.ABOT_BUILD || '?');
+    add('viewport', true, window.innerWidth + 'x' + window.innerHeight);
+    try {
+        const dup = {};
+        document.querySelectorAll('[id]').forEach((el) => { dup[el.id] = (dup[el.id] || 0) + 1; });
+        const dups = Object.entries(dup).filter(([, n]) => n > 1).map(([id, n]) => id + 'x' + n);
+        add('duplicate ids', dups.length === 0, dups.join(', ') || 'none');
+    } catch (e) { add('duplicate ids', false, e.message); }
+    try {
+        navigator.serviceWorker.getRegistrations().then((rs) => {
+            if (rs.length) results.push('SW: ' + rs.map((r) => (r.active && r.active.scriptURL) || '?').join(', '));
+            return caches.keys();
+        }).then((keys) => { if (keys.length) results.push('caches: ' + keys.join(', ')); }).catch(() => {});
+    } catch {}
+
+    let stateMod = null;
+    try { stateMod = await import('./state.js'); } catch (e) { add('import state.js', false, e.message); }
+    const st = stateMod ? stateMod.state : null;
+    add('initApp completed (state.isAppInitialized)', st ? !!st.isAppInitialized : false);
+
+    if (window.__abotErrors && window.__abotErrors.length) {
+        results.push('--- captured errors ---');
+        window.__abotErrors.slice(0, 6).forEach((e) => results.push('ERR  ' + e));
+    }
+
+    const click = (el) => el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+
+    try {
+        const before = document.documentElement.classList.contains('dark');
+        click(dom.themeToggle);
+        await sleep(60);
+        const after = document.documentElement.classList.contains('dark');
+        add('theme toggle', before !== after, `${before}->${after}`);
+        click(dom.themeToggle);
+    } catch (e) { add('theme toggle', false, e.message); }
+
+    try {
+        click(dom.modelSelectorBtn);
+        await sleep(350);
+        const open = dom.modelSelectorPanel && !dom.modelSelectorPanel.classList.contains('hidden');
+        const options = dom.modelSelectorPanel ? dom.modelSelectorPanel.querySelectorAll('button').length : 0;
+        add('model selector opens', !!open, options + ' options');
+        if (open) click(document.body);
+        await sleep(250);
+    } catch (e) { add('model selector opens', false, e.message); }
+
+    try {
+        const sb = dom.sidebar;
+        const before = sb.className;
+        click(dom.sidebarToggle);
+        await sleep(120);
+        const changed = sb.className !== before;
+        add('sidebar toggle', changed);
+        click(dom.sidebarToggle);
+        await sleep(120);
+    } catch (e) { add('sidebar toggle', false, e.message); }
+
+    try {
+        click(dom.settingsToggleBtn); await sleep(60);
+        const sp = dom.settingsPanel && !dom.settingsPanel.classList.contains('hidden');
+        add('settings panel opens', !!sp);
+        if (sp) click(dom.settingsToggleBtn);
+    } catch (e) { add('settings panel opens', false, e.message); }
+    try {
+        click(dom.searchToggleBtn); await sleep(60);
+        const sp = dom.searchPanel && !dom.searchPanel.classList.contains('hidden');
+        add('search panel opens', !!sp);
+        if (sp) click(dom.searchToggleBtn);
+    } catch (e) { add('search panel opens', false, e.message); }
+
+    ['signoutBtn', 'voiceBtn', 'promptBtn'].forEach((k) => {
+        const el = dom[k];
+        add(`${k} present`, !!el);
+    });
+    add('TTS support', typeof speechSynthesis !== 'undefined' && typeof SpeechSynthesisUtterance !== 'undefined');
+
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:auto 0 0 0;z-index:99999;background:#181715;color:#faf9f5;font:12px/1.5 monospace;padding:12px;max-height:55vh;overflow:auto;border-top:2px solid #cc785c;white-space:pre-wrap';
+    overlay.textContent = 'ABOT DIAGNOSTICS\n==================\n' + results.join('\n') + '\n\n(screenshot this)';
+    document.body.appendChild(overlay);
+}
+if (location.hash === '#diag') {
+    setTimeout(() => runDiagnostics().catch((e) => console.error('[ABot] diag crashed:', e)), 1500);
 }
 
 window.addEventListener('beforeunload', stopSpeaking);

@@ -7,7 +7,7 @@
     "build": "npm run build:css",
     "build:css": "tailwindcss -i ./src/input.css -o ./dist/output.css --minify",
     "watch:css": "tailwindcss -i ./src/input.css -o ./dist/output.css --watch",
-    "test": "node tests/chat-security.test.js && node tools/smoke-node.js",
+    "test": "node tests/chat-security.test.js && node tools/smoke-node.js && node tools/interaction-test.js",
     "lint": "eslint .",
     "check": "node tools/syntax-check.js"
   },

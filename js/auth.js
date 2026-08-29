@@ -222,7 +222,14 @@ state.auth.onAuthStateChanged(async (user) => {
         dom.authSection.style.display = 'none';
         dom.appContainer.style.display = 'flex';
 
-        _initApp();
+        try {
+            _initApp();
+        } catch (initError) {
+            console.error('[ABot] initApp crashed:', initError);
+            window.__abotErrors = window.__abotErrors || [];
+            window.__abotErrors.push('initApp crashed: ' + (initError.stack || initError.message));
+            showToast('App init failed — open ' + location.origin + '/#diag', 'error');
+        }
 
         if (user.isAnonymous) {
             dom.userEmailDisplay.textContent = 'Guest User';
