@@ -498,7 +498,7 @@ function initApp() {
 
 // Phase 6.5: client-state reset + build identity
 // Visit <site>/#reset to wipe SW/caches/storage and reload (recovery tool).
-window.ABOT_BUILD = '2026-08-27.4';
+window.ABOT_BUILD = '2026-08-30.1';
 console.log(`[ABot] build ${window.ABOT_BUILD}`);
 if (location.hash === '#reset') {
     (async () => {
@@ -629,10 +629,53 @@ async function runDiagnostics() {
     });
     add('TTS support', typeof speechSynthesis !== 'undefined' && typeof SpeechSynthesisUtterance !== 'undefined');
 
-    const overlay = document.createElement('div');
-    overlay.style.cssText = 'position:fixed;inset:auto 0 0 0;z-index:99999;background:#181715;color:#faf9f5;font:12px/1.5 monospace;padding:12px;max-height:55vh;overflow:auto;border-top:2px solid #cc785c;white-space:pre-wrap';
-    overlay.textContent = 'ABOT DIAGNOSTICS\n==================\n' + results.join('\n') + '\n\n(screenshot this)';
-    document.body.appendChild(overlay);
+    // REAL hit-test: what would a physical tap on each control actually hit?
+    results.push('--- real tap hit-test (elementFromPoint) ---');
+    ['themeToggle', 'modelSelectorBtn', 'sidebarToggle', 'sendBtn'].forEach((k) => {
+        const el = dom[k];
+        if (!el) { add(`tap ${k}`, false, 'missing'); return; }
+        const r = el.getBoundingClientRect();
+        const cx = Math.min(Math.max(r.left + r.width / 2, 1), window.innerWidth - 1);
+        const cy = Math.min(Math.max(r.top + r.height / 2, 1), window.innerHeight - 1);
+        const hit = document.elementFromPoint(cx, cy);
+        const ok = !!hit && (hit === el || el.contains(hit) || (hit && el.contains(hit.closest('[id]'))));
+        add(`tap ${k}`, !!ok, ok ? 'reaches button' : `BLOCKED by <${hit ? hit.tagName.toLowerCase() + (hit.id ? '#' + hit.id : '') + (hit.className && typeof hit.className === 'string' ? '.' + hit.className.split(' ').slice(0, 2).join('.') : '') : 'nothing'}>`);
+    });
+
+    // invisible-overlay detector: full-viewport, visible, click-catching layers
+    try {
+        const suspects = [];
+        const vw = window.innerWidth, vh = window.innerHeight;
+        document.querySelectorAll('body *').forEach((el) => {
+            if (dom.appContainer && (el === dom.appContainer || dom.appContainer.contains(el))) return;
+            if (el.id === 'vanta-bg') return;
+            const cs = getComputedStyle(el);
+            if (cs.position !== 'fixed' && cs.position !== 'absolute') return;
+            if (cs.display === 'none' || cs.visibility === 'hidden') return;
+            if (cs.pointerEvents === 'none') return;
+            const r = el.getBoundingClientRect();
+            if (r.width > vw * 0.6 && r.height > vh * 0.6) {
+                suspects.push(`<${el.tagName.toLowerCase()}${el.id ? '#' + el.id : ''}> ${Math.round(r.width)}x${Math.round(r.height)} z=${cs.zIndex} opacity=${cs.opacity}`);
+            }
+        });
+        add('viewport-covering layers (outside app)', suspects.length === 0, suspects.slice(0, 3).join(' | ') || 'none');
+    } catch (e) { add('overlay scan', false, e.message); }
+
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'position:fixed;inset:auto 0 0 0;z-index:99999;border-top:2px solid #cc785c';
+    const bar = document.createElement('div');
+    bar.style.cssText = 'display:flex;justify-content:space-between;align-items:center;background:#252320;color:#faf9f5;font:12px monospace;padding:6px 12px';
+    bar.innerHTML = '<span>ABOT DIAGNOSTICS</span>';
+    const closeBtn = document.createElement('button');
+    closeBtn.textContent = '✕ close & re-test by hand';
+    closeBtn.style.cssText = 'background:#cc785c;color:#fff;border:0;border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer';
+    closeBtn.addEventListener('click', () => wrap.remove());
+    bar.appendChild(closeBtn);
+    const pre = document.createElement('div');
+    pre.style.cssText = 'background:#181715;color:#faf9f5;font:12px/1.5 monospace;padding:12px;max-height:50vh;overflow:auto;white-space:pre-wrap';
+    pre.textContent = results.join('\n');
+    wrap.appendChild(bar); wrap.appendChild(pre);
+    document.body.appendChild(wrap);
 }
 if (location.hash === '#diag') {
     setTimeout(() => runDiagnostics().catch((e) => console.error('[ABot] diag crashed:', e)), 1500);
