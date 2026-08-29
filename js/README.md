@@ -1,18 +1,34 @@
-/**
- * ABot Reference Modules - README
- * 
- * These JavaScript modules were extracted from the inline code in index.html
- * as a reference for future refactoring. They are NOT currently used by the app.
- * 
- * The app still runs using the inline JavaScript in index.html for stability.
- * 
- * MODULES:
- * - config.js  : Color maps, model configurations, constants
- * - utils.js   : Security helpers, toast, voice recognition
- * 
- * TO DO FULL MIGRATION:
- * 1. Update index.html to use: <script type="module" src="/js/app.js"></script>
- * 2. Create a complete app.js that imports all modules
- * 3. Ensure all DOM references and Firebase instances are properly passed
- * 4. Test thoroughly before deploying
- */
+# ABot — Frontend Modules
+
+These are the **live application modules** (Phase 2 de-monolithization). They are loaded by
+`index.html` via `<script type="module" src="js/app.js"></script>`.
+
+> Logic is extracted verbatim from the former 1,670-line inline module — verified by
+> `node tools/verify-parity.js` (token-level parity) and `node tools/smoke-node.js`
+> (jsdom runtime walk of the logged-out and logged-in init paths).
+
+## Modules (dependency order)
+
+| File | Owns | Imports |
+|---|---|---|
+| `config.js` | `COLOR_MAP`, `MODEL_CONFIG`, `SYSTEM_PROMPTS`, `GUEST_MESSAGE_LIMIT`, `generateColorClasses` | — |
+| `dom.js` | element registry `dom` + `initDomExtras()` | — |
+| `state.js` | shared mutable `state` (chats, activeChatId, abortController, auth/db handles, …) | — |
+| `utils.js` | `showToast`, `getTimestamp`, `startVoiceRecognition` | dom, state |
+| `ui.js` | theme, sidebar, prompt modals, guest-limit modals, `applyModelColorTheme` | config, dom, state, utils |
+| `auth.js` | Firebase init, login/signup/guest/Google-GIS flows, `initAuth()` (`onAuthStateChanged` wiring) | config, dom, state, utils, ui, chat |
+| `chat.js` | chat CRUD, message rendering/streaming (`sendMessage`), import/export, `renderChatList`/`renderActiveChat` | config, dom, state, utils, ui |
+| `app.js` | entry: SW registration, init sequence (`main()`), `initApp()` listener wiring | all |
+
+`auth/db` live on `state` and are assigned by `initFirebase()` — the same point in the
+init sequence as the original closure statements (module-load evaluation would precede
+`initializeApp()`).
+
+## Tools
+
+- `tools/extract-inline.js` — pulls the inline script blocks out of `index.html`
+- `tools/build-split.js` — regenerates the modules from the extracted block (mechanical)
+- `tools/verify-parity.js` — proves token-level parity with the original inline code
+- `tools/smoke-node.js` — jsdom runtime smoke test with stubbed firebase/marked/hljs/Vanta
+
+Re-run after any generator change: `node tools/build-split.js && node tools/verify-parity.js && node tools/smoke-node.js`

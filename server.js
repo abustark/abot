@@ -1,9 +1,13 @@
 const express = require('express');
-const cors = require('cors');
 require('dotenv').config();
 const admin = require('firebase-admin');
 const fs = require('fs');
 const path = require('path');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const chatSecurity = require('./lib/chat-security.js');
+
+const { LIMITS, validateChatRequest, MemoryRateLimiter, identityKey, clientIp, upstreamTimeout, sseError, logProviderError } = chatSecurity;
 
 // Initialize Firebase Admin SDK
 let serviceAccount;
@@ -40,17 +44,18 @@ admin.initializeApp({
 console.log("Firebase Admin SDK initialized successfully.");
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
-// Security: Add helmet for security headers
-const helmet = require('helmet');
+// Security: security headers (CSP will be tightened in Phase 2 once inline JS is removed)
 app.use(helmet({
     contentSecurityPolicy: {
         directives: {
             defaultSrc: ["'self'"],
             scriptSrc: [
                 "'self'",
-                "'unsafe-inline'", // Required for inline scripts
+                // hash-pinned pre-render blocks: theme flicker guard + SW registration
+                "'sha256-2ZlTh5XhLKMq+T7gRcJnqOEzBgpEkLeVTox22opwovI='",
+                "'sha256-VWaPoUOlzYoe9zCTZaYlk6twkMHt+udfeNAaXcYGi+4='",
                 "https://cdn.jsdelivr.net",
                 "https://cdnjs.cloudflare.com",
                 "https://www.gstatic.com",
@@ -58,11 +63,9 @@ app.use(helmet({
             ],
             styleSrc: [
                 "'self'",
-                "'unsafe-inline'",
-                "https://fonts.googleapis.com",
-                "https://cdnjs.cloudflare.com"
+                "'unsafe-inline'"
             ],
-            fontSrc: ["'self'", "https://fonts.gstatic.com"],
+            fontSrc: ["'self'"],
             imgSrc: ["'self'", "data:", "https://i.pravatar.cc", "https://*.googleusercontent.com"],
             connectSrc: [
                 "'self'",
@@ -76,10 +79,6 @@ app.use(helmet({
                 "https://identitytoolkit.googleapis.com",
                 "https://securetoken.googleapis.com",
                 "wss://firestore.googleapis.com",
-                "https://cdnjs.cloudflare.com",
-                "https://cdn.jsdelivr.net",
-                "https://fonts.googleapis.com",
-                "https://fonts.gstatic.com",
                 "https://www.gstatic.com"
             ],
             frameSrc: ["https://accounts.google.com"],
@@ -90,55 +89,74 @@ app.use(helmet({
     crossOriginEmbedderPolicy: false, // Required for some CDN resources
 }));
 
-// Security: Rate limiting
-const rateLimit = require('express-rate-limit');
-
-// General rate limit: 100 requests per 15 minutes per IP
+// Security: rate limiting
+// General: 100 requests / 15 min per IP — chat: enforced per-identity below (shared lib)
 const generalLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
+    windowMs: 15 * 60 * 1000,
     max: 100,
     message: { error: 'Too many requests, please try again later.' },
     standardHeaders: true,
     legacyHeaders: false,
 });
-
-// Stricter limit for chat API: 30 requests per 15 minutes
-const chatLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 30,
-    message: { error: 'Rate limit exceeded for chat API. Please wait before sending more messages.' },
-    standardHeaders: true,
-    legacyHeaders: false,
-});
-
 app.use(generalLimiter);
-app.use(express.static('.'));
-app.use(cors());
-app.use(express.json());
 
-// Middleware to verify Firebase token
+// NOTE: no cors() — the app is same-origin (frontend and API are served together)
+
+app.use(express.json({ limit: '256kb' }));
+
+// --- Static serving: explicit allowlist ONLY ---
+// (Previously express.static('.') exposed server.js, package.json, .git/ ...)
+const sendRootFile = (filename) => (req, res) => res.sendFile(path.join(__dirname, filename));
+
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
+app.get('/index.html', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
+app.get('/favicon.png', sendRootFile('favicon.png'));
+app.get('/favicon-32.png', sendRootFile('favicon-32.png'));
+app.get('/icon-192.png', sendRootFile('icon-192.png'));
+app.get('/icon-512.png', sendRootFile('icon-512.png'));
+app.get('/apple-touch-icon.png', sendRootFile('apple-touch-icon.png'));
+app.get('/logo.png', sendRootFile('logo.png'));
+app.get('/manifest.json', sendRootFile('manifest.json'));
+app.get('/service-worker.js', (req, res) => {
+    res.setHeader('Service-Worker-Allowed', '/');
+    res.sendFile(path.join(__dirname, 'service-worker.js'));
+});
+app.use('/dist', express.static(path.join(__dirname, 'dist'), {
+    dotfiles: 'ignore',
+    index: false,
+    maxAge: '1h'
+}));
+app.use('/js', express.static(path.join(__dirname, 'js'), {
+    dotfiles: 'ignore',
+    index: false,
+    maxAge: '1h'
+}));
+app.use('/vendor', express.static(path.join(__dirname, 'vendor'), {
+    dotfiles: 'ignore',
+    index: false,
+    maxAge: '7d'
+}));
+// Everything else under the repo root is NOT served (404 by default).
+
+// Middleware to verify Firebase token (Authorization header ONLY — query params rejected)
 const checkAuth = async (req, res, next) => {
-    let idToken;
-    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
-        idToken = req.headers.authorization.split('Bearer ')[1];
-    } else if (req.query.token) {
-        idToken = req.query.token;
-    }
-
-    if (idToken) {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+        const idToken = authHeader.slice('Bearer '.length).trim();
         try {
             const decodedToken = await admin.auth().verifyIdToken(idToken);
             req.user = decodedToken;
             return next();
         } catch (error) {
-            console.error('Error while verifying Firebase ID token:', error);
-            return res.status(403).send({ error: 'Unauthorized: Invalid token.' });
+            console.error('Token verification failed');
+            return res.status(403).json({ error: 'Unauthorized: Invalid token.' });
         }
-    } else {
-        return res.status(401).send({ error: 'Unauthorized: No token provided.' });
     }
+    return res.status(401).json({ error: 'Unauthorized: No token provided.' });
 };
 
+// Local-dev config endpoint (Firebase web config is public by design; production
+// keeps it inline in index.html). Rate-limited by generalLimiter.
 app.get('/api/firebase-config', (req, res) => {
     res.json({
         apiKey: process.env.FIREBASE_API_KEY,
@@ -151,43 +169,28 @@ app.get('/api/firebase-config', (req, res) => {
     });
 });
 
-app.post('/api/chat', chatLimiter, checkAuth, async (req, res) => {
-    const { model, messages } = req.body;
+// Shared per-identity limiter (uid, else hashed IP) — mirrors api/chat.js
+const chatMemoryLimiter = new MemoryRateLimiter();
 
-    // Security: Input validation
-    const ALLOWED_PROVIDERS = ['google/', 'groq/', 'nvidia/', 'deepseek/', 'qwen/', 'z-ai/', 'cognitivecomputations/'];
-
-    if (!model || typeof model !== 'string') {
-        return res.status(400).json({ error: 'Invalid model parameter' });
+app.post('/api/chat', checkAuth, async (req, res) => {
+    // Rate limit per identity
+    const rl = chatMemoryLimiter.check(identityKey(req.user && req.user.uid, clientIp(req)));
+    if (!rl.allowed) {
+        res.setHeader('Retry-After', String(rl.retryAfterSec));
+        return res.status(429).json({ error: 'Rate limit exceeded. Please wait before sending more messages.' });
     }
 
-    if (!messages || !Array.isArray(messages) || messages.length === 0) {
-        return res.status(400).json({ error: 'Invalid messages parameter' });
+    // Shared validation & limits
+    const v = validateChatRequest(req.body);
+    if (!v.ok) {
+        return res.status(v.code).json({ error: v.message });
     }
-
-    // Validate model starts with an allowed provider
-    const isValidProvider = ALLOWED_PROVIDERS.some(provider => model.startsWith(provider));
-    if (!isValidProvider) {
-        return res.status(400).json({ error: 'Invalid model provider' });
-    }
-
-    // Validate each message has required fields
-    for (const msg of messages) {
-        if (!msg.role || !['system', 'user', 'assistant'].includes(msg.role)) {
-            return res.status(400).json({ error: 'Invalid message role' });
-        }
-        if (typeof msg.content !== 'string') {
-            return res.status(400).json({ error: 'Invalid message content' });
-        }
-    }
+    const { model, cleanedMessages } = v;
 
     res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Cache-Control', 'no-cache, no-store');
     res.setHeader('Connection', 'keep-alive');
     res.flushHeaders();
-
-    // Create a "cleaned" version of the messages array for standard APIs
-    const cleanedMessages = messages.map(({ role, content }) => ({ role, content }));
 
     const isGoogle = model.startsWith('google/');
     const isGroq = model.startsWith('groq/');
@@ -199,19 +202,20 @@ app.post('/api/chat', chatLimiter, checkAuth, async (req, res) => {
             if (!apiKey) throw new Error('GEMINI_API_KEY not configured.');
 
             const googleModelName = model.split('/')[1];
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${googleModelName}:generateContent?key=${apiKey}`;
-            // Google's transformer function uses the original 'messages' array
-            const requestBody = transformMessagesForGoogle(messages);
-
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(googleModelName)}:generateContent`;
             const response = await fetch(apiUrl, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(requestBody)
+                signal: upstreamTimeout(),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-goog-api-key': apiKey // key in header, never in URL
+                },
+                body: JSON.stringify(transformMessagesForGoogle(cleanedMessages))
             });
 
             if (!response.ok) {
-                const errorData = await response.text();
-                throw new Error(`API Error: ${response.status} ${response.statusText} - ${errorData}`);
+                logProviderError('google', response.status, await response.text());
+                throw new Error('The AI provider returned an error. Please try again.');
             }
 
             const fullData = await response.json();
@@ -219,57 +223,29 @@ app.post('/api/chat', chatLimiter, checkAuth, async (req, res) => {
             const sseData = { choices: [{ delta: { content: fullText } }] };
             res.write(`data: ${JSON.stringify(sseData)}\n\n`);
 
-        } else if (isGroq) {
-            const apiKey = process.env.GROQ_API_KEY;
-            if (!apiKey) throw new Error('GROQ_API_KEY not configured.');
+        } else if (isGroq || isNvidia) {
+            const apiKey = isGroq ? process.env.GROQ_API_KEY : process.env.NVIDIA_API_KEY;
+            if (!apiKey) throw new Error(`${isGroq ? 'GROQ' : 'NVIDIA'}_API_KEY not configured.`);
 
-            const apiUrl = "https://api.groq.com/openai/v1/chat/completions";
-            const groqModelName = model.substring(model.indexOf('/') + 1);
-
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${apiKey}`,
-                    'Content-Type': 'application/json'
-                },
-                // Use the cleaned messages array
-                body: JSON.stringify({ model: groqModelName, messages: cleanedMessages, stream: true })
-            });
-
-            if (!response.ok) {
-                const errorData = await response.text();
-                throw new Error(`API Error: ${response.status} ${response.statusText} - ${errorData}`);
-            }
-
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-                res.write(decoder.decode(value));
-            }
-
-        } else if (isNvidia) {
-            const apiKey = process.env.NVIDIA_API_KEY;
-            if (!apiKey) throw new Error('NVIDIA_API_KEY not configured.');
-
-            const apiUrl = "https://integrate.api.nvidia.com/v1/chat/completions";
-            const nvidiaModelName = model.substring(model.indexOf('/') + 1);
+            const apiUrl = isGroq
+                ? "https://api.groq.com/openai/v1/chat/completions"
+                : "https://integrate.api.nvidia.com/v1/chat/completions";
+            const providerModel = model.substring(model.indexOf('/') + 1);
 
             const response = await fetch(apiUrl, {
                 method: 'POST',
+                signal: upstreamTimeout(),
                 headers: {
                     'Authorization': `Bearer ${apiKey}`,
                     'Content-Type': 'application/json',
                     'Accept': 'text/event-stream'
                 },
-                // Use the cleaned messages array
-                body: JSON.stringify({ model: nvidiaModelName, messages: cleanedMessages, stream: true })
+                body: JSON.stringify({ model: providerModel, messages: cleanedMessages, stream: true })
             });
 
             if (!response.ok) {
-                const errorData = await response.text();
-                throw new Error(`API Error: ${response.status} ${response.statusText} - ${errorData}`);
+                logProviderError(isGroq ? 'groq' : 'nvidia', response.status, await response.text());
+                throw new Error('The AI provider returned an error. Please try again.');
             }
 
             const reader = response.body.getReader();
@@ -280,24 +256,24 @@ app.post('/api/chat', chatLimiter, checkAuth, async (req, res) => {
                 res.write(decoder.decode(value));
             }
 
-        } else { // Default to OpenRouter
+        } else { // OpenRouter
             const apiKey = process.env.OPENROUTER_API_KEY;
             if (!apiKey) throw new Error('OPENROUTER_API_KEY not configured.');
 
             const apiUrl = "https://openrouter.ai/api/v1/chat/completions";
             const response = await fetch(apiUrl, {
                 method: 'POST',
+                signal: upstreamTimeout(),
                 headers: {
                     'Authorization': `Bearer ${apiKey}`,
                     'Content-Type': 'application/json'
                 },
-                // Use the cleaned messages array
                 body: JSON.stringify({ model, messages: cleanedMessages, stream: true })
             });
 
             if (!response.ok) {
-                const errorData = await response.text();
-                throw new Error(`API Error: ${response.status} ${response.statusText} - ${errorData}`);
+                logProviderError('openrouter', response.status, await response.text());
+                throw new Error('The AI provider returned an error. Please try again.');
             }
 
             const reader = response.body.getReader();
@@ -309,37 +285,37 @@ app.post('/api/chat', chatLimiter, checkAuth, async (req, res) => {
             }
         }
     } catch (error) {
-        console.error('Server stream error:', error);
-        res.write(`event: error\ndata: ${JSON.stringify({ message: error.message })}\n\n`);
+        if (error && (error.name === 'AbortError' || error.code === 'ABORT_ERR')) {
+            logProviderError('stream', 'timeout', 'upstream exceeded time budget');
+            sseError(res, 'The AI provider took too long to respond. Please try again.');
+        } else {
+            console.error('[chat] stream error');
+            sseError(res, 'Something went wrong while generating a response. Please try again.');
+        }
     } finally {
-        // Always send a [DONE] message for the frontend to correctly finish.
-        res.write('data: [DONE]\n\n');
-        res.end();
+        if (!res.writableEnded) {
+            res.write('data: [DONE]\n\n');
+            res.end();
+        }
     }
 });
 
 /**
- * Transforms the generic message format into the specific format
- * required by the Google Gemini API, building a valid request body.
- * @param {Array<Object>} messages - The array of message objects.
- * @returns {Object} - The complete, final request body for the Google API.
+ * Transforms the generic message format into the Google Gemini format.
+ * @param {Array<Object>} messages - cleaned messages array.
  */
 function transformMessagesForGoogle(messages) {
     const requestBody = { contents: [] };
     let systemPromptFound = false;
 
-    // The Gemini API requires the system prompt to be the very first part of the request.
-    // It also doesn't like an empty user message right after a system prompt.
     messages.forEach(msg => {
         if (msg.role === 'system' && msg.content && !systemPromptFound) {
-            // Add the system prompt in the correct format
             requestBody.systemInstruction = {
-                role: "user", // The role for system instructions must be 'user'
+                role: "user",
                 parts: [{ text: msg.content }]
             };
             systemPromptFound = true;
         } else if (msg.role === 'user' || msg.role === 'assistant') {
-            // Add user and assistant messages to the main contents
             requestBody.contents.push({
                 role: msg.role === 'assistant' ? 'model' : 'user',
                 parts: [{ text: msg.content }]
@@ -350,8 +326,16 @@ function transformMessagesForGoogle(messages) {
     return requestBody;
 }
 
-app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/index.html');
+// Malformed JSON body -> clean 400 (never a stack trace)
+app.use((err, req, res, next) => {
+    if (err && err.type === 'entity.parse.failed') {
+        return res.status(400).json({ error: 'Invalid JSON body' });
+    }
+    if (err && err.type === 'entity.too.large') {
+        return res.status(413).json({ error: 'Request body too large' });
+    }
+    console.error('[server] unhandled error');
+    return res.status(500).json({ error: 'Internal server error' });
 });
 
 app.listen(port, () => {
