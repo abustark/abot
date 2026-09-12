@@ -37,6 +37,29 @@ export const showToast = (message, type = 'success') => {
     state.toastTimeout = setTimeout(() => {
         dom.toastNotification.style.transform = 'translateX(150%)';
     }, 4000);
+
+    // One-time wiring: explicit dismiss button (a11y) + flick-to-dismiss
+    // on touch (Sonner-style, roadmap #4). Flick right = slide-out direction.
+    if (dom.toastCloseBtn && !dom.toastCloseBtn.dataset.wired) {
+        dom.toastCloseBtn.dataset.wired = '1';
+        dom.toastCloseBtn.addEventListener('click', () => {
+            clearTimeout(state.toastTimeout);
+            dom.toastNotification.style.transform = 'translateX(150%)';
+        });
+    }
+    if (!dom.toastNotification.dataset.wired) {
+        dom.toastNotification.dataset.wired = '1';
+        let startX = null;
+        dom.toastNotification.addEventListener('pointerdown', (e) => { startX = e.clientX; });
+        dom.toastNotification.addEventListener('pointerup', (e) => {
+            if (startX === null) return;
+            if (e.clientX - startX > 48) {
+                clearTimeout(state.toastTimeout);
+                dom.toastNotification.style.transform = 'translateX(150%)';
+            }
+            startX = null;
+        });
+    }
 };
 
 export const getTimestamp = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });

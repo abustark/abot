@@ -72,6 +72,11 @@ export const dom = {
 };
 
 // --- Phase 3 additions (search + settings) ---
+dom.commandPalette = document.getElementById('commandPalette');
+dom.commandPaletteOverlay = document.getElementById('commandPaletteOverlay');
+dom.commandPalettePanel = document.getElementById('commandPalettePanel');
+dom.commandPaletteInput = document.getElementById('commandPaletteInput');
+dom.commandPaletteList = document.getElementById('commandPaletteList');
 dom.searchToggleBtn = document.getElementById('searchToggleBtn');
 dom.searchPanel = document.getElementById('searchPanel');
 dom.messageSearchInput = document.getElementById('messageSearchInput');
@@ -80,6 +85,7 @@ dom.settingsToggleBtn = document.getElementById('settingsToggleBtn');
 dom.settingsPanel = document.getElementById('settingsPanel');
 dom.timestampsToggle = document.getElementById('timestampsToggle');
 dom.ttsToggle = document.getElementById('ttsToggle');
+dom.toastCloseBtn = document.getElementById('toastCloseBtn');
 
 export function initDomExtras() {
 dom.promptLibrary = document.getElementById('promptLibrary');

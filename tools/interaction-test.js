@@ -108,6 +108,37 @@ function stubChain(label) {
         await sleep(50);
         check('search panel opens', $('searchPanel') && !$('searchPanel').classList.contains('hidden'));
     }
+    // command palette (Ctrl+K): open, type, keyboard-run an action
+    {
+        window.document.dispatchEvent(new window.KeyboardEvent('keydown', {
+            key: 'k', ctrlKey: true, bubbles: true, cancelable: true,
+        }));
+        await sleep(50);
+        const palette = $('commandPalette');
+        check('palette opens with Ctrl+K', palette && !palette.classList.contains('hidden'));
+        const items = palette ? palette.querySelectorAll('.palette-item') : [];
+        check('palette lists commands', items.length >= 5, items.length + ' commands');
+        window.document.getElementById('commandPaletteInput').value = 'timestamps';
+        window.document.getElementById('commandPaletteInput').dispatchEvent(new window.Event('input', { bubbles: true }));
+        await sleep(50);
+        const filteredItems = palette.querySelectorAll('.palette-item');
+        check('palette filters', filteredItems.length === 1, filteredItems.length + ' match');
+        const input = window.document.getElementById('commandPaletteInput');
+        input.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+        await sleep(50);
+        check('palette Enter closes and runs', palette.classList.contains('hidden'));
+        check('palette action toggled timestamps', $('timestampsToggle').checked === false);
+        // reset timestamps to true for determinism
+        $('timestampsToggle').checked = true;
+        $('timestampsToggle').dispatchEvent(new window.Event('change', { bubbles: true }));
+        await sleep(50);
+        window.document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'k', ctrlKey: true, bubbles: true, cancelable: true }));
+        await sleep(50);
+        check('palette re-opens (toggle)', palette && !palette.classList.contains('hidden'));
+        window.document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+        await sleep(50);
+        check('palette Escape closes', palette.classList.contains('hidden'));
+    }
     // timestamps switch affects re-render without throwing
     {
         const tt = $('timestampsToggle');
@@ -115,6 +146,17 @@ function stubChain(label) {
         tt.dispatchEvent(new window.Event('change', { bubbles: true }));
         await sleep(50);
         check('timestamps toggle change handled', true);
+    }
+    // toast: shows, dismiss button hides (roadmap #4 polish)
+    {
+        const { showToast } = await import('file://' + path.join(esmDir, 'utils.js'));
+        showToast('test toast');
+        await sleep(50);
+        const toast = $('toast-notification');
+        check('toast becomes visible', toast.style.transform.includes('translateX(0)'));
+        click($('toastCloseBtn'));
+        await sleep(50);
+        check('toast close dismisses', toast.style.transform.includes('translateX(150%)'));
     }
 
     console.log(fails ? `\n${fails} INTERACTION FAILURE(S) ❌` : '\nALL INTERACTIONS PASS ✅');

@@ -18,6 +18,7 @@ import { importChat } from './chat.js';
 import { initDomExtras } from './dom.js';
 import { renderSearchResults } from './chat.js';
 import { initFirebase, initAuth, registerInitApp } from './auth.js';
+import { initPalette } from './palette.js';
 import { initMessageActions } from './chat.js';
 import { linkGuestToGoogle } from './auth.js';
 import { openPromptModal } from './ui.js';
@@ -300,6 +301,7 @@ function initApp() {
     });
     dom.messageInput.addEventListener('input', function () { this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px'; setUnsentDraft(this.value.trim().length > 0); });
     installDraftLeaveGuard(); // warn before leaving with an unsent draft or mid-stream
+    initPalette(); // Ctrl+K command palette (roadmap #8)
     dom.messageInput.addEventListener('keydown', e => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), sendMessage()));
     dom.stopBtn.addEventListener('click', () => {
         stopSpeaking();

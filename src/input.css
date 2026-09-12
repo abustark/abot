@@ -472,3 +472,44 @@ h1, h2, h3, .prose h1, .prose h2, .prose h3 { text-wrap: balance; }
 @media (prefers-reduced-motion: reduce) {
     [data-tooltip]::after { transition: none; }
 }
+
+/* Command palette (Ctrl+K): instant open (animate-skill rule for
+   keyboard-first UI), quick fade-out, no width/height animation. */
+.command-palette-panel {
+    transition: opacity 120ms var(--ease-out);
+}
+.palette-kbd {
+    display: inline-block;
+    min-width: 1.4em;
+    padding: 1px 5px;
+    border: 1px solid rgb(var(--c-hairline));
+    border-bottom-width: 2px;
+    border-radius: 4px;
+    background-color: rgb(var(--c-surface));
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-align: center;
+    color: rgb(var(--c-muted));
+}
+.palette-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    text-align: left;
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-size: 14px;
+    color: rgb(var(--c-body));
+}
+.palette-item[aria-selected="true"] {
+    background-color: rgb(var(--c-coral-soft));
+    color: rgb(var(--c-ink));
+}
+.palette-item .palette-hint {
+    margin-left: auto;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: rgb(var(--c-muted));
+}
