@@ -3,13 +3,13 @@
  * Provides offline caching for local assets only
  */
 
-const CACHE_NAME = 'abot-cache-v19'; // v19: premium revamp — Geist fonts, logo restored, palette, composer dock
+const CACHE_NAME = 'abot-cache-v20'; // v20: label fix + css v=p8
 const STATIC_ASSETS = [
     '/',
     '/index.html',
     '/favicon-32.png',
     '/logo.png',
-    '/dist/output.css?v=p7',
+    '/dist/output.css?v=p8',
     '/js/app.js',
     '/js/config.js',
     '/js/dom.js',
