@@ -7,8 +7,7 @@ const CACHE_NAME = 'abot-cache-v18'; // v18: skills-audit — lazy hljs, no lega
 const STATIC_ASSETS = [
     '/',
     '/index.html',
-    '/favicon.png',
-    '/logo.png',
+    '/favicon-32.png',
     '/dist/output.css?v=p6',
     '/js/app.js',
     '/js/config.js',

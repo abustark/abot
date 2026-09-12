@@ -34,6 +34,12 @@ module.exports = {
         danger: 'rgb(var(--c-danger) / <alpha-value>)',
         teal: 'rgb(var(--c-teal) / <alpha-value>)',
         amber: 'rgb(var(--c-amber) / <alpha-value>)',
+        provider: {
+          google: 'rgb(var(--c-provider-google) / <alpha-value>)',
+          groq: 'rgb(var(--c-provider-groq) / <alpha-value>)',
+          nvidia: 'rgb(var(--c-provider-nvidia) / <alpha-value>)',
+          openrouter: 'rgb(var(--c-provider-openrouter) / <alpha-value>)',
+        },
       },
       borderRadius: {
         btn: '8px',
@@ -43,11 +49,6 @@ module.exports = {
       transitionDuration: {
         fast: '120ms',
         base: '180ms',
-      },
-      transitionTimingFunction: {
-        out: 'cubic-bezier(0.23, 1, 0.32, 1)',
-        'in-out': 'cubic-bezier(0.77, 0, 0.175, 1)',
-        drawer: 'cubic-bezier(0.32, 0.72, 0, 1)',
       },
       transitionTimingFunction: {
         out: 'cubic-bezier(0.23, 1, 0.32, 1)',

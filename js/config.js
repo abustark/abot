@@ -46,17 +46,19 @@ export const generateColorClasses = (colorName) => {
 
 // Initialize the Firestore database
 
-// --- Provider identity colors (owner spec: OpenRouter=yellow, Groq=purple,
-// Gemini=blue, NVIDIA=green; OpenRouter-hosted models inherit yellow) ---
+// --- Provider identity colors (owner spec: OpenRouter=amber, Groq=violet,
+// Gemini=blue, NVIDIA=green; OpenRouter-hosted models inherit amber).
+// Skills-audit Phase 2: raw Tailwind palette classes replaced with semantic
+// tokens (--c-provider-*) so hues stay warm-harmonized and dark-mode aware.
 export const PROVIDER_COLORS = {
-    google:               { dot: 'bg-sky-500',     text: 'text-sky-500',     label: 'Google Gemini' },
-    groq:                 { dot: 'bg-purple-500',  text: 'text-purple-500',  label: 'Groq' },
-    nvidia:               { dot: 'bg-emerald-500', text: 'text-emerald-500', label: 'NVIDIA' },
-    openrouter:           { dot: 'bg-yellow-400',  text: 'text-yellow-400',  label: 'OpenRouter' },
-    deepseek:             { dot: 'bg-yellow-400',  text: 'text-yellow-400',  label: 'OpenRouter · DeepSeek' },
-    qwen:                 { dot: 'bg-yellow-400',  text: 'text-yellow-400',  label: 'OpenRouter · Qwen' },
-    'z-ai':               { dot: 'bg-yellow-400',  text: 'text-yellow-400',  label: 'OpenRouter · GLM' },
-    cognitivecomputations:{ dot: 'bg-yellow-400',  text: 'text-yellow-400',  label: 'OpenRouter · Venice' },
+    google:               { dot: 'bg-provider-google',     text: 'text-provider-google',     label: 'Google Gemini' },
+    groq:                 { dot: 'bg-provider-groq',       text: 'text-provider-groq',       label: 'Groq' },
+    nvidia:               { dot: 'bg-provider-nvidia',     text: 'text-provider-nvidia',     label: 'NVIDIA' },
+    openrouter:           { dot: 'bg-provider-openrouter', text: 'text-provider-openrouter', label: 'OpenRouter' },
+    deepseek:             { dot: 'bg-provider-openrouter', text: 'text-provider-openrouter', label: 'OpenRouter · DeepSeek' },
+    qwen:                 { dot: 'bg-provider-openrouter', text: 'text-provider-openrouter', label: 'OpenRouter · Qwen' },
+    'z-ai':               { dot: 'bg-provider-openrouter', text: 'text-provider-openrouter', label: 'OpenRouter · GLM' },
+    cognitivecomputations:{ dot: 'bg-provider-openrouter', text: 'text-provider-openrouter', label: 'OpenRouter · Venice' },
 };
 
 export const getProviderColor = (model) => {
