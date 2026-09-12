@@ -21,14 +21,26 @@
     <link rel="stylesheet" href="/vendor/atom-one-dark.css">
     <script src="/vendor/highlight.min.js" defer></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
-
-    <style>
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://firestore.googleapis.com">    <style>
         html {
-            font-size: 14px;
+            font-size: 15px;
         }
-        /* Theme colors are owned by src/input.css tokens (Phase 3).
-           All legacy "Premium Theme" overrides removed — they fought the
-           new tokens with !important. */
+        /* Visually-hidden-until-focused skip link (a11y) */
+        .skip-link {
+            position: absolute;
+            top: -48px;
+            left: 12px;
+            z-index: 60;
+            padding: 8px 14px;
+            border-radius: 8px;
+            background-color: rgb(var(--c-ink));
+            color: rgb(var(--c-canvas));
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: top 120ms var(--ease-out);
+        }
+        .skip-link:focus-visible { top: 12px; }
     </style>
 
     <script>
@@ -65,7 +77,8 @@
 
     <!-- App Loader -->
     <div id="app-loader"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-canvas transition-opacity duration-300 ease-in-out">
+        class="fixed inset-0 z-50 flex items-center justify-center bg-canvas transition-opacity duration-300 ease-in-out"
+        role="status" aria-label="Loading ABot" aria-hidden="true">
         <div class="loader-circle-22"></div>
     </div>
 
@@ -227,7 +240,7 @@
                     </div>
                 </div>
                 <div class="relative">
-                    <input type="search" id="searchChats"
+                    <input type="search" id="searchChats" aria-label="Search chats"
                         class="w-full pl-8 pr-2 py-1.5 text-sm rounded-md border bg-canvas dark:bg-card border-hairline focus:ring-2 focus:ring-coral/40 focus:border-coral focus:outline-none"
                         placeholder="Search chats...">
                     <svg class="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-muted"
@@ -247,7 +260,7 @@
                         <span id="userEmailDisplay"
                             class="font-medium text-sm text-body truncate">user@example.com</span>
                     </div>
-                    <button id="signoutBtn" aria-label="Sign out" title="Sign Out"
+                    <button id="signoutBtn" aria-label="Sign out" data-tooltip="Sign Out"
                         class="p-2 rounded-md hover:bg-card transition-colors flex-shrink-0 ml-2">
                         <svg class="w-5 h-5 text-muted" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
                             fill="currentColor">
@@ -296,13 +309,13 @@
             </div>
         </aside>
 
-        <!-- Main Content Area -->
-        <div class="flex-1 flex flex-col w-full">
+    <div class="flex-1 flex flex-col w-full">
+        <a href="#chatHistory" class="skip-link">Skip to conversation</a>
 
             <header
                 class="relative bg-canvas dark:bg-card shadow-sm py-2 px-4 flex items-center justify-between z-10">
                 <div class="flex items-center">
-                    <button id="sidebarToggle" aria-label="Toggle sidebar"
+                    <button id="sidebarToggle" aria-label="Toggle sidebar" data-tooltip="Toggle sidebar"
                         class="mr-3 text-muted hover:text-ink transition-colors p-1 rounded-md hover:bg-card">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
@@ -311,13 +324,12 @@
                         </svg>
                     </button>
                     <div class="flex items-center">
-                        <div
-                            class="text-xl font-bold font-display text-ink ml-3">
-                            ABot</div>
+                        <h1 class="text-xl font-bold font-display text-ink ml-3">
+                            ABot</h1>
                     </div>
                 </div>
                 <div class="flex items-center space-x-2 p-1 rounded-lg">
-                    <button id="headerNewChatBtn" aria-label="New chat" title="New Chat"
+                    <button id="headerNewChatBtn" aria-label="New chat" data-tooltip="New Chat"
                         class="p-1.5 rounded-md text-muted hover:text-ink hover:bg-card transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd"
@@ -327,7 +339,7 @@
                     </button>
                     <div class="w-px h-6 bg-hairline mx-2"></div>
                     <div id="modelIndicatorPill" class="flex items-center px-2 py-1 text-sm font-medium"></div>
-                    <button id="themeToggle" aria-label="Toggle dark mode"
+                    <button id="themeToggle" aria-label="Toggle dark mode" data-tooltip="Toggle theme"
                         class="p-1.5 rounded-full bg-canvas dark:bg-card hover:bg-card transition-colors">
                         <svg id="sunIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-500"
                             viewBox="0 0 20 20" fill="currentColor">
@@ -388,14 +400,14 @@
                         </div>
                         <button id="searchToggleBtn"
                             class="p-2 rounded-md text-muted hover:text-ink hover:bg-card transition-colors" aria-label="Search in messages"
-                            title="Search in messages">
+                            data-tooltip="Search messages">
                             <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd"
                                     d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
                                     clip-rule="evenodd" />
                             </svg>
                         </button>
-                        <button id="promptBtn" aria-label="Open prompt library"
+                        <button id="promptBtn" aria-label="Open prompt library" data-tooltip="Prompt library"
                             class="p-2 rounded-md hover:bg-card transition-colors">
                             <svg class="w-5 h-5 text-muted" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
                                 fill="currentColor">
@@ -414,21 +426,21 @@
                     <div id="searchResults" class="mt-2 max-h-64 overflow-y-auto scrollbar-custom space-y-1"></div>
                 </div>
 
-                <div id="chatHistoryContainer" class="relative flex-1 overflow-y-auto p-3 md:p-6 scrollbar-custom">
+                <div id="chatHistoryContainer" class="relative flex-1 overflow-y-auto overscroll-contain p-3 md:p-6 scrollbar-custom">
                     <div id="chatHistory" class="max-w-3xl mx-auto space-y-6" aria-live="polite" aria-label="Chat messages"></div>
 
                 </div>
 
                 <div
-                    class="bg-canvas/80 dark:bg-card/80 border-t border-hairline py-1.5 px-2 md:py-3 md:px-4 backdrop-blur-sm">
+                    class="bg-canvas/80 dark:bg-card/80 border-t border-hairline py-1.5 px-2 md:py-3 md:px-4 backdrop-blur-sm pb-[max(env(safe-area-inset-bottom),0.375rem)]">
                     <div class="max-w-3xl mx-auto">
                         <div
                             class="flex items-end bg-surface dark:bg-card border border-hairline rounded-xl p-1 transition-colors focus-within:border-coral/60 focus-within:ring-2 focus-within:ring-coral/20">
                             <textarea id="messageInput"
                                 class="flex-1 bg-transparent px-3 py-2 resize-none focus:outline-none text-body"
                                 placeholder="Message AI assistant..." rows="1"></textarea>
-                            <button id="voiceBtn" aria-label="Voice input"
-                                class="p-2 text-muted hover:text-coral">
+                            <button id="voiceBtn" aria-label="Voice input" data-tooltip="Voice input"
+                                class="w-11 h-11 flex items-center justify-center rounded-lg text-muted hover:text-coral transition-colors">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
                                     fill="currentColor">
                                     <path fill-rule="evenodd"
@@ -437,7 +449,7 @@
                                 </svg>
                             </button>
                             <div class="relative flex items-center">
-                                <button id="sendBtn" aria-label="Send message" class="p-2 text-white rounded-lg transition-all hover:scale-105 active:scale-95">
+                                <button id="sendBtn" aria-label="Send message" data-tooltip="Send" class="w-11 h-11 flex items-center justify-center rounded-lg text-white transition-transform hover:scale-105 active:scale-95">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
                                         fill="currentColor">
                                         <path
@@ -445,7 +457,7 @@
                                     </svg>
                                 </button>
                                 <button id="stopBtn" aria-label="Stop generating"
-                                    class="p-2 text-white bg-danger hover:bg-danger/90 rounded-lg transition-colors hidden">
+                                    class="w-11 h-11 flex items-center justify-center rounded-lg text-white bg-danger hover:bg-danger/90 transition-colors hidden">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
                                         fill="currentColor">
                                         <path fill-rule="evenodd"
@@ -505,7 +517,7 @@
 
         <!-- Guest User Limit Modal -->
         <div id="guestLimitModal"
-            class="fixed inset-0 z-30 flex items-center justify-center bg-black bg-opacity-60 hidden"
+            class="fixed inset-0 z-30 flex items-center justify-center bg-ink/60 hidden"
             aria-labelledby="modal-title" role="dialog" aria-modal="true">
             <div id="guestLimitOverlay" class="absolute inset-0"></div>
             <div id="guestLimitPanel"
@@ -587,8 +599,8 @@
 
         <!-- Toast Notification -->
         <div id="toast-notification"
-            role="status" aria-live="polite" class="fixed top-5 right-5 z-50 flex items-center w-full max-w-xs p-4 text-body bg-canvas rounded-lg shadow-lg dark:bg-card hidden transition-transform duration-200 ease-out"
-            role="alert" style="transform: translateX(150%); transition: transform 0.4s ease;">
+            role="status" aria-live="polite" class="fixed top-5 right-5 z-50 flex items-center w-full max-w-xs p-4 text-body bg-canvas rounded-lg shadow-lg dark:bg-card hidden transition-transform duration-200 ease-out will-change-transform"
+            style="transform: translateX(150%); transition: transform 0.4s var(--ease-out);">
             <div id="toast-icon" class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg">
                 <!-- Icon will be dynamically inserted here -->
             </div>

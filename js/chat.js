@@ -11,10 +11,38 @@ import { applyModelColorTheme } from './ui.js';
 import { closeSidebar } from './ui.js';
 import { dom } from './dom.js';
 import { generateColorClasses } from './config.js';
-import { getTimestamp, isSpeaking, speakText, stopSpeaking } from './utils.js';
+import { getTimestamp, isSpeaking, speakText, stopSpeaking, setUnsentDraft } from './utils.js';
 import { showGuestLimitModal } from './ui.js';
 import { showToast } from './utils.js';
 import { state } from './state.js';
+// --- On-demand highlight.js (skills-audit perf fix: 164 KB eager → lazy).
+// First code block triggers a single deferred <script> load; all highlighting
+// waits for it. Errors fall back gracefully to unstyled (still readable) code.
+let highlightLoadPromise = null;
+const loadHighlightJs = () => {
+    if (window.hljs) return Promise.resolve();
+    if (!highlightLoadPromise) {
+        highlightLoadPromise = new Promise((resolve) => {
+            const s = document.createElement('script');
+            s.src = '/vendor/highlight.min.js';
+            s.onload = () => resolve();
+            s.onerror = () => {
+                console.warn('[ABot] highlight.js failed to load; code blocks render unstyled.');
+                resolve();
+            };
+            document.head.appendChild(s);
+        });
+    }
+    return highlightLoadPromise;
+};
+const highlightWhenReady = (block) => {
+    loadHighlightJs().then(() => {
+        if (window.hljs && typeof window.hljs.highlightElement === 'function') {
+            window.hljs.highlightElement(block);
+        }
+    });
+};
+
 export const loadUserChatsFromFirestore = async (userId) => {
     const chatsCollectionRef = state.db.collection('users').doc(userId).collection('chats');
     try {
@@ -324,7 +352,7 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
         } else {
             let indicatorHtml = '<div class="typing-indicator"><span></span><span></span><span></span></div>';
             if (options.isGoogle) {
-                                indicatorHtml += `<p class="fade-in-polite text-xs text-muted mt-2 italic">Please wait, fetching the full response from Gemini...</p>`;
+                                indicatorHtml += `<p class="fade-in-polite text-xs text-muted mt-2 italic">Please wait, fetching the full response from Gemini…</p>`;
             }
                             messageContent = `<span id="${uniqueId}">${indicatorHtml}</span>`;
         }
@@ -434,7 +462,7 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
     // Syntax Highlighting for AI messages
     if (!isUser) {
         messageEl.querySelectorAll('pre code').forEach(block => {
-            hljs.highlightElement(block);
+            highlightWhenReady(block);
             // Add Copy Code button (simplified logic)
             const pre = block.parentElement;
             const copyCodeBtn = document.createElement('button');
@@ -620,6 +648,7 @@ export const sendMessage = async () => {
 
     dom.messageInput.value = '';
     dom.messageInput.style.height = 'auto';
+    setUnsentDraft(false); // draft shipped — clear leave-guard
     dom.messageInput.focus();
 
     dom.sendBtn.classList.add('hidden');
@@ -746,7 +775,7 @@ export const sendMessage = async () => {
                 });
             });
             pre.appendChild(copyBtn);
-            hljs.highlightElement(block);
+            highlightWhenReady(block);
         });
 
         currentChat.messages.push({ role: 'assistant', content: fullReply, model: currentChat.model });

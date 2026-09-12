@@ -128,9 +128,10 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  /* Phase 0 fix A2: visible keyboard focus everywhere */
+  /* Phase 0 fix A2: visible keyboard focus everywhere (tokenized color) */
   :focus-visible {
     outline: 2px solid rgb(var(--c-coral));
+    outline-color: rgb(var(--c-coral));
     outline-offset: 2px;
     border-radius: 4px;
   }
@@ -369,7 +370,7 @@ mark {
     border-radius: 2px;
 }
 
-/* Small popovers (chat item menus): origin-aware, enter-only.
+/* Small popovers (chat ⋮ menus): origin-aware, enter-only.
    @starting-style degrades to instant appearance on old browsers — fine. */
 .chat-options-menu {
     transform-origin: top right;
@@ -377,4 +378,72 @@ mark {
 }
 @starting-style {
     .chat-options-menu { opacity: 0; transform: scale(0.95); }
+}
+
+/* ---------------------------------------------------------------------------
+   Skills-audit improvements (web-design-guidelines + UI roadmap)
+--------------------------------------------------------------------------- */
+
+/* Chat ⋮ affordance: discoverable on touch, quiet on pointer devices.
+   Replaces the hover-only opacity-0 (invisible without a mouse). */
+.chat-list-item .chat-options-btn { opacity: 0.5; }
+@media (hover: none) {
+    .chat-list-item .chat-options-btn { opacity: 1; }
+}
+
+/* Message actions (copy etc.): keyboard-focus + touch reveal.
+   The default is still hover-reveal via group-hover utilities in markup. */
+.message-container:focus-within .copy-message-btn,
+.message-container:focus-within .edit-msg-btn,
+.message-container:focus-within .delete-msg-btn { opacity: 1 !important; }
+@media (hover: none) {
+    .copy-message-btn,
+    .edit-msg-btn,
+    .delete-msg-btn,
+    .copy-code-btn { opacity: 1 !important; }
+}
+
+/* Typing indicator dots follow the accent token (was template gray/currentColor) */
+.typing-indicator span { background-color: rgb(var(--c-coral)); }
+
+/* Headings never orphan a single word (web-design-guidelines: typography) */
+h1, h2, h3, .prose h1, .prose h2, .prose h3 { text-wrap: balance; }
+
+/* Timestamps align in columns (web-design-guidelines: tabular-nums) */
+.msg-timestamp { font-variant-numeric: tabular-nums; }
+
+/* CSS-only tooltips (roadmap #7) — token colors, 150–200ms, no JS.
+   Usage: <button data-tooltip="New chat">. Pseudo-element, so zero DOM cost. */
+[data-tooltip] { position: relative; }
+[data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    translate: -50% 0;
+    padding: 4px 8px;
+    border-radius: 6px;
+    background-color: rgb(var(--c-ink));
+    color: rgb(var(--c-canvas));
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.3;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(2px);
+    transition: opacity 150ms var(--ease-out), transform 150ms var(--ease-out);
+    z-index: 40;
+}
+[data-tooltip]:hover::after,
+[data-tooltip]:focus-visible::after {
+    opacity: 1;
+    transform: translateY(0);
+}
+/* Hide tooltips on touch (no hover) and for reduced-motion users */
+@media (hover: none) {
+    [data-tooltip]::after { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+    [data-tooltip]::after { transition: none; }
 }

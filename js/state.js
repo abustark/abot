@@ -19,4 +19,5 @@ export const state = {
   tokenClient: undefined,
   auth: null, // assigned by initFirebase()
   db: null, // assigned by initFirebase()
+  toastTimeout: null, // auto-dismiss timer (skills-audit: no double-hide race)
 };

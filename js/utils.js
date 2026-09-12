@@ -3,10 +3,16 @@
  * Extracted from index.html inline module (Phase 2 de-monolithization).
  * Logic frozen; only imports/exports/state.* renames were applied.
  * Verify with: node tools/verify-parity.js
+ *
+ * Skills-audit additions: reduced-motion-safe toast transform, draft
+ * leave-guard, stream-state flag, safe-area-inset helper.
  */
 
 import { dom } from './dom.js';
 import { state } from './state.js';
+
+const REDUCED_MOTION_MQ = '(prefers-reduced-motion: reduce)';
+
 export const showToast = (message, type = 'success') => {
     dom.toastMessage.textContent = message;
 
@@ -16,22 +22,43 @@ export const showToast = (message, type = 'success') => {
     dom.toastIcon.classList.remove(...successClasses, ...errorClasses);
 
     if (type === 'success') {
-                        dom.toastIcon.innerHTML = `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>`;
+        dom.toastIcon.innerHTML = `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>`;
         dom.toastIcon.classList.add(...successClasses);
     } else { // error
-                        dom.toastIcon.innerHTML = `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.607a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>`;
+        dom.toastIcon.innerHTML = `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.607a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>`;
         dom.toastIcon.classList.add(...errorClasses);
     }
 
     dom.toastNotification.classList.remove('hidden');
+    dom.toastNotification.style.transition = 'transform 0.4s var(--ease-out)';
     dom.toastNotification.style.transform = 'translateX(0)';
 
-    setTimeout(() => {
+    clearTimeout(state.toastTimeout);
+    state.toastTimeout = setTimeout(() => {
         dom.toastNotification.style.transform = 'translateX(150%)';
     }, 4000);
 };
 
 export const getTimestamp = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+// --- Stream state (drives composer leave-guard; set by chat.js) ---
+export const isStreaming = () => !!state.abortController;
+
+// --- Unsent-draft leave-guard (web-design-guidelines: warn before
+// navigation with unsaved changes). Cleared by chat.js on send/delete. ---
+let draftHandlerInstalled = false;
+let hasUnsentDraft = false;
+export const setUnsentDraft = (hasDraft) => { hasUnsentDraft = !!hasDraft; };
+export const installDraftLeaveGuard = () => {
+    if (draftHandlerInstalled) return;
+    draftHandlerInstalled = true;
+    window.addEventListener('beforeunload', (e) => {
+        if (hasUnsentDraft || isStreaming()) {
+            e.preventDefault();
+            e.returnValue = '';
+        }
+    });
+};
 
 export const startVoiceRecognition = () => {
     if (!state.recognition) {

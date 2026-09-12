@@ -26,7 +26,7 @@ import { renderActiveChat } from './chat.js';
 import { renderChatList } from './chat.js';
 import { saveSystemPrompt } from './ui.js';
 import { sendMessage } from './chat.js';
-import { showToast, stopSpeaking } from './utils.js';
+import { showToast, stopSpeaking, installDraftLeaveGuard, setUnsentDraft } from './utils.js';
 import { signOutUser } from './auth.js';
 import { startVoiceRecognition } from './utils.js';
 import { state } from './state.js';
@@ -288,7 +288,18 @@ function initApp() {
     document.getElementById('headerNewChatBtn')?.addEventListener('click', createNewChatWrapper);
 
     dom.modelSelectorPanel.addEventListener('keydown', handleModelSelectorNavigation);
-    dom.messageInput.addEventListener('input', function () { this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px'; });
+    // Tab must not escape the open model panel (a11y: keep focus in the menu)
+    dom.modelSelectorPanel.addEventListener('keydown', (e) => {
+        if (e.key !== 'Tab') return;
+        const items = [...dom.modelSelectorPanel.querySelectorAll('button')].filter(b => !b.disabled);
+        if (!items.length) return;
+        const first = items[0];
+        const last = items[items.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    });
+    dom.messageInput.addEventListener('input', function () { this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px'; setUnsentDraft(this.value.trim().length > 0); });
+    installDraftLeaveGuard(); // warn before leaving with an unsent draft or mid-stream
     dom.messageInput.addEventListener('keydown', e => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), sendMessage()));
     dom.stopBtn.addEventListener('click', () => {
         stopSpeaking();
@@ -415,6 +426,50 @@ function initApp() {
     dom.importFileInput.addEventListener('change', (e) => {
         if (e.target.files.length > 0) { importChat(e.target.files[0]); }
         e.target.value = null;
+    });
+
+    // --- Modal a11y (skills-audit): scroll-lock + focus restore for every
+    // dialog. Class mutations are the single source of truth — chat.js and
+    // app.js both open/close via classList, so one observer covers all paths.
+    const rememberOpener = new WeakMap();
+    const observeModal = (modalEl) => {
+        if (!modalEl) return;
+        new MutationObserver(() => {
+            const open = !modalEl.classList.contains('hidden');
+            if (open) {
+                if (document.activeElement && document.activeElement !== document.body) {
+                    rememberOpener.set(modalEl, document.activeElement);
+                }
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = '';
+                const opener = rememberOpener.get(modalEl);
+                if (opener && document.contains(opener)) {
+                    try { opener.focus({ preventScroll: true }); } catch { opener.focus(); }
+                }
+            }
+        }).observe(modalEl, { attributes: true, attributeFilter: ['class'] });
+    };
+    observeModal(dom.deleteModal);
+    observeModal(dom.guestLimitModal);
+    observeModal(dom.promptModal);
+
+    // Focus-trap for the delete/sign-out dialog (Tab cycles its two buttons)
+    dom.deleteModal.addEventListener('keydown', (e) => {
+        if (e.key !== 'Tab') return;
+        const cancel = dom.deleteModal.querySelector('#deleteCancelBtn');
+        const confirm = dom.deleteModal.querySelector('#deleteConfirmBtn');
+        const items = [cancel, confirm].filter(Boolean);
+        if (!items.length) return;
+        const first = items[0];
+        const last = items[items.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+            e.preventDefault(); last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault(); first.focus();
+        } else if (!items.includes(document.activeElement)) {
+            e.preventDefault(); first.focus();
+        }
     });
 
     // --- Delete Modal Listeners ---

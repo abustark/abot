@@ -3,7 +3,7 @@
  * Provides offline caching for local assets only
  */
 
-const CACHE_NAME = 'abot-cache-v17'; // v12: Phase 4 self-hosted fonts + vendored libs
+const CACHE_NAME = 'abot-cache-v18'; // v18: skills-audit — lazy hljs, no legacy favicon precache
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -19,7 +19,6 @@ const STATIC_ASSETS = [
     '/js/auth.js',
     '/js/chat.js',
     '/vendor/marked.min.js',
-    '/vendor/highlight.min.js',
     '/vendor/atom-one-dark.css',
     '/manifest.json',
     '/dist/fonts/inter-latin-400-normal.woff2',
