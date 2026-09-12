@@ -1,4 +1,27 @@
-/* Self-hosted fonts (Phase 4) — latin subsets, display=swap */
+/* Self-hosted fonts — latin subsets, display=swap.
+   Geist (Vercel, SIL OFL) is the UI voice; Inter kept as fallback stack.
+   Source Serif 4 stays the display voice. */
+@font-face {
+  font-family: 'Geist';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/dist/fonts/geist-latin-400-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Geist';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/dist/fonts/geist-latin-500-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Geist';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/dist/fonts/geist-latin-600-normal.woff2') format('woff2');
+}
 @font-face {
   font-family: 'Inter';
   font-style: normal;
@@ -9,23 +32,9 @@
 @font-face {
   font-family: 'Inter';
   font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  src: url('/dist/fonts/inter-latin-500-normal.woff2') format('woff2');
-}
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
   font-weight: 600;
   font-display: swap;
   src: url('/dist/fonts/inter-latin-600-normal.woff2') format('woff2');
-}
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url('/dist/fonts/inter-latin-700-normal.woff2') format('woff2');
 }
 @font-face {
   font-family: 'JetBrains Mono';
@@ -136,7 +145,7 @@
   body {
     background-color: rgb(var(--c-canvas));
     color: rgb(var(--c-body));
-    font-family: 'Inter', sans-serif;
+    font-family: 'Geist', 'Inter', sans-serif;
     -webkit-font-smoothing: antialiased;
   }
 
@@ -291,7 +300,21 @@
     40% { transform: scale(1.0); }
 }
 
-.sidebar { transition: transform 0.3s ease; }
+.sidebar { transition: transform 0.3s var(--ease-drawer); }
+
+/* Floating composer dock (revamp): fixed sheet on mobile, static flow on
+   desktop. --kb-h (visualViewport offset) lifts it above the mobile keyboard
+   when the browser resizes only the visual viewport. */
+.composer-anim { transition: bottom 180ms var(--ease-out); }
+@media (min-width: 768px) {
+  .composer-anim { transition: none; bottom: auto !important; }
+}
+
+/* Floating header hairline — appears only when the message list is scrolled */
+.header-scrolled {
+  border-bottom-color: rgb(var(--c-hairline));
+  background-color: rgb(var(--c-canvas) / 0.92);
+}
 
 /* Message entrance */
 .message-enter { animation: messageEnter 240ms var(--ease-out) both; }
@@ -352,13 +375,24 @@
     color: rgb(var(--c-muted));
 }
 .copy-code-btn {
-    background-color: transparent;
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background-color: rgb(var(--c-card));
     color: rgb(var(--c-muted));
-    padding: 0.25rem;
-    border-radius: 0.25rem;
-    transition: color 0.2s;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 0.25rem 0.6rem;
+    border-radius: 0.375rem;
+    opacity: 0;
+    transition: opacity 0.15s ease, color 0.2s;
 }
 .copy-code-btn:hover { color: rgb(var(--c-ink)); }
+pre:hover .copy-code-btn,
+pre:focus-within .copy-code-btn { opacity: 1; }
+@media (hover: none) {
+    .copy-code-btn { opacity: 1; }
+}
 .prose pre > code {
     border-top-left-radius: 0 !important;
     border-top-right-radius: 0 !important;

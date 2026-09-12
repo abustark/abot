@@ -5,26 +5,20 @@
  * Verify with: node tools/verify-parity.js
  */
 
-import { COLOR_MAP, getProviderColor } from './config.js';
-import { SYSTEM_PROMPTS } from './config.js';
+import { SYSTEM_PROMPTS, getProviderColor } from './config.js';
 import { dom } from './dom.js';
-import { generateColorClasses } from './config.js';
 import { state } from './state.js';
 import { showToast } from './utils.js';
 export const closeSidebar = () => { dom.sidebar.classList.add('-translate-x-full'); dom.sidebarOverlay.classList.add('hidden'); };
 
 export const applyModelColorTheme = (model) => {
-    // Phase 3.5: provider-colored dot (buttons stay coral — actions are brand,
-    // model identity lives in accents). `model` is the full model string.
+    // Provider-colored dot in the header pill (buttons stay coral — actions are
+    // brand, model identity lives in accents). The old duplicate indicator pill
+    // was removed in the revamp; only the selector dot is updated.
     const provider = getProviderColor(model);
 
     if (dom.modelSelectorDot) {
-        dom.modelSelectorDot.className = `w-2.5 h-2.5 rounded-full ${provider.dot} transition-colors`;
-    }
-
-    const pill = dom.modelIndicatorPill;
-    if (pill) {
-        pill.className = `flex items-center px-2 py-1 text-sm font-medium ${provider.text}`;
+        dom.modelSelectorDot.className = `w-2 h-2 rounded-full ${provider.dot} transition-colors`;
     }
 };
 

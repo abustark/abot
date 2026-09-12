@@ -13,7 +13,6 @@ import { closePromptModal } from './ui.js';
 import { closeSidebar } from './ui.js';
 import { createNewChat } from './chat.js';
 import { dom } from './dom.js';
-import { generateColorClasses } from './config.js';
 import { importChat } from './chat.js';
 import { initDomExtras } from './dom.js';
 import { renderSearchResults } from './chat.js';
@@ -61,31 +60,46 @@ if ('serviceWorker' in navigator) {
 
 function initApp() {
 
-    // --- Main App Listeners ---
-
-    if (!document.documentElement.classList.contains('dark')) {
-        dom.sunIcon.classList.remove('hidden');
-        dom.moonIcon.classList.add('hidden');
-    } else {
-        dom.sunIcon.classList.add('hidden');
-        dom.moonIcon.classList.remove('hidden');
-    }
+    // --- Theme: follow system until the user explicitly toggles ---
+    // Head script applies the initial class (stored choice > system pref);
+    // here we only keep the icon pair in sync and persist explicit choices.
+    const syncThemeIcons = () => {
+        const dark = document.documentElement.classList.contains('dark');
+        dom.sunIcon.classList.toggle('hidden', !dark);
+        dom.moonIcon.classList.toggle('hidden', dark);
+    };
+    syncThemeIcons();
     dom.themeToggle.addEventListener('click', () => {
-        // Check the CURRENT state and reverse it.
-        if (document.documentElement.classList.contains('dark')) {
-            // It IS dark, so switch to LIGHT
-            document.documentElement.classList.remove('dark');
-            localStorage.setItem('darkMode', 'false');
-            console.log('[Click Event] Switched to LIGHT mode.');
-        } else {
-            // It IS light, so switch to DARK
-            document.documentElement.classList.add('dark');
-            localStorage.setItem('darkMode', 'true');
-            console.log('[Click Event] Switched to DARK mode.');
-        }
-        dom.sunIcon.classList.toggle('hidden');
-        dom.moonIcon.classList.toggle('hidden');
+        const dark = document.documentElement.classList.toggle('dark');
+        localStorage.setItem('darkMode', String(dark));
+        syncThemeIcons();
     });
+
+    // --- Mobile keyboard offset: keep the fixed composer dock above the
+    // keypad even on browsers that ignore `interactive-widget=resizes-content`
+    // (visualViewport shrinks while the layout viewport does not). ---
+    if (window.visualViewport) {
+        const vv = window.visualViewport;
+        const applyKbOffset = () => {
+            const kb = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+            document.documentElement.style.setProperty('--kb-h', kb + 'px');
+        };
+        vv.addEventListener('resize', applyKbOffset);
+        vv.addEventListener('scroll', applyKbOffset);
+        applyKbOffset();
+    }
+
+    // --- Floating header hairline: border appears only when the message
+    // list is scrolled (premium-chat pattern). rAF-throttled. ---
+    let headerTick = false;
+    dom.chatHistoryContainer.addEventListener('scroll', () => {
+        if (headerTick) return;
+        headerTick = true;
+        requestAnimationFrame(() => {
+            dom.appHeader.classList.toggle('header-scrolled', dom.chatHistoryContainer.scrollTop > 4);
+            headerTick = false;
+        });
+    }, { passive: true });
 
     // --- Model Selector Listeners ---
 
@@ -154,45 +168,60 @@ function initApp() {
         dom.modelSelectorPanel.innerHTML = ''; // Clear previous options
         const currentChatModel = state.activeChatId ? state.chats[state.activeChatId].model : null;
 
+        // Provider-grouped menu (single column, like ChatGPT/Claude pickers).
+        const groups = new Map();
         Object.keys(MODEL_CONFIG).forEach(key => {
-            const model = MODEL_CONFIG[key];
-            const isActive = key === currentChatModel;
-            const providerColor = getProviderColor(key);
+            const provider = getProviderColor(key).label;
+            if (!groups.has(provider)) groups.set(provider, []);
+            groups.get(provider).push(key);
+        });
 
-            const optionEl = document.createElement('button');
-                            optionEl.className = `w-full flex items-center justify-between text-left p-3 rounded-lg text-sm transition-colors duration-150 ${isActive ? 'bg-coral-soft font-semibold text-ink' : 'hover:bg-card'}`;
-            optionEl.dataset.modelKey = key;
+        groups.forEach((keys, providerLabel) => {
+            const heading = document.createElement('div');
+            heading.className = 'px-3 pt-3 pb-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-muted';
+            heading.textContent = providerLabel;
+            dom.modelSelectorPanel.appendChild(heading);
 
-            let checkmarkSvg = '';
-            if (isActive) {
-                                checkmarkSvg = `<svg class="w-4 h-4 text-coral" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.052-.143z" clip-rule="evenodd" /></svg>`;
-            }
+            keys.forEach(key => {
+                const model = MODEL_CONFIG[key];
+                const isActive = key === currentChatModel;
+                const providerColor = getProviderColor(key);
 
-            optionEl.innerHTML = `
-            <div class="flex items-center space-x-3">
-                <span class="w-2.5 h-2.5 rounded-full ${providerColor.dot}"></span>
-                <span class="font-medium text-ink">${model.name}</span>
-            </div>
-            ${checkmarkSvg}
-        `;
+                const optionEl = document.createElement('button');
+                optionEl.className = `w-full flex items-center justify-between text-left px-3 py-2.5 rounded-lg text-sm transition-colors duration-150 ${isActive ? 'bg-coral-soft font-semibold text-ink' : 'hover:bg-card'}`;
+                optionEl.dataset.modelKey = key;
 
-            optionEl.addEventListener('click', async (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                const currentUser = state.auth.currentUser;
-                if (state.chats[state.activeChatId] && currentUser) {
-                    state.chats[state.activeChatId].model = key;
-                    const chatDocRef = state.db.collection('users').doc(currentUser.uid).collection('chats').doc(state.activeChatId);
-                    await chatDocRef.update({ model: key }).catch(err => console.error("Failed to update model in DB", err));
-
-                    renderActiveChat();
-
-                    dom.modelSelectorPanel.style.opacity = '0';
-                    dom.modelSelectorPanel.style.transform = 'scale(0.95)';
-                    setTimeout(() => dom.modelSelectorPanel.classList.add('hidden'), 200);
+                let checkmarkSvg = '';
+                if (isActive) {
+                    checkmarkSvg = `<svg class="w-4 h-4 text-coral" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.052-.143z" clip-rule="evenodd" /></svg>`;
                 }
+
+                optionEl.innerHTML = `
+                    <span class="flex items-center gap-2.5 min-w-0">
+                        <span class="w-2 h-2 rounded-full ${providerColor.dot} flex-shrink-0"></span>
+                        <span class="font-medium text-ink truncate">${model.name}</span>
+                    </span>
+                    ${checkmarkSvg}
+                `;
+
+                optionEl.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const currentUser = state.auth.currentUser;
+                    if (state.chats[state.activeChatId] && currentUser) {
+                        state.chats[state.activeChatId].model = key;
+                        const chatDocRef = state.db.collection('users').doc(currentUser.uid).collection('chats').doc(state.activeChatId);
+                        await chatDocRef.update({ model: key }).catch(err => console.error("Failed to update model in DB", err));
+
+                        renderActiveChat();
+
+                        dom.modelSelectorPanel.style.opacity = '0';
+                        dom.modelSelectorPanel.style.transform = 'scale(0.95)';
+                        setTimeout(() => dom.modelSelectorPanel.classList.add('hidden'), 200);
+                    }
+                });
+                dom.modelSelectorPanel.appendChild(optionEl);
             });
-            dom.modelSelectorPanel.appendChild(optionEl);
         });
     };
 
@@ -321,7 +350,18 @@ function initApp() {
 
     dom.sendBtn.addEventListener('click', sendMessage);
     dom.voiceBtn.addEventListener('click', startVoiceRecognition);
-    dom.sidebarToggle.addEventListener('click', e => { e.stopPropagation(); dom.sidebar.classList.toggle('-translate-x-full'); dom.sidebarOverlay.classList.toggle('hidden'); });
+    dom.sidebarToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        // md+ renders the toggle visually hidden (CSS), so clicks here only
+        // happen on mobile — the drawer. Overlay + scroll-lock while open.
+        const opening = dom.sidebar.classList.contains('-translate-x-full');
+        dom.sidebar.classList.toggle('-translate-x-full', !opening);
+        if (opening) {
+            dom.sidebarOverlay.classList.remove('hidden');
+        } else {
+            dom.sidebarOverlay.classList.add('hidden');
+        }
+    });
     dom.sidebarOverlay.addEventListener('click', closeSidebar);
 
 
@@ -610,11 +650,9 @@ function main() {
     initMessageActions();      // was statements #43-44
     registerInitApp(initApp);  // auth's onAuthStateChanged needs initApp
     initAuth();                // was statements #52,54-58,60-65
-    // footer years (replaces the old inline document.write scripts)
-    for (const id of ['footer-year', 'footer-year2']) {
-        const el = document.getElementById(id);
-        if (el) el.textContent = new Date().getFullYear();
-    }
+    // footer year (the old duplicate in-app footer was removed in the revamp)
+    const yearEl = document.getElementById('footer-year');
+    if (yearEl) yearEl.textContent = new Date().getFullYear();
 }
 
 // --- Phase 6.5b: #diag — in-page interaction self-test (mobile-friendly) ---

@@ -3,15 +3,17 @@
  * Provides offline caching for local assets only
  */
 
-const CACHE_NAME = 'abot-cache-v18'; // v18: skills-audit — lazy hljs, no legacy favicon precache
+const CACHE_NAME = 'abot-cache-v19'; // v19: premium revamp — Geist fonts, logo restored, palette, composer dock
 const STATIC_ASSETS = [
     '/',
     '/index.html',
     '/favicon-32.png',
-    '/dist/output.css?v=p6',
+    '/logo.png',
+    '/dist/output.css?v=p7',
     '/js/app.js',
     '/js/config.js',
     '/js/dom.js',
+    '/js/palette.js',
     '/js/state.js',
     '/js/utils.js',
     '/js/ui.js',
@@ -20,8 +22,10 @@ const STATIC_ASSETS = [
     '/vendor/marked.min.js',
     '/vendor/atom-one-dark.css',
     '/manifest.json',
+    '/dist/fonts/geist-latin-400-normal.woff2',
+    '/dist/fonts/geist-latin-500-normal.woff2',
+    '/dist/fonts/geist-latin-600-normal.woff2',
     '/dist/fonts/inter-latin-400-normal.woff2',
-    '/dist/fonts/inter-latin-600-normal.woff2',
     '/dist/fonts/source-serif-4-latin-400-normal.woff2'
 ];
 

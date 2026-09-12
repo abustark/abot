@@ -233,15 +233,17 @@ state.auth.onAuthStateChanged(async (user) => {
 
         if (user.isAnonymous) {
             dom.userEmailDisplay.textContent = 'Guest User';
-                            dom.userAvatar.src = `https://i.pravatar.cc/40?u=guest`;
+            dom.userAvatar.textContent = 'G';
             dom.importChatBtn.style.display = 'none';
         } else {
             dom.userEmailDisplay.textContent = user.displayName || user.email;
-                            dom.userAvatar.src = user.photoURL || `https://i.pravatar.cc/40?u=${user.uid}`;
+            const initials = (user.displayName || user.email || '?')
+                .trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
+            dom.userAvatar.textContent = initials || 'A';
             dom.importChatBtn.style.display = 'flex';
         }
 
-                        dom.chatList.innerHTML = `<div class="p-2 space-y-2"><div class="skeleton h-9"></div><div class="skeleton h-9 w-5/6"></div><div class="skeleton h-9 w-4/6"></div></div>`;
+                        dom.chatList.innerHTML = `<div class="p-2 space-y-2"><div class="skeleton h-10 rounded-lg"></div><div class="skeleton h-10 w-5/6 rounded-lg"></div><div class="skeleton h-10 w-4/6 rounded-lg"></div></div>`;
         const chatsLoaded = await loadUserChatsFromFirestore(user.uid);
 
         if (chatsLoaded) {

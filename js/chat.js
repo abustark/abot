@@ -10,7 +10,6 @@ import { MODEL_CONFIG } from './config.js';
 import { applyModelColorTheme } from './ui.js';
 import { closeSidebar } from './ui.js';
 import { dom } from './dom.js';
-import { generateColorClasses } from './config.js';
 import { getTimestamp, isSpeaking, speakText, stopSpeaking, setUnsentDraft } from './utils.js';
 import { showGuestLimitModal } from './ui.js';
 import { showToast } from './utils.js';
@@ -200,8 +199,8 @@ export const renderChatList = (searchTerm = '') => {
     const filteredChats = Object.values(state.chats).filter(chat => chat.name.toLowerCase().includes(searchTerm.toLowerCase()));
     filteredChats.sort((a, b) => b.id - a.id).forEach(chat => {
         const chatItemContainer = document.createElement('div');
-                        chatItemContainer.className = `relative chat-list-item group ${String(chat.id) === String(state.activeChatId) ? 'active' : ''}`;
-                        chatItemContainer.innerHTML = `<div class="flex items-center justify-between w-full rounded-md ${String(chat.id) === String(state.activeChatId) ? '' : 'text-muted hover:bg-card'}"><a href="#" class="flex-1 px-4 py-2 text-sm truncate" data-chat-id="${chat.id}"><span class="chat-name-span">${chat.name}</span></a><input type="text" class="chat-rename-input hidden flex-1 mx-2 p-1 text-sm bg-surface dark:bg-card rounded" value="${chat.name}"><button class="chat-options-btn p-1 mr-2 rounded-md hover:bg-card opacity-0 group-hover:opacity-100 transition-opacity"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" /></svg></button></div><div class="absolute right-0 top-full mt-1 w-32 bg-canvas dark:bg-card border border-hairline rounded-md shadow-lg z-10 hidden chat-options-menu"><button class="rename-chat-btn w-full text-left px-3 py-1.5 text-sm hover:bg-card">Rename</button><button class="export-chat-btn w-full text-left px-3 py-1.5 text-sm hover:bg-card">Export JSON</button><button class="export-md-btn w-full text-left px-3 py-1.5 text-sm hover:bg-card">Export Markdown</button><button class="delete-chat-btn w-full text-left px-3 py-1.5 text-sm text-danger hover:bg-card">Delete</button></div>`;
+        chatItemContainer.className = `relative chat-list-item group ${String(chat.id) === String(state.activeChatId) ? 'active' : ''}`;
+        chatItemContainer.innerHTML = `<div class="flex items-center justify-between w-full rounded-xl ${String(chat.id) === String(state.activeChatId) ? '' : 'text-body hover:bg-card/70'}"><a href="#" class="flex-1 px-3 py-2.5 text-sm truncate" data-chat-id="${chat.id}"><span class="chat-name-span">${chat.name}</span></a><input type="text" class="chat-rename-input hidden flex-1 mx-2 p-1 text-sm bg-surface dark:bg-card rounded" value="${chat.name}"><button class="chat-options-btn p-2 mr-1 rounded-lg hover:bg-card transition-colors" aria-label="Chat options"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" /></svg></button></div><div class="absolute right-0 top-full mt-1 w-36 bg-canvas dark:bg-card border border-hairline rounded-xl shadow-lift z-10 hidden chat-options-menu overflow-hidden"><button class="rename-chat-btn w-full text-left px-3 py-2 text-sm hover:bg-card">Rename</button><button class="export-chat-btn w-full text-left px-3 py-2 text-sm hover:bg-card">Export JSON</button><button class="export-md-btn w-full text-left px-3 py-2 text-sm hover:bg-card">Export Markdown</button><button class="delete-chat-btn w-full text-left px-3 py-2 text-sm text-danger hover:bg-card">Delete</button></div>`;
         const nameSpan = chatItemContainer.querySelector('.chat-name-span');
         const renameInput = chatItemContainer.querySelector('.chat-rename-input');
         const saveRename = () => { renameChat(chat.id, renameInput.value); };
@@ -339,7 +338,6 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
 
     // CORE LOGIC: Use the message's own model, or fall back to the chat's current model.
     const modelConf = MODEL_CONFIG[messageModel || currentChat.model] || { name: 'AI', color: 'indigo-600' };
-    const colorClasses = generateColorClasses(modelConf.color);
     const providerColor = getProviderColor(messageModel || currentChat.model);
 
     let messageContent;
@@ -359,7 +357,7 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
     }
 
     // --- Action Buttons ---
-                    const copyBtnHtml = `<button class="copy-message-btn p-1.5 rounded-md text-muted hover:text-body transition-colors" title="Copy" aria-label="Copy message"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" /></svg></button>`;
+                    const copyBtnHtml = `<button class="copy-message-btn p-1.5 rounded-md text-muted hover:text-ink transition-colors" title="Copy" aria-label="Copy message"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" /></svg></button>`;
 
     let reactButtonsHtml = '';
     if (!isUser && typeof options.index === 'number') {
@@ -387,36 +385,37 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
     if (!isHistory) messageEl.classList.add('message-enter');
 
     if (isUser) {
-        // --- USER MESSAGE LAYOUT (Clean Bubble, Right Aligned) ---
+        // --- USER MESSAGE: right-aligned soft-coral bubble (Gemini pattern) ---
         messageEl.innerHTML = `
-                            <div class="message-container w-full flex justify-end mb-6 group relative pl-10">
-                                <div class="absolute right-full mr-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center bg-canvas dark:bg-card rounded-lg shadow-sm border border-hairline px-1">
+                            <div class="message-container w-full flex justify-end mb-5 group relative">
+                                <div class="absolute right-full mr-2 top-2 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity flex items-center bg-canvas dark:bg-card rounded-lg shadow-sm border border-hairline px-1">
                                     ${copyBtnHtml}
                                     ${actionButtonsHtml}
                                 </div>
-                                <div class="max-w-[90%] md:max-w-[80%] bg-card rounded-[24px] rounded-tr-sm px-5 py-3 text-[15px] text-ink">
+                                <div class="max-w-[85%] md:max-w-[75%] bg-coral-soft rounded-2xl rounded-br-md px-4 py-2.5 text-[15px] text-ink">
                                    <div class="prose dark:prose-invert max-w-none whitespace-pre-wrap">${messageContent}</div>
                                 </div>
                             </div>
                         `;
     } else {
-        // --- AI MESSAGE LAYOUT (Full Width, Header, No Background) ---
-        // Note: Using colorClasses.text matches the theme color
+        // --- AI MESSAGE: full-width clean text + quiet model label (Claude/ChatGPT
+        // pattern) — no bubble box, model identity is a small avatar + muted
+        // label, content is the star. ---
         messageEl.innerHTML = `
-                            <div class="message-container w-full flex flex-col mb-10 group">
-                                <div class="flex items-center gap-3 mb-2 select-none">
-                                    <div class="w-7 h-7 rounded-sm ${providerColor.dot} flex items-center justify-center flex-shrink-0 shadow-sm">
-                                         <span class="text-white text-[10px] font-bold">${modelConf.name.substring(0, 2)}</span>
+                            <div class="message-container w-full flex flex-col mb-8 group">
+                                <div class="flex items-center gap-2.5 mb-1.5 select-none">
+                                    <div class="w-5 h-5 rounded-md ${providerColor.dot} flex items-center justify-center flex-shrink-0">
+                                         <span class="text-white text-[8px] font-bold">${modelConf.name.substring(0, 2).toUpperCase()}</span>
                                     </div>
-                                    <span class="text-xs font-bold uppercase tracking-wider ${providerColor.text}">${modelConf.name}</span>
+                                    <span class="text-xs font-semibold ${providerColor.text}">${modelConf.name}</span>
                                     ${message.pinned ? '<span class="text-[10px]" role="img" aria-label="Pinned">📌</span>' : ''}
-                                    ${showTs ? `<span class="text-xs text-muted msg-timestamp">${getTimestamp()}</span>` : ''}
+                                    ${showTs ? `<span class="text-[11px] text-muted/80 msg-timestamp">${getTimestamp()}</span>` : ''}
                                 </div>
-                                <div class="pl-0 md:pl-10 w-full overflow-hidden">
+                                <div class="w-full overflow-hidden">
                                     <div class="prose dark:prose-invert max-w-none text-ink text-[15px] leading-7 msg-collapsible">
                                         ${messageContent}
                                     </div>
-                                    <div class="flex items-center gap-1 mt-3 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                                    <div class="flex items-center gap-0.5 mt-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
                                          ${copyBtnHtml}
                                          ${reactButtonsHtml}
                                          ${actionButtonsHtml}
@@ -466,13 +465,13 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
             // Add Copy Code button (simplified logic)
             const pre = block.parentElement;
             const copyCodeBtn = document.createElement('button');
-            copyCodeBtn.className = 'copy-code-btn absolute top-2 right-2 bg-gray-700 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity';
-            copyCodeBtn.textContent = 'Copy Code';
+            copyCodeBtn.className = 'copy-code-btn';
+            copyCodeBtn.textContent = 'Copy';
             pre.classList.add('group'); // Enable hover
             copyCodeBtn.addEventListener('click', () => {
                 navigator.clipboard.writeText(block.textContent);
                 copyCodeBtn.textContent = 'Copied!';
-                setTimeout(() => copyCodeBtn.textContent = 'Copy Code', 2000);
+                setTimeout(() => copyCodeBtn.textContent = 'Copy', 2000);
             });
             pre.appendChild(copyCodeBtn);
         });
@@ -754,7 +753,7 @@ export const sendMessage = async () => {
                     }
                 }
             }
-            dom.chatHistoryContainer.scrollTop = dom.chatHistoryContainer.scrollHeight;
+            dom.chatHistoryContainer.scrollTo({ top: dom.chatHistoryContainer.scrollHeight, behavior: 'smooth' });
         }
 
         const contentHolder = latestBotMessageSpan.querySelector('.content-span');
@@ -866,12 +865,13 @@ const renderEmptyState = () => {
         { title: 'Brainstorm ideas', sub: 'Get creative options fast', prompt: 'Brainstorm 10 names for a warm, minimal AI chat app.' },
     ];
     dom.chatHistory.innerHTML = `
-        <div class="flex flex-col items-center justify-center text-center py-16 px-4">
-            <h2 class="font-display text-2xl md:text-3xl text-ink mb-2">How can I help today?</h2>
-            <p class="text-muted text-sm mb-8">Pick a suggestion or type your own prompt below.</p>
+        <div class="flex flex-col items-center justify-center text-center py-14 md:py-20 px-4 min-h-[50vh]">
+            <img src="/logo.png" alt="" aria-hidden="true" class="h-14 w-14 rounded-2xl mb-6 select-none" draggable="false">
+            <h2 class="font-display text-3xl md:text-4xl text-ink mb-3">How can I help today?</h2>
+            <p class="text-muted text-sm mb-10">Pick a suggestion or type your own prompt below.</p>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-2xl">
                 ${suggestions.map(sg => `
-                    <button class="suggestion-card text-left p-4 rounded-card bg-card border border-hairline hover:border-coral transition-colors" data-prompt="${sg.prompt.replace(/"/g, '&quot;')}">
+                    <button class="suggestion-card text-left p-4 rounded-2xl bg-card/60 dark:bg-card/80 border border-hairline shadow-sm hover:shadow-lift hover:-translate-y-0.5 hover:border-coral/50 transition-all duration-base ease-out" data-prompt="${sg.prompt.replace(/"/g, '&quot;')}">
                         <span class="block text-sm font-medium text-ink">${sg.title}</span>
                         <span class="block text-xs text-muted mt-1">${sg.sub}</span>
                     </button>`).join('')}
@@ -888,7 +888,6 @@ export const renderActiveChat = () => {
         dom.chatTitle.textContent = "No Chat Selected";
         dom.chatTitleInput.value = "";
         dom.modelSelectorLabel.textContent = 'Select Model';
-        dom.modelIndicatorPill.textContent = 'Select Model';
         return;
     }
     const chat = state.chats[state.activeChatId];
@@ -902,6 +901,5 @@ export const renderActiveChat = () => {
     dom.chatTitle.textContent = chat.name;
     dom.chatTitleInput.value = chat.name;
     dom.modelSelectorLabel.textContent = MODEL_CONFIG[chat.model]?.name || 'Select Model';
-    dom.modelIndicatorPill.textContent = MODEL_CONFIG[chat.model]?.name || 'Select Model';
     applyModelColorTheme(chat.model);
 };

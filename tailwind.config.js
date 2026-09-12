@@ -8,7 +8,7 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
+        sans: ['Geist', 'Inter', 'sans-serif'],
         display: ['"Source Serif 4"', 'Georgia', 'serif'],
         heading: ['"Source Serif 4"', 'Georgia', 'serif'], // legacy alias -> serif display voice
         mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
@@ -42,9 +42,13 @@ module.exports = {
         },
       },
       borderRadius: {
-        btn: '8px',
-        card: '12px',
-        modal: '16px',
+        btn: '10px',
+        card: '14px',
+        modal: '20px',
+      },
+      boxShadow: {
+        lift: '0 1px 2px rgb(20 20 19 / 0.04), 0 8px 24px -8px rgb(20 20 19 / 0.12)',
+        soft: '0 1px 2px rgb(20 20 19 / 0.04)',
       },
       transitionDuration: {
         fast: '120ms',
