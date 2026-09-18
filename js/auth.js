@@ -92,10 +92,19 @@ export const signInAsGuest = () => {
 
 export const signOutUser = () => {
     stopSpeaking();
+    // Actually end the Firebase session (was a no-op — only stopped TTS).
+    // onAuthStateChanged(null) handles the teardown + UI flip.
+    state.isAppInitialized = false;
+    if (state.auth) {
+        state.auth.signOut().catch((err) => {
+            console.error('Sign out error:', err);
+            showToast('Failed to sign out. Please try again.', 'error');
+        });
+    }
 };
 
 export const linkGuestToGoogle = () => {
-    const provider = new firebase.state.auth.GoogleAuthProvider();
+    const provider = new firebase.auth.GoogleAuthProvider();
     const currentUser = state.auth.currentUser;
     if (!currentUser || !currentUser.isAnonymous) return;
 
@@ -123,7 +132,7 @@ export const linkGuestToGoogle = () => {
 export async function handleCredentialResponse(response) {
     try {
         // This creates a Firebase credential from the token the pop-up provides.
-        const credential = firebase.state.auth.GoogleAuthProvider.credential(null, response.access_token);
+        const credential = firebase.auth.GoogleAuthProvider.credential(null, response.access_token);
         await state.auth.signInWithCredential(credential);
     } catch (error) {
         console.error("Google credential sign-in error:", error);

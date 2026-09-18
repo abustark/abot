@@ -42,6 +42,10 @@ function stubChain(label) {
     global.Event = window.Event;
     global.CustomEvent = window.CustomEvent;
     global.getComputedStyle = window.getComputedStyle;
+    // app.js initApp() uses MutationObserver (modal scroll-lock/focus-restore).
+    // Without this global the import-time init crashes before any listener attaches.
+    global.MutationObserver = window.MutationObserver;
+    global.KeyboardEvent = window.KeyboardEvent;
     global.firebase = window.firebase;
     global.marked = window.marked;
     global.hljs = window.hljs;
@@ -65,6 +69,16 @@ function stubChain(label) {
     const $ = (id) => window.document.getElementById(id);
     let fails = 0;
     const check = (name, ok, detail = '') => { console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}${detail ? ' — ' + detail : ''}`); if (!ok) fails++; };
+
+    // GATE: no duplicate element ids (regression guard — sidebarToggle,
+    // modelSelectorPanel and modal-title were all shipped duplicated before).
+    {
+        const seen = new Set(); const dupes = new Set();
+        window.document.querySelectorAll('[id]').forEach((el) => {
+            if (seen.has(el.id)) dupes.add(el.id); else seen.add(el.id);
+        });
+        check('no duplicate element ids', dupes.size === 0, [...dupes].join(', '));
+    }
 
     // model selector FIRST (clean state; the panel auto-closer reacts to any prior click)
     {
@@ -92,7 +106,11 @@ function stubChain(label) {
         const before = sb.className;
         click($('sidebarToggle'));
         await sleep(100);
-        check('sidebar toggle', sb.className !== before);
+        check('sidebar toggle (header hamburger)', sb.className !== before);
+        const opened = sb.className;
+        click($('sidebarCloseBtn'));
+        await sleep(100);
+        check('sidebar close button (in-drawer ×)', sb.className !== opened);
         click($('sidebarToggle'));
         await sleep(100);
     }

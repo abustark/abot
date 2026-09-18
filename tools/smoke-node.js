@@ -84,6 +84,10 @@ async function main() {
   global.Event = window.Event;
   global.getComputedStyle = window.getComputedStyle;
   global.requestAnimationFrame = (cb) => setTimeout(cb, 0);
+  // initApp() uses MutationObserver (modal scroll-lock/focus-restore) —
+  // without this global the import-time init crashes before listeners attach.
+  global.MutationObserver = window.MutationObserver;
+  global.KeyboardEvent = window.KeyboardEvent;
 
   process.on('unhandledRejection', (r) => errors.push('unhandledRejection: ' + (r && r.message || r)));
 

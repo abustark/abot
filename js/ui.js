@@ -9,7 +9,22 @@ import { SYSTEM_PROMPTS, getProviderColor } from './config.js';
 import { dom } from './dom.js';
 import { state } from './state.js';
 import { showToast } from './utils.js';
-export const closeSidebar = () => { dom.sidebar.classList.add('-translate-x-full'); dom.sidebarOverlay.classList.add('hidden'); };
+// Single source of truth for the sidebar drawer. Owns the slide class, the
+// overlay, and body scroll-lock. On md+ the drawer is a static column
+// (md:translate-x-0) and the overlay is md:hidden, so scroll-lock only applies
+// to the mobile drawer — we gate on viewport width to stay correct.
+export const setSidebar = (open) => {
+    dom.sidebar.classList.toggle('-translate-x-full', !open);
+    dom.sidebarOverlay.classList.toggle('hidden', !open);
+    const isMobile = window.innerWidth < 768;
+    if (open && isMobile) {
+        document.body.style.overflow = 'hidden';
+    } else if (!open) {
+        document.body.style.overflow = '';
+    }
+};
+export const toggleSidebar = () => setSidebar(dom.sidebar.classList.contains('-translate-x-full'));
+export const closeSidebar = () => setSidebar(false);
 
 export const applyModelColorTheme = (model) => {
     // Provider-colored dot in the header pill (buttons stay coral — actions are

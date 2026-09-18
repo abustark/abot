@@ -11,6 +11,7 @@ import { MODEL_CONFIG, getProviderColor } from './config.js';
 import { closeGuestLimitModal } from './ui.js';
 import { closePromptModal } from './ui.js';
 import { closeSidebar } from './ui.js';
+import { toggleSidebar } from './ui.js';
 import { createNewChat } from './chat.js';
 import { dom } from './dom.js';
 import { importChat } from './chat.js';
@@ -350,18 +351,11 @@ function initApp() {
 
     dom.sendBtn.addEventListener('click', sendMessage);
     dom.voiceBtn.addEventListener('click', startVoiceRecognition);
-    dom.sidebarToggle.addEventListener('click', (e) => {
-        e.stopPropagation();
-        // md+ renders the toggle visually hidden (CSS), so clicks here only
-        // happen on mobile — the drawer. Overlay + scroll-lock while open.
-        const opening = dom.sidebar.classList.contains('-translate-x-full');
-        dom.sidebar.classList.toggle('-translate-x-full', !opening);
-        if (opening) {
-            dom.sidebarOverlay.classList.remove('hidden');
-        } else {
-            dom.sidebarOverlay.classList.add('hidden');
-        }
-    });
+    // Both the header hamburger (#sidebarToggle) and the in-drawer close
+    // (#sidebarCloseBtn) drive the single setSidebar() state owner (ui.js).
+    const onSidebarToggleClick = (e) => { e.stopPropagation(); toggleSidebar(); };
+    dom.sidebarToggle.addEventListener('click', onSidebarToggleClick);
+    if (dom.sidebarCloseBtn) dom.sidebarCloseBtn.addEventListener('click', onSidebarToggleClick);
     dom.sidebarOverlay.addEventListener('click', closeSidebar);
 
 

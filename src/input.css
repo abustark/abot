@@ -499,6 +499,17 @@ h1, h2, h3, .prose h1, .prose h2, .prose h3 { text-wrap: balance; }
     opacity: 1;
     transform: translateY(0);
 }
+/* Bottom-positioned variant for triggers in the TOP bar (header, sidebar
+   brand). Default above-position would clip off the viewport top there. */
+[data-tooltip-pos="bottom"]::after {
+    bottom: auto;
+    top: calc(100% + 6px);
+    transform: translateY(-2px);
+}
+[data-tooltip-pos="bottom"]:hover::after,
+[data-tooltip-pos="bottom"]:focus-visible::after {
+    transform: translateY(0);
+}
 /* Hide tooltips on touch (no hover) and for reduced-motion users */
 @media (hover: none) {
     [data-tooltip]::after { display: none; }

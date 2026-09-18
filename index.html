@@ -234,8 +234,8 @@
                         <img src="/logo.png" alt="ABot logo" class="h-7 w-7 rounded-md select-none" draggable="false">
                         <span class="text-[15px] font-semibold tracking-tight text-ink">ABot</span>
                     </div>
-                    <button id="sidebarToggle" aria-label="Close sidebar" data-tooltip="Close sidebar"
-                        class="p-2 rounded-lg text-muted hover:text-ink hover:bg-card transition-colors">
+                    <button id="sidebarCloseBtn" aria-label="Close sidebar" data-tooltip="Close sidebar" data-tooltip-pos="bottom"
+                        class="p-2 rounded-lg text-muted hover:text-ink hover:bg-card transition-colors md:hidden">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
@@ -343,7 +343,7 @@
             <header id="appHeader"
                 class="relative z-10 flex items-center justify-between gap-3 h-14 px-3 md:px-5 bg-canvas/80 dark:bg-canvas/80 backdrop-blur-md border-b border-transparent transition-[border-color,background-color] duration-base ease-out">
                 <div class="flex items-center min-w-0">
-                    <button id="sidebarToggle" aria-label="Toggle sidebar" data-tooltip="History"
+                    <button id="sidebarToggle" aria-label="Toggle sidebar" data-tooltip="History" data-tooltip-pos="bottom"
                         class="mr-1 md:mr-3 text-muted hover:text-ink transition-colors p-2 rounded-lg hover:bg-card">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
@@ -356,7 +356,7 @@
                         <input type="text" id="chatTitleInput" aria-label="Chat name"
                             class="text-[15px] font-semibold bg-transparent border-b-2 border-coral focus:outline-none w-full hidden">
                     </div>
-                    <button id="renameChatBtn" aria-label="Rename chat" data-tooltip="Rename"
+                    <button id="renameChatBtn" aria-label="Rename chat" data-tooltip="Rename" data-tooltip-pos="bottom"
                         class="p-2 rounded-lg text-muted hover:text-ink hover:bg-card transition-colors">
                         <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
                             fill="currentColor">
@@ -369,7 +369,7 @@
                     </button>
                 </div>
                 <div class="flex items-center gap-1">
-                    <button id="headerNewChatBtn" aria-label="New chat" data-tooltip="New Chat"
+                    <button id="headerNewChatBtn" aria-label="New chat" data-tooltip="New Chat" data-tooltip-pos="bottom"
                         class="p-2 rounded-lg text-muted hover:text-ink hover:bg-card transition-colors md:hidden">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd"
@@ -393,14 +393,14 @@
                         style="opacity: 0; transform: translateY(-10px) scale(0.98);"></div>
                     <button id="searchToggleBtn"
                         class="p-2 rounded-lg text-muted hover:text-ink hover:bg-card transition-colors" aria-label="Search in messages"
-                        data-tooltip="Search messages">
+                        data-tooltip="Search messages" data-tooltip-pos="bottom">
                         <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd"
                                 d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
                                 clip-rule="evenodd" />
                         </svg>
                     </button>
-                    <button id="promptBtn" aria-label="Open prompt library" data-tooltip="Prompt library"
+                    <button id="promptBtn" aria-label="Open prompt library" data-tooltip="Prompt library" data-tooltip-pos="bottom"
                         class="p-2 rounded-lg text-muted hover:text-ink hover:bg-card transition-colors">
                         <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
                             fill="currentColor">
@@ -410,7 +410,7 @@
                         </svg>
                     </button>
                     <div class="w-px h-5 bg-hairline mx-1"></div>
-                    <button id="themeToggle" aria-label="Toggle dark mode" data-tooltip="Toggle theme"
+                    <button id="themeToggle" aria-label="Toggle dark mode" data-tooltip="Toggle theme" data-tooltip-pos="bottom"
                         class="p-2 rounded-lg text-muted hover:text-ink hover:bg-card transition-colors">
                         <svg id="sunIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-500 hidden"
                             viewBox="0 0 20 20" fill="currentColor">
@@ -538,7 +538,7 @@
         <!-- Guest User Limit Modal -->
         <div id="guestLimitModal"
             class="fixed inset-0 z-30 flex items-center justify-center bg-ink/60 hidden"
-            aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            aria-labelledby="guest-modal-title" role="dialog" aria-modal="true">
             <div id="guestLimitOverlay" class="absolute inset-0"></div>
             <div id="guestLimitPanel"
                 class="modal-transition relative z-10 w-full max-w-md p-6 mx-4 bg-canvas dark:bg-card rounded-2xl shadow-lift border border-hairline"
