@@ -20,6 +20,7 @@ module.exports = {
         canvas: 'rgb(var(--c-canvas) / <alpha-value>)',
         surface: 'rgb(var(--c-surface) / <alpha-value>)',
         card: 'rgb(var(--c-card) / <alpha-value>)',
+        raised: 'rgb(var(--c-raised) / <alpha-value>)',
         hairline: 'rgb(var(--c-hairline) / <alpha-value>)',
         ink: 'rgb(var(--c-ink) / <alpha-value>)',
         body: 'rgb(var(--c-body) / <alpha-value>)',

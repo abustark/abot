@@ -86,6 +86,7 @@
     --c-canvas: 250 249 245;   /* #faf9f5 */
     --c-surface: 245 240 232;  /* #f5f0e8 */
     --c-card: 239 233 222;     /* #efe9de */
+    --c-raised: 252 250 246;   /* #fcfaf6 — light: panels lift toward white */
     --c-hairline: 230 223 216; /* #e6dfd8 */
     --c-ink: 20 20 19;         /* #141413 */
     --c-body: 61 61 58;        /* #3d3d3a */
@@ -119,6 +120,7 @@
     --c-canvas: 24 23 21;      /* #181715 */
     --c-surface: 31 30 27;     /* #1f1e1b */
     --c-card: 37 35 32;        /* #252320 */
+    --c-raised: 43 41 37;      /* #2b2925 — dark: panels lift off the canvas */
     --c-hairline: 55 51 45;
     --c-ink: 250 249 245;      /* #faf9f5 */
     --c-body: 232 228 220;
@@ -277,10 +279,33 @@
     to { border-color: rgb(var(--c-coral) / 0); }
 }
 
+/* Empty-state ambient glow — a whisper of the auth coral radial, so the new-chat
+   screen has a focal warmth instead of a flat void. Compositor-only. */
+.empty-state { overflow: hidden; }
+.empty-glow {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(48% 38% at 50% 38%, rgb(var(--c-coral) / 0.07), transparent 70%);
+}
+
+/* Sidebar depth — the rail sits a half-step below the canvas so the two
+   regions read as layered, not one flat plane. Subtle inner edge light. */
+@media (min-width: 768px) {
+    #sidebar { box-shadow: inset -1px 0 0 rgb(var(--c-hairline) / 0.5); }
+}
+
+/* Composer seam — soften the hard edge where the dock meets the message list */
+#composerDock { border-top: 1px solid transparent; }
+@media (min-width: 768px) {
+    #composerDock { box-shadow: 0 -8px 24px -16px rgb(var(--c-ink) / 0.18); }
+}
+
 /* Chat bubbles */
-.chat-bubble { max-width: 85%; transition: transform 0.2s ease, opacity 0.3s ease; }
-.user-bubble { border-radius: 18px 4px 18px 18px; }
-.bot-bubble { border-radius: 4px 18px 18px 18px; }
+.chat-bubble { max-width: 85%; transition: transform 0.2s var(--ease-out), opacity 0.3s var(--ease-out); }
+.user-bubble { border-radius: 18px 18px 6px 18px; }
+.bot-bubble { border-radius: 18px 18px 18px 6px; }
 .chat-bubble .prose p { margin: 0; }
 
 /* Typing indicator */

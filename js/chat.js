@@ -392,7 +392,7 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
                                     ${copyBtnHtml}
                                     ${actionButtonsHtml}
                                 </div>
-                                <div class="max-w-[85%] md:max-w-[75%] bg-coral-soft rounded-2xl rounded-br-md px-4 py-2.5 text-[15px] text-ink">
+                                <div class="max-w-[85%] md:max-w-[75%] user-bubble bg-coral-soft px-4 py-2.5 text-[15px] leading-relaxed text-ink shadow-soft">
                                    <div class="prose dark:prose-invert max-w-none whitespace-pre-wrap">${messageContent}</div>
                                 </div>
                             </div>
@@ -412,7 +412,7 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
                                     ${showTs ? `<span class="text-[11px] text-muted/80 msg-timestamp">${getTimestamp()}</span>` : ''}
                                 </div>
                                 <div class="w-full overflow-hidden">
-                                    <div class="prose dark:prose-invert max-w-none text-ink text-[15px] leading-7 msg-collapsible">
+                                    <div class="prose dark:prose-invert max-w-none text-body text-[15px] leading-7 msg-collapsible">
                                         ${messageContent}
                                     </div>
                                     <div class="flex items-center gap-0.5 mt-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
@@ -865,15 +865,16 @@ const renderEmptyState = () => {
         { title: 'Brainstorm ideas', sub: 'Get creative options fast', prompt: 'Brainstorm 10 names for a warm, minimal AI chat app.' },
     ];
     dom.chatHistory.innerHTML = `
-        <div class="flex flex-col items-center justify-center text-center py-14 md:py-20 px-4 min-h-[50vh]">
-            <img src="/logo.png" alt="" aria-hidden="true" class="h-14 w-14 rounded-2xl mb-6 select-none" draggable="false">
-            <h2 class="font-display text-3xl md:text-4xl text-ink mb-3">How can I help today?</h2>
-            <p class="text-muted text-sm mb-10">Pick a suggestion or type your own prompt below.</p>
+        <div class="empty-state relative flex flex-col items-center justify-center text-center px-4 min-h-full">
+            <div class="empty-glow" aria-hidden="true"></div>
+            <img src="/logo.png" alt="" aria-hidden="true" class="h-14 w-14 rounded-2xl mb-6 select-none shadow-soft" draggable="false">
+            <h2 class="font-display text-3xl md:text-[2.5rem] leading-tight text-ink mb-3 tracking-tight">How can I help today?</h2>
+            <p class="text-muted text-sm mb-10 max-w-sm">Pick a suggestion or type your own prompt below.</p>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-2xl">
                 ${suggestions.map(sg => `
-                    <button class="suggestion-card text-left p-4 rounded-2xl bg-card/60 dark:bg-card/80 border border-hairline shadow-sm hover:shadow-lift hover:-translate-y-0.5 hover:border-coral/50 transition-all duration-base ease-out" data-prompt="${sg.prompt.replace(/"/g, '&quot;')}">
+                    <button class="suggestion-card text-left p-4 rounded-2xl bg-raised border border-hairline shadow-soft hover:shadow-lift hover:-translate-y-0.5 hover:border-coral/50 transition-all duration-base ease-out" data-prompt="${sg.prompt.replace(/"/g, '&quot;')}">
                         <span class="block text-sm font-medium text-ink">${sg.title}</span>
-                        <span class="block text-xs text-muted mt-1">${sg.sub}</span>
+                        <span class="block text-xs text-muted mt-1 leading-relaxed">${sg.sub}</span>
                     </button>`).join('')}
             </div>
         </div>`;

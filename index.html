@@ -225,7 +225,7 @@
 
         <!-- Sidebar for Chat History -->
         <aside id="sidebar"
-            class="w-72 flex-shrink-0 flex flex-col bg-canvas md:bg-surface/60 border-r border-hairline transform -translate-x-full fixed md:static h-full z-20 sidebar md:translate-x-0 transition-transform duration-300 ease-drawer">
+            class="w-72 flex-shrink-0 flex flex-col bg-surface md:bg-surface border-r border-hairline/70 transform -translate-x-full fixed md:static h-full z-20 sidebar md:translate-x-0 transition-transform duration-300 ease-drawer">
 
             <div class="p-3 border-b border-hairline space-y-3">
                 <!-- Brand row (mobile: X closes the drawer; md+ keeps toggle hidden by CSS) -->
@@ -368,7 +368,7 @@
                         </svg>
                     </button>
                 </div>
-                <div class="flex items-center gap-1">
+                <div class="flex items-center gap-1.5">
                     <button id="headerNewChatBtn" aria-label="New chat" data-tooltip="New Chat" data-tooltip-pos="bottom"
                         class="p-2 rounded-lg text-muted hover:text-ink hover:bg-card transition-colors md:hidden">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -378,7 +378,7 @@
                         </svg>
                     </button>
                     <button id="modelSelectorBtn"
-                        class="flex items-center gap-2 bg-canvas dark:bg-card border border-hairline shadow-sm pl-3 pr-2.5 py-1.5 rounded-full text-sm text-body hover:bg-card focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-coral/40 dark:focus:ring-offset-canvas transition-colors active:scale-[0.98]">
+                        class="flex items-center gap-2 bg-raised dark:bg-raised border border-hairline shadow-soft pl-3 pr-2.5 py-1.5 rounded-full text-sm font-medium text-ink hover:border-coral/40 hover:shadow-lift focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-coral/40 dark:focus:ring-offset-canvas transition-all duration-fast ease-out active:scale-[0.98]">
                         <span id="modelSelectorDot" class="w-2 h-2 rounded-full bg-coral"></span>
                         <span id="modelSelectorLabel" class="font-medium whitespace-nowrap truncate max-w-[130px] md:max-w-none">Select Model</span>
                         <svg class="w-3.5 h-3.5 text-muted" xmlns="http://www.w3.org/2000/svg"
@@ -434,7 +434,7 @@
                 </div>
 
                 <div id="chatHistoryContainer" class="relative flex-1 overflow-y-auto overscroll-contain p-3 pb-44 md:pb-6 md:p-6 scrollbar-custom">
-                    <div id="chatHistory" class="max-w-3xl mx-auto space-y-6" aria-live="polite" aria-label="Chat messages"></div>
+                    <div id="chatHistory" class="max-w-3xl mx-auto space-y-6 h-full" aria-live="polite" aria-label="Chat messages"></div>
 
                 </div>
 
@@ -446,7 +446,7 @@
                     style="bottom: var(--kb-h, 0px);">
                     <div class="max-w-3xl mx-auto">
                         <div
-                            class="flex items-end bg-canvas dark:bg-card border border-hairline shadow-lift rounded-[1.5rem] p-1.5 transition-[border-color,box-shadow] duration-base ease-out focus-within:border-coral/50 focus-within:ring-2 focus-within:ring-coral/15">
+                            class="flex items-end bg-raised dark:bg-raised border border-hairline shadow-lift rounded-2xl p-1.5 transition-[border-color,box-shadow] duration-base ease-out focus-within:border-coral/50 focus-within:ring-2 focus-within:ring-coral/15">
                             <textarea id="messageInput"
                                 class="flex-1 bg-transparent px-3 py-2.5 resize-none focus:outline-none text-body placeholder:text-muted max-h-48"
                                 placeholder="Message ABot…" rows="1"></textarea>
