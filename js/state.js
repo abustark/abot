@@ -7,6 +7,7 @@
 
 // Shared mutable state — the closure variables of the original main(),
 // preserved under a single exported object. initFirebase() assigns auth/db.
+/** @type {AppState} */
 export const state = {
   chats: {},
   activeChatId: null,

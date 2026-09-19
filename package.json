@@ -9,7 +9,9 @@
     "watch:css": "tailwindcss -i ./src/input.css -o ./dist/output.css --watch",
     "test": "node tests/chat-security.test.js && node tools/smoke-node.js && node tools/interaction-test.js",
     "lint": "eslint .",
-    "check": "node tools/syntax-check.js"
+    "check": "node tools/syntax-check.js",
+    "typecheck": "tsc -p jsconfig.json",
+    "prepare": "git config core.hooksPath .githooks"
   },
   "dependencies": {
     "cors": "^2.8.5",
@@ -32,7 +34,8 @@
     "jsdom": "^30.0.1",
     "marked": "^18.0.11",
     "postcss": "^8.5.6",
-    "tailwindcss": "^3.4.13"
+    "tailwindcss": "^3.4.13",
+    "typescript": "^5.9.3"
   },
   "repository": {
     "type": "git",
