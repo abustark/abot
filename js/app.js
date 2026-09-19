@@ -343,16 +343,30 @@ function initApp() {
     dom.newChatBtn?.addEventListener('click', createNewChatWrapper);
 
     // --- Phase 3: search + settings wiring ---
+    // v2.0.7: search is a sheet with its own backdrop so the close control can
+    // never be covered by the fixed composer/jump-pill layers on mobile. The
+    // backdrop lives in the DOM (index.html); these helpers keep panel +
+    // backdrop + aria in lockstep.
+    const searchBackdrop = document.getElementById('searchBackdrop');
+    const openSearch = () => {
+        dom.searchPanel.classList.remove('hidden');
+        searchBackdrop?.classList.remove('hidden');
+        dom.messageSearchInput?.focus();
+    };
+    const closeSearch = () => {
+        dom.searchPanel.classList.add('hidden');
+        searchBackdrop?.classList.add('hidden');
+        if (dom.searchResults) dom.searchResults.innerHTML = '';
+    };
+    const isSearchOpen = () => !dom.searchPanel.classList.contains('hidden');
     dom.searchToggleBtn?.addEventListener('click', () => {
-        dom.searchPanel.classList.toggle('hidden');
-        if (!dom.searchPanel.classList.contains('hidden')) dom.messageSearchInput?.focus();
+        if (isSearchOpen()) closeSearch(); else openSearch();
     });
     // v1.0.4: search had no way out once opened — on mobile it is entered from
     // the drawer, so the header toggle was never reachable to dismiss it.
-    dom.searchCloseBtn?.addEventListener('click', () => {
-        dom.searchPanel.classList.add('hidden');
-        if (dom.searchResults) dom.searchResults.innerHTML = '';
-    });
+    dom.searchCloseBtn?.addEventListener('click', closeSearch);
+    // Tap outside (backdrop) closes the sheet — the mobile-natural affordance.
+    searchBackdrop?.addEventListener('click', closeSearch);
     let searchDebounce = null;
     dom.messageSearchInput?.addEventListener('input', (e) => {
         clearTimeout(searchDebounce);
@@ -408,6 +422,29 @@ function initApp() {
     // New chat (Header)
     document.getElementById('headerNewChatBtn')?.addEventListener('click', createNewChatWrapper);
 
+    // v2.0.7: header overflow menu (search/prompt/theme collapsed into one "⋯").
+    const overflowBtn = document.getElementById('headerOverflowBtn');
+    const overflowMenu = document.getElementById('headerOverflowMenu');
+    const closeOverflow = () => {
+        overflowMenu?.classList.add('hidden');
+        overflowBtn?.setAttribute('aria-expanded', 'false');
+    };
+    overflowBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const open = overflowMenu?.classList.toggle('hidden') === false;
+        overflowBtn.setAttribute('aria-expanded', String(open));
+    });
+    // Close the overflow when picking an item or tapping anywhere outside it.
+    overflowMenu?.addEventListener('click', (e) => {
+        if (e.target.closest('.menu-row')) closeOverflow();
+    });
+    document.addEventListener('click', (e) => {
+        if (!overflowMenu || overflowMenu.classList.contains('hidden')) return;
+        if (!overflowMenu.contains(e.target) && e.target !== overflowBtn && !overflowBtn.contains(e.target)) {
+            closeOverflow();
+        }
+    });
+
     dom.modelSelectorPanel.addEventListener('keydown', handleModelSelectorNavigation);
     // Tab must not escape the open model panel (a11y: keep focus in the menu)
     dom.modelSelectorPanel.addEventListener('keydown', (e) => {
@@ -459,8 +496,7 @@ function initApp() {
     // mobile first so the target UI isn't covered. ---
     dom.sidebarSearchBtn?.addEventListener('click', () => {
         closeSidebar();
-        dom.searchPanel.classList.remove('hidden');
-        dom.messageSearchInput?.focus();
+        openSearch();
     });
     dom.sidebarPromptBtn?.addEventListener('click', () => {
         closeSidebar();
@@ -595,8 +631,12 @@ function initApp() {
                 closePromptModal();
                 return;
             }
+            if (overflowMenu && !overflowMenu.classList.contains('hidden')) {
+                closeOverflow();
+                return;
+            }
             if (!dom.searchPanel.classList.contains('hidden')) {
-                dom.searchPanel.classList.add('hidden');
+                closeSearch();
                 return;
             }
             if (!dom.modelSelectorPanel.classList.contains('hidden')) {

@@ -292,7 +292,7 @@
                     </div>
                 </button>
                 <div class="relative">
-                    <input type="search" id="searchChats" aria-label="Search chats"
+                    <input type="text" inputmode="search" id="searchChats" aria-label="Search chats"
                         class="w-full pl-9 pr-2 py-2 text-sm rounded-lg bg-surface/70 dark:bg-card/70 border border-hairline/80 focus:bg-canvas dark:focus:bg-card focus:ring-2 focus:ring-coral/30 focus:border-coral focus:outline-none transition-colors"
                         placeholder="Search chats...">
                     <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted"
@@ -423,7 +423,7 @@
             <!-- Floating chat header: sits over the message list, hairline only
                  when scrolled (premium-chat pattern — no glued navbar bar). -->
             <header id="appHeader"
-                class="relative z-10 flex items-center justify-between gap-3 h-14 px-3 md:px-5 bg-canvas/80 dark:bg-canvas/80 backdrop-blur-md border-b border-transparent transition-[border-color,background-color] duration-base ease-out">
+                class="relative z-10 flex items-center justify-between gap-2 h-12 px-3 md:px-4 bg-canvas/80 dark:bg-canvas/80 backdrop-blur-md border-b border-hairline/60 transition-[border-color,background-color] duration-base ease-out">
                 <div class="flex items-center min-w-0">
                     <button id="sidebarToggle" aria-label="Toggle sidebar" data-tooltip="History" data-tooltip-pos="bottom"
                         class="mr-1 md:mr-3 text-muted hover:text-ink transition-colors p-2 rounded-lg hover:bg-card">
@@ -443,7 +443,7 @@
                 </div>
                 <div class="flex items-center gap-1.5">
                     <button id="modelSelectorBtn"
-                        class="flex items-center gap-2 bg-raised dark:bg-raised border border-hairline shadow-soft pl-3 pr-2.5 py-1.5 rounded-full text-sm font-medium text-ink hover:border-coral/40 hover:shadow-lift focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-coral/40 dark:focus:ring-offset-canvas transition-[border-color,box-shadow,transform] duration-fast ease-out active:scale-[0.98]">
+                        class="flex items-center gap-2 bg-transparent border border-hairline/70 pl-2.5 pr-2 py-1 rounded-full text-[13px] font-normal text-body hover:border-coral/40 hover:text-ink focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-coral/40 dark:focus:ring-offset-canvas transition-[border-color,color] duration-fast ease-out">
                         <span id="modelSelectorDot" class="w-2 h-2 rounded-full bg-coral"></span>
                         <span id="modelSelectorLabel" class="font-medium whitespace-nowrap truncate max-w-[130px] md:max-w-none">Select Model</span>
                         <svg class="w-3.5 h-3.5 text-muted" xmlns="http://www.w3.org/2000/svg"
@@ -455,47 +455,67 @@
                     </button>
                     <div id="modelSelectorPanel"
                         class="model-panel absolute top-full right-3 md:right-5 mt-2 w-80 max-w-[calc(100vw-1.5rem)] max-h-[60vh] overflow-y-auto bg-canvas dark:bg-card border border-hairline rounded-xl shadow-lift z-20 hidden origin-top-right scrollbar-custom"></div>
-                    <div class="w-px h-5 bg-hairline mx-1 hidden md:block"></div>
-                    <button id="searchToggleBtn"
-                        class="hidden md:block p-2 rounded-lg text-muted hover:text-ink hover:bg-card transition-colors" aria-label="Search in messages"
-                        data-tooltip="Search messages (Alt+/)" data-tooltip-pos="bottom">
-                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd"
-                                d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                                clip-rule="evenodd" />
+                    <button id="headerNewChatBtn" aria-label="New chat" data-tooltip="New chat (Alt+N)" data-tooltip-pos="bottom"
+                        class="p-2 rounded-lg text-muted hover:text-ink hover:bg-card transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                            stroke-width="1.6" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" />
                         </svg>
                     </button>
-                    <button id="promptBtn" aria-label="Open prompt library" data-tooltip="Prompt library" data-tooltip-pos="bottom"
-                        class="hidden md:block p-2 rounded-lg text-muted hover:text-ink hover:bg-card transition-colors">
-                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                            fill="currentColor">
-                            <path fill-rule="evenodd"
-                                d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4zm3 2a1 1 0 00-1 1v1a1 1 0 002 0V5a1 1 0 00-1-1zm4 0a1 1 0 00-1 1v1a1 1 0 002 0V5a1 1 0 00-1-1zm4 0a1 1 0 00-1 1v1a1 1 0 002 0V5a1 1 0 00-1-1zM7 8a1 1 0 00-1 1v1a1 1 0 002 0v-1a1 1 0 00-1-1zm4 0a1 1 0 00-1 1v1a1 1 0 002 0v-1a1 1 0 00-1-1zm4 0a1 1 0 00-1 1v1a1 1 0 002 0v-1a1 1 0 00-1-1z"
-                                clip-rule="evenodd" />
-                        </svg>
-                    </button>
-                    <div class="w-px h-5 bg-hairline mx-1 hidden md:block"></div>
-                    <!-- B6 (v1.0.6): the icon pair cross-fades + rotates instead of
-                         hard-swapping via `hidden` (display:none can't animate). -->
-                    <button id="themeToggle" aria-label="Toggle dark mode" data-tooltip="Toggle theme" data-tooltip-pos="bottom"
-                        class="theme-toggle hidden md:block relative w-9 h-9 rounded-lg text-muted hover:text-ink hover:bg-card transition-colors">
-                        <svg id="sunIcon" xmlns="http://www.w3.org/2000/svg" class="theme-icon is-off h-5 w-5 text-amber-500"
-                            viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd"
-                                d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"
-                                clip-rule="evenodd" />
-                        </svg>
-                        <svg id="moonIcon" xmlns="http://www.w3.org/2000/svg" class="theme-icon h-5 w-5"
-                            viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
-                        </svg>
-                    </button>
+                    <!-- v2.0.7: 3 ghost icons (search/prompt/theme) collapsed into one
+                         overflow menu. Original IDs live inside it so wiring/tests stay intact. -->
+                    <div class="relative">
+                        <button id="headerOverflowBtn" aria-label="More options" aria-haspopup="menu" aria-expanded="false"
+                            data-tooltip="More" data-tooltip-pos="bottom"
+                            class="p-2 rounded-lg text-muted hover:text-ink hover:bg-card transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                            </svg>
+                        </button>
+                        <div id="headerOverflowMenu" role="menu"
+                            class="absolute right-0 top-full mt-1.5 w-48 bg-canvas dark:bg-card border border-hairline rounded-xl shadow-lift z-30 hidden overflow-hidden py-1">
+                            <button id="searchToggleBtn" role="menuitem"
+                                class="menu-row w-full flex items-center gap-2.5 px-3.5 py-2.5 text-sm text-body hover:bg-card transition-colors"
+                                aria-label="Search in messages">
+                                <svg class="w-4 h-4 text-muted" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                                </svg>
+                                <span>Search messages</span>
+                            </button>
+                            <button id="promptBtn" role="menuitem" aria-label="Open prompt library"
+                                class="menu-row w-full flex items-center gap-2.5 px-3.5 py-2.5 text-sm text-body hover:bg-card transition-colors">
+                                <svg class="w-4 h-4 text-muted" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <path fill-rule="evenodd" d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4zm3 2a1 1 0 00-1 1v1a1 1 0 002 0V5a1 1 0 00-1-1zm4 0a1 1 0 00-1 1v1a1 1 0 002 0V5a1 1 0 00-1-1zm4 0a1 1 0 00-1 1v1a1 1 0 002 0V5a1 1 0 00-1-1zM7 8a1 1 0 00-1 1v1a1 1 0 002 0v-1a1 1 0 00-1-1zm4 0a1 1 0 00-1 1v1a1 1 0 002 0v-1a1 1 0 00-1-1zm4 0a1 1 0 00-1 1v1a1 1 0 002 0v-1a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                </svg>
+                                <span>Prompt library</span>
+                            </button>
+                            <div class="h-px bg-hairline/70 mx-3 my-1"></div>
+                            <button id="themeToggle" role="menuitem" aria-label="Toggle dark mode"
+                                class="menu-row w-full flex items-center gap-2.5 px-3.5 py-2.5 text-sm text-body hover:bg-card transition-colors">
+                                <svg id="sunIcon" xmlns="http://www.w3.org/2000/svg" class="theme-icon is-off h-4 w-4 text-amber-500"
+                                    viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 01-1.414-1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd" />
+                                </svg>
+                                <svg id="moonIcon" xmlns="http://www.w3.org/2000/svg" class="theme-icon h-4 w-4"
+                                    viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+                                </svg>
+                                <span>Toggle theme</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </header>
 
-                <div id="searchPanel" class="hidden border-b border-hairline bg-canvas dark:bg-card px-4 py-3">
+                <!-- v2.0.7 (owner request): mobile search became a fixed sheet with its
+                     own backdrop, so the close button is never covered by the fixed
+                     composer dock / jump pill (they stack at z-10/z-20 over a static
+                     panel on narrow screens — which is why the X was untappable). -->
+                <div id="searchBackdrop" class="hidden fixed inset-0 z-30 bg-ink/40 backdrop-blur-[2px]"></div>
+                <div id="searchPanel" class="hidden relative z-40 border-b border-hairline bg-canvas dark:bg-card px-4 py-3 shadow-lift">
                     <div class="max-w-3xl mx-auto flex items-center gap-2">
-                        <input type="search" id="messageSearchInput" placeholder="Search messages..."
+                        <input type="text" inputmode="search" id="messageSearchInput" placeholder="Search messages..."
                             aria-label="Search messages"
                             class="flex-1 min-w-0 bg-surface dark:bg-card border border-hairline text-body placeholder:text-muted text-sm rounded-btn px-3 py-2 focus:ring-coral/40 focus:border-coral focus:outline-none">
                         <!-- v1.0.4: search had no way out once opened — explicit close + Esc. -->

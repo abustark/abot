@@ -295,10 +295,19 @@ document.querySelectorAll('[data-toggle-password]').forEach(btn => {
 
 const hideAppLoader = () => {
     if (!dom.appLoader) return;
+    // Remove from the hit-test path IMMEDIATELY — the element is fixed inset-0
+    // z-50, so a transparent-but-present loader was swallowing every real tap
+    // on mobile after first login (the 300ms display:none timer can be
+    // throttled/dropped during page transitions). opacity handles the fade;
+    // visibility + pointer-events make it untappable right away.
+    dom.appLoader.style.pointerEvents = 'none';
+    dom.appLoader.style.visibility = 'hidden';
     dom.appLoader.style.opacity = '0';
-    setTimeout(() => {
-        dom.appLoader.style.display = 'none';
-    }, 300);
+    const clear = () => { dom.appLoader.style.display = 'none'; };
+    // Belt-and-braces: transitionend normally fires the cleanup, the timer is
+    // the fallback for browsers that skip it (reduced-motion / bfcache).
+    dom.appLoader.addEventListener('transitionend', clear, { once: true });
+    setTimeout(clear, 350);
 };
 
 const enterApp = async (user) => {
@@ -384,12 +393,20 @@ state.auth.onAuthStateChanged(async (user) => {
         showLoginView();
 
         // Correctly initialize Google's library here, only when it's needed.
-        if (window.google && google.accounts && google.accounts.id) {
-            google.accounts.id.initialize({
-                client_id: "784623545561-f9qumqjcsek7g368657cloq8rqc0kurj.apps.googleusercontent.com",
-                callback: handleCredentialResponse
-            });
-        }
+        // The GSI script is `async defer` and on slow mobile networks may not
+        // have loaded yet when this fires — so retry briefly instead of
+        // leaving the Google button dead on first tap.
+        const initGoogleButton = (attempt = 0) => {
+            if (window.google && google.accounts && google.accounts.id) {
+                google.accounts.id.initialize({
+                    client_id: "784623545561-f9qumqjcsek7g368657cloq8rqc0kurj.apps.googleusercontent.com",
+                    callback: handleCredentialResponse
+                });
+            } else if (attempt < 30) { // ~6s of retries at 200ms
+                setTimeout(() => initGoogleButton(attempt + 1), 200);
+            }
+        };
+        initGoogleButton();
     }
 
     hideAppLoader();
