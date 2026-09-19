@@ -7,7 +7,7 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const chatSecurity = require('./lib/chat-security.js');
 
-const { LIMITS, validateChatRequest, MemoryRateLimiter, identityKey, clientIp, upstreamTimeout, sseError, logProviderError } = chatSecurity;
+const { validateChatRequest, MemoryRateLimiter, identityKey, clientIp, upstreamTimeout, sseError, logProviderError } = chatSecurity;
 
 // Initialize Firebase Admin SDK
 let serviceAccount;
@@ -151,7 +151,7 @@ const checkAuth = async (req, res, next) => {
             const decodedToken = await admin.auth().verifyIdToken(idToken);
             req.user = decodedToken;
             return next();
-        } catch (error) {
+        } catch {
             console.error('Token verification failed');
             return res.status(403).json({ error: 'Unauthorized: Invalid token.' });
         }
@@ -346,7 +346,7 @@ function transformMessagesForGoogle(messages, chatOptions = {}) {
 }
 
 // Malformed JSON body -> clean 400 (never a stack trace)
-app.use((err, req, res, next) => {
+app.use((err, req, res, _next) => {
     if (err && err.type === 'entity.parse.failed') {
         return res.status(400).json({ error: 'Invalid JSON body' });
     }

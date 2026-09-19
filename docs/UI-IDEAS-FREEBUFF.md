@@ -5,7 +5,7 @@
 > go through this plan **before** doing anything else the user asks, and keep
 > these ideas in mind for every UI change. This file overrides scattered
 > suggestions elsewhere — treat it as the current UI/UX north star alongside
-> `docs/IMPLEMENT-PLAN.md` (whose ledger remains the progress record).
+> `docs/AI-WORK-ORDER.md` (current findings, order, and approval gates).
 >
 > **Constraint reminder:** vanilla JS only (no animation libraries, no
 > framework migration), token-only colors, motion ≤300ms from `--ease-*`
@@ -122,7 +122,7 @@
 - Header `data-tooltip`s become "Search (Ctrl+K)" style hints. Free
   discoverability; zero new code paths (tooltip system already exists).
 
-### C4 · D1 reading measure (from IMPLEMENT-PLAN, now prioritized here)
+### C4 · Reading measure (now tracked through AI-WORK-ORDER)
 - Content max-width 48rem (768px) with larger side padding; ~70–80ch prose
   measure. The single biggest "calm professional" layout improvement left.
 
@@ -230,8 +230,8 @@
 1. ~~v1.0.4 "light & motion": A1 → A2 → A3 → A4 + B1 + C1 (+ C2/C4).~~ ✅ shipped
 2. ~~v1.0.5: remaining perf + the two mobile bugs.~~ ✅ shipped
 3. ~~v1.0.6: B2/B4–B7 + C3 + C5 + the owner's new-chat landing and settings pass.~~ ✅ shipped
-4. **Next:** B3 revisit-trigger, the D-polish items in `IMPLEMENT-PLAN.md`, and
-   the optional drawer drag-handle affordance.
+4. **Next:** follow `docs/AI-WORK-ORDER.md`: finish LOW work first, then stop
+   for owner approval before MEDIUM work.
 
 ## Rules for every item
 - Token colors only, `--ease-*` motion ≤300ms, reduced-motion respected.

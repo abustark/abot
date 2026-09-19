@@ -11,8 +11,6 @@
 import { dom } from './dom.js';
 import { state } from './state.js';
 
-const REDUCED_MOTION_MQ = '(prefers-reduced-motion: reduce)';
-
 // Single owner of "take the toast away" — the auto-dismiss timer, the × button
 // and the swipe gesture all route through here so they cannot fight (the old
 // code cleared the timer in one place and not the other).

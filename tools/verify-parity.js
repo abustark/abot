@@ -14,9 +14,7 @@ const acorn = require('acorn');
 
 const ROOT = path.join(__dirname, '..');
 const SRC = fs.readFileSync(path.join(ROOT, 'tmp', 'main-module.js'), 'utf8');
-const ast = acorn.parse(SRC, { ecmaVersion: 2022, sourceType: 'module', locations: true, onComment: () => {} });
-const main = ast.body.find((s) => s.type === 'FunctionDeclaration');
-const stmts = main.body.body;
+void acorn.parse(SRC, { ecmaVersion: 2022, sourceType: 'module', locations: true, onComment: () => {} });
 
 // --- the documented mechanical rename set (must mirror build-split.js) ---
 const STATE_VARS = ['chats', 'activeChatId', 'abortController', 'guestSessionMessageCount', 'isAppInitialized', 'vantaEffect', 'recognition', 'titleAnimationInterval', 'tokenClient', 'auth', 'db'];
@@ -64,7 +62,7 @@ function renamedOriginalText() {
   const unitByStmt = new Array(stmtsC.length).fill(null);
   UNITS.forEach((u) => u.stmts.forEach((i) => (unitByStmt[i] = u)));
   STATE_VARS.forEach((n) => mainBindings.add(n));
-  stmtsC.forEach((s, i) => {
+  stmtsC.forEach((s, _i) => {
     if (s.type === 'VariableDeclaration') for (const d of s.declarations) if (d.id.type === 'Identifier') mainBindings.add(d.id.name);
     else if (s.type === 'FunctionDeclaration') mainBindings.add(s.id.name);
   });
@@ -194,7 +192,7 @@ function walkIds(pat) {
   return out;
 }
 
-const { text: RENAMED, stmtsC, unitByStmt } = renamedOriginalText();
+const { text: RENAMED, stmtsC } = renamedOriginalText();
 // NOTE: RENAMED has edits applied; statement offsets shifted. Re-parse renamed text
 const astR = acorn.parse(RENAMED, { ecmaVersion: 2022, sourceType: 'module', locations: true });
 const mainR = astR.body.find((s) => s.type === 'FunctionDeclaration');
@@ -269,7 +267,7 @@ if (failures.length) {
 
 // --- CHECK 3: module top-level names all trace to originals or infra ---
 const originalTopNames = new Set();
-stmtsC.forEach((s, i) => {
+stmtsC.forEach((s, _i) => {
   if (s.type === 'VariableDeclaration') for (const d of s.declarations) if (d.id.type === 'Identifier') originalTopNames.add(d.id.name);
   else if (s.type === 'FunctionDeclaration') originalTopNames.add(s.id.name);
 });

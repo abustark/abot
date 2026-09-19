@@ -290,7 +290,7 @@ for (const u of UNITS) {
 // 5. Text extraction helpers
 // ---------------------------------------------------------------------------
 const comments = [];
-walk.full(ast, (node) => { /* noop — acorn comments come from onComment */ });
+walk.full(ast, (_node) => { /* noop — acorn comments come from onComment */ });
 
 // re-parse with onComment to capture comments
 const astC = acorn.parse(SRC, { ecmaVersion: 2022, sourceType: 'module', locations: true, ranges: true, onComment: (block, text, start, end) => comments.push({ start, end }) });
@@ -345,7 +345,7 @@ function applyEdits(text, edits, baseOffset) {
   return t;
 }
 
-function renameEdits(u, runNode) {
+function renameEdits(u, _runNode) {
   const edits = [];
   const { refs } = analyzeUnit(u);
   for (const r of refs) {

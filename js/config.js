@@ -28,9 +28,7 @@ export const COLOR_MAP = {
     'indigo-600': { name: 'indigo-600', isLight: false }
 };
 
-export const generateColorClasses = (colorName) => {
-    const config = COLOR_MAP[colorName] || { name: 'indigo-600', isLight: false };
-    const color = config.name;
+export const generateColorClasses = (_colorName) => {
     // Phase 3: primary actions are always coral; the model identity lives in
     // small accents (selector dot), not button colors. Bubbles are warm card.
     return {

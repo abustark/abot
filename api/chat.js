@@ -1,7 +1,7 @@
 import admin from 'firebase-admin';
 import chatSecurity from '../lib/chat-security.js';
 
-const { LIMITS, validateChatRequest, MemoryRateLimiter, identityKey, clientIp, upstreamTimeout, sseError, logProviderError } = chatSecurity;
+const { validateChatRequest, MemoryRateLimiter, identityKey, clientIp, upstreamTimeout, sseError, logProviderError } = chatSecurity;
 
 // --- Firebase Admin SDK Initialization (runs once per cold start) ---
 if (!admin.apps.length) {
@@ -15,7 +15,7 @@ if (!admin.apps.length) {
     });
 }
 
-// Tier-1 rate limiting (in-memory, per warm instance — see IMPLEMENTATION_PLAN.md)
+// Tier-1 rate limiting (in-memory, per warm instance)
 const chatLimiter = new MemoryRateLimiter();
 
 // --- Main Serverless Function Handler ---
@@ -38,7 +38,7 @@ export default async function handler(req, res) {
     try {
         const decodedToken = await admin.auth().verifyIdToken(idToken);
         uid = decodedToken.uid;
-    } catch (error) {
+    } catch {
         console.error('[chat] token verification failed');
         return res.status(403).json({ error: 'Unauthorized: Invalid token.' });
     }

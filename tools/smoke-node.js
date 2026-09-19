@@ -14,15 +14,15 @@ const errors = [];
 
 function stubChain(label) {
   const handler = {
-    get(target, prop) {
+    get(_target, prop) {
       if (prop === 'then') return undefined; // never thenable
       if (prop === Symbol.toPrimitive) return () => `[stub ${label}]`;
       return makeStubFn(label + '.' + String(prop));
     },
-    apply(target, thisArg, args) {
+    apply(_target, _thisArg, _args) {
       return makeStubFn(label + '()');
     },
-    construct(target, args) {
+    construct(_target, _args) {
       return makeStubFn('new ' + label);
     },
   };
@@ -47,7 +47,6 @@ async function main() {
   window.fetch = () => { throw new Error('fetch() called unexpectedly in smoke test'); };
   const authCallbacks = [];
   const firestoreChain = () => stubChain('firestore');
-  const authStub = stubChain('auth');
   // make onAuthStateChanged capture the callback instead of chain-stubbing
   const authObj = new Proxy({}, {
     get(t, prop) {
@@ -100,7 +99,7 @@ async function main() {
     if (f.endsWith('.js')) fs.copyFileSync(path.join(ROOT, 'js', f), path.join(esmDir, f));
   }
   const appUrl = 'file://' + path.join(esmDir, 'app.js') + '?t=' + Date.now();
-  const app = await import(appUrl);
+  await import(appUrl);
   console.log('✓ module graph imported (app.js + all relative imports)');
 
   // ---- fire DOMContentLoaded ----

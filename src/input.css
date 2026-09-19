@@ -65,7 +65,7 @@
 @tailwind utilities;
 
 /* ---------------------------------------------------------------------------
-   ABot design tokens — Claude-style calm (docs/PHASE3_PLAN.md §1)
+   ABot design tokens — Claude-style calm tokens
    RGB triplets so Tailwind opacity modifiers work: bg-coral/20 etc.
    Light values = claude DESIGN.md light theme; .dark flips the surfaces.
 --------------------------------------------------------------------------- */

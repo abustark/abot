@@ -411,7 +411,7 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
 
     const copyBtn = messageEl.querySelector('.copy-message-btn');
     if (copyBtn) {
-        copyBtn.addEventListener('click', (event) => {
+        copyBtn.addEventListener('click', () => {
             const proseContent = messageEl.querySelector('.prose'); // Simpler selection
             const textToCopy = proseContent ? proseContent.textContent : '';
             navigator.clipboard.writeText(textToCopy).then(() => showToast("Copied!")).catch(() => showToast("Failed to copy", "error"));
@@ -465,12 +465,12 @@ function maybeCollapse(messageEl) {
     target.after(btn);
 }
 
-const persistMessageMeta = async (chatId) => {
+const _persistMessageMeta = async (chatId) => {
     try {
         const uid = state.auth.currentUser.uid;
         await state.db.collection('users').doc(uid).collection('chats').doc(chatId)
             .update({ messages: state.chats[chatId].messages });
-    } catch (e) {
+    } catch {
         console.error('Failed to save message meta');
         showToast('Could not save', 'error');
     }
@@ -704,7 +704,7 @@ export const sendMessage = async () => {
                                 }
                             }
                         }
-                    } catch (e) {
+                    } catch {
                         console.warn("Could not parse JSON chunk:", jsonStr);
                     }
                 }

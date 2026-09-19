@@ -8,7 +8,6 @@
 import { SYSTEM_PROMPTS, getProviderColor, modelCapabilities } from './config.js';
 import { dom } from './dom.js';
 import { state } from './state.js';
-import { showToast } from './utils.js';
 // Single source of truth for the sidebar. Two regimes:
 //  - <768px: off-canvas drawer (transform slide) + overlay + body scroll-lock.
 //  - >=768px: static flex column; collapse = slide the 18rem column out via

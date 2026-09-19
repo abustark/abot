@@ -1,8 +1,8 @@
 # UI Components Roadmap — "shadcn-class" quality without React
 
 > **Decision (owner, 2026-08-30):** stay vanilla. Do **not** migrate to React.
-> This file is the memory/plan for the visual-component upgrade to implement
-> **after** the tap-blocking bug (see `docs/BUG-BRIEF-tap-blocking.md`) is resolved.
+> This file is historical component-roadmap context. Current work order and
+> approval gates live in `docs/AI-WORK-ORDER.md`.
 >
 > Skills to load when executing: `.agents/skills/emil-design-eng`,
 > `animate`, `review-animations`, `apple-design`, plus

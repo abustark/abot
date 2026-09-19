@@ -9,7 +9,6 @@ import { dom } from './dom.js';
 import { state } from './state.js';
 import { createNewChat, exportChat, exportChatMarkdown, switchChat } from './chat.js';
 import { openPromptModal } from './ui.js';
-import { stopSpeaking } from './utils.js';
 
 let isOpen = false;
 let commands = [];

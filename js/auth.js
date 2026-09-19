@@ -36,26 +36,31 @@ state.db = firebase.firestore();
 // AUTHENTICATION FUNCTIONS
 // =================================================================================
 
+const setAuthMessage = (message = '', type = 'error') => {
+    dom.errorMessage.textContent = message;
+    dom.errorMessage.classList.remove('text-danger', 'text-ok');
+    dom.errorMessage.classList.add(type === 'success' ? 'text-ok' : 'text-danger');
+};
 
 export const showLoginView = () => {
     dom.loginView.style.display = 'block';
     dom.signupView.style.display = 'none';
     dom.forgotPasswordView.style.display = 'none';
-    dom.errorMessage.textContent = '';
+    setAuthMessage();
 };
 
 export const showSignupView = () => {
     dom.loginView.style.display = 'none';
     dom.signupView.style.display = 'block';
     dom.forgotPasswordView.style.display = 'none';
-    dom.errorMessage.textContent = '';
+    setAuthMessage();
 };
 
 export const showForgotPasswordView = () => {
     dom.loginView.style.display = 'none';
     dom.signupView.style.display = 'none';
     dom.forgotPasswordView.style.display = 'block';
-    dom.errorMessage.textContent = '';
+    setAuthMessage();
 };
 
 export const handleAuthError = (error) => {
@@ -78,15 +83,15 @@ export const handleAuthError = (error) => {
             message = "The sign-in window was closed. Please try again.";
             break;
     }
-    dom.errorMessage.textContent = message;
+    setAuthMessage(message);
 };
 
 export const signInAsGuest = () => {
-    dom.errorMessage.textContent = '';
+    setAuthMessage();
     state.auth.signInAnonymously()
         .catch((error) => {
             console.error("Anonymous sign-in error:", error);
-                            dom.errorMessage.textContent = `Could not start a guest session: ${error.message}`;
+            setAuthMessage(`Could not start a guest session: ${error.message}`);
         });
 };
 
@@ -175,15 +180,14 @@ dom.forgotPasswordForm.addEventListener('submit', (e) => {
     const email = document.getElementById('forgot-password-email').value;
     state.auth.sendPasswordResetEmail(email)
         .then(() => {
-            dom.errorMessage.style.color = '#22c55e';
-            dom.errorMessage.textContent = 'Success! Check your email for a reset link.';
+            setAuthMessage('Success! Check your email for a reset link.', 'success');
         })
         .catch(handleAuthError);
 });
 
 dom.signupForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    dom.errorMessage.textContent = '';
+    setAuthMessage();
     const email = document.getElementById('signup-email').value;
     const password = document.getElementById('signup-password').value;
     state.auth.createUserWithEmailAndPassword(email, password).catch(handleAuthError);
@@ -191,7 +195,7 @@ dom.signupForm.addEventListener('submit', (e) => {
 
 dom.loginForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    dom.errorMessage.textContent = '';
+    setAuthMessage();
     const email = document.getElementById('login-email').value;
     const password = document.getElementById('login-password').value;
     state.auth.signInWithEmailAndPassword(email, password).catch(handleAuthError);
