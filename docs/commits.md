@@ -8,6 +8,14 @@ This document tracks every commit made on `main` following the `2.0.x` versionin
 
 ## Commit History
 
+### 2.0.4 - fix email verification gate race and cache-bust assets
+- **Date**: 2026-09-19
+- **Changes**:
+  - Fixed `providerData` race condition in `onAuthStateChanged` where Firebase returns an empty `providerData[]` immediately after `createUserWithEmailAndPassword`, allowing unverified users to bypass the verification gate. Replaced with a simpler `!user.isAnonymous && !user.emailVerified` check (Google users always have `emailVerified=true`).
+  - Added safety guard inside `enterApp()` as a second line of defense.
+  - Cache-busted `app.js` and `output.css` in `index.html` (`?v=p14`) so Vercel visitors get the new code immediately.
+  - Updated test fake users with `emailVerified: true` to match the new gate.
+
 ### 2.0.3 - add playwright verification suite and ignore local sessions
 - **Date**: 2026-09-19
 - **Changes**:

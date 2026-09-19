@@ -126,7 +126,7 @@ async function main() {
   console.log('✓ logged-out path OK (login view shown, loader hidden)');
 
   // ---- logged-in path: run initApp wiring via the auth callback ----
-  const fakeUser = { uid: 'smoke-user-1', displayName: 'Smoke Tester', email: 'smoke@test.dev', isAnonymous: false, photoURL: null };
+  const fakeUser = { uid: 'smoke-user-1', displayName: 'Smoke Tester', email: 'smoke@test.dev', isAnonymous: false, emailVerified: true, photoURL: null };
   for (const cb of authCallbacks) {
     try { await cb(fakeUser); } catch (e) { errors.push('auth(user) threw: ' + (e && e.stack || e)); }
   }
