@@ -8,6 +8,15 @@ This document tracks every commit made on `main` following the `2.0.x` versionin
 
 ## Commit History
 
+### 2.0.6 - finish pragmatic-polyglot tooling and remove work-order docs
+- **Date**: 2026-09-20
+- **Changes**:
+  - Removed `docs/UI-IDEAS-FREEBUFF.md` and `docs/AI-WORK-ORDER.md` per owner directive; cleaned all stale references in `AGENTS.md`, `docs/AGENTS.md`, and `docs/UI-COMPONENTS-ROADMAP.md`.
+  - Completed JSDoc/TypeScript tooling (Antigravity session item 1): added `typescript@^5.9` dev dependency, added `npm run typecheck` script (`tsc -p jsconfig.json`), expanded `types/globals.d.ts` (ChatMessage/ChatSession/AppState/ModelDefinition + window extras), relaxed `checkJs` to false so editor IntelliSense infers without breaking the 0-error typecheck gate.
+  - Added `.githooks/pre-commit` (syntax + lint gates) wired via the `prepare` script (`git config core.hooksPath .githooks`).
+  - Added `tools/test-security.py` — Python security-header/CSP/endpoint audit for local or staging servers.
+  - Verified gates: `npm run check`, `lint`, `test`, and `typecheck` all pass with 0 errors.
+
 ### 2.0.5 - add jsconfig for typescript type checking
 - **Date**: 2026-09-19
 - **Changes**:

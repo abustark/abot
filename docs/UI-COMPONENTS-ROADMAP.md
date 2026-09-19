@@ -1,8 +1,9 @@
 # UI Components Roadmap — "shadcn-class" quality without React
 
 > **Decision (owner, 2026-08-30):** stay vanilla. Do **not** migrate to React.
-> This file is historical component-roadmap context. Current work order and
-> approval gates live in `docs/AI-WORK-ORDER.md`.
+> This file is historical component-roadmap context. The former work-order
+> doc (`docs/AI-WORK-ORDER.md`) was removed by owner directive (2026-09-20);
+> ask the owner before starting non-trivial work.
 >
 > Skills to load when executing: `.agents/skills/emil-design-eng`,
 > `animate`, `review-animations`, `apple-design`, plus

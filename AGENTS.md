@@ -4,13 +4,6 @@
 > task order, quality gates, and hard constraints for working on ABot.
 > Codex/Claude/Antigravity: this file overrides your defaults where they conflict.
 >
-> **🔴 READ-FIRST RULE (owner directive, 2026-09-19): before doing ANYTHING
-> else the user asks, open and go through `docs/UI-IDEAS-FREEBUFF.md` — the
-> Freebuff UI ideas backlog (performance, motion, PC/mobile polish). Every
-> UI change you make must keep those ideas in mind, and new work should not
-> contradict them. Re-read it when you touch `index.html`, `js/`, or
-> `src/input.css`.**
-
 ---
 
 ## 0. Repository context (60 seconds)
@@ -19,7 +12,7 @@ ABot is a **vanilla-JS, multi-model AI chat app** (no framework):
 - Frontend: `index.html` + ES modules in `js/` (entry: `js/app.js`), Tailwind CSS compiled from `src/input.css` → `dist/output.css` (**compiled file is committed — always rebuild + commit it after CSS/config changes**)
 - Design system: Claude-style warm tokens (canvas/ink/coral) defined in `src/input.css` CSS vars + `tailwind.config.js`. **Never hardcode hex colors in markup/JS.**
 - Backend: Vercel serverless `api/chat.js` (production) + `server.js` (local dev mirror), sharing `lib/chat-security.js`. Firebase Auth + Firestore (`users/{uid}/chats/{chatId}`).
-- Tests/gates: see §3. Docs worth reading before any work: `docs/UI-IDEAS-FREEBUFF.md` (**read first — owner directive**) and `docs/AI-WORK-ORDER.md` (current findings, difficulty order, and approval gates).
+- Tests/gates: see §3. (`docs/UI-IDEAS-FREEBUFF.md` and `docs/AI-WORK-ORDER.md` were removed by owner directive, 2026-09-20 — no replacement work order exists; ask the owner before starting non-trivial work.)
 
 **Constraint:** all AI providers are FREE-TIER keys. Never add features that make extra AI API calls without asking the owner.
 
@@ -41,18 +34,15 @@ ABot is a **vanilla-JS, multi-model AI chat app** (no framework):
 
 ---
 
-## 2. Task order (do NOT skip ahead)
+## 2. Task order
 
-> **Standing pre-task step:** read `docs/UI-IDEAS-FREEBUFF.md` first and keep
-> its backlog in mind. Then read `docs/AI-WORK-ORDER.md` and follow its LOW →
-> MEDIUM → HARD order.
+> The work-order docs (`docs/UI-IDEAS-FREEBUFF.md`, `docs/AI-WORK-ORDER.md`)
+> were removed by owner directive (2026-09-20). The LOW → MEDIUM → HARD
+> backlog they tracked is complete (L1–L4, M1–M4, H1; H2 cancelled).
 
-1. Complete LOW difficulty work first.
-2. Stop and report before starting MEDIUM work.
-3. Start MEDIUM or HARD work only after explicit owner approval.
-4. Do not add new features until the current security/auth findings in
-   `docs/AI-WORK-ORDER.md` are handled or deliberately deferred by the owner.
-5. Keep using `/#diag`, `/#reset`, interaction tests, and real-browser checks
+1. There is no standing work queue — **confirm scope with the owner before starting non-trivial work.**
+2. Do not add new features without owner approval.
+3. Keep using `/#diag`, `/#reset`, interaction tests, and real-browser checks
    when debugging shell taps, auth, or mobile UI.
 
 ---
@@ -93,4 +83,4 @@ For PHASE D: load `emil-design-eng` + `animate` + `taste-skill` before writing U
 
 ---
 
-*Prepared 2026-08-30 · Updated 2026-09-19 · Current source of truth: `docs/AI-WORK-ORDER.md`*
+*Prepared 2026-08-30 · Updated 2026-09-20 · Commit log: `docs/commits.md`*
