@@ -25,13 +25,19 @@ ABot is a **vanilla-JS, multi-model AI chat app** (no framework):
 
 ---
 
-## 1. Branch discipline (strict)
+## 1. Branch discipline & Commit Versioning (strict)
 
-1. `git fetch origin` and base ALL work on **`origin/arena/01a03fe9-abot`** — this is the current integration branch (50+ commits: security hardening, modularization, design system, TTS, CI).
-2. Create your working branch **from it**: `git checkout -b fix/tap-blocking origin/arena/01a03fe9-abot`
-3. Commit early, commit small, message style: imperative summary + body explaining *why*.
-4. When done and all gates pass (§3), push your branch to `origin`, then merge or open a PR **into `arena/01a03fe9-abot`**. Do not push broken/intermediate states to the integration branch. Do not touch `main` — the owner merges that.
-5. Never force-push `arena/01a03fe9-abot`. Never commit secrets (`.env`, `service-account-key.json` are gitignored — keep them that way).
+1. **Always work on `main`**: All development, fixes, quality gates, and commits happen directly on the `main` branch.
+2. **Commit Naming & Versioning**:
+   - Every commit must follow this versioning structure:
+     `2.0.1`, `2.0.2`, ..., `2.0.9`, `2.0.10` ➔ rolls over to `2.1.0`.
+     Then `2.1.1`, ..., `2.1.10` ➔ rolls over to `2.2.0`, etc.
+   - Format: `<version> - <short description>` (e.g., `2.0.2 - auth page ui changed`). Keep it short and clear, avoid overly long commit titles.
+   - Every commit must also be logged in `docs/commits.md` with its version and what it did.
+3. **Arena Synchronization (`arena/01a03fe9-abot`)**:
+   - After updating `main`, merge `main` into `arena/01a03fe9-abot` so the integration branch stays synced with `main`.
+   - **`docs/updates.md`**: Exists **only on the `arena` branch** (never commit to `main`). It is updated only after major updates (not for every small commit) and documents the contrast between the old workflow and the updated workflow.
+4. **Secrets**: Never commit secrets (`.env`, `service-account-key.json` are gitignored — keep them that way).
 
 ---
 
