@@ -4,6 +4,44 @@
 
 ---
 
+## Update: v2.0.7 Mobile Stability & Header Cleanup (2026-09-20)
+
+### 1. Critical: Mobile "frozen after first login"
+* **Old Workflow**: `#app-loader` (fixed, z-50) was removed only by a 300 ms `setTimeout`.
+  When mobile browsers throttled/dropped that timer during page transitions, an
+  invisible full-screen layer kept intercepting every real tap — forcing a refresh.
+* **Updated Workflow**: `hideAppLoader()` now sets `pointer-events:none` + `visibility:hidden`
+  *immediately*, and clears `display:none` via `transitionend` with a timer fallback.
+  The loader can never trap taps again.
+
+### 2. Mobile search close button was unreachable
+* **Old Workflow**: `#searchPanel` was `position:static` with no z-index; on narrow screens the
+  fixed composer dock (z-10) and jump-to-latest pill (z-20) overlapped and covered
+  the close "X", so taps never landed. Worked on PC (composer is in-flow there).
+* **Updated Workflow**: search is now a proper sheet — `#searchPanel` is `relative z-40`
+  (a fixed top bar below 768px) with a `z-30` `#searchBackdrop` for tap-outside-to-close.
+
+### 3. Google sign-in dead on first mobile tap
+* **Old Workflow**: the GSI client (`async defer`) often hadn't loaded when `onAuthStateChanged`
+  ran, so `google.accounts.id.initialize` was skipped and the button did nothing.
+* **Updated Workflow**: initialization is retried for ~6 s instead of silently skipped.
+
+### 4. PC header declutter (Option A)
+* **Old Workflow**: a row of five mismatched ghost icons + barely-visible dividers; the model
+  pill was the loudest element; no clear primary action.
+* **Updated Workflow**: slimmer `h-12` bar with a hairline border, quieter model pill, and
+  search/prompt/theme collapsed into a single `⋯` overflow menu. Original element IDs
+  preserved inside the menu so wiring and interaction tests stay intact.
+
+### 5. Misc
+* Search inputs switched to `type="text" inputmode="search"` so iOS's native clear-x
+  no longer swallows the first tap.
+* Interaction tests added for the search backdrop and the overflow menu.
+
+> Note: landed on `main` (commit `828a54a`), merged into arena. Quality gates deferred per owner instruction.
+
+---
+
 ## Major Update: v2.0.0 Architecture & Security Overhaul (2026-09-19)
 
 ### 1. Workflow Comparison: Old vs. Updated
