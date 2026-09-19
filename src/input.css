@@ -1,6 +1,8 @@
 /* Self-hosted fonts — latin subsets, display=swap.
-   Geist (Vercel, SIL OFL) is the UI voice; Inter kept as fallback stack.
-   Source Serif 4 stays the display voice. */
+   Geist (Vercel, SIL OFL) is the UI voice (400/500/600 — markup never asks for
+   a heavier weight). Inter was removed in v1.0.5: Geist always won the stack, so
+   its four faces were dead weight (~92 KB). Source Serif 4 stays the display
+   voice. System fonts carry the fallback. */
 @font-face {
   font-family: 'Geist';
   font-style: normal;
@@ -21,20 +23,6 @@
   font-weight: 600;
   font-display: swap;
   src: url('/dist/fonts/geist-latin-600-normal.woff2') format('woff2');
-}
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url('/dist/fonts/inter-latin-400-normal.woff2') format('woff2');
-}
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url('/dist/fonts/inter-latin-600-normal.woff2') format('woff2');
 }
 @font-face {
   font-family: 'JetBrains Mono';
@@ -147,7 +135,7 @@
   body {
     background-color: rgb(var(--c-canvas));
     color: rgb(var(--c-body));
-    font-family: 'Geist', 'Inter', sans-serif;
+    font-family: 'Geist', ui-sans-serif, system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
 
@@ -499,6 +487,19 @@ mark {
 .typing-indicator span { background-color: rgb(var(--c-coral)); }
 
 /* ---------------------------------------------------------------------------
+   v1.0.5 — A3: long-thread render cost
+--------------------------------------------------------------------------- */
+
+/* Off-screen messages skip layout + paint. contain-intrinsic-size keeps the
+   scrollbar honest for skipped boxes (the placeholder height is an average of
+   short AI/user messages). Interaction-test + owner scroll check cover the
+   search-jump path, which is the only code that scrolls to a message. */
+.message-container {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 120px;
+}
+
+/* ---------------------------------------------------------------------------
    v1.0.3 — composer chips (B3/B4), jump-to-latest pill (E1)
 --------------------------------------------------------------------------- */
 
@@ -506,6 +507,7 @@ mark {
    input. Token-only colors, 150ms ease-out, coral tint when active, disabled
    at 40% with not-allowed cursor. Per AGENTS.md: ≤300ms, reduced-motion safe. */
 .composer-chip {
+    position: relative;
     display: inline-flex;
     align-items: center;
     gap: 0.375rem;
@@ -583,6 +585,24 @@ mark {
 @media (prefers-reduced-motion: reduce) {
     .switch-track,
     .switch-track::after { transition: none; }
+}
+
+/* C2 (v1.0.5): the visual pill stays slim but the tap target must clear 44px.
+   A vertical-only ::before expansion avoids overlapping the neighbouring chip. */
+.composer-chip::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -9px;
+    bottom: -9px;
+}
+
+/* C1 (v1.0.5): the jump pill floats above the composer, so it has to lift with
+   the mobile keyboard exactly like the dock does (--kb-h) — otherwise a
+   mid-stream reveal hides under the keyboard. ID beats the bottom-28 utility. */
+#jumpToLatest {
+    bottom: calc(7rem + var(--kb-h, 0px));
 }
 
 /* Jump-to-latest pill (E1): `hidden` toggles to `flex` from markup; entry is

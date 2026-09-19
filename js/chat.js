@@ -18,10 +18,21 @@ import { state } from './state.js';
 // First code block triggers a single deferred <script> load; all highlighting
 // waits for it. Errors fall back gracefully to unstyled (still readable) code.
 let highlightLoadPromise = null;
+// A1 (v1.0.5): the library AND its theme used to be head-linked, so every
+// visitor downloaded 159 KB plus a stylesheet even if they never saw a code
+// block. Both are now injected on the first code block and runtime-cached by
+// the service worker.
 const loadHighlightJs = () => {
     if (window.hljs) return Promise.resolve();
     if (!highlightLoadPromise) {
         highlightLoadPromise = new Promise((resolve) => {
+            if (!document.querySelector('link[data-hljs-theme]')) {
+                const css = document.createElement('link');
+                css.rel = 'stylesheet';
+                css.href = '/vendor/atom-one-dark.css';
+                css.dataset.hljsTheme = '1';
+                document.head.appendChild(css);
+            }
             const s = document.createElement('script');
             s.src = '/vendor/highlight.min.js';
             s.onload = () => resolve();
@@ -402,7 +413,7 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
                             <div class="message-container w-full flex flex-col mb-8 group">
                                 <div class="flex items-center gap-2.5 mb-1.5 select-none">
                                     <div class="w-5 h-5 rounded-md ${providerColor.dot} flex items-center justify-center flex-shrink-0">
-                                         <span class="text-white text-[8px] font-bold">${modelConf.name.substring(0, 2).toUpperCase()}</span>
+                                         <span class="text-white text-[8px] font-semibold">${modelConf.name.substring(0, 2).toUpperCase()}</span>
                                     </div>
                                     <span class="text-xs font-semibold ${providerColor.text}">${modelConf.name}</span>
                                     ${showTs ? `<span class="text-[11px] text-muted/80 msg-timestamp">${getTimestamp()}</span>` : ''}
@@ -866,7 +877,7 @@ const renderEmptyState = () => {
             <p class="text-muted text-sm mb-10 max-w-sm">Pick a suggestion or type your own prompt below.</p>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-2xl">
                 ${suggestions.map(sg => `
-                    <button class="suggestion-card text-left p-4 rounded-2xl bg-raised border border-hairline shadow-soft hover:shadow-lift hover:-translate-y-0.5 hover:border-coral/50 transition-all duration-base ease-out" data-prompt="${sg.prompt.replace(/"/g, '&quot;')}">
+                    <button class="suggestion-card text-left p-4 rounded-2xl bg-raised border border-hairline shadow-soft hover:shadow-lift hover:-translate-y-0.5 hover:border-coral/50 transition-[box-shadow,transform,border-color] duration-base ease-out" data-prompt="${sg.prompt.replace(/"/g, '&quot;')}">
                         <span class="block text-sm font-medium text-ink">${sg.title}</span>
                         <span class="block text-xs text-muted mt-1 leading-relaxed">${sg.sub}</span>
                     </button>`).join('')}

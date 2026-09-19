@@ -8,7 +8,7 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Geist', 'Inter', 'sans-serif'],
+        sans: ['Geist', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         display: ['"Source Serif 4"', 'Georgia', 'serif'],
         heading: ['"Source Serif 4"', 'Georgia', 'serif'], // legacy alias -> serif display voice
         mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],

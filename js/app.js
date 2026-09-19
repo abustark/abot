@@ -77,10 +77,22 @@ function initApp() {
         if (track) track.dataset.on = String(dark);
     };
     syncThemeIcons();
-    dom.themeToggle.addEventListener('click', () => {
+    const applyThemeToggle = () => {
         const dark = document.documentElement.classList.toggle('dark');
         localStorage.setItem('darkMode', String(dark));
         syncThemeIcons();
+    };
+    dom.themeToggle.addEventListener('click', () => {
+        // B1 (v1.0.5): crossfade the theme flip where the View Transitions API
+        // exists (progressive enhancement, ~0 cost); instant on browsers
+        // without it. Reduced-motion users always get the instant swap.
+        const reduceMotion = typeof window.matchMedia === 'function'
+            && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (!reduceMotion && typeof document.startViewTransition === 'function') {
+            document.startViewTransition(applyThemeToggle);
+        } else {
+            applyThemeToggle();
+        }
     });
 
     // --- Mobile keyboard offset: keep the fixed composer dock above the

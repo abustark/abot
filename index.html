@@ -21,10 +21,11 @@
     <link rel="preload" href="/dist/fonts/geist-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/dist/fonts/geist-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/dist/fonts/source-serif-4-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link href="./dist/output.css?v=p10" rel="stylesheet">
+    <link href="./dist/output.css?v=p11" rel="stylesheet">
     <script src="/vendor/marked.min.js" defer></script>
-    <link rel="stylesheet" href="/vendor/atom-one-dark.css">
-    <script src="/vendor/highlight.min.js" defer></script>
+    <!-- A1 (v1.0.5): highlight.js + its theme are lazy-loaded on the first code
+         block (js/chat.js) — they were head-linked here, costing every visitor
+         159 KB whether or not they ever saw a code block. -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
     <link rel="dns-prefetch" href="https://firestore.googleapis.com">    <style>
@@ -104,7 +105,7 @@
                 <span class="mb-5 inline-flex items-center rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.2em] font-medium bg-coral-soft text-coral">Multi-model chat</span>
         <!-- Old AB monogram — restored per owner request -->
         <img src="/logo.png" alt="ABot logo" class="h-16 w-16 mb-5 select-none" draggable="false">
-                <h1 class="text-3xl font-bold font-heading text-ink">Welcome to ABot</h1>
+                <h1 class="text-3xl font-semibold font-heading text-ink">Welcome to ABot</h1>
                 <p class="mt-2 text-muted">Sign in to pick up where you left off</p>
                 <p class="mt-4 text-[10px] text-muted/70 select-all" id="build-badge"></p>
             </div>
@@ -420,7 +421,7 @@
                 </div>
                 <div class="flex items-center gap-1.5">
                     <button id="modelSelectorBtn"
-                        class="flex items-center gap-2 bg-raised dark:bg-raised border border-hairline shadow-soft pl-3 pr-2.5 py-1.5 rounded-full text-sm font-medium text-ink hover:border-coral/40 hover:shadow-lift focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-coral/40 dark:focus:ring-offset-canvas transition-all duration-fast ease-out active:scale-[0.98]">
+                        class="flex items-center gap-2 bg-raised dark:bg-raised border border-hairline shadow-soft pl-3 pr-2.5 py-1.5 rounded-full text-sm font-medium text-ink hover:border-coral/40 hover:shadow-lift focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-coral/40 dark:focus:ring-offset-canvas transition-[border-color,box-shadow,transform] duration-fast ease-out active:scale-[0.98]">
                         <span id="modelSelectorDot" class="w-2 h-2 rounded-full bg-coral"></span>
                         <span id="modelSelectorLabel" class="font-medium whitespace-nowrap truncate max-w-[130px] md:max-w-none">Select Model</span>
                         <svg class="w-3.5 h-3.5 text-muted" xmlns="http://www.w3.org/2000/svg"
@@ -556,7 +557,7 @@
                     </div>
                 </div>
                 <button id="jumpToLatest" aria-label="Jump to latest message"
-                    class="fixed bottom-28 right-5 z-20 hidden flex-col items-center gap-1 px-3 py-2.5 rounded-full bg-raised border border-hairline shadow-lift text-xs font-medium text-ink hover:border-coral/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-coral/40 transition-all duration-base ease-out active:scale-95">
+                    class="fixed bottom-28 right-5 z-20 hidden flex-col items-center gap-1 px-3 py-2.5 rounded-full bg-raised border border-hairline shadow-lift text-xs font-medium text-ink hover:border-coral/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-coral/40 transition-[border-color,box-shadow,transform] duration-base ease-out active:scale-95">
                     <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3" /></svg>
                     <span>Latest</span>
                 </button>

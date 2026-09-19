@@ -132,6 +132,30 @@
 
 ---
 
+## Status (updated 2026-09-19 · shipped in v1.0.5)
+
+- ✅ **A1** highlight.js *and* its theme now lazy-load on the first code block;
+  the eager head tags are gone (−159 KB on every first visit) and the SW no
+  longer precaches the stylesheet.
+- ✅ **A2** Inter removed end-to-end: 2 `@font-face` blocks, 4 woff2 files and
+  the SW precache entry are gone; sans stack is `Geist, ui-sans-serif,
+  system-ui`; the two `font-bold` uses became `font-semibold` (Geist ships
+  400/500/600, so bold was being faux-rendered).
+- ✅ **A3** `content-visibility: auto` + `contain-intrinsic-size: auto 120px` on
+  `.message-container` — ⚠️ owner should sanity-check long-thread scrolling and
+  the search jump-to-message path locally (render behavior is not testable in
+  jsdom).
+- ✅ **A4** zero `transition-all` left — all three are property-specific now.
+- ✅ **B1** theme flips through `document.startViewTransition` where available,
+  and is skipped entirely under `prefers-reduced-motion`.
+- ✅ **C1** `#jumpToLatest { bottom: calc(7rem + var(--kb-h, 0px)); }` — the pill
+  now lifts with the mobile keyboard exactly like the composer dock.
+- ✅ **C2** chip tap area reaches ≥44px via a vertical-only `::before` (the
+  visible pill stays slim).
+- ✅ **C4** already satisfied before this pass — the chat column is `max-w-3xl`
+  (48rem), matching the intended reading measure.
+- ☐ **B2–B7, C3, C5** remain — next slice (see execution order below).
+
 ## Execution order (suggested)
 
 1. **v1.0.4 "light & motion":** A1 → A2 → A3 → A4 + B1 + C1 (+ C2/C4 if time).

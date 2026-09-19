@@ -3,13 +3,13 @@
  * Provides offline caching for local assets only
  */
 
-const CACHE_NAME = 'abot-cache-v23'; // v23: composer chips, jump pill, sidebar quick actions, css v=p11
+const CACHE_NAME = 'abot-cache-v24'; // v24: lazy highlight.js, Inter removed, css v=p11
 const STATIC_ASSETS = [
     '/',
     '/index.html',
     '/favicon-32.png',
     '/logo.png',
-    '/dist/output.css?v=p10',
+    '/dist/output.css?v=p11',
     '/js/app.js',
     '/js/config.js',
     '/js/dom.js',
@@ -20,12 +20,12 @@ const STATIC_ASSETS = [
     '/js/auth.js',
     '/js/chat.js',
     '/vendor/marked.min.js',
-    '/vendor/atom-one-dark.css',
+    // A1/A2 (v1.0.5): atom-one-dark.css is injected with the lazy highlight.js
+    // load, and the Inter faces are gone — neither belongs in the precache.
     '/manifest.json',
     '/dist/fonts/geist-latin-400-normal.woff2',
     '/dist/fonts/geist-latin-500-normal.woff2',
     '/dist/fonts/geist-latin-600-normal.woff2',
-    '/dist/fonts/inter-latin-400-normal.woff2',
     '/dist/fonts/source-serif-4-latin-400-normal.woff2'
 ];
 
