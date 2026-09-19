@@ -288,7 +288,11 @@ export const createNewChat = async () => {
             name: "New Chat",
             model: Object.keys(MODEL_CONFIG)[0],
             systemPrompt: "You are an AI assistant powered by ABot, a multi-model chat platform. Your goal is to be helpful, accurate, and concise. When asked about yourself, you can mention you are running on the ABot application.",
-            messages: [{ role: "assistant", content: "Hello! How can I assist you today?", model: Object.keys(MODEL_CONFIG)[0] }]
+            // v2.0.9 (owner request): a new chat starts EMPTY. Seeding a fake
+            // assistant greeting made messages.length > 0, so renderActiveChat()
+            // always took the "has messages" branch and the new-chat landing
+            // (centred composer + greeting + suggestion cards) never rendered.
+            messages: []
         };
 
         await state.db.collection('users').doc(currentUser.uid).collection('chats').doc(newChatId).set(newChatData);

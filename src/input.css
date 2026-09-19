@@ -1004,3 +1004,73 @@ html.dark .logo-mark { filter: brightness(0) invert(1); }
     /* Windows high-contrast overrides colors wholesale — let it win. */
     .logo-mark { filter: none; }
 }
+
+/* ==========================================================================
+   v2.0.9 — dotted loader · header polish · micro-interactions · mobile pass
+   ========================================================================== */
+
+/* --- P1: dot-matrix "ABot" wordmark (Nothing-style) ----------------------
+   Each dot rides its own animation-delay (baked into the SVG by
+   tools/make-dotmark.js) so every letter builds bottom-left -> top and the
+   letters sweep A -> b -> o -> t. --ease-out token, 240ms, well under 300ms. */
+.dotmark { overflow: visible; }
+.dotmark circle {
+    fill: rgb(var(--c-ink));
+    opacity: 0;
+    transform: translateY(3px);
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: dotRise 240ms var(--ease-out) forwards;
+}
+@keyframes dotRise {
+    to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+    /* No assembly sequence — just show the finished wordmark. */
+    .dotmark circle { animation: none; opacity: 1; transform: none; }
+}
+
+/* --- P3: header overflow menu — real surface + states --------------------
+   The rows sat on the same surface as the menu (bg-card on bg-card), so hover
+   and active were invisible on the dark theme. Give the menu a raised surface
+   and the rows genuine hover/press/focus feedback. */
+#headerOverflowMenu { background-color: rgb(var(--c-raised)); }
+html.dark #headerOverflowMenu { background-color: rgb(var(--c-card)); }
+#headerOverflowMenu .menu-row:hover { background-color: rgb(var(--c-hairline) / 0.45); }
+#headerOverflowMenu .menu-row:active { background-color: rgb(var(--c-hairline) / 0.7); }
+#headerOverflowMenu .menu-row:focus-visible {
+    background-color: rgb(var(--c-hairline) / 0.45);
+    outline: 2px solid rgb(var(--c-coral) / 0.45);
+    outline-offset: -2px;
+}
+
+/* --- P5: micro-interactions (press + focus) ------------------------------
+   Pointer-only press feedback; keyboard users get a ring instead. */
+#appHeader button:focus-visible,
+#searchPanel button:focus-visible,
+#headerOverflowMenu .menu-row:focus-visible {
+    outline: 2px solid rgb(var(--c-coral) / 0.45);
+    outline-offset: 2px;
+}
+#headerOverflowMenu .menu-row:focus-visible { outline-offset: -2px; }
+@media (hover: hover) and (pointer: fine) {
+    #headerOverflowBtn,
+    #headerNewChatBtn,
+    #headerOverflowMenu .menu-row {
+        transition: transform 140ms var(--ease-out), background-color 140ms var(--ease-out),
+            color 140ms var(--ease-out);
+    }
+    #headerOverflowBtn:active,
+    #headerNewChatBtn:active { transform: scale(0.94); }
+    #headerOverflowMenu .menu-row:active { transform: scale(0.985); }
+}
+
+/* --- P7: mobile ergonomics -----------------------------------------------
+   Comfortable tap targets on touch devices only (desktop keeps the tighter
+   visual rhythm), and momentum scrolling in the thread. */
+@media (hover: none) {
+    #appHeader button { min-width: 40px; min-height: 40px; }
+    #headerOverflowMenu .menu-row { min-height: 44px; }
+    #searchCloseBtn { min-width: 44px; min-height: 44px; justify-content: center; }
+}
+#chatHistoryContainer { -webkit-overflow-scrolling: touch; }

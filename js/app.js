@@ -444,6 +444,32 @@ function initApp() {
             closeOverflow();
         }
     });
+    // P3 (v2.0.9): keyboard access — ArrowDown/Up cycle the rows, Esc closes
+    // and hands focus back to the trigger. ArrowDown on the trigger opens it.
+    overflowMenu?.addEventListener('keydown', (e) => {
+        const rows = Array.from(overflowMenu.querySelectorAll('.menu-row'));
+        if (!rows.length) return;
+        const i = rows.indexOf(document.activeElement);
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            rows[(i + 1 + rows.length) % rows.length].focus();
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            rows[(i - 1 + rows.length) % rows.length].focus();
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            e.stopPropagation(); // don't also run the global Esc closer
+            closeOverflow();
+            overflowBtn?.focus();
+        }
+    });
+    overflowBtn?.addEventListener('keydown', (e) => {
+        if (e.key !== 'ArrowDown') return;
+        e.preventDefault();
+        overflowMenu?.classList.remove('hidden');
+        overflowBtn.setAttribute('aria-expanded', 'true');
+        overflowMenu?.querySelector('.menu-row')?.focus();
+    });
 
     dom.modelSelectorPanel.addEventListener('keydown', handleModelSelectorNavigation);
     // Tab must not escape the open model panel (a11y: keep focus in the menu)
