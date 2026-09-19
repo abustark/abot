@@ -3,6 +3,13 @@
 > **Read this fully before writing any code.** It defines branch discipline,
 > task order, quality gates, and hard constraints for working on ABot.
 > Codex/Claude/Antigravity: this file overrides your defaults where they conflict.
+>
+> **🔴 READ-FIRST RULE (owner directive, 2026-09-19): before doing ANYTHING
+> else the user asks, open and go through `docs/UI-IDEAS-FREEBUFF.md` — the
+> Freebuff UI ideas backlog (performance, motion, PC/mobile polish). Every
+> UI change you make must keep those ideas in mind, and new work should not
+> contradict them. Re-read it when you touch `index.html`, `js/`, or
+> `src/input.css`.**
 
 ---
 
@@ -12,7 +19,7 @@ ABot is a **vanilla-JS, multi-model AI chat app** (no framework):
 - Frontend: `index.html` + ES modules in `js/` (entry: `js/app.js`), Tailwind CSS compiled from `src/input.css` → `dist/output.css` (**compiled file is committed — always rebuild + commit it after CSS/config changes**)
 - Design system: Claude-style warm tokens (canvas/ink/coral) defined in `src/input.css` CSS vars + `tailwind.config.js`. **Never hardcode hex colors in markup/JS.**
 - Backend: Vercel serverless `api/chat.js` (production) + `server.js` (local dev mirror), sharing `lib/chat-security.js`. Firebase Auth + Firestore (`users/{uid}/chats/{chatId}`).
-- Tests/gates: see §3. Docs worth reading before UI work: `docs/PHASE3_PLAN.md` (design system), `IMPLEMENTATION_PLAN.md` (history).
+- Tests/gates: see §3. Docs worth reading before UI work: `docs/UI-IDEAS-FREEBUFF.md` (**read first — owner directive**), `docs/PHASE3_PLAN.md` (design system), `IMPLEMENTATION_PLAN.md` (history).
 
 **Constraint:** all AI providers are FREE-TIER keys. Never add features that make extra AI API calls without asking the owner.
 
@@ -29,6 +36,10 @@ ABot is a **vanilla-JS, multi-model AI chat app** (no framework):
 ---
 
 ## 2. Task order (do NOT skip ahead)
+
+> **Standing pre-task step (all phases):** read `docs/UI-IDEAS-FREEBUFF.md`
+> first and keep its backlog in mind — the user may ask for something else,
+> but the UI ideas there are the standing direction for every visual change.
 
 ### PHASE A — Fix the open bug first (blocking everything else)
 Read **`docs/BUG-BRIEF-tap-blocking.md`** in full. Summary: physical taps on shell controls do nothing on the deployed app, while synthetic `dispatchEvent` clicks all pass — a hit-testing/interception issue. The build already contains ground-truth tools you must use, not replace:

@@ -147,6 +147,12 @@ Status legend: ☐ planned · ◐ in progress · ✅ done · ❌ rejected
 
 ## H. Progress ledger (update every session)
 
+> **Direction note (2026-09-19):** the owner-approved UI/perf/motion direction
+> now lives in **`docs/UI-IDEAS-FREEBUFF.md`** — read it FIRST (AGENTS.md
+> carries the read-first rule). This ledger remains the progress record; the
+> ideas file is the north star for what "polish" means next (v1.0.4 "light
+> & motion" = its A1–A4 + B1 + C1 items).
+
 > **Session 2026-09-19 (v1.0.3 completion):** finished the interrupted v1.0.3 work —
 > wired dead controls (chips had no listeners, jump pill had no logic, sidebar quick
 > actions unwired), added missing `.composer-chip`/`.chip-active`/`.jump-enter` CSS
