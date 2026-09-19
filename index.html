@@ -13,7 +13,12 @@
     <meta name="keywords" content="AI, Chatbot, Full-Stack, JavaScript, NodeJS, Firebase, Portfolio, Gemini, Llama">
     <title>ABot | Multi-Model Assistant</title>
     <meta name="google-site-verification" content="dTytwbvR6YbeqaBn4RV_AP4V4BCCG15QXX4HKNgQJbw" />
+    <!-- Theme-aware tab icon: the same mark as a black silhouette on light tabs
+         and a white one on dark tabs (a favicon cannot be CSS-filtered). The
+         plain link is the fallback for browsers that ignore `media`. -->
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32-light.png" media="(prefers-color-scheme: light)">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32-dark.png" media="(prefers-color-scheme: dark)">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#181715">
@@ -21,7 +26,7 @@
     <link rel="preload" href="/dist/fonts/geist-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/dist/fonts/geist-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/dist/fonts/source-serif-4-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link href="./dist/output.css?v=p11" rel="stylesheet">
+    <link href="./dist/output.css?v=p12" rel="stylesheet">
     <script src="/vendor/marked.min.js" defer></script>
     <!-- A1 (v1.0.5): highlight.js + its theme are lazy-loaded on the first code
          block (js/chat.js) — they were head-linked here, costing every visitor
@@ -104,7 +109,7 @@
             <div class="flex flex-col items-center justify-center mb-8">
                 <span class="mb-5 inline-flex items-center rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.2em] font-medium bg-coral-soft text-coral">Multi-model chat</span>
         <!-- Old AB monogram — restored per owner request -->
-        <img src="/logo.png" alt="ABot logo" class="h-16 w-16 mb-5 select-none" draggable="false">
+        <img src="/logo.png" alt="ABot logo" class="logo-mark h-16 w-16 mb-5 select-none" draggable="false">
                 <h1 class="text-3xl font-semibold font-heading text-ink">Welcome to ABot</h1>
                 <p class="mt-2 text-muted">Sign in to pick up where you left off</p>
                 <p class="mt-4 text-[10px] text-muted/70 select-all" id="build-badge"></p>
@@ -232,7 +237,7 @@
                 <!-- Brand row (mobile: X closes the drawer; md+ keeps toggle hidden by CSS) -->
                 <div class="flex items-center justify-between px-1 pt-1">
                     <div class="flex items-center gap-2.5">
-                        <img src="/logo.png" alt="ABot logo" class="h-7 w-7 rounded-md select-none" draggable="false">
+                        <img src="/logo.png" alt="ABot logo" class="logo-mark h-7 w-7 rounded-md select-none" draggable="false">
                         <span class="text-[15px] font-semibold tracking-tight text-ink">ABot</span>
                     </div>
                     <button id="sidebarCloseBtn" aria-label="Close sidebar" data-tooltip="Close sidebar" data-tooltip-pos="bottom"
@@ -414,7 +419,7 @@
                     <!-- v1.0.4 (owner request): the chat title + rename moved to the
                          sidebar; the chat screen carries the brand mark instead. -->
                     <div class="flex items-center gap-2 min-w-0">
-                        <img src="/logo.png" alt="" aria-hidden="true" class="h-7 w-7 rounded-lg select-none"
+                        <img src="/logo.png" alt="" aria-hidden="true" class="logo-mark h-7 w-7 rounded-lg select-none"
                             draggable="false">
                         <span class="hidden sm:block text-[15px] font-semibold tracking-tight text-ink">ABot</span>
                     </div>

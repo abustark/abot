@@ -869,7 +869,7 @@ const renderEmptyState = () => {
     dom.emptyWelcome.innerHTML = `
         <div class="relative flex flex-col items-center justify-center text-center">
             <div class="empty-glow" aria-hidden="true"></div>
-            <img src="/logo.png" alt="" aria-hidden="true" class="h-12 w-12 rounded-xl mb-4 select-none shadow-soft" draggable="false">
+            <img src="/logo.png" alt="" aria-hidden="true" class="logo-mark h-12 w-12 rounded-xl mb-4 select-none shadow-soft" draggable="false">
             <h2 class="font-display text-2xl md:text-3xl leading-tight text-ink mb-2 tracking-tight">How can I help today?</h2>
             <p class="text-muted text-sm max-w-sm">Pick a suggestion below or type your own prompt.</p>
         </div>`;

@@ -835,3 +835,15 @@ body.chat-empty #jumpToLatest { display: none; }
 /* --- B7: a toast is dragged horizontally, so let the browser keep vertical
    scroll gestures for itself instead of cancelling the drag. */
 #toast-notification { touch-action: pan-y; }
+
+/* --- Brand mark (owner request 2026-09-19): the violet glyph renders as a flat
+   silhouette — black on the light canvas, white on the dark one — so it stays
+   legible in both themes. brightness(0) flattens hue only; alpha is untouched,
+   so the artwork's soft edges survive. The browser-tab icon cannot be filtered,
+   so it uses real per-theme PNGs (favicon-32-light/dark.png). */
+.logo-mark { filter: brightness(0); }
+html.dark .logo-mark { filter: brightness(0) invert(1); }
+@media (forced-colors: active) {
+    /* Windows high-contrast overrides colors wholesale — let it win. */
+    .logo-mark { filter: none; }
+}

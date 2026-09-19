@@ -300,6 +300,18 @@ function stubChain(label) {
         click($('themeToggle'));
         await sleep(50);
     }
+    // --- v1.0.6: brand mark is theme-aware (black in light, white in dark) -----
+    {
+        const marks = [...window.document.querySelectorAll('img[src="/logo.png"]')];
+        check('every on-page logo carries the silhouette class',
+            marks.length >= 3 && marks.every(img => img.classList.contains('logo-mark')),
+            marks.length + ' placements');
+        const themed = [...window.document.querySelectorAll('link[rel="icon"][media]')]
+            .map(l => l.getAttribute('href'));
+        check('tab icon has a per-theme pair',
+            themed.includes('/favicon-32-light.png') && themed.includes('/favicon-32-dark.png'),
+            themed.join(' '));
+    }
     // --- v1.0.6: keyboard hints in tooltips (C3) ------------------------------
     {
         check('send tooltip names the shortcut', ($('sendBtn').getAttribute('data-tooltip') || '').includes('Enter'));
