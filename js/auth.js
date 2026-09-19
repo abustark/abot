@@ -46,6 +46,7 @@ export const showLoginView = () => {
     dom.loginView.style.display = 'block';
     dom.signupView.style.display = 'none';
     dom.forgotPasswordView.style.display = 'none';
+    if (dom.verifyEmailView) dom.verifyEmailView.style.display = 'none';
     setAuthMessage();
 };
 
@@ -53,6 +54,7 @@ export const showSignupView = () => {
     dom.loginView.style.display = 'none';
     dom.signupView.style.display = 'block';
     dom.forgotPasswordView.style.display = 'none';
+    if (dom.verifyEmailView) dom.verifyEmailView.style.display = 'none';
     setAuthMessage();
 };
 
@@ -60,11 +62,21 @@ export const showForgotPasswordView = () => {
     dom.loginView.style.display = 'none';
     dom.signupView.style.display = 'none';
     dom.forgotPasswordView.style.display = 'block';
+    if (dom.verifyEmailView) dom.verifyEmailView.style.display = 'none';
+    setAuthMessage();
+};
+
+export const showVerifyEmailView = (email = '') => {
+    dom.loginView.style.display = 'none';
+    dom.signupView.style.display = 'none';
+    dom.forgotPasswordView.style.display = 'none';
+    if (dom.verifyEmailView) dom.verifyEmailView.style.display = 'block';
+    if (dom.verifyEmailAddress) dom.verifyEmailAddress.textContent = email;
     setAuthMessage();
 };
 
 export const handleAuthError = (error) => {
-    console.error("Authentication Error:", error.code);
+    console.error("Authentication Error:", error?.code);
     let message = "An unexpected error occurred. Please try again.";
     switch (error.code) {
         case 'auth/invalid-credential':
@@ -185,12 +197,24 @@ dom.forgotPasswordForm.addEventListener('submit', (e) => {
         .catch(handleAuthError);
 });
 
+
 dom.signupForm.addEventListener('submit', (e) => {
     e.preventDefault();
     setAuthMessage();
     const email = document.getElementById('signup-email').value;
     const password = document.getElementById('signup-password').value;
-    state.auth.createUserWithEmailAndPassword(email, password).catch(handleAuthError);
+    state.auth.createUserWithEmailAndPassword(email, password)
+        .then((credential) => {
+            const user = credential.user;
+            if (user) {
+                user.sendEmailVerification().catch((err) => {
+                    console.warn('[auth] Could not send initial verification email:', err);
+                });
+                showVerifyEmailView(user.email || email);
+                setAuthMessage('Account created! A verification link has been sent to your email.', 'success');
+            }
+        })
+        .catch(handleAuthError);
 });
 
 dom.loginForm.addEventListener('submit', (e) => {
@@ -200,6 +224,54 @@ dom.loginForm.addEventListener('submit', (e) => {
     const password = document.getElementById('login-password').value;
     state.auth.signInWithEmailAndPassword(email, password).catch(handleAuthError);
 });
+
+if (dom.checkVerificationBtn) {
+    dom.checkVerificationBtn.addEventListener('click', async () => {
+        const user = state.auth.currentUser;
+        if (!user) {
+            showLoginView();
+            return;
+        }
+        try {
+            await user.reload();
+            if (state.auth.currentUser.emailVerified) {
+                setAuthMessage('Email verified! Loading ABot...', 'success');
+                state.isAppInitialized = false;
+                await enterApp(state.auth.currentUser);
+            } else {
+                setAuthMessage('Your email is not verified yet. Please check your inbox or spam folder.', 'error');
+            }
+        } catch (err) {
+            console.error('Error reloading user:', err);
+            setAuthMessage('Could not check verification status. Please try again.', 'error');
+        }
+    });
+}
+
+if (dom.resendVerificationBtn) {
+    dom.resendVerificationBtn.addEventListener('click', async () => {
+        const user = state.auth.currentUser;
+        if (!user) {
+            showLoginView();
+            return;
+        }
+        try {
+            await user.sendEmailVerification();
+            setAuthMessage('Verification email sent! Please check your inbox.', 'success');
+            showToast('Verification email resent');
+        } catch (err) {
+            console.error('Error resending verification email:', err);
+            setAuthMessage('Could not resend verification email. Please wait a moment and try again.', 'error');
+        }
+    });
+}
+
+if (dom.verifyBackToLogin) {
+    dom.verifyBackToLogin.addEventListener('click', (e) => {
+        e.preventDefault();
+        signOutUser();
+    });
+}
 
 // --- CENTRAL AUTH STATE CONTROLLER ---
 // Phase 3.5: password visibility toggles
@@ -221,54 +293,74 @@ document.querySelectorAll('[data-toggle-password]').forEach(btn => {
     if (badge) badge.textContent = `build ${window.ABOT_BUILD || '?'}`;
 }
 
+const hideAppLoader = () => {
+    if (!dom.appLoader) return;
+    dom.appLoader.style.opacity = '0';
+    setTimeout(() => {
+        dom.appLoader.style.display = 'none';
+    }, 300);
+};
+
+const enterApp = async (user) => {
+    state.isAppInitialized = true; // Set the lock immediately
+    // --- USER IS LOGGED IN ---
+
+    dom.authSection.style.display = 'none';
+    dom.appContainer.style.display = 'flex';
+
+    try {
+        _initApp();
+    } catch (initError) {
+        console.error('[ABot] initApp crashed:', initError);
+        window.__abotErrors = window.__abotErrors || [];
+        window.__abotErrors.push('initApp crashed: ' + (initError.stack || initError.message));
+        showToast('App init failed — open ' + location.origin + '/#diag', 'error');
+    }
+
+    if (user.isAnonymous) {
+        dom.userEmailDisplay.textContent = 'Guest User';
+        dom.userAvatar.textContent = 'G';
+        dom.importChatBtn.style.display = 'none';
+    } else {
+        dom.userEmailDisplay.textContent = user.displayName || user.email;
+        const initials = (user.displayName || user.email || '?')
+            .trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
+        dom.userAvatar.textContent = initials || 'A';
+        dom.importChatBtn.style.display = 'flex';
+    }
+
+    dom.chatList.innerHTML = `<div class="p-2 space-y-2.5"><div class="skeleton h-11 rounded-xl" style="animation-delay:0ms"></div><div class="skeleton h-11 w-11/12 rounded-xl" style="animation-delay:80ms"></div><div class="skeleton h-11 w-4/6 rounded-xl" style="animation-delay:160ms"></div></div>`;
+    const chatsLoaded = await loadUserChatsFromFirestore(user.uid);
+
+    if (chatsLoaded) {
+        const chatIds = Object.keys(state.chats);
+        if (chatIds.length > 0) {
+            const lastChatId = Math.max(...chatIds.map(Number));
+            switchChat(String(lastChatId));
+        } else {
+            await createNewChat();
+        }
+    } else {
+        await createNewChat();
+    }
+};
+
 state.auth.onAuthStateChanged(async (user) => {
     if (user && state.isAppInitialized) return;
 
     if (user) {
-        state.isAppInitialized = true; // Set the lock immediately
-        // --- USER IS LOGGED IN ---
-
-        dom.authSection.style.display = 'none';
-        dom.appContainer.style.display = 'flex';
-
-        try {
-            _initApp();
-        } catch (initError) {
-            console.error('[ABot] initApp crashed:', initError);
-            window.__abotErrors = window.__abotErrors || [];
-            window.__abotErrors.push('initApp crashed: ' + (initError.stack || initError.message));
-            showToast('App init failed — open ' + location.origin + '/#diag', 'error');
+        const isPasswordUser = !user.isAnonymous && user.providerData?.some(p => p.providerId === 'password');
+        if (isPasswordUser && !user.emailVerified) {
+            state.isAppInitialized = false;
+            dom.appContainer.style.display = 'none';
+            dom.authSection.style.display = 'flex';
+            showVerifyEmailView(user.email);
+            hideAppLoader();
+            return;
         }
 
-        if (user.isAnonymous) {
-            dom.userEmailDisplay.textContent = 'Guest User';
-            dom.userAvatar.textContent = 'G';
-            dom.importChatBtn.style.display = 'none';
-        } else {
-            dom.userEmailDisplay.textContent = user.displayName || user.email;
-            const initials = (user.displayName || user.email || '?')
-                .trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
-            dom.userAvatar.textContent = initials || 'A';
-            dom.importChatBtn.style.display = 'flex';
-        }
-
-                        dom.chatList.innerHTML = `<div class="p-2 space-y-2.5"><div class="skeleton h-11 rounded-xl" style="animation-delay:0ms"></div><div class="skeleton h-11 w-11/12 rounded-xl" style="animation-delay:80ms"></div><div class="skeleton h-11 w-4/6 rounded-xl" style="animation-delay:160ms"></div></div>`;
-        const chatsLoaded = await loadUserChatsFromFirestore(user.uid);
-
-        if (chatsLoaded) {
-            const chatIds = Object.keys(state.chats);
-            if (chatIds.length > 0) {
-                const lastChatId = Math.max(...chatIds.map(Number));
-                switchChat(String(lastChatId));
-            } else {
-                await createNewChat();
-            }
-        } else {
-            await createNewChat();
-        }
-
+        await enterApp(user);
     } else {
-
         // --- USER IS LOGGED OUT ---
         dom.appContainer.style.display = 'none';
         // The backdrop is CSS-only now (`.auth-scene`) — nothing to spin up.
@@ -287,11 +379,7 @@ state.auth.onAuthStateChanged(async (user) => {
         }
     }
 
-    // HIDE THE LOADER IN BOTH CASES (Correctly placed)
-    dom.appLoader.style.opacity = '0';
-    setTimeout(() => {
-        dom.appLoader.style.display = 'none';
-    }, 300);
+    hideAppLoader();
 });
 }
 

@@ -181,3 +181,81 @@ export const speakText = (raw, { onend } = {}) => {
     utter.onerror = () => { ttsSpeaking = false; if (onend) onend(); };
     speechSynthesis.speak(utter);
 };
+
+// ---------------------------------------------------------------------------
+// HTML Sanitization & Safe Markdown Rendering (M3)
+// ---------------------------------------------------------------------------
+const ALLOWED_TAGS = new Set([
+    'a', 'b', 'blockquote', 'br', 'code', 'dd', 'del', 'details', 'div', 'dl', 'dt',
+    'em', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hr', 'i', 'img', 'ins', 'kbd',
+    'li', 'ol', 'p', 'pre', 'q', 'rp', 'rt', 'ruby', 's', 'samp', 'small', 'span',
+    'strike', 'strong', 'sub', 'summary', 'sup', 'table', 'tbody', 'td', 'tfoot',
+    'th', 'thead', 'tr', 'u', 'ul', 'var'
+]);
+
+const ALLOWED_ATTRS = new Set([
+    'href', 'src', 'alt', 'title', 'class', 'target', 'rel', 'id', 'align',
+    'valign', 'width', 'height', 'colspan', 'rowspan'
+]);
+
+const FORBIDDEN_TAGS = new Set([
+    'script', 'style', 'iframe', 'frame', 'frameset', 'object', 'embed', 'applet',
+    'form', 'input', 'button', 'textarea', 'select', 'meta', 'link', 'base'
+]);
+
+export function sanitizeHtml(rawHtml) {
+    if (!rawHtml) return '';
+    if (typeof document === 'undefined') return String(rawHtml);
+
+    const template = document.createElement('template');
+    template.innerHTML = rawHtml;
+
+    const sanitizeNode = (node) => {
+        const children = Array.from(node.childNodes);
+        for (const child of children) {
+            if (child.nodeType === (typeof Node !== 'undefined' ? Node.ELEMENT_NODE : 1)) {
+                const tagName = child.tagName.toLowerCase();
+                if (FORBIDDEN_TAGS.has(tagName) || !ALLOWED_TAGS.has(tagName)) {
+                    child.remove();
+                    continue;
+                }
+
+                for (const attr of Array.from(child.attributes)) {
+                    const attrName = attr.name.toLowerCase();
+                    const attrValue = attr.value;
+
+                    if (attrName.startsWith('on') || !ALLOWED_ATTRS.has(attrName)) {
+                        child.removeAttribute(attr.name);
+                        continue;
+                    }
+
+                    if (attrName === 'href' || attrName === 'src') {
+                        const trimmed = attrValue.trim();
+                        if (/^(javascript|data|vbscript):/i.test(trimmed)) {
+                            child.removeAttribute(attr.name);
+                            continue;
+                        }
+                    }
+                }
+
+                if (tagName === 'a' && child.hasAttribute('href')) {
+                    child.setAttribute('target', '_blank');
+                    child.setAttribute('rel', 'noopener noreferrer');
+                }
+
+                sanitizeNode(child);
+            }
+        }
+    };
+
+    sanitizeNode(template.content);
+    return template.innerHTML;
+}
+
+export function renderSafeMarkdown(markdown) {
+    if (!markdown) return '';
+    const rawHtml = typeof window !== 'undefined' && window.marked && window.marked.parse
+        ? window.marked.parse(markdown)
+        : String(markdown);
+    return sanitizeHtml(rawHtml);
+}

@@ -28,7 +28,7 @@ import { renderActiveChat } from './chat.js';
 import { renderChatList } from './chat.js';
 import { saveSystemPrompt } from './ui.js';
 import { sendMessage } from './chat.js';
-import { showToast, stopSpeaking, installDraftLeaveGuard, setUnsentDraft } from './utils.js';
+import { showToast, stopSpeaking, installDraftLeaveGuard, setUnsentDraft, renderSafeMarkdown } from './utils.js';
 import { signOutUser } from './auth.js';
 import { startVoiceRecognition } from './utils.js';
 import { state } from './state.js';
@@ -436,8 +436,8 @@ function initApp() {
         if (allBotSpans.length > 0) {
             const latestBotMessageSpan = allBotSpans[allBotSpans.length - 1];
             const finalContent = latestBotMessageSpan.querySelector('.content-span')?.innerHTML || "";
-            // Use marked.parse to be consistent with how other messages are rendered.
-            latestBotMessageSpan.innerHTML = finalContent + marked.parse('\n\n*-- Generation stopped --*');
+            // Use renderSafeMarkdown to be consistent with how other messages are rendered.
+            latestBotMessageSpan.innerHTML = finalContent + renderSafeMarkdown('\n\n*-- Generation stopped --*');
         }
 
         if (state.abortController) {

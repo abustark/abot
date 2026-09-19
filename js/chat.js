@@ -10,7 +10,7 @@ import { MODEL_CONFIG } from './config.js';
 import { applyModelColorTheme, syncComposerChips } from './ui.js';
 import { closeSidebar } from './ui.js';
 import { dom } from './dom.js';
-import { getTimestamp, isSpeaking, speakText, stopSpeaking, setUnsentDraft } from './utils.js';
+import { getTimestamp, isSpeaking, speakText, stopSpeaking, setUnsentDraft, renderSafeMarkdown } from './utils.js';
 import { showGuestLimitModal } from './ui.js';
 import { showToast } from './utils.js';
 import { state } from './state.js';
@@ -187,7 +187,12 @@ export const deleteChat = (chatId) => {
 
     // 1. Configure Modal Text
     dom.deleteModal.querySelector('#modal-title').textContent = "Confirm Deletion";
-                    dom.deleteModalBody.innerHTML = `Are you sure you want to delete the chat: "<strong class="font-medium text-ink">${chat.name}</strong>"? This action cannot be undone.`;
+    dom.deleteModalBody.textContent = 'Are you sure you want to delete the chat: "';
+    const strong = document.createElement('strong');
+    strong.className = 'font-medium text-ink';
+    strong.textContent = chat.name;
+    dom.deleteModalBody.appendChild(strong);
+    dom.deleteModalBody.appendChild(document.createTextNode('"? This action cannot be undone.'));
 
     // 2. Configure Button
     const confirmBtn = dom.deleteConfirmBtn;
@@ -211,9 +216,11 @@ export const renderChatList = (searchTerm = '') => {
     filteredChats.sort((a, b) => b.id - a.id).forEach(chat => {
         const chatItemContainer = document.createElement('div');
         chatItemContainer.className = `relative chat-list-item group ${String(chat.id) === String(state.activeChatId) ? 'active' : ''}`;
-        chatItemContainer.innerHTML = `<div class="flex items-center justify-between w-full rounded-xl ${String(chat.id) === String(state.activeChatId) ? '' : 'text-body hover:bg-card/70'}"><a href="#" class="flex-1 px-3 py-2.5 text-sm truncate" data-chat-id="${chat.id}"><span class="chat-name-span">${chat.name}</span></a><input type="text" class="chat-rename-input hidden flex-1 mx-2 p-1 text-sm bg-surface dark:bg-card rounded" value="${chat.name}"><button class="chat-options-btn p-2 mr-1 rounded-lg hover:bg-card transition-colors" aria-label="Chat options"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" /></svg></button></div><div class="absolute right-0 top-full mt-1 w-36 bg-canvas dark:bg-card border border-hairline rounded-xl shadow-lift z-10 hidden chat-options-menu overflow-hidden"><button class="rename-chat-btn w-full text-left px-3 py-2 text-sm hover:bg-card">Rename</button><button class="export-chat-btn w-full text-left px-3 py-2 text-sm hover:bg-card">Export JSON</button><button class="export-md-btn w-full text-left px-3 py-2 text-sm hover:bg-card">Export Markdown</button><button class="delete-chat-btn w-full text-left px-3 py-2 text-sm text-danger hover:bg-card">Delete</button></div>`;
+        chatItemContainer.innerHTML = `<div class="flex items-center justify-between w-full rounded-xl ${String(chat.id) === String(state.activeChatId) ? '' : 'text-body hover:bg-card/70'}"><a href="#" class="flex-1 px-3 py-2.5 text-sm truncate" data-chat-id="${chat.id}"><span class="chat-name-span"></span></a><input type="text" class="chat-rename-input hidden flex-1 mx-2 p-1 text-sm bg-surface dark:bg-card rounded" value=""><button class="chat-options-btn p-2 mr-1 rounded-lg hover:bg-card transition-colors" aria-label="Chat options"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" /></svg></button></div><div class="absolute right-0 top-full mt-1 w-36 bg-canvas dark:bg-card border border-hairline rounded-xl shadow-lift z-10 hidden chat-options-menu overflow-hidden"><button class="rename-chat-btn w-full text-left px-3 py-2 text-sm hover:bg-card">Rename</button><button class="export-chat-btn w-full text-left px-3 py-2 text-sm hover:bg-card">Export JSON</button><button class="export-md-btn w-full text-left px-3 py-2 text-sm hover:bg-card">Export Markdown</button><button class="delete-chat-btn w-full text-left px-3 py-2 text-sm text-danger hover:bg-card">Delete</button></div>`;
         const nameSpan = chatItemContainer.querySelector('.chat-name-span');
         const renameInput = chatItemContainer.querySelector('.chat-rename-input');
+        nameSpan.textContent = chat.name;
+        renameInput.value = chat.name;
         const saveRename = () => { renameChat(chat.id, renameInput.value); };
         renameInput.addEventListener('keydown', e => { if (e.key === 'Enter') { saveRename(); renameInput.blur(); } else if (e.key === 'Escape') { renameInput.blur(); } });
         renameInput.addEventListener('blur', () => { nameSpan.classList.remove('hidden'); renameInput.classList.add('hidden'); renderChatList(dom.searchChats.value); });
@@ -316,7 +323,7 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
     } else {
                         const uniqueId = `bot-msg-${Date.now()}`;
         if (isHistory) {
-                            messageContent = `<span id="${uniqueId}">${marked.parse(text)}</span>`;
+                            messageContent = `<span id="${uniqueId}">${renderSafeMarkdown(text)}</span>`;
         } else {
             let indicatorHtml = '<div class="typing-indicator"><span></span><span></span><span></span></div>';
             if (options.isGoogle) {
@@ -693,12 +700,12 @@ export const sendMessage = async () => {
                             fullReply += textChunk;
 
                             if (isFirstChunk) {
-                                                latestBotMessageSpan.innerHTML = `<span class="content-span">${marked.parse(fullReply)}</span><span class="blinking-cursor"></span>`;
+                                                latestBotMessageSpan.innerHTML = `<span class="content-span">${renderSafeMarkdown(fullReply)}</span><span class="blinking-cursor"></span>`;
                                 isFirstChunk = false;
                             } else {
                                 const contentHolder = latestBotMessageSpan.querySelector('.content-span');
                                 if (contentHolder) {
-                                    contentHolder.innerHTML = marked.parse(fullReply);
+                                    contentHolder.innerHTML = renderSafeMarkdown(fullReply);
                                     const __mc = contentHolder.closest('.message-container');
                                     if (__mc) maybeCollapse(__mc);
                                 }
@@ -716,7 +723,7 @@ export const sendMessage = async () => {
 
         const contentHolder = latestBotMessageSpan.querySelector('.content-span');
         const cursor = latestBotMessageSpan.querySelector('.blinking-cursor');
-        if (contentHolder) contentHolder.innerHTML = marked.parse(fullReply);
+        if (contentHolder) contentHolder.innerHTML = renderSafeMarkdown(fullReply);
         if (cursor) cursor.remove();
 
         latestBotMessageSpan.closest('.prose').querySelectorAll('pre code').forEach(block => {

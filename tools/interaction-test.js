@@ -368,6 +368,45 @@ function stubChain(label) {
         check('toast close dismisses', toast.style.transform.includes('translateX(150%)'));
     }
 
+    // --- M1: email verification view and controls ----------------------------
+    {
+        const verifyView = $('verify-email-view');
+        const checkBtn = $('check-verification-btn');
+        const resendBtn = $('resend-verification-btn');
+        const backToLogin = $('verify-back-to-login');
+        check('verify email view exists in auth card', !!verifyView && verifyView.style.display === 'none');
+        check('verify email action buttons present', !!checkBtn && !!resendBtn && !!backToLogin);
+    }
+    // --- M2: chat-name XSS hardening -----------------------------------------
+    {
+        const { state } = await import('file://' + path.join(esmDir, 'state.js'));
+        const { renderChatList, deleteChat } = await import('file://' + path.join(esmDir, 'chat.js'));
+        const maliciousName = '<img src=x onerror=alert(1)>';
+        state.chats['9999'] = { id: 9999, name: maliciousName, messages: [] };
+        renderChatList();
+        const chatItem = window.document.querySelector('[data-chat-id="9999"]');
+        const span = chatItem ? chatItem.querySelector('.chat-name-span') : null;
+        check('malicious chat name rendered as text in sidebar', !!span && span.textContent === maliciousName);
+        check('no img tag injected into sidebar chat item', !span?.querySelector('img'));
+
+        deleteChat('9999');
+        const deleteBody = $('deleteModalBody');
+        check('delete modal renders malicious chat name safely', !deleteBody?.querySelector('img') && deleteBody?.textContent.includes(maliciousName));
+        delete state.chats['9999'];
+        renderChatList();
+    }
+    // --- M3: markdown output sanitization ------------------------------------
+    {
+        const { sanitizeHtml } = await import('file://' + path.join(esmDir, 'utils.js'));
+        const dirtyPayload = '<script>alert("pwned")</script><img src="x" onerror="alert(1)"><a href="javascript:alert(1)">bad link</a>';
+        const sanitized = sanitizeHtml(dirtyPayload);
+        check('sanitizer removes script tags', !sanitized.includes('<script>') && !sanitized.includes('pwned'));
+        check('sanitizer strips onerror handlers', !sanitized.includes('onerror'));
+        check('sanitizer strips javascript: hrefs', !sanitized.includes('javascript:'));
+        const safeHtml = sanitizeHtml('<p><strong>bold text</strong> and <a href="https://example.com">link</a></p>');
+        check('sanitizer preserves valid formatting and secures links', safeHtml.includes('<strong>bold text</strong>') && safeHtml.includes('rel="noopener noreferrer"'));
+    }
+
     console.log(fails ? `\n${fails} INTERACTION FAILURE(S) ❌` : '\nALL INTERACTIONS PASS ✅');
     process.exit(fails ? 1 : 0);
 })().catch((e) => { console.error('CRASHED:', e); process.exit(1); });

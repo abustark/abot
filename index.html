@@ -210,6 +210,25 @@
                                 class="font-semibold text-coral hover:underline">Back to
                                 Login</a></p>
                     </div>
+                    <div id="verify-email-view" style="display: none;">
+                        <div class="text-center">
+                            <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-coral-soft text-coral mb-3">
+                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                                </svg>
+                            </div>
+                            <h3 class="font-semibold text-lg text-ink mb-1">Verify Your Email</h3>
+                            <p class="text-sm text-muted mb-4">We sent a verification link to <strong id="verify-email-address" class="text-ink font-medium"></strong>. Please check your inbox and verify your account to continue.</p>
+                        </div>
+                        <div class="space-y-3">
+                            <button type="button" id="check-verification-btn"
+                                class="w-full text-white bg-coral hover:bg-coral-active focus:ring-4 focus:ring-coral/30 font-medium rounded-lg text-sm px-5 py-3 text-center transition-colors duration-fast ease-out active:scale-[0.98]">I've Verified My Email</button>
+                            <button type="button" id="resend-verification-btn"
+                                class="w-full text-body bg-canvas dark:bg-card hover:bg-card border border-hairline font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors">Resend Verification Email</button>
+                        </div>
+                        <p class="text-sm text-center mt-5"><a href="#" id="verify-back-to-login"
+                                class="font-semibold text-coral hover:underline">Back to Login</a></p>
+                    </div>
                     <p id="error-message" class="text-center text-danger mt-4 min-h-[20px]"></p>
                 </div>
             </div>
