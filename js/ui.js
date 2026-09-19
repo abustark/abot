@@ -9,22 +9,35 @@ import { SYSTEM_PROMPTS, getProviderColor } from './config.js';
 import { dom } from './dom.js';
 import { state } from './state.js';
 import { showToast } from './utils.js';
-// Single source of truth for the sidebar drawer. Owns the slide class, the
-// overlay, and body scroll-lock. On md+ the drawer is a static column
-// (md:translate-x-0) and the overlay is md:hidden, so scroll-lock only applies
-// to the mobile drawer — we gate on viewport width to stay correct.
+// Single source of truth for the sidebar. Two regimes:
+//  - <768px: off-canvas drawer (transform slide) + overlay + body scroll-lock.
+//  - >=768px: static flex column; collapse = slide the 18rem column out via
+//    negative margin (.sidebar-collapsed). The translate classes are inert on
+//    desktop (md:translate-x-0 wins), which is why the hamburger "did nothing".
+const isDesktopViewport = () => !!window.matchMedia && window.matchMedia('(min-width: 768px)').matches;
+
+export const isSidebarOpen = () => isDesktopViewport()
+    ? !dom.sidebar.classList.contains('sidebar-collapsed')
+    : !dom.sidebar.classList.contains('-translate-x-full');
+
 export const setSidebar = (open) => {
-    dom.sidebar.classList.toggle('-translate-x-full', !open);
-    dom.sidebarOverlay.classList.toggle('hidden', !open);
-    const isMobile = window.innerWidth < 768;
-    if (open && isMobile) {
-        document.body.style.overflow = 'hidden';
-    } else if (!open) {
+    if (isDesktopViewport()) {
+        dom.sidebar.classList.toggle('sidebar-collapsed', !open);
+        dom.sidebarOverlay.classList.add('hidden');
         document.body.style.overflow = '';
+    } else {
+        dom.sidebar.classList.toggle('-translate-x-full', !open);
+        dom.sidebarOverlay.classList.toggle('hidden', !open);
+        document.body.style.overflow = open ? 'hidden' : '';
     }
+    dom.sidebarToggle?.setAttribute('aria-expanded', String(open));
 };
-export const toggleSidebar = () => setSidebar(dom.sidebar.classList.contains('-translate-x-full'));
-export const closeSidebar = () => setSidebar(false);
+
+export const toggleSidebar = () => setSidebar(!isSidebarOpen());
+
+// Mobile-only close: chat switching / overlay taps must not collapse the
+// desktop column (desktop has the hamburger for that).
+export const closeSidebar = () => { if (!isDesktopViewport()) setSidebar(false); };
 
 export const applyModelColorTheme = (model) => {
     // Provider-colored dot in the header pill (buttons stay coral — actions are

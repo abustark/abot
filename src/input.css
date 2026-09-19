@@ -325,7 +325,15 @@
     40% { transform: scale(1.0); }
 }
 
-.sidebar { transition: transform 0.3s var(--ease-drawer); }
+.sidebar { transition: transform 0.3s var(--ease-drawer), margin-left 0.3s var(--ease-drawer); }
+
+/* Desktop collapse: at md+ the drawer becomes a static flex column, so the
+   translate classes are inert (md:translate-x-0 wins). Collapsing is done by
+   sliding the 18rem (w-72) column out via negative margin — the flex sibling
+   reflows, and the transition keeps it animated. */
+@media (min-width: 768px) {
+    .sidebar.sidebar-collapsed { margin-left: -18rem; border-right-width: 0; }
+}
 
 /* Floating composer dock (revamp): fixed sheet on mobile, static flow on
    desktop. --kb-h (visualViewport offset) lifts it above the mobile keyboard

@@ -358,6 +358,26 @@ function initApp() {
     if (dom.sidebarCloseBtn) dom.sidebarCloseBtn.addEventListener('click', onSidebarToggleClick);
     dom.sidebarOverlay.addEventListener('click', closeSidebar);
 
+    // Breakpoint crossing: classes valid in one regime are inert/harmful in the
+    // other (e.g. sidebar-collapsed margin on a phone). Re-sanitize on change.
+    // jsdom (and some old browsers) lack matchMedia — degrade to "no listener".
+    const mdMq = typeof window.matchMedia === 'function' ? window.matchMedia('(min-width: 768px)') : null;
+    const onBreakpointChange = () => {
+        dom.sidebar.classList.remove('sidebar-collapsed');
+        if (mdMq.matches) {
+            dom.sidebar.classList.remove('-translate-x-full');
+        } else {
+            dom.sidebar.classList.add('-translate-x-full');
+        }
+        dom.sidebarOverlay.classList.add('hidden');
+        document.body.style.overflow = '';
+        dom.sidebarToggle?.setAttribute('aria-expanded', String(!dom.sidebar.classList.contains('-translate-x-full')));
+    };
+    if (mdMq) {
+        if (mdMq.addEventListener) mdMq.addEventListener('change', onBreakpointChange);
+        else if (mdMq.addListener) mdMq.addListener(onBreakpointChange); // old Safari/Edge
+    }
+
 
     dom.searchChats.addEventListener('input', (e) => renderChatList(e.target.value));
 
@@ -589,7 +609,7 @@ function initApp() {
 
 // Phase 6.5: client-state reset + build identity
 // Visit <site>/#reset to wipe SW/caches/storage and reload (recovery tool).
-window.ABOT_BUILD = '2026-08-30.2';
+window.ABOT_BUILD = '2026-09-19.1';
 console.log(`[ABot] build ${window.ABOT_BUILD}`);
 if (location.hash === '#reset') {
     (async () => {

@@ -114,6 +114,22 @@ function stubChain(label) {
         click($('sidebarToggle'));
         await sleep(100);
     }
+    // desktop collapse: >=768px regime uses .sidebar-collapsed (margin slide),
+    // not the transform — stub matchMedia to pretend a desktop viewport.
+    {
+        const realMatchMedia = window.matchMedia;
+        window.matchMedia = (q) => ({ matches: String(q).includes('768'), media: String(q), addEventListener() {}, addListener() {}, removeEventListener() {}, removeListener() {} });
+        const sb = $('sidebar');
+        sb.classList.remove('-translate-x-full');
+        click($('sidebarToggle'));
+        await sleep(100);
+        check('sidebar collapses on desktop', sb.classList.contains('sidebar-collapsed'));
+        click($('sidebarToggle'));
+        await sleep(100);
+        check('sidebar re-expands on desktop', !sb.classList.contains('sidebar-collapsed'));
+        window.matchMedia = realMatchMedia || ((q) => ({ matches: false, media: String(q), addEventListener() {}, addListener() {}, removeEventListener() {}, removeListener() {} }));
+        sb.classList.add('-translate-x-full');
+    }
     // settings
     {
         click($('settingsToggleBtn'));

@@ -3,13 +3,13 @@
  * Provides offline caching for local assets only
  */
 
-const CACHE_NAME = 'abot-cache-v21'; // v21: shell polish (depth, empty state) + css v=p9
+const CACHE_NAME = 'abot-cache-v22'; // v22: desktop sidebar collapse + css v=p10
 const STATIC_ASSETS = [
     '/',
     '/index.html',
     '/favicon-32.png',
     '/logo.png',
-    '/dist/output.css?v=p9',
+    '/dist/output.css?v=p10',
     '/js/app.js',
     '/js/config.js',
     '/js/dom.js',
