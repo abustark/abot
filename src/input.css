@@ -920,6 +920,12 @@ body.chat-empty #composerDock {
     border: 0;
     box-shadow: none;
     padding-top: 0;
+    /* v2.0.9: the block now holds greeting + composer + suggestion cards, so on
+       short viewports it can exceed the screen — let it scroll instead of
+       clipping the cards. */
+    max-height: 100dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
 }
 body.chat-empty #jumpToLatest { display: none; }
 

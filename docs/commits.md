@@ -8,6 +8,18 @@ This document tracks every commit made on `main` following the `2.0.x` versionin
 
 ## Commit History
 
+### 2.0.10 - live-site verification round: empty-state card order + dotmark radius fixes
+- **Date**: 2026-09-20
+- **Method:** owner approved running the site + full gates. Ran local `server.js`, the jsdom interaction suite, the Playwright real-browser suite (desktop 1280×800 + mobile 390×844), and DOM-order/geometry probes with screenshots.
+- **Bug fixed — empty-state order (owner-visible):** `#emptySuggestions` was a sibling AFTER the fixed `#composerDock`, so on a fresh chat the 4 suggestion cards rendered in normal flow above the (fixed, centred) composer — clipped against the header. Moved the div INSIDE the dock under the composer so greeting + composer + cards centre as ONE unit; verified desktop + mobile (cards_top 456 >= composer_bottom 368; correct DOM order). (index.html)
+- **Bug fixed:** `body.chat-empty #composerDock` now gets `max-height: 100dvh; overflow-y: auto; overscroll-behavior: contain` so the taller one-unit block scrolls instead of clipping on short viewports. (src/input.css)
+- **Bug fixed:** all 55 dot-matrix wordmark circles were missing `r="2.3"` (default r=0 → zero-size, invisible dots — the loader showed only the spinner). Radius restored via regex pass; verified dots now paint 5×5 px with `dotRise` animation applied. (index.html)
+- **Tests updated to real behavior:** overflow menu row-click closes the menu (asserted), trigger-toggle and outside-tap close paths added; "normal layout" assertion now seeds a message explicitly (new chats start empty since 2.0.9). (tools/interaction-test.js)
+- **Tooling:** `tools/test-playwright.py` artifact dir is now repo-relative (`tmp/playwright/`, overridable via `ABOT_ARTIFACT_DIR`) instead of a hardcoded Antigravity path; self-creates the directory.
+- **Noted (no code change):** local `server.js` `generalLimiter` is 100 req/15 min per IP — repeated full-page loads (Playwright SW cold loads) trip 429 with no friendly UI. Production is unaffected (Vercel). Owner may want a dev-mode relax later.
+- **Gates run (green):** interaction suite (2 stale assertions updated to match intended behavior), smoke, chat-security, `lint` 0 errors, `check` clean, `tsc -p jsconfig.json` 0 errors, `build:css` rebuilt and verified (`100dvh`, `mt-5`, `.dotmark` present), Playwright auth/shell/theme/backend-policy suite all PASS with no page errors.
+
+
 ### 2.0.9 - new-chat landing fix, dotted loader, header + micro-interaction polish
 - **Date**: 2026-09-20
 - **Bug fixed (owner-reported):** the new-chat landing (centred composer + greeting + suggestion cards) never appeared. Root cause: `createNewChat()` seeded every new chat with a fake assistant message (`"Hello! How can I assist you today?"`), so `messages.length > 0` and `renderActiveChat()` always took the "has messages" branch — `renderEmptyState()` was unreachable. New chats now start with `messages: []`, so the Phase-0 landing renders on PC and mobile. (js/chat.js)

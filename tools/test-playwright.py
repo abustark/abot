@@ -1,7 +1,11 @@
 import json, os, sys, time
 from playwright.sync_api import sync_playwright
 
-ARTIFACT_DIR = r"C:\Users\abu\.gemini\antigravity\brain\b3456da5-9488-4f2e-9f33-3542a73168cd"
+ARTIFACT_DIR = os.environ.get(
+    "ABOT_ARTIFACT_DIR",
+    os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "tmp", "playwright"),
+)
+os.makedirs(ARTIFACT_DIR, exist_ok=True)
 BASE_URL = "http://127.0.0.1:3000"
 
 results = {

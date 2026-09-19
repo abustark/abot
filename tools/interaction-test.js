@@ -202,7 +202,8 @@ function stubChain(label) {
         await sleep(50);
         check('backdrop tap closes search', $('searchPanel').classList.contains('hidden') && $('searchBackdrop').classList.contains('hidden'));
     }
-    // header overflow menu (v2.0.7): opens, closes on outside tap, hosts the moved controls.
+    // header overflow menu (v2.0.7 / v2.0.9): opens, hosts the moved controls,
+    // a picked row closes it, and both the trigger and an outside tap close it.
     {
         click($('headerOverflowBtn'));
         await sleep(50);
@@ -215,10 +216,25 @@ function stubChain(label) {
         click($('themeToggle'));
         await sleep(50);
         check('theme toggles from overflow menu', window.document.documentElement.classList.contains('dark') !== before);
-        click($('themeToggle')); // restore
-        click($('headerOverflowBtn')); // close
+        check('picking a row closes the menu', $('headerOverflowMenu').classList.contains('hidden'));
+        // Restore the theme: re-open, flip back (the row click closes it again).
+        click($('headerOverflowBtn'));
         await sleep(50);
-        check('header overflow menu closes', $('headerOverflowMenu').classList.contains('hidden'));
+        click($('themeToggle'));
+        await sleep(50);
+        // Trigger toggles it shut.
+        click($('headerOverflowBtn'));
+        await sleep(50);
+        check('header overflow menu reopens', !$('headerOverflowMenu').classList.contains('hidden'));
+        click($('headerOverflowBtn'));
+        await sleep(50);
+        check('header overflow menu closes via trigger', $('headerOverflowMenu').classList.contains('hidden'));
+        // An outside tap closes it too.
+        click($('headerOverflowBtn'));
+        await sleep(50);
+        window.document.body.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }));
+        await sleep(50);
+        check('outside tap closes the overflow menu', $('headerOverflowMenu').classList.contains('hidden'));
     }
     // composer chips (v1.0.3 B3/B4): gated per model, toggle on/off.
     {
@@ -329,7 +345,13 @@ function stubChain(label) {
             !dock.getAttribute('style') || !dock.getAttribute('style').includes('bottom'));
 
         // ...and the normal layout returns as soon as the chat has messages.
-        if (activeChat && savedMessages) activeChat.messages = savedMessages;
+        // v2.0.9: new chats start empty, so seed one message when the saved
+        // state has none — this assertion is about the non-empty branch.
+        if (activeChat) {
+            activeChat.messages = (savedMessages && savedMessages.length)
+                ? savedMessages
+                : [{ role: 'assistant', content: 'Hello!', model: activeChat.model }];
+        }
         chatMod.renderActiveChat();
         await sleep(30);
         check('normal layout returns once messages exist', !window.document.body.classList.contains('chat-empty'));
