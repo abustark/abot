@@ -8,6 +8,11 @@ This document tracks every commit made on `main` following the `2.0.x` versionin
 
 ## Commit History
 
+### 2.0.6a - ignore python cache, unstage pyc
+- **Date**: 2026-09-20
+- **Changes**:
+  - Removed accidentally committed `tools/__pycache__/*.pyc` and added `__pycache__/` + `*.pyc` to `.gitignore`.
+
 ### 2.0.6 - finish pragmatic-polyglot tooling and remove work-order docs
 - **Date**: 2026-09-20
 - **Changes**:
