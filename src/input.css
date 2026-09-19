@@ -509,7 +509,7 @@ mark {
     display: inline-flex;
     align-items: center;
     gap: 0.375rem;
-    padding: 0.25rem 0.75rem;
+    padding: 0.375rem 0.75rem;
     border-radius: 9999px;
     border: 1px solid rgb(var(--c-hairline));
     background-color: transparent;
@@ -535,6 +535,54 @@ mark {
 }
 @media (prefers-reduced-motion: reduce) {
     .composer-chip { transition: none; }
+}
+
+/* B2 morph — CRITICAL FIX (v1.0.4): `.stop-hidden` was referenced by markup and
+   chat.js but never defined, so the stop control (absolute inset-0, opaque) sat
+   on top of the send button permanently. Geometry is shared with #sendBtn so the
+   two states cross-fade; `visibility` (delayed on hide) keeps the hidden control
+   out of the tab order — opacity alone would leave an invisible focus stop. */
+.stop-hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 140ms var(--ease-out), visibility 0s linear 140ms;
+}
+#stopBtn:not(.stop-hidden) { transition: opacity 140ms var(--ease-out); }
+@media (prefers-reduced-motion: reduce) {
+    .stop-hidden,
+    #stopBtn:not(.stop-hidden) { transition: none; }
+}
+
+/* Settings switch track (theme row). Matches the peer-checked switches exactly
+   (w-10 h-5, 1rem knob) but is driven by `data-on` so a button-based row can
+   reuse the same visual. */
+.switch-track {
+    position: relative;
+    flex-shrink: 0;
+    width: 2.5rem;
+    height: 1.25rem;
+    border-radius: 9999px;
+    background-color: rgb(var(--c-hairline));
+    transition: background-color 150ms var(--ease-out);
+}
+.switch-track::after {
+    content: '';
+    position: absolute;
+    top: 0.125rem;
+    left: 0.125rem;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 9999px;
+    background-color: #fff;
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.08);
+    transition: transform 150ms var(--ease-out);
+}
+.switch-track[data-on="true"] { background-color: rgb(var(--c-coral)); }
+.switch-track[data-on="true"]::after { transform: translateX(1.25rem); }
+@media (prefers-reduced-motion: reduce) {
+    .switch-track,
+    .switch-track::after { transition: none; }
 }
 
 /* Jump-to-latest pill (E1): `hidden` toggles to `flex` from markup; entry is

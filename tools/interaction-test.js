@@ -135,6 +135,24 @@ function stubChain(label) {
         click($('settingsToggleBtn'));
         await sleep(50);
         check('settings panel opens', $('settingsPanel') && !$('settingsPanel').classList.contains('hidden'));
+        // v1.0.4: dark mode is a switch row inside the panel (was a cramped link).
+        const sw = $('sidebarThemeBtn');
+        check('theme switch lives in settings', !!sw && sw.getAttribute('role') === 'switch' && $('settingsPanel').contains(sw));
+        const darkBefore = window.document.documentElement.classList.contains('dark');
+        click(sw);
+        await sleep(50);
+        const darkAfter = window.document.documentElement.classList.contains('dark');
+        check('theme switch toggles dark mode', darkBefore !== darkAfter, `${darkBefore}->${darkAfter}`);
+        check('theme switch aria-checked tracks state', sw.getAttribute('aria-checked') === String(darkAfter));
+        click(sw); // restore
+        await sleep(50);
+    }
+    // composer layout + morph state (v1.0.4): chips inside the box, stop hidden at rest
+    {
+        const box = $('messageInput') && $('messageInput').parentElement;
+        check('chips sit inside the composer box', !!box && box.contains($('webSearchChip')) && box.contains($('sendBtn')));
+        check('stop control hidden at rest', $('stopBtn').classList.contains('stop-hidden'));
+        check('chat title moved to the sidebar', !!$('sidebarCurrentChat') && $('sidebarCurrentChat').contains($('chatTitle')));
     }
     // search
     {
@@ -145,6 +163,10 @@ function stubChain(label) {
         click($('sidebarSearchBtn'));
         await sleep(50);
         check('sidebar search button opens search panel', $('searchPanel') && !$('searchPanel').classList.contains('hidden'));
+        // v1.0.4: explicit dismiss — the panel had no way out once opened.
+        click($('searchCloseBtn'));
+        await sleep(50);
+        check('search close button dismisses the panel', $('searchPanel').classList.contains('hidden'));
     }
     // composer chips (v1.0.3 B3/B4): gated per model, toggle on/off.
     {

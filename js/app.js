@@ -69,6 +69,12 @@ function initApp() {
         const dark = document.documentElement.classList.contains('dark');
         dom.sunIcon.classList.toggle('hidden', !dark);
         dom.moonIcon.classList.toggle('hidden', dark);
+        // v1.0.4: keep the settings "Dark mode" switch in sync — it is a button
+        // (role=switch), so it can't use the peer-checked styling the
+        // timestamps/TTS checkboxes rely on.
+        dom.sidebarThemeBtn?.setAttribute('aria-checked', String(dark));
+        const track = dom.sidebarThemeBtn?.querySelector('.switch-track');
+        if (track) track.dataset.on = String(dark);
     };
     syncThemeIcons();
     dom.themeToggle.addEventListener('click', () => {
@@ -326,6 +332,12 @@ function initApp() {
         dom.searchPanel.classList.toggle('hidden');
         if (!dom.searchPanel.classList.contains('hidden')) dom.messageSearchInput?.focus();
     });
+    // v1.0.4: search had no way out once opened — on mobile it is entered from
+    // the drawer, so the header toggle was never reachable to dismiss it.
+    dom.searchCloseBtn?.addEventListener('click', () => {
+        dom.searchPanel.classList.add('hidden');
+        if (dom.searchResults) dom.searchResults.innerHTML = '';
+    });
     let searchDebounce = null;
     dom.messageSearchInput?.addEventListener('input', (e) => {
         clearTimeout(searchDebounce);
@@ -473,6 +485,10 @@ function initApp() {
             }
             if (!dom.promptModal.classList.contains('hidden')) {
                 closePromptModal();
+                return;
+            }
+            if (!dom.searchPanel.classList.contains('hidden')) {
+                dom.searchPanel.classList.add('hidden');
                 return;
             }
             if (!dom.modelSelectorPanel.classList.contains('hidden')) {

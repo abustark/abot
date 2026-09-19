@@ -95,6 +95,7 @@ dom.sidebarThemeBtn = document.getElementById('sidebarThemeBtn');
 dom.sidebarSearchBtn = document.getElementById('sidebarSearchBtn');
 dom.sidebarPromptBtn = document.getElementById('sidebarPromptBtn');
 dom.composerHint = document.getElementById('composerHint');
+dom.searchCloseBtn = document.getElementById('searchCloseBtn');
 
 export function initDomExtras() {
 dom.promptLibrary = document.getElementById('promptLibrary');
