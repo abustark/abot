@@ -8,6 +8,12 @@ This document tracks every commit made on `main` following the `2.0.x` versionin
 
 ## Commit History
 
+### 2.0.5 - add jsconfig for typescript type checking
+- **Date**: 2026-09-19
+- **Changes**:
+  - Added `jsconfig.json` configuring TypeScript language service to type-check vanilla JavaScript files with `"checkJs": true`, target `ES2022`, and DOM libraries.
+  - Added `types/globals.d.ts` with ambient declarations for CDN-loaded libraries (`firebase`, `marked`, `hljs`, `google`, `VANTA`) and window extensions.
+
 ### 2.0.4 - fix email verification gate race and cache-bust assets
 - **Date**: 2026-09-19
 - **Changes**:
