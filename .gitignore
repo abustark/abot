@@ -35,3 +35,6 @@ temp/
 .freebuff/
 .playwright/
 .playwright-cli/
+
+__pycache__/
+*.pyc
