@@ -3,7 +3,7 @@
  * Provides offline caching for local assets only
  */
 
-const CACHE_NAME = 'abot-cache-v22'; // v22: desktop sidebar collapse + css v=p10
+const CACHE_NAME = 'abot-cache-v23'; // v23: composer chips, jump pill, sidebar quick actions, css v=p11
 const STATIC_ASSETS = [
     '/',
     '/index.html',

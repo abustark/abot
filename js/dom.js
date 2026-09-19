@@ -88,6 +88,13 @@ dom.settingsPanel = document.getElementById('settingsPanel');
 dom.timestampsToggle = document.getElementById('timestampsToggle');
 dom.ttsToggle = document.getElementById('ttsToggle');
 dom.toastCloseBtn = document.getElementById('toastCloseBtn');
+dom.webSearchChip = document.getElementById('webSearchChip');
+dom.thinkingChip = document.getElementById('thinkingChip');
+dom.jumpToLatest = document.getElementById('jumpToLatest');
+dom.sidebarThemeBtn = document.getElementById('sidebarThemeBtn');
+dom.sidebarSearchBtn = document.getElementById('sidebarSearchBtn');
+dom.sidebarPromptBtn = document.getElementById('sidebarPromptBtn');
+dom.composerHint = document.getElementById('composerHint');
 
 export function initDomExtras() {
 dom.promptLibrary = document.getElementById('promptLibrary');

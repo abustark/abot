@@ -7,7 +7,7 @@
 
 import { GUEST_MESSAGE_LIMIT, getProviderColor } from './config.js';
 import { MODEL_CONFIG } from './config.js';
-import { applyModelColorTheme } from './ui.js';
+import { applyModelColorTheme, syncComposerChips } from './ui.js';
 import { closeSidebar } from './ui.js';
 import { dom } from './dom.js';
 import { getTimestamp, isSpeaking, speakText, stopSpeaking, setUnsentDraft } from './utils.js';
@@ -356,27 +356,24 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
         }
     }
 
-    // --- Action Buttons ---
+    // --- Action Buttons (v1.0.3: owner spec — AI rows carry copy · read aloud ·
+    // regenerate only; 👍/👎/📌 removed as noise. User rows keep copy·edit·delete.) ---
                     const copyBtnHtml = `<button class="copy-message-btn p-1.5 rounded-md text-muted hover:text-ink transition-colors" title="Copy" aria-label="Copy message"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" /></svg></button>`;
 
-    let reactButtonsHtml = '';
-    if (!isUser && typeof options.index === 'number') {
-        const upActive = message.reaction === 'up' ? 'text-coral' : 'text-muted';
-        const downActive = message.reaction === 'down' ? 'text-coral' : 'text-muted';
-        const pinActive = message.pinned ? 'text-coral' : 'text-muted';
-        reactButtonsHtml = `
-                                    <button class="speak-btn p-1.5 rounded-md transition-colors hover:text-coral text-muted" aria-label="Read aloud" aria-pressed="false" title="Read aloud"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M13 4.5c0-1.104-.806-2.03-1.886-2.03H11L9.66 5.33A2.5 2.5 0 017.5 6.5H5A2.5 2.5 0 002.5 9v6A2.5 2.5 0 005 17.5h2.5a2.5 2.5 0 012.16 1.17l1.34 2.83h.114C12.194 21.5 13 20.574 13 19.47v-14.97z"/><path d="M16.5 8.5a.75.75 0 011.06 0 5 5 0 010 7 .75.75 0 11-1.06-1.06 3.5 3.5 0 000-4.88.75.75 0 010-1.06z"/><path d="M19.09 5.5a.75.75 0 011.06 0 9 9 0 010 13 .75.75 0 11-1.06-1.06 7.5 7.5 0 000-10.88.75.75 0 010-1.06z"/></svg></button>
-                                    <button class="react-up-btn p-1.5 rounded-md transition-colors hover:text-coral ${upActive}" aria-label="Good response" title="Good response">👍</button>
-                                    <button class="react-down-btn p-1.5 rounded-md transition-colors hover:text-coral ${downActive}" aria-label="Bad response" title="Bad response">👎</button>
-                                    <button class="pin-btn p-1.5 rounded-md transition-colors hover:text-coral ${pinActive}" aria-label="Pin message" title="Pin message">📌</button>`;
-    }
+    const speakBtnHtml = `<button class="speak-btn p-1.5 rounded-md transition-colors hover:text-coral text-muted" aria-label="Read aloud" aria-pressed="false" title="Read aloud"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M13 4.5c0-1.104-.806-2.03-1.886-2.03H11L9.66 5.33A2.5 2.5 0 017.5 6.5H5A2.5 2.5 0 002.5 9v6A2.5 2.5 0 005 17.5h2.5a2.5 2.5 0 012.16 1.17l1.34 2.83h.114C12.194 21.5 13 20.574 13 19.47v-14.97z"/><path d="M16.5 8.5a.75.75 0 011.06 0 5 5 0 010 7 .75.75 0 11-1.06-1.06 3.5 3.5 0 000-4.88.75.75 0 010-1.06z"/><path d="M19.09 5.5a.75.75 0 011.06 0 9 9 0 010 13 .75.75 0 11-1.06-1.06 7.5 7.5 0 000-10.88.75.75 0 010-1.06z"/></svg></button>`;
+
+    const regenBtnHtml = (!isUser && typeof options.index === 'number')
+        ? `<button class="regen-btn p-1.5 rounded-md transition-colors hover:text-coral text-muted" aria-label="Regenerate response" title="Regenerate response"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" /></svg></button>`
+        : '';
+
+    // AI rows: copy + read aloud + regenerate, parked top-right on the meta line.
+    const aiActionsHtml = (!isUser) ? copyBtnHtml + speakBtnHtml + regenBtnHtml : '';
 
     let actionButtonsHtml = '';
     if (typeof options.index === 'number') {
         actionButtonsHtml = `
                             ${isUser ? `<button class="edit-msg-btn p-1.5 text-muted hover:text-coral transition-colors" title="Edit" aria-label="Edit message"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button>` : ''}
-                            <button class="delete-msg-btn p-1.5 text-muted hover:text-danger transition-colors" title="Delete" aria-label="Delete message"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.958L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
-                         `;
+                            ${isUser ? `<button class="delete-msg-btn p-1.5 text-muted hover:text-danger transition-colors" title="Delete" aria-label="Delete message"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.958L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>` : ''}`;
     }
 
     const messageEl = document.createElement('div');
@@ -408,17 +405,14 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
                                          <span class="text-white text-[8px] font-bold">${modelConf.name.substring(0, 2).toUpperCase()}</span>
                                     </div>
                                     <span class="text-xs font-semibold ${providerColor.text}">${modelConf.name}</span>
-                                    ${message.pinned ? '<span class="text-[10px]" role="img" aria-label="Pinned">📌</span>' : ''}
                                     ${showTs ? `<span class="text-[11px] text-muted/80 msg-timestamp">${getTimestamp()}</span>` : ''}
+                                    <div class="ml-auto flex items-center gap-0.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+                                        ${aiActionsHtml}
+                                    </div>
                                 </div>
                                 <div class="w-full overflow-hidden">
                                     <div class="prose dark:prose-invert max-w-none text-body text-[15px] leading-7 msg-collapsible">
                                         ${messageContent}
-                                    </div>
-                                    <div class="flex items-center gap-0.5 mt-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
-                                         ${copyBtnHtml}
-                                         ${reactButtonsHtml}
-                                         ${actionButtonsHtml}
                                     </div>
                                 </div>
                             </div>
@@ -442,9 +436,7 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
                 speakBtn.setAttribute('aria-pressed', 'true');
             }
         });
-        messageEl.querySelector('.react-up-btn')?.addEventListener('click', (e) => { e.stopPropagation(); toggleReaction(state.activeChatId, options.index, 'up'); });
-        messageEl.querySelector('.react-down-btn')?.addEventListener('click', (e) => { e.stopPropagation(); toggleReaction(state.activeChatId, options.index, 'down'); });
-        messageEl.querySelector('.pin-btn')?.addEventListener('click', (e) => { e.stopPropagation(); togglePin(state.activeChatId, options.index); });
+        messageEl.querySelector('.regen-btn')?.addEventListener('click', (e) => { e.stopPropagation(); regenerateLastResponse(); });
     }
 
     const copyBtn = messageEl.querySelector('.copy-message-btn');
@@ -512,22 +504,6 @@ const persistMessageMeta = async (chatId) => {
         console.error('Failed to save message meta');
         showToast('Could not save', 'error');
     }
-};
-
-export const toggleReaction = (chatId, msgIndex, type) => {
-    const msg = state.chats[chatId]?.messages[msgIndex];
-    if (!msg) return;
-    msg.reaction = (msg.reaction === type) ? null : type;
-    renderActiveChat();
-    persistMessageMeta(chatId);
-};
-
-export const togglePin = (chatId, msgIndex) => {
-    const msg = state.chats[chatId]?.messages[msgIndex];
-    if (!msg) return;
-    msg.pinned = !msg.pinned;
-    renderActiveChat();
-    persistMessageMeta(chatId);
 };
 
 export const performMessageSearch = (term) => {
@@ -614,6 +590,9 @@ export const sendMessage = async () => {
     const userMessage = { role: 'user', content: message, model: currentChat.model };
     appendMessage(userMessage, false, { index: currentChat.messages.length });
     currentChat.messages.push(userMessage);
+    // A1: ONE deterministic scroll on send so the reply starts on screen —
+    // never again during the stream; the user owns the viewport from here.
+    dom.chatHistoryContainer.scrollTop = dom.chatHistoryContainer.scrollHeight;
 
     // Save the user's message to Firestore immediately to prevent data loss on refresh.
     try {
@@ -650,8 +629,10 @@ export const sendMessage = async () => {
     setUnsentDraft(false); // draft shipped — clear leave-guard
     dom.messageInput.focus();
 
-    dom.sendBtn.classList.add('hidden');
-    dom.stopBtn.classList.remove('hidden');
+    // B2: single morphing control — the stop state overlays the send button
+    // (same geometry, crossfade), no layout jump.
+    dom.stopBtn.classList.remove('stop-hidden');
+    state.isStreaming = true;
 
     dom.modelSelectorBtn.disabled = true;
     dom.modelSelectorBtn.classList.add('opacity-50', 'cursor-not-allowed');
@@ -664,8 +645,8 @@ export const sendMessage = async () => {
     const latestBotMessageSpan = allBotSpans[allBotSpans.length - 1];
 
     if (!latestBotMessageSpan) {
-        dom.sendBtn.classList.remove('hidden');
-        dom.stopBtn.classList.add('hidden');
+        dom.stopBtn.classList.add('stop-hidden');
+        state.isStreaming = false;
         state.abortController = null;
         return;
     }
@@ -689,7 +670,11 @@ export const sendMessage = async () => {
         const response = await fetch('/api/chat', {
             method: 'POST',
                             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` },
-            body: JSON.stringify({ model: currentChat.model, messages: cleanedMessages }),
+            body: JSON.stringify({
+                model: currentChat.model,
+                messages: cleanedMessages,
+                options: { webSearch: state.webSearchEnabled, thinking: state.thinkingEnabled },
+            }),
             signal: state.abortController.signal
         });
 
@@ -753,7 +738,9 @@ export const sendMessage = async () => {
                     }
                 }
             }
-            dom.chatHistoryContainer.scrollTo({ top: dom.chatHistoryContainer.scrollHeight, behavior: 'smooth' });
+            // A1: intentionally NO in-stream auto-scroll — the user reads the
+            // first lines and scrolls down when they choose (E1 pill covers
+            // "catch up" if they scrolled away mid-stream).
         }
 
         const contentHolder = latestBotMessageSpan.querySelector('.content-span');
@@ -808,10 +795,17 @@ export const sendMessage = async () => {
             console.error("Error saving final chat state to Firestore:", dbError);
         }
 
-        // 2. Reset the UI buttons.
-        dom.sendBtn.classList.remove('hidden');
-        dom.stopBtn.classList.add('hidden');
+        // 2. Reset the UI buttons + per-message composer chips.
+        dom.stopBtn.classList.add('stop-hidden');
+        state.isStreaming = false;
+        // Stream over: the E1 pill must never outlive the reply (no scroll
+        // event fires here if the user is parked above, so hide it directly).
+        dom.jumpToLatest?.classList.add('hidden');
+        dom.jumpToLatest?.classList.remove('flex', 'jump-enter');
         state.abortController = null;
+        state.webSearchEnabled = false;
+        state.thinkingEnabled = false;
+        syncComposerChips();
         dom.modelSelectorBtn.disabled = false;
         dom.modelSelectorBtn.classList.remove('opacity-50', 'cursor-not-allowed');
 
@@ -903,4 +897,20 @@ export const renderActiveChat = () => {
     dom.chatTitleInput.value = chat.name;
     dom.modelSelectorLabel.textContent = MODEL_CONFIG[chat.model]?.name || 'Select Model';
     applyModelColorTheme(chat.model);
+    syncComposerChips();
+};
+
+// E2 (owner-approved): drop the trailing assistant reply, keep the last user
+// prompt, and send it again. Costs one extra AI call per use.
+export const regenerateLastResponse = () => {
+    const chat = state.chats[state.activeChatId];
+    if (!chat || !Array.isArray(chat.messages) || !chat.messages.length) return;
+    while (chat.messages.length && chat.messages[chat.messages.length - 1].role === 'assistant') chat.messages.pop();
+    const last = chat.messages[chat.messages.length - 1];
+    if (!last || last.role !== 'user') return;
+    const text = last.content;
+    chat.messages.pop(); // sendMessage re-appends it fresh
+    renderActiveChat();
+    dom.messageInput.value = text;
+    sendMessage();
 };

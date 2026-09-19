@@ -147,19 +147,33 @@ Status legend: ☐ planned · ◐ in progress · ✅ done · ❌ rejected
 
 ## H. Progress ledger (update every session)
 
+> **Session 2026-09-19 (v1.0.3 completion):** finished the interrupted v1.0.3 work —
+> wired dead controls (chips had no listeners, jump pill had no logic, sidebar quick
+> actions unwired), added missing `.composer-chip`/`.chip-active`/`.jump-enter` CSS
+> + rebuilt `dist/output.css`, plumbed `options:{webSearch,thinking}` through
+> `validateChatRequest` (strict bool coercion, tests added) into both backends
+> (OpenRouter `:online`, Gemini `google_search` + `thinkingConfig`, Groq/NVIDIA
+> ignored), B1 textbox (52px min, 40vh max) + fading Enter hint, B2 morph kept,
+> E3 palette commands, SW cache v23. Gates: check ✅ lint 0 errors ✅ npm test ✅
+> (9 new interaction assertions incl. per-model chip gating) CSS rebuilt ✅.
+
 | Item | Target version | Status | Evidence / commit |
 |------|---------------|--------|-------------------|
-| A1 no auto-scroll | 1.0.2 | ☐ | |
-| A2 actions slim-down | 1.0.2 | ☐ | |
-| A3 placement | 1.0.2 | ☐ | |
-| A5 desktop auth click fix | 1.0.2 | ☐ | Playwright-verified finding |
-| A6 guest label ↵ + affordance | 1.0.2 | ☐ | Playwright-verified finding |
-| B1 textbox | 1.0.3 | ☐ | |
-| B2 send⇄stop morph | 1.0.3 | ☐ | |
-| C1 mobile header | 1.0.3 | ☐ | |
+| A1 no auto-scroll | 1.0.2 | ✅ | v1.0.3 — single scroll on send (`chat.js`), no in-stream scroll |
+| A2 actions slim-down | 1.0.2 | ✅ | v1.0.3 — AI rows = copy·read-aloud·regenerate; 👍/👎/📌 removed |
+| A3 placement | 1.0.2 | ✅ | v1.0.3 — actions on the model-label line, top-right |
+| A5 desktop auth click fix | 1.0.2 | ✅ | fixed with shell restore (`f7ad27d`); re-verify on deploy |
+| A6 guest label ↵ + affordance | 1.0.2 | ✅ | v1.0.3 — ↵ removed, ghost-button styling |
+| B1 textbox | 1.0.3 | ✅ | v1.0.3 — min 52px, max 40vh, Enter hint fades while typing |
+| B2 send⇄stop morph | 1.0.3 | ✅ | v1.0.3 — stop overlays send (same geometry, no jump) |
+| B3 web search chip 💰 | 1.0.5 | ✅ | v1.0.3 — chip → `:online`/`google_search`; owner OK 2026-09-19 |
+| B4 thinking chip 💰 | 1.0.5 | ✅ | v1.0.3 — chip → Gemini `thinkingConfig` 8192; owner OK 2026-09-19 |
+| C1 mobile header | 1.0.3 | ✅ | v1.0.3 — search/prompts/theme re-homed to drawer, quick-action row |
+| E1 jump-to-latest pill | 1.0.6 | ✅ | v1.0.3 — shows only while streaming AND scrolled up >200px |
+| E2 regenerate 💰 | 1.0.7 | ✅ | v1.0.3 — `regenerateLastResponse()`, one AI call per use |
+| E3 palette additions | 1.0.6 | ✅ | v1.0.3 — web search / thinking / jump-to-latest commands |
+| E4 message search mobile placement | 1.0.6 | ✅ | v1.0.3 — drawer Search opens the panel |
+| B5 model capability badge | 1.0.6 | ☐ | |
+| C2 desktop header rhythm | 1.0.4 | ☐ | |
 | D1-D6 polish pass | 1.0.4 | ☐ | |
-| B3 web search chip 💰 | 1.0.5 | ☐ | owner OK 2026-09-19 |
-| B4 thinking chip 💰 | 1.0.5 | ☐ | owner OK 2026-09-19 |
-| B5/E1/E3 | 1.0.6 | ☐ | |
-| E2 regenerate 💰 | 1.0.7 | ☐ | needs per-use OK |
 

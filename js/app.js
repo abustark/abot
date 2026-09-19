@@ -11,6 +11,7 @@ import { MODEL_CONFIG, getProviderColor } from './config.js';
 import { closeGuestLimitModal } from './ui.js';
 import { closePromptModal } from './ui.js';
 import { closeSidebar } from './ui.js';
+import { syncComposerChips } from './ui.js';
 import { toggleSidebar } from './ui.js';
 import { createNewChat } from './chat.js';
 import { dom } from './dom.js';
@@ -90,17 +91,52 @@ function initApp() {
         applyKbOffset();
     }
 
-    // --- Floating header hairline: border appears only when the message
-    // list is scrolled (premium-chat pattern). rAF-throttled. ---
+    // --- Floating header hairline + jump-to-latest pill (E1). ---
+    // Header gets its hairline border once scrolled (premium-chat pattern);
+    // the pill shows only while a reply is streaming AND the user has scrolled
+    // up past the fresh content (>200px) — never otherwise. rAF-throttled.
+    const JUMP_PILL_THRESHOLD = 200;
     let headerTick = false;
+    const updateJumpPill = () => {
+        if (!dom.jumpToLatest) return;
+        const el = dom.chatHistoryContainer;
+        const away = el.scrollHeight - el.scrollTop - el.clientHeight > JUMP_PILL_THRESHOLD;
+        const show = away && state.isStreaming;
+        if (show && dom.jumpToLatest.classList.contains('hidden')) {
+            dom.jumpToLatest.classList.remove('hidden');
+            dom.jumpToLatest.classList.add('flex', 'jump-enter');
+        } else if (!show && !dom.jumpToLatest.classList.contains('hidden')) {
+            dom.jumpToLatest.classList.add('hidden');
+            dom.jumpToLatest.classList.remove('flex', 'jump-enter');
+        }
+    };
     dom.chatHistoryContainer.addEventListener('scroll', () => {
         if (headerTick) return;
         headerTick = true;
         requestAnimationFrame(() => {
             dom.appHeader.classList.toggle('header-scrolled', dom.chatHistoryContainer.scrollTop > 4);
+            updateJumpPill();
             headerTick = false;
         });
     }, { passive: true });
+    // Click = go to the live bottom; the next scroll event hides the pill.
+    dom.jumpToLatest?.addEventListener('click', () => {
+        dom.chatHistoryContainer.scrollTo({ top: dom.chatHistoryContainer.scrollHeight, behavior: 'smooth' });
+    });
+
+    // --- Composer chips (B3/B4): per-message Web search / Think toggles. ---
+    // Capability gating lives in syncComposerChips(); re-sync after each toggle
+    // so the active visual state follows the (possibly re-gated) state.
+    dom.webSearchChip?.addEventListener('click', () => {
+        if (dom.webSearchChip.disabled) return;
+        state.webSearchEnabled = !state.webSearchEnabled;
+        syncComposerChips();
+    });
+    dom.thinkingChip?.addEventListener('click', () => {
+        if (dom.thinkingChip.disabled) return;
+        state.thinkingEnabled = !state.thinkingEnabled;
+        syncComposerChips();
+    });
 
     // --- Model Selector Listeners ---
 
@@ -329,7 +365,13 @@ function initApp() {
         if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
         else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
     });
-    dom.messageInput.addEventListener('input', function () { this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px'; setUnsentDraft(this.value.trim().length > 0); });
+    dom.messageInput.addEventListener('input', function () {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+        setUnsentDraft(this.value.trim().length > 0);
+        // B1: the hint carries the Enter shortcut — fade it once typing starts.
+        if (dom.composerHint) dom.composerHint.style.opacity = this.value ? '0' : '1';
+    });
     installDraftLeaveGuard(); // warn before leaving with an unsent draft or mid-stream
     initPalette(); // Ctrl+K command palette (roadmap #8)
     dom.messageInput.addEventListener('keydown', e => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), sendMessage()));
@@ -357,6 +399,20 @@ function initApp() {
     dom.sidebarToggle.addEventListener('click', onSidebarToggleClick);
     if (dom.sidebarCloseBtn) dom.sidebarCloseBtn.addEventListener('click', onSidebarToggleClick);
     dom.sidebarOverlay.addEventListener('click', closeSidebar);
+
+    // --- Sidebar quick actions (C1): mobile header declutter re-homed search,
+    // prompt library and theme into the drawer. Actions close the drawer on
+    // mobile first so the target UI isn't covered. ---
+    dom.sidebarSearchBtn?.addEventListener('click', () => {
+        closeSidebar();
+        dom.searchPanel.classList.remove('hidden');
+        dom.messageSearchInput?.focus();
+    });
+    dom.sidebarPromptBtn?.addEventListener('click', () => {
+        closeSidebar();
+        openPromptModal();
+    });
+    dom.sidebarThemeBtn?.addEventListener('click', () => dom.themeToggle.click());
 
     // Breakpoint crossing: classes valid in one regime are inert/harmful in the
     // other (e.g. sidebar-collapsed margin on a phone). Re-sanitize on change.

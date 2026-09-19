@@ -185,7 +185,7 @@ app.post('/api/chat', checkAuth, async (req, res) => {
     if (!v.ok) {
         return res.status(v.code).json({ error: v.message });
     }
-    const { model, cleanedMessages } = v;
+    const { model, cleanedMessages, chatOptions } = v;
 
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache, no-store');
@@ -195,6 +195,13 @@ app.post('/api/chat', checkAuth, async (req, res) => {
     const isGoogle = model.startsWith('google/');
     const isGroq = model.startsWith('groq/');
     const isNvidia = model.startsWith('nvidia/');
+
+    // Per-message composer options (v1.0.3 B3/B4). Free-tier rule: these are
+    // applied ONLY when the user explicitly toggled a chip — never always-on.
+    // OpenRouter models take the `:online` suffix; Gemini takes google_search
+    // grounding / thinkingConfig; Groq/NVIDIA offer neither (chips are disabled
+    // client-side and ignored here), so the flags stay false for them.
+    const useWebSearch = !!chatOptions.webSearch && !isGroq && !isNvidia;
 
     try {
         if (isGoogle) {
@@ -210,7 +217,7 @@ app.post('/api/chat', checkAuth, async (req, res) => {
                     'Content-Type': 'application/json',
                     'x-goog-api-key': apiKey // key in header, never in URL
                 },
-                body: JSON.stringify(transformMessagesForGoogle(cleanedMessages))
+                body: JSON.stringify(transformMessagesForGoogle(cleanedMessages, chatOptions))
             });
 
             if (!response.ok) {
@@ -268,7 +275,7 @@ app.post('/api/chat', checkAuth, async (req, res) => {
                     'Authorization': `Bearer ${apiKey}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ model, messages: cleanedMessages, stream: true })
+                body: JSON.stringify({ model: useWebSearch ? `${model}:online` : model, messages: cleanedMessages, stream: true })
             });
 
             if (!response.ok) {
@@ -304,8 +311,16 @@ app.post('/api/chat', checkAuth, async (req, res) => {
  * Transforms the generic message format into the Google Gemini format.
  * @param {Array<Object>} messages - cleaned messages array.
  */
-function transformMessagesForGoogle(messages) {
+// chatOptions (v1.0.3 B3/B4): webSearch -> google_search grounding tool;
+// thinking -> thinkingConfig with a bounded dynamic budget (free-tier friendly).
+function transformMessagesForGoogle(messages, chatOptions = {}) {
     const requestBody = { contents: [] };
+    if (chatOptions.webSearch) {
+        requestBody.tools = [{ google_search: {} }];
+    }
+    if (chatOptions.thinking) {
+        requestBody.thinkingConfig = { thinkingBudget: 8192 };
+    }
     let systemPromptFound = false;
 
     messages.forEach(msg => {

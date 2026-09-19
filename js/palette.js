@@ -42,6 +42,10 @@ const buildCommands = () => {
         { label: 'Toggle theme', hint: 'Action', keywords: 'theme dark light mode toggle', run: () => dom.themeToggle.click() },
         { label: 'Toggle sidebar', hint: 'Action', keywords: 'sidebar toggle history', run: () => dom.sidebarToggle.click() },
         { label: 'Toggle timestamps', hint: 'Action', keywords: 'timestamps time show hide', run: () => { dom.timestampsToggle.checked = !dom.timestampsToggle.checked; dom.timestampsToggle.dispatchEvent(new Event('change', { bubbles: true })); } },
+        // E3: keyboard parity with the composer chips (B3/B4) + jump pill (E1).
+        { label: 'Toggle web search', hint: 'Action', keywords: 'web search internet online chip', run: () => dom.webSearchChip?.click() },
+        { label: 'Toggle thinking', hint: 'Action', keywords: 'think reasoning extended thinking chip', run: () => dom.thinkingChip?.click() },
+        { label: 'Jump to latest message', hint: 'Action', keywords: 'jump latest bottom scroll down', run: () => { if (dom.jumpToLatest && !dom.jumpToLatest.classList.contains('hidden')) dom.jumpToLatest.click(); } },
         ...exportActive,
     ];
 };

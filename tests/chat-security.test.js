@@ -30,6 +30,22 @@ assert(!V({ model: 'groq/m', messages: [{ role: 'tool', content: 'x' }] }).ok, '
 assert(!V({ model: 'groq/m', messages: [{ role: 'user', content: 42 }] }).ok, 'non-string content rejected');
 assert(!V(null).ok, 'null body rejected');
 
+// --- composer options (v1.0.3 B3/B4): strict boolean coercion, no pass-through ---
+r = V({ model: 'groq/m', messages: [{ role: 'user', content: 'a' }], options: { webSearch: true, thinking: true } });
+assert(r.ok && r.chatOptions.webSearch === true && r.chatOptions.thinking === true, 'valid options pass through as booleans');
+
+r = V({ model: 'groq/m', messages: [{ role: 'user', content: 'a' }], options: { webSearch: 'yes', thinking: 1 } });
+assert(r.ok && r.chatOptions.webSearch === false && r.chatOptions.thinking === false, 'non-strict-true values coerce to false');
+
+r = V({ model: 'groq/m', messages: [{ role: 'user', content: 'a' }], options: { webSearch: true, injected: '<script>' } });
+assert(r.ok && !('injected' in r.chatOptions) && Object.keys(r.chatOptions).length === 2, 'unknown option keys stripped');
+
+r = V({ model: 'groq/m', messages: [{ role: 'user', content: 'a' }], options: 'delete-everything' });
+assert(r.ok && r.chatOptions.webSearch === false && r.chatOptions.thinking === false, 'non-object options ignored safely');
+
+r = V({ model: 'groq/m', messages: [{ role: 'user', content: 'a' }] });
+assert(r.ok && r.chatOptions.webSearch === false && r.chatOptions.thinking === false, 'absent options default to false');
+
 // --- rate limiter ---
 const L = new sec.MemoryRateLimiter({ windowMs: 1000, max: 3 });
 assert(L.check('a').allowed && L.check('a').allowed && L.check('a').allowed, '3 allowed');

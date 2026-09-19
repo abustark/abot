@@ -205,7 +205,7 @@
             </div>
             <div class="text-center mt-8">
                 <button id="guest-signin-btn"
-                    class="text-base text-muted hover:text-coral font-medium transition-colors focus:outline-none">Continue
+                    class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full border border-hairline text-sm font-medium text-body hover:text-coral hover:border-coral/50 hover:bg-coral-soft/50 focus:outline-none focus:ring-2 focus:ring-coral/40 transition-colors">Continue
                     as Guest</button>
             </div>
             <footer class="text-center py-4 mt-4">
@@ -274,8 +274,21 @@
                             clip-rule="evenodd" />
                     </svg>
                 </div>
+                <div id="sidebarQuickActions" class="flex gap-2 md:hidden">
+                    <button id="sidebarSearchBtn" aria-label="Search in messages"
+                        class="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs text-muted hover:text-ink bg-card/60 hover:bg-card transition-colors">
+                        <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg>
+                        Search
+                    </button>
+                    <button id="sidebarPromptBtn" aria-label="Open prompt library"
+                        class="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs text-muted hover:text-ink bg-card/60 hover:bg-card transition-colors">
+                        <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4zm3 2a1 1 0 00-1 1v1a1 1 0 002 0V5a1 1 0 00-1-1zm4 0a1 1 0 00-1 1v1a1 1 0 002 0V5a1 1 0 00-1-1zm4 0a1 1 0 00-1 1v1a1 1 0 002 0V5a1 1 0 00-1-1zM7 8a1 1 0 00-1 1v1a1 1 0 002 0v-1a1 1 0 00-1-1zm4 0a1 1 0 00-1 1v1a1 1 0 002 0v-1a1 1 0 00-1-1zm4 0a1 1 0 00-1 1v1a1 1 0 002 0v-1a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+                        Prompts
+                    </button>
+                </div>
             </div>
-            <nav id="chatList" class="flex-1 overflow-y-auto p-2 space-y-1 scrollbar-custom" aria-label="Chat history"></nav>
+            <div class="px-3 pt-2 pb-1 text-[11px] font-semibold uppercase tracking-wider text-muted/80">Recent</div>
+            <nav id="chatList" class="flex-1 overflow-y-auto p-2 pt-1 space-y-1 scrollbar-custom" aria-label="Chat history"></nav>
             <div class="p-3 border-t border-hairline">
                 <div class="flex items-center gap-3 rounded-xl px-2 py-2 hover:bg-card/60 transition-colors">
                     <div id="userAvatar"
@@ -284,16 +297,25 @@
                     <div class="min-w-0 flex-1">
                         <span id="userEmailDisplay"
                             class="block font-medium text-sm text-ink truncate">user@example.com</span>
-                        <button id="settingsToggleBtn"
-                            class="flex items-center gap-1.5 text-xs text-muted hover:text-coral transition-colors"
-                            aria-expanded="false">
-                            <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd"
-                                    d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"
-                                    clip-rule="evenodd" />
-                            </svg>
-                            <span>Settings</span>
-                        </button>
+                        <div class="flex items-center gap-3">
+                            <button id="settingsToggleBtn"
+                                class="flex items-center gap-1.5 text-xs text-muted hover:text-coral transition-colors"
+                                aria-expanded="false">
+                                <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd"
+                                        d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                                <span>Settings</span>
+                            </button>
+                            <button id="sidebarThemeBtn" aria-label="Toggle dark mode"
+                                class="flex items-center gap-1.5 text-xs text-muted hover:text-coral transition-colors">
+                                <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+                                </svg>
+                                <span>Theme</span>
+                            </button>
+                        </div>
                     </div>
                     <button id="signoutBtn" aria-label="Sign out" data-tooltip="Sign Out"
                         class="p-2 rounded-lg hover:bg-card transition-colors flex-shrink-0">
@@ -369,14 +391,6 @@
                     </button>
                 </div>
                 <div class="flex items-center gap-1.5">
-                    <button id="headerNewChatBtn" aria-label="New chat" data-tooltip="New Chat" data-tooltip-pos="bottom"
-                        class="p-2 rounded-lg text-muted hover:text-ink hover:bg-card transition-colors md:hidden">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd"
-                                d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                                clip-rule="evenodd" />
-                        </svg>
-                    </button>
                     <button id="modelSelectorBtn"
                         class="flex items-center gap-2 bg-raised dark:bg-raised border border-hairline shadow-soft pl-3 pr-2.5 py-1.5 rounded-full text-sm font-medium text-ink hover:border-coral/40 hover:shadow-lift focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-coral/40 dark:focus:ring-offset-canvas transition-all duration-fast ease-out active:scale-[0.98]">
                         <span id="modelSelectorDot" class="w-2 h-2 rounded-full bg-coral"></span>
@@ -391,8 +405,9 @@
                     <div id="modelSelectorPanel"
                         class="modal-transition absolute top-full right-3 md:right-5 mt-2 w-80 max-w-[calc(100vw-1.5rem)] max-h-[60vh] overflow-y-auto bg-canvas dark:bg-card border border-hairline rounded-xl shadow-lift z-20 hidden origin-top-right scrollbar-custom"
                         style="opacity: 0; transform: translateY(-10px) scale(0.98);"></div>
+                    <div class="w-px h-5 bg-hairline mx-1 hidden md:block"></div>
                     <button id="searchToggleBtn"
-                        class="p-2 rounded-lg text-muted hover:text-ink hover:bg-card transition-colors" aria-label="Search in messages"
+                        class="hidden md:block p-2 rounded-lg text-muted hover:text-ink hover:bg-card transition-colors" aria-label="Search in messages"
                         data-tooltip="Search messages" data-tooltip-pos="bottom">
                         <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd"
@@ -401,7 +416,7 @@
                         </svg>
                     </button>
                     <button id="promptBtn" aria-label="Open prompt library" data-tooltip="Prompt library" data-tooltip-pos="bottom"
-                        class="p-2 rounded-lg text-muted hover:text-ink hover:bg-card transition-colors">
+                        class="hidden md:block p-2 rounded-lg text-muted hover:text-ink hover:bg-card transition-colors">
                         <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
                             fill="currentColor">
                             <path fill-rule="evenodd"
@@ -409,9 +424,9 @@
                                 clip-rule="evenodd" />
                         </svg>
                     </button>
-                    <div class="w-px h-5 bg-hairline mx-1"></div>
+                    <div class="w-px h-5 bg-hairline mx-1 hidden md:block"></div>
                     <button id="themeToggle" aria-label="Toggle dark mode" data-tooltip="Toggle theme" data-tooltip-pos="bottom"
-                        class="p-2 rounded-lg text-muted hover:text-ink hover:bg-card transition-colors">
+                        class="hidden md:block p-2 rounded-lg text-muted hover:text-ink hover:bg-card transition-colors">
                         <svg id="sunIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-500 hidden"
                             viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd"
@@ -448,7 +463,7 @@
                         <div
                             class="flex items-end bg-raised dark:bg-raised border border-hairline shadow-lift rounded-2xl p-1.5 transition-[border-color,box-shadow] duration-base ease-out focus-within:border-coral/50 focus-within:ring-2 focus-within:ring-coral/15">
                             <textarea id="messageInput"
-                                class="flex-1 bg-transparent px-3 py-2.5 resize-none focus:outline-none text-body placeholder:text-muted max-h-48"
+                                class="flex-1 bg-transparent px-3 py-2.5 resize-none focus:outline-none text-body placeholder:text-muted min-h-[52px] max-h-[40vh]"
                                 placeholder="Message ABot…" rows="1"></textarea>
                             <button id="voiceBtn" aria-label="Voice input" data-tooltip="Voice input"
                                 class="w-11 h-11 flex items-center justify-center rounded-full text-muted hover:text-coral transition-colors flex-shrink-0">
@@ -470,7 +485,7 @@
                                     </svg>
                                 </button>
                                 <button id="stopBtn" aria-label="Stop generating" data-tooltip="Stop"
-                                    class="w-11 h-11 flex items-center justify-center rounded-full text-white bg-ink hover:bg-ink/90 transition-colors hidden">
+                                    class="stop-hidden absolute inset-0 w-11 h-11 flex items-center justify-center rounded-full text-white bg-ink hover:bg-ink/90 transition-opacity duration-150">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
                                         fill="currentColor">
                                         <rect x="6" y="6" width="8" height="8" rx="1.5" fill="currentColor" />
@@ -478,9 +493,29 @@
                                 </button>
                             </div>
                         </div>
+                        <div class="flex items-center gap-2 px-2 pt-1.5">
+                            <button id="webSearchChip" type="button" aria-pressed="false"
+                                title="Search the web for current information before answering"
+                                class="composer-chip">
+                                <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 100-18 9 9 0 000 18zm0 0c1.5-1.5 2.5-4 2.5-9S13.5 4.5 12 3m0 18c-1.5-1.5-2.5-4-2.5-9S10.5 4.5 12 3M3.6 9h16.8M3.6 15h16.8" /></svg>
+                                <span>Web search</span>
+                            </button>
+                            <button id="thinkingChip" type="button" aria-pressed="false" disabled
+                                title="Select a thinking-capable model (e.g. Gemini 2.5 Pro) to enable"
+                                class="composer-chip">
+                                <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" /></svg>
+                                <span>Think</span>
+                            </button>
+                            <span id="composerHint" class="ml-auto text-[11px] text-muted/70 hidden md:block transition-opacity duration-fast">Enter to send · Shift+Enter for newline</span>
+                        </div>
                         <p class="text-center text-[11px] text-muted/70 mt-1.5 hidden md:block">ABot can make mistakes. Verify important information.</p>
                     </div>
                 </div>
+                <button id="jumpToLatest" aria-label="Jump to latest message"
+                    class="fixed bottom-28 right-5 z-20 hidden flex-col items-center gap-1 px-3 py-2.5 rounded-full bg-raised border border-hairline shadow-lift text-xs font-medium text-ink hover:border-coral/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-coral/40 transition-all duration-base ease-out active:scale-95">
+                    <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3" /></svg>
+                    <span>Latest</span>
+                </button>
 
             </main>
         </div>

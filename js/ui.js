@@ -5,7 +5,7 @@
  * Verify with: node tools/verify-parity.js
  */
 
-import { SYSTEM_PROMPTS, getProviderColor } from './config.js';
+import { SYSTEM_PROMPTS, getProviderColor, modelCapabilities } from './config.js';
 import { dom } from './dom.js';
 import { state } from './state.js';
 import { showToast } from './utils.js';
@@ -47,6 +47,38 @@ export const applyModelColorTheme = (model) => {
 
     if (dom.modelSelectorDot) {
         dom.modelSelectorDot.className = `w-2 h-2 rounded-full ${provider.dot} transition-colors`;
+    }
+};
+
+// B3/B4: keep the composer chips in sync with (a) the selected model's
+// capabilities and (b) the current toggle state. Runs on model change, on
+// chat switch, and after each send (chips are per-message).
+export const syncComposerChips = () => {
+    const model = state.chats[state.activeChatId]?.model;
+    const caps = modelCapabilities(model);
+
+    if (dom.webSearchChip) {
+        const active = state.webSearchEnabled && caps.webSearch;
+        if (!caps.webSearch) state.webSearchEnabled = false;
+        dom.webSearchChip.disabled = !caps.webSearch;
+        dom.webSearchChip.classList.toggle('chip-active', active);
+        dom.webSearchChip.setAttribute('aria-pressed', String(active));
+        dom.webSearchChip.title = caps.webSearch
+            ? 'Search the web for current information before answering'
+            : 'Web search is not available for this provider';
+    }
+
+    if (dom.thinkingChip) {
+        const active = state.thinkingEnabled && caps.thinking;
+        if (!caps.thinking) state.thinkingEnabled = false;
+        dom.thinkingChip.disabled = !caps.thinking;
+        dom.thinkingChip.classList.toggle('chip-active', active);
+        dom.thinkingChip.setAttribute('aria-pressed', String(active));
+        dom.thinkingChip.title = caps.thinking
+            ? 'Extended thinking on/off (higher quality, slower and more tokens when on)'
+            : caps.alwaysThinks
+                ? 'This model always reasons — nothing to toggle'
+                : 'Select a thinking-capable model (e.g. Gemini 2.5 Pro) to enable';
     }
 };
 

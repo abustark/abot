@@ -101,6 +101,24 @@ export const MODEL_CONFIG = {
 
 export const GUEST_MESSAGE_LIMIT = 5;
 
+// Per-model capability gates for the composer chips (v1.0.3).
+//  - webSearch: OpenRouter-routed models support the `:online` plugin and
+//    Gemini supports google_search grounding; Groq/NVIDIA direct APIs offer
+//    neither, so the chip is disabled there.
+//  - thinking: only models with a real on/off thinking control. DeepSeek R1
+//    variants always reason (no toggle to offer) — chip stays disabled with
+//    an explanatory tooltip.
+const THINKING_MODELS = new Set(['google/gemini-2.5-pro']);
+
+export const modelCapabilities = (model) => {
+    const m = String(model || '');
+    return {
+        webSearch: !m.startsWith('groq/') && !m.startsWith('nvidia/'),
+        thinking: THINKING_MODELS.has(m),
+        alwaysThinks: /deepseek-r1/.test(m),
+    };
+};
+
 export const SYSTEM_PROMPTS = [
     { title: "Standard Assistant", prompt: "You are a helpful AI assistant." },
     { title: "Code Helper", prompt: "You are an expert programmer. Provide clear, concise, and accurate code examples. Use markdown for all code blocks and explain your reasoning." },

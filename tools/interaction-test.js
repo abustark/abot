@@ -141,6 +141,52 @@ function stubChain(label) {
         click($('searchToggleBtn'));
         await sleep(50);
         check('search panel opens', $('searchPanel') && !$('searchPanel').classList.contains('hidden'));
+        // v1.0.3 C1: the drawer re-homes search for mobile — click must open the same panel.
+        click($('sidebarSearchBtn'));
+        await sleep(50);
+        check('sidebar search button opens search panel', $('searchPanel') && !$('searchPanel').classList.contains('hidden'));
+    }
+    // composer chips (v1.0.3 B3/B4): gated per model, toggle on/off.
+    {
+        const ws = $('webSearchChip');
+        const th = $('thinkingChip');
+        check('thinking chip gated for default model', th && th.disabled);
+        check('web-search chip gated for groq default', ws && ws.disabled);
+        // Switch the active chat to a fully capable model via app state, as a
+        // model-selector pick would (capability re-sync is the point here).
+        const { state } = await import('file://' + path.join(esmDir, 'state.js'));
+        const { renderActiveChat } = await import('file://' + path.join(esmDir, 'chat.js'));
+        const chat = state.chats[state.activeChatId];
+        const prevModel = chat ? chat.model : null;
+        if (chat) { chat.model = 'google/gemini-2.5-pro'; renderActiveChat(); } // same path the model picker uses
+        click(ws);
+        await sleep(50);
+        check('web-search chip activates for capable model', ws.getAttribute('aria-pressed') === 'true' && ws.classList.contains('chip-active'));
+        click(ws);
+        await sleep(50);
+        check('web-search chip deactivates', ws.getAttribute('aria-pressed') === 'false' && !ws.classList.contains('chip-active'));
+        check('thinking chip unlocks for gemini-2.5-pro', th && !th.disabled);
+        click(th);
+        await sleep(50);
+        check('thinking chip activates', th.getAttribute('aria-pressed') === 'true' && th.classList.contains('chip-active'));
+        click(th);
+        await sleep(50);
+        check('thinking chip deactivates', th.getAttribute('aria-pressed') === 'false');
+        if (chat) { chat.model = prevModel; renderActiveChat(); } // restore default
+    }
+    // jump-to-latest pill (v1.0.3 E1): hidden at rest (no stream, no scroll-away).
+    {
+        const pill = $('jumpToLatest');
+        check('jump pill hidden at rest', pill && pill.classList.contains('hidden') && !pill.classList.contains('flex'));
+    }
+    // prompt library (v1.0.3 C1): drawer button opens the modal.
+    {
+        click($('sidebarPromptBtn'));
+        await sleep(50);
+        check('sidebar prompts button opens prompt modal', $('promptModal') && !$('promptModal').classList.contains('hidden'));
+        window.document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+        await sleep(300);
+        check('prompt modal Escape-closes', $('promptModal').classList.contains('hidden'));
     }
     // command palette (Ctrl+K): open, type, keyboard-run an action
     {
