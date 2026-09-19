@@ -3,6 +3,13 @@
 > **Read this fully before writing any code.** It defines branch discipline,
 > task order, quality gates, and hard constraints for working on ABot.
 > Codex/Claude/Antigravity: this file overrides your defaults where they conflict.
+>
+> **🔴 READ-FIRST RULE (owner directive, 2026-09-19): before doing ANYTHING
+> else the user asks, open and go through `docs/UI-IDEAS-FREEBUFF.md` — the
+> Freebuff UI ideas backlog (performance, motion, PC/mobile polish). Every
+> UI change you make must keep those ideas in mind, and new work should not
+> contradict them. Re-read it when you touch `index.html`, `js/`, or
+> `src/input.css`.**
 
 ---
 
@@ -12,7 +19,7 @@ ABot is a **vanilla-JS, multi-model AI chat app** (no framework):
 - Frontend: `index.html` + ES modules in `js/` (entry: `js/app.js`), Tailwind CSS compiled from `src/input.css` → `dist/output.css` (**compiled file is committed — always rebuild + commit it after CSS/config changes**)
 - Design system: Claude-style warm tokens (canvas/ink/coral) defined in `src/input.css` CSS vars + `tailwind.config.js`. **Never hardcode hex colors in markup/JS.**
 - Backend: Vercel serverless `api/chat.js` (production) + `server.js` (local dev mirror), sharing `lib/chat-security.js`. Firebase Auth + Firestore (`users/{uid}/chats/{chatId}`).
-- Tests/gates: see §3. Docs worth reading before UI work: `docs/PHASE3_PLAN.md` (design system), `IMPLEMENTATION_PLAN.md` (history).
+- Tests/gates: see §3. Docs worth reading before any work: `docs/UI-IDEAS-FREEBUFF.md` (**read first — owner directive**) and `docs/AI-WORK-ORDER.md` (current findings, difficulty order, and approval gates).
 
 **Constraint:** all AI providers are FREE-TIER keys. Never add features that make extra AI API calls without asking the owner.
 
@@ -30,27 +37,17 @@ ABot is a **vanilla-JS, multi-model AI chat app** (no framework):
 
 ## 2. Task order (do NOT skip ahead)
 
-### PHASE A — Fix the open bug first (blocking everything else)
-Read **`docs/BUG-BRIEF-tap-blocking.md`** in full. Summary: physical taps on shell controls do nothing on the deployed app, while synthetic `dispatchEvent` clicks all pass — a hit-testing/interception issue. The build already contains ground-truth tools you must use, not replace:
-- `window.__abotClicks` — capture-phase log of every real click (target, x/y, time)
-- `#diag` in-page overlay: build id, initApp completion, duplicate-id scan, `elementFromPoint` hit-tests, viewport-covering-layer scan, real-click log, captured errors
-- `<url>/#reset` — wipes SW/caches/storage and reloads
+> **Standing pre-task step:** read `docs/UI-IDEAS-FREEBUFF.md` first and keep
+> its backlog in mind. Then read `docs/AI-WORK-ORDER.md` and follow its LOW →
+> MEDIUM → HARD order.
 
-**Method:** run the app locally (`node server.js`, port 3000), reproduce with REAL browser interaction (you have a real browser — use it; the previous agent's sandbox could not, which is why this bug survived), follow the brief's decisive test, name the intercepting layer or wiring mismatch, fix it minimally.
-
-Known-fixed pitfalls — do NOT reintroduce: duplicate element IDs (`modelSelectorPanel`, `modal-title` were duplicated before), the any-click panel auto-closer, `'unsafe-inline'` scripts, `express.static('.')`.
-
-### PHASE B — Verify (all gates green + real-browser pass)
-Run every gate in §3, then verify in a real browser (desktop + mobile viewport):
-- `#reset` → sign in as guest → send a chat message (streams in)
-- Tap-test by hand: theme toggle, sidebar, model selector (17 options), settings switches, search, export menu, sign-out confirm
-- Auth screen: coral ambient net renders behind the card in dark AND light
-
-### PHASE C — Only now push
-Push your branch, merge into `arena/01a03fe9-abot` (CI must be green — `.github/workflows/ci.yml` runs on every push), and report to the owner: root cause, fix, files touched, verification evidence (the diag overlay output before/after).
-
-### PHASE D — Component visual upgrade (only after A–C)
-Open **`docs/UI-COMPONENTS-ROADMAP.md`** and execute it top-down (toast polish → modal focus-trap → tooltips → Ctrl+K command palette). Respect its acceptance criteria and the design-token/motion rules. One component per commit, gates green per commit.
+1. Complete LOW difficulty work first.
+2. Stop and report before starting MEDIUM work.
+3. Start MEDIUM or HARD work only after explicit owner approval.
+4. Do not add new features until the current security/auth findings in
+   `docs/AI-WORK-ORDER.md` are handled or deliberately deferred by the owner.
+5. Keep using `/#diag`, `/#reset`, interaction tests, and real-browser checks
+   when debugging shell taps, auth, or mobile UI.
 
 ---
 
@@ -90,4 +87,4 @@ For PHASE D: load `emil-design-eng` + `animate` + `taste-skill` before writing U
 
 ---
 
-*Prepared 2026-08-30 · Current open bug: `docs/BUG-BRIEF-tap-blocking.md` · Next roadmap: `docs/UI-COMPONENTS-ROADMAP.md`*
+*Prepared 2026-08-30 · Updated 2026-09-19 · Current source of truth: `docs/AI-WORK-ORDER.md`*

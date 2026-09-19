@@ -1,7 +1,7 @@
 import admin from 'firebase-admin';
 import chatSecurity from '../lib/chat-security.js';
 
-const { LIMITS, validateChatRequest, MemoryRateLimiter, identityKey, clientIp, upstreamTimeout, sseError, logProviderError } = chatSecurity;
+const { validateChatRequest, MemoryRateLimiter, identityKey, clientIp, upstreamTimeout, sseError, logProviderError } = chatSecurity;
 
 // --- Firebase Admin SDK Initialization (runs once per cold start) ---
 if (!admin.apps.length) {
@@ -15,7 +15,7 @@ if (!admin.apps.length) {
     });
 }
 
-// Tier-1 rate limiting (in-memory, per warm instance — see IMPLEMENTATION_PLAN.md)
+// Tier-1 rate limiting (in-memory, per warm instance)
 const chatLimiter = new MemoryRateLimiter();
 
 // --- Main Serverless Function Handler ---
@@ -38,7 +38,7 @@ export default async function handler(req, res) {
     try {
         const decodedToken = await admin.auth().verifyIdToken(idToken);
         uid = decodedToken.uid;
-    } catch (error) {
+    } catch {
         console.error('[chat] token verification failed');
         return res.status(403).json({ error: 'Unauthorized: Invalid token.' });
     }
@@ -55,7 +55,7 @@ export default async function handler(req, res) {
     if (!v.ok) {
         return res.status(v.code).json({ error: v.message });
     }
-    const { model, cleanedMessages } = v;
+    const { model, cleanedMessages, chatOptions } = v;
 
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache, no-store');
@@ -66,13 +66,20 @@ export default async function handler(req, res) {
     const isGroq = model.startsWith('groq/');
     const isNvidia = model.startsWith('nvidia/');
 
+    // Per-message composer options (v1.0.3 B3/B4). Free-tier rule: these are
+    // applied ONLY when the user explicitly toggled a chip — never always-on.
+    // OpenRouter models take the `:online` suffix; Gemini takes google_search
+    // grounding / thinkingConfig; Groq/NVIDIA offer neither (chips are disabled
+    // client-side and ignored here), so the flags stay false for them.
+    const useWebSearch = !!chatOptions.webSearch && !isGroq && !isNvidia;
+
     try {
         if (isGoogle) {
             const apiKey = process.env.GEMINI_API_KEY;
             if (!apiKey) throw new Error('GEMINI_API_KEY not configured.');
             const googleModelName = model.split('/')[1];
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(googleModelName)}:generateContent`;
-            const requestBody = transformMessagesForGoogle(cleanedMessages);
+            const requestBody = transformMessagesForGoogle(cleanedMessages, chatOptions);
             const response = await fetch(apiUrl, {
                 method: 'POST',
                 signal: upstreamTimeout(),
@@ -122,7 +129,7 @@ export default async function handler(req, res) {
                     'Authorization': `Bearer ${apiKey}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ model, messages: cleanedMessages, stream: true })
+                body: JSON.stringify({ model: useWebSearch ? `${model}:online` : model, messages: cleanedMessages, stream: true })
             });
             if (!response.ok) {
                 logProviderError('openrouter', response.status, await response.text());
@@ -146,9 +153,17 @@ export default async function handler(req, res) {
     }
 }
 
-// Google Gemini message transformer (system prompt first; user/assistant -> user/model)
-function transformMessagesForGoogle(messages) {
+// Google Gemini message transformer (system prompt first; user/assistant -> user/model).
+// chatOptions (v1.0.3 B3/B4): webSearch -> google_search grounding tool;
+// thinking -> thinkingConfig with a bounded dynamic budget (free-tier friendly).
+function transformMessagesForGoogle(messages, chatOptions = {}) {
     const requestBody = { contents: [] };
+    if (chatOptions.webSearch) {
+        requestBody.tools = [{ google_search: {} }];
+    }
+    if (chatOptions.thinking) {
+        requestBody.thinkingConfig = { thinkingBudget: 8192 };
+    }
     let systemPromptFound = false;
     messages.forEach(msg => {
         if (msg.role === 'system' && msg.content && !systemPromptFound) {

@@ -3,27 +3,31 @@
  * Provides offline caching for local assets only
  */
 
-const CACHE_NAME = 'abot-cache-v17'; // v12: Phase 4 self-hosted fonts + vendored libs
+const CACHE_NAME = 'abot-cache-v27'; // v27: CSS-only auth aurora, account menu, css v=p13
 const STATIC_ASSETS = [
     '/',
     '/index.html',
-    '/favicon.png',
+    '/favicon-32.png',
+    '/favicon-32-light.png',
+    '/favicon-32-dark.png',
     '/logo.png',
-    '/dist/output.css?v=p6',
+    '/dist/output.css?v=p13',
     '/js/app.js',
     '/js/config.js',
     '/js/dom.js',
+    '/js/palette.js',
     '/js/state.js',
     '/js/utils.js',
     '/js/ui.js',
     '/js/auth.js',
     '/js/chat.js',
     '/vendor/marked.min.js',
-    '/vendor/highlight.min.js',
-    '/vendor/atom-one-dark.css',
+    // A1/A2 (v1.0.5): atom-one-dark.css is injected with the lazy highlight.js
+    // load, and the Inter faces are gone — neither belongs in the precache.
     '/manifest.json',
-    '/dist/fonts/inter-latin-400-normal.woff2',
-    '/dist/fonts/inter-latin-600-normal.woff2',
+    '/dist/fonts/geist-latin-400-normal.woff2',
+    '/dist/fonts/geist-latin-500-normal.woff2',
+    '/dist/fonts/geist-latin-600-normal.woff2',
     '/dist/fonts/source-serif-4-latin-400-normal.woff2'
 ];
 

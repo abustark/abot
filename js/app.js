@@ -11,13 +11,15 @@ import { MODEL_CONFIG, getProviderColor } from './config.js';
 import { closeGuestLimitModal } from './ui.js';
 import { closePromptModal } from './ui.js';
 import { closeSidebar } from './ui.js';
+import { syncComposerChips } from './ui.js';
+import { toggleSidebar } from './ui.js';
 import { createNewChat } from './chat.js';
 import { dom } from './dom.js';
-import { generateColorClasses } from './config.js';
 import { importChat } from './chat.js';
 import { initDomExtras } from './dom.js';
 import { renderSearchResults } from './chat.js';
 import { initFirebase, initAuth, registerInitApp } from './auth.js';
+import { initPalette } from './palette.js';
 import { initMessageActions } from './chat.js';
 import { linkGuestToGoogle } from './auth.js';
 import { openPromptModal } from './ui.js';
@@ -26,7 +28,7 @@ import { renderActiveChat } from './chat.js';
 import { renderChatList } from './chat.js';
 import { saveSystemPrompt } from './ui.js';
 import { sendMessage } from './chat.js';
-import { showToast, stopSpeaking } from './utils.js';
+import { showToast, stopSpeaking, installDraftLeaveGuard, setUnsentDraft, renderSafeMarkdown } from './utils.js';
 import { signOutUser } from './auth.js';
 import { startVoiceRecognition } from './utils.js';
 import { state } from './state.js';
@@ -60,33 +62,129 @@ if ('serviceWorker' in navigator) {
 
 function initApp() {
 
-    // --- Main App Listeners ---
-
-    if (!document.documentElement.classList.contains('dark')) {
-        dom.sunIcon.classList.remove('hidden');
-        dom.moonIcon.classList.add('hidden');
-    } else {
-        dom.sunIcon.classList.add('hidden');
-        dom.moonIcon.classList.remove('hidden');
-    }
-    dom.themeToggle.addEventListener('click', () => {
-        // Check the CURRENT state and reverse it.
-        if (document.documentElement.classList.contains('dark')) {
-            // It IS dark, so switch to LIGHT
-            document.documentElement.classList.remove('dark');
-            localStorage.setItem('darkMode', 'false');
-            console.log('[Click Event] Switched to LIGHT mode.');
+    // --- Theme: follow system until the user explicitly toggles ---
+    // Head script applies the initial class (stored choice > system pref);
+    // here we only keep the icon pair in sync and persist explicit choices.
+    const syncThemeIcons = () => {
+        const dark = document.documentElement.classList.contains('dark');
+        // B6 (v1.0.6): cross-fade + rotate instead of `hidden` — display:none
+        // can't animate, so the swap used to be a hard jump. `.is-off` only
+        // fades/scales (the icon stays in the layout, out of the a11y tree via
+        // the button's own label).
+        dom.sunIcon.classList.toggle('is-off', !dark);
+        dom.moonIcon.classList.toggle('is-off', dark);
+        // v1.0.7: the account-menu switch is a real checkbox, so its knob slides
+        // off :checked in CSS — mirror the state onto it and nothing else.
+        if (dom.sidebarThemeSwitch) dom.sidebarThemeSwitch.checked = dark;
+    };
+    syncThemeIcons();
+    // One owner of "set the theme", taking an explicit value so the header button
+    // and the menu switch can never drift apart.
+    const applyTheme = (dark) => {
+        document.documentElement.classList.toggle('dark', dark);
+        localStorage.setItem('darkMode', String(dark));
+        syncThemeIcons();
+    };
+    const setTheme = (dark) => {
+        // B1 (v1.0.5): crossfade the theme flip where the View Transitions API
+        // exists (progressive enhancement, ~0 cost); instant on browsers
+        // without it. Reduced-motion users always get the instant swap.
+        const reduceMotion = typeof window.matchMedia === 'function'
+            && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (!reduceMotion && typeof document.startViewTransition === 'function') {
+            document.startViewTransition(() => applyTheme(dark));
         } else {
-            // It IS light, so switch to DARK
-            document.documentElement.classList.add('dark');
-            localStorage.setItem('darkMode', 'true');
-            console.log('[Click Event] Switched to DARK mode.');
+            applyTheme(dark);
         }
-        dom.sunIcon.classList.toggle('hidden');
-        dom.moonIcon.classList.toggle('hidden');
+    };
+    dom.themeToggle.addEventListener('click', () => {
+        setTheme(!document.documentElement.classList.contains('dark'));
+    });
+    dom.sidebarThemeSwitch?.addEventListener('change', () => {
+        setTheme(dom.sidebarThemeSwitch.checked);
+    });
+
+    // --- Mobile keyboard offset: keep the fixed composer dock above the
+    // keypad even on browsers that ignore `interactive-widget=resizes-content`
+    // (visualViewport shrinks while the layout viewport does not). ---
+    if (window.visualViewport) {
+        const vv = window.visualViewport;
+        const applyKbOffset = () => {
+            const kb = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+            document.documentElement.style.setProperty('--kb-h', kb + 'px');
+        };
+        vv.addEventListener('resize', applyKbOffset);
+        vv.addEventListener('scroll', applyKbOffset);
+        applyKbOffset();
+    }
+
+    // --- Floating header hairline + jump-to-latest pill (E1). ---
+    // Header gets its hairline border once scrolled (premium-chat pattern);
+    // the pill shows only while a reply is streaming AND the user has scrolled
+    // up past the fresh content (>200px) — never otherwise. rAF-throttled.
+    const JUMP_PILL_THRESHOLD = 200;
+    let headerTick = false;
+    const updateJumpPill = () => {
+        if (!dom.jumpToLatest) return;
+        const el = dom.chatHistoryContainer;
+        const away = el.scrollHeight - el.scrollTop - el.clientHeight > JUMP_PILL_THRESHOLD;
+        const show = away && state.isStreaming;
+        if (show && dom.jumpToLatest.classList.contains('hidden')) {
+            dom.jumpToLatest.classList.remove('hidden');
+            dom.jumpToLatest.classList.add('flex', 'jump-enter');
+        } else if (!show && !dom.jumpToLatest.classList.contains('hidden')) {
+            dom.jumpToLatest.classList.add('hidden');
+            dom.jumpToLatest.classList.remove('flex', 'jump-enter');
+        }
+    };
+    dom.chatHistoryContainer.addEventListener('scroll', () => {
+        if (headerTick) return;
+        headerTick = true;
+        requestAnimationFrame(() => {
+            dom.appHeader.classList.toggle('header-scrolled', dom.chatHistoryContainer.scrollTop > 4);
+            updateJumpPill();
+            headerTick = false;
+        });
+    }, { passive: true });
+    // Click = go to the live bottom; the next scroll event hides the pill.
+    dom.jumpToLatest?.addEventListener('click', () => {
+        dom.chatHistoryContainer.scrollTo({ top: dom.chatHistoryContainer.scrollHeight, behavior: 'smooth' });
+    });
+
+    // --- Composer chips (B3/B4): per-message Web search / Think toggles. ---
+    // Capability gating lives in syncComposerChips(); re-sync after each toggle
+    // so the active visual state follows the (possibly re-gated) state.
+    dom.webSearchChip?.addEventListener('click', () => {
+        if (dom.webSearchChip.disabled) return;
+        state.webSearchEnabled = !state.webSearchEnabled;
+        syncComposerChips();
+    });
+    dom.thinkingChip?.addEventListener('click', () => {
+        if (dom.thinkingChip.disabled) return;
+        state.thinkingEnabled = !state.thinkingEnabled;
+        syncComposerChips();
     });
 
     // --- Model Selector Listeners ---
+
+    // B5 (v1.0.6): enter-only, origin-aware motion via `@starting-style`
+    // (see .model-panel in src/input.css). The old code wrote inline
+    // opacity/transform and hid the panel 200ms later from five separate call
+    // sites — those timers raced each other, so open → close → open could
+    // leave the panel stuck invisible.
+    const openModelPanel = () => {
+        renderModelSelectorOptions(); // re-render options every time it's opened
+        dom.modelSelectorPanel.classList.remove('hidden');
+        const activeOrFirst = dom.modelSelectorPanel.querySelector('button[class*="bg-coral-soft"]')
+            || dom.modelSelectorPanel.querySelector('button');
+        if (activeOrFirst) activeOrFirst.focus();
+    };
+    const closeModelPanel = ({ restoreFocus = false } = {}) => {
+        if (!dom.modelSelectorPanel.classList.contains('hidden')) {
+            dom.modelSelectorPanel.classList.add('hidden');
+        }
+        if (restoreFocus) dom.modelSelectorBtn.focus();
+    };
 
     const handleModelSelectorNavigation = (e) => {
         if (dom.modelSelectorPanel.classList.contains('hidden')) return;
@@ -98,10 +196,7 @@ function initApp() {
 
         if (e.key === 'Escape') {
             e.preventDefault();
-            dom.modelSelectorPanel.style.opacity = '0';
-            dom.modelSelectorPanel.style.transform = 'scale(0.95)';
-            setTimeout(() => dom.modelSelectorPanel.classList.add('hidden'), 200);
-            dom.modelSelectorBtn.focus();
+            closeModelPanel({ restoreFocus: true });
             return;
         }
 
@@ -153,45 +248,57 @@ function initApp() {
         dom.modelSelectorPanel.innerHTML = ''; // Clear previous options
         const currentChatModel = state.activeChatId ? state.chats[state.activeChatId].model : null;
 
+        // Provider-grouped menu (single column, like ChatGPT/Claude pickers).
+        const groups = new Map();
         Object.keys(MODEL_CONFIG).forEach(key => {
-            const model = MODEL_CONFIG[key];
-            const isActive = key === currentChatModel;
-            const providerColor = getProviderColor(key);
+            const provider = getProviderColor(key).label;
+            if (!groups.has(provider)) groups.set(provider, []);
+            groups.get(provider).push(key);
+        });
 
-            const optionEl = document.createElement('button');
-                            optionEl.className = `w-full flex items-center justify-between text-left p-3 rounded-lg text-sm transition-colors duration-150 ${isActive ? 'bg-coral-soft font-semibold text-ink' : 'hover:bg-card'}`;
-            optionEl.dataset.modelKey = key;
+        groups.forEach((keys, providerLabel) => {
+            const heading = document.createElement('div');
+            heading.className = 'px-3 pt-3 pb-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-muted';
+            heading.textContent = providerLabel;
+            dom.modelSelectorPanel.appendChild(heading);
 
-            let checkmarkSvg = '';
-            if (isActive) {
-                                checkmarkSvg = `<svg class="w-4 h-4 text-coral" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.052-.143z" clip-rule="evenodd" /></svg>`;
-            }
+            keys.forEach(key => {
+                const model = MODEL_CONFIG[key];
+                const isActive = key === currentChatModel;
+                const providerColor = getProviderColor(key);
 
-            optionEl.innerHTML = `
-            <div class="flex items-center space-x-3">
-                <span class="w-2.5 h-2.5 rounded-full ${providerColor.dot}"></span>
-                <span class="font-medium text-ink">${model.name}</span>
-            </div>
-            ${checkmarkSvg}
-        `;
+                const optionEl = document.createElement('button');
+                optionEl.className = `w-full flex items-center justify-between text-left px-3 py-2.5 rounded-lg text-sm transition-colors duration-150 ${isActive ? 'bg-coral-soft font-semibold text-ink' : 'hover:bg-card'}`;
+                optionEl.dataset.modelKey = key;
 
-            optionEl.addEventListener('click', async (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                const currentUser = state.auth.currentUser;
-                if (state.chats[state.activeChatId] && currentUser) {
-                    state.chats[state.activeChatId].model = key;
-                    const chatDocRef = state.db.collection('users').doc(currentUser.uid).collection('chats').doc(state.activeChatId);
-                    await chatDocRef.update({ model: key }).catch(err => console.error("Failed to update model in DB", err));
-
-                    renderActiveChat();
-
-                    dom.modelSelectorPanel.style.opacity = '0';
-                    dom.modelSelectorPanel.style.transform = 'scale(0.95)';
-                    setTimeout(() => dom.modelSelectorPanel.classList.add('hidden'), 200);
+                let checkmarkSvg = '';
+                if (isActive) {
+                    checkmarkSvg = `<svg class="w-4 h-4 text-coral" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.052-.143z" clip-rule="evenodd" /></svg>`;
                 }
+
+                optionEl.innerHTML = `
+                    <span class="flex items-center gap-2.5 min-w-0">
+                        <span class="w-2 h-2 rounded-full ${providerColor.dot} flex-shrink-0"></span>
+                        <span class="font-medium text-ink truncate">${model.name}</span>
+                    </span>
+                    ${checkmarkSvg}
+                `;
+
+                optionEl.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const currentUser = state.auth.currentUser;
+                    if (state.chats[state.activeChatId] && currentUser) {
+                        state.chats[state.activeChatId].model = key;
+                        const chatDocRef = state.db.collection('users').doc(currentUser.uid).collection('chats').doc(state.activeChatId);
+                        await chatDocRef.update({ model: key }).catch(err => console.error("Failed to update model in DB", err));
+
+                        renderActiveChat();
+                        closeModelPanel();
+                    }
+                });
+                dom.modelSelectorPanel.appendChild(optionEl);
             });
-            dom.modelSelectorPanel.appendChild(optionEl);
         });
     };
 
@@ -199,24 +306,8 @@ function initApp() {
 
     dom.modelSelectorBtn.addEventListener('click', e => {
         e.stopPropagation();
-        const isHidden = dom.modelSelectorPanel.classList.contains('hidden');
-        if (isHidden) {
-            renderModelSelectorOptions(); // Re-render options every time it's opened
-            dom.modelSelectorPanel.classList.remove('hidden');
-            setTimeout(() => {
-                dom.modelSelectorPanel.style.opacity = '1';
-                dom.modelSelectorPanel.style.transform = 'translateY(0) scale(1)';
-                // Focus the currently active model or the first one
-                const activeOrFirstButton = dom.modelSelectorPanel.querySelector('button[class*="bg-coral-soft"]') || dom.modelSelectorPanel.querySelector('button');
-                if (activeOrFirstButton) {
-                    activeOrFirstButton.focus();
-                }
-            }, 10); // A short delay ensures the transition plays
-        } else {
-            dom.modelSelectorPanel.style.opacity = '0';
-            dom.modelSelectorPanel.style.transform = 'translateY(-10px) scale(0.98)';
-            setTimeout(() => dom.modelSelectorPanel.classList.add('hidden'), 200); // Wait for animation to finish
-        }
+        if (dom.modelSelectorPanel.classList.contains('hidden')) openModelPanel();
+        else closeModelPanel();
     });
 
     document.addEventListener('click', (e) => {
@@ -227,10 +318,7 @@ function initApp() {
         const panel = dom.modelSelectorPanel;
         const isVisible = !panel.classList.contains('hidden');
         if (isVisible && !panel.contains(e.target) && !dom.modelSelectorBtn.contains(e.target)) {
-            panel.style.opacity = '0';
-            panel.style.transform = 'scale(0.95)';
-            setTimeout(() => panel.classList.add('hidden'), 200);
-            dom.modelSelectorBtn.focus();
+            closeModelPanel({ restoreFocus: true });
         }
 
         // Also, ensure the smaller chat options menus are closed.
@@ -259,15 +347,48 @@ function initApp() {
         dom.searchPanel.classList.toggle('hidden');
         if (!dom.searchPanel.classList.contains('hidden')) dom.messageSearchInput?.focus();
     });
+    // v1.0.4: search had no way out once opened — on mobile it is entered from
+    // the drawer, so the header toggle was never reachable to dismiss it.
+    dom.searchCloseBtn?.addEventListener('click', () => {
+        dom.searchPanel.classList.add('hidden');
+        if (dom.searchResults) dom.searchResults.innerHTML = '';
+    });
     let searchDebounce = null;
     dom.messageSearchInput?.addEventListener('input', (e) => {
         clearTimeout(searchDebounce);
         searchDebounce = setTimeout(() => renderSearchResults(e.target.value.trim()), 200);
     });
 
-    dom.settingsToggleBtn?.addEventListener('click', () => {
-        const hidden = dom.settingsPanel.classList.toggle('hidden');
-        dom.settingsToggleBtn.setAttribute('aria-expanded', String(!hidden));
+    // --- Account menu (v1.0.7) ------------------------------------------------
+    // The profile row opens a popup above itself. Dismissal follows the same
+    // contract as every other popover here: outside click, Escape, or activating
+    // an item — and focus goes back to the trigger. The switch rows deliberately
+    // stay open, so several settings can be flipped in one visit.
+    const setProfileMenu = (open) => {
+        if (!dom.profileMenu || !dom.profileMenuBtn) return;
+        dom.profileMenu.classList.toggle('hidden', !open);
+        dom.profileMenuBtn.setAttribute('aria-expanded', String(open));
+        if (open) dom.profileMenu.querySelector('[role="menuitem"]')?.focus();
+    };
+    const closeProfileMenu = ({ restoreFocus = false } = {}) => {
+        if (!dom.profileMenu || dom.profileMenu.classList.contains('hidden')) return;
+        setProfileMenu(false);
+        if (restoreFocus) dom.profileMenuBtn.focus();
+    };
+    dom.profileMenuBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        setProfileMenu(dom.profileMenu.classList.contains('hidden'));
+    });
+    dom.profileMenu?.addEventListener('click', (e) => {
+        if (e.target.closest('[role="menuitem"]')) closeProfileMenu();
+    });
+    document.addEventListener('click', (e) => {
+        if (!dom.profileMenu || dom.profileMenu.classList.contains('hidden')) return;
+        if (dom.profileMenu.contains(e.target) || dom.profileMenuBtn.contains(e.target)) return;
+        closeProfileMenu();
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeProfileMenu({ restoreFocus: true });
     });
     if (dom.ttsToggle) {
         dom.ttsToggle.checked = localStorage.getItem('abot-auto-tts') === 'true';
@@ -288,7 +409,25 @@ function initApp() {
     document.getElementById('headerNewChatBtn')?.addEventListener('click', createNewChatWrapper);
 
     dom.modelSelectorPanel.addEventListener('keydown', handleModelSelectorNavigation);
-    dom.messageInput.addEventListener('input', function () { this.style.height = 'auto'; this.style.height = (this.scrollHeight) + 'px'; });
+    // Tab must not escape the open model panel (a11y: keep focus in the menu)
+    dom.modelSelectorPanel.addEventListener('keydown', (e) => {
+        if (e.key !== 'Tab') return;
+        const items = [...dom.modelSelectorPanel.querySelectorAll('button')].filter(b => !b.disabled);
+        if (!items.length) return;
+        const first = items[0];
+        const last = items[items.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    });
+    dom.messageInput.addEventListener('input', function () {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+        setUnsentDraft(this.value.trim().length > 0);
+        // B1: the hint carries the Enter shortcut — fade it once typing starts.
+        if (dom.composerHint) dom.composerHint.style.opacity = this.value ? '0' : '1';
+    });
+    installDraftLeaveGuard(); // warn before leaving with an unsent draft or mid-stream
+    initPalette(); // Ctrl+K command palette (roadmap #8)
     dom.messageInput.addEventListener('keydown', e => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), sendMessage()));
     dom.stopBtn.addEventListener('click', () => {
         stopSpeaking();
@@ -297,8 +436,8 @@ function initApp() {
         if (allBotSpans.length > 0) {
             const latestBotMessageSpan = allBotSpans[allBotSpans.length - 1];
             const finalContent = latestBotMessageSpan.querySelector('.content-span')?.innerHTML || "";
-            // Use marked.parse to be consistent with how other messages are rendered.
-            latestBotMessageSpan.innerHTML = finalContent + marked.parse('\n\n*-- Generation stopped --*');
+            // Use renderSafeMarkdown to be consistent with how other messages are rendered.
+            latestBotMessageSpan.innerHTML = finalContent + renderSafeMarkdown('\n\n*-- Generation stopped --*');
         }
 
         if (state.abortController) {
@@ -308,11 +447,115 @@ function initApp() {
 
     dom.sendBtn.addEventListener('click', sendMessage);
     dom.voiceBtn.addEventListener('click', startVoiceRecognition);
-    dom.sidebarToggle.addEventListener('click', e => { e.stopPropagation(); dom.sidebar.classList.toggle('-translate-x-full'); dom.sidebarOverlay.classList.toggle('hidden'); });
+    // Both the header hamburger (#sidebarToggle) and the in-drawer close
+    // (#sidebarCloseBtn) drive the single setSidebar() state owner (ui.js).
+    const onSidebarToggleClick = (e) => { e.stopPropagation(); toggleSidebar(); };
+    dom.sidebarToggle.addEventListener('click', onSidebarToggleClick);
+    if (dom.sidebarCloseBtn) dom.sidebarCloseBtn.addEventListener('click', onSidebarToggleClick);
     dom.sidebarOverlay.addEventListener('click', closeSidebar);
+
+    // --- Sidebar quick actions (C1): mobile header declutter re-homed search,
+    // prompt library and theme into the drawer. Actions close the drawer on
+    // mobile first so the target UI isn't covered. ---
+    dom.sidebarSearchBtn?.addEventListener('click', () => {
+        closeSidebar();
+        dom.searchPanel.classList.remove('hidden');
+        dom.messageSearchInput?.focus();
+    });
+    dom.sidebarPromptBtn?.addEventListener('click', () => {
+        closeSidebar();
+        openPromptModal();
+    });
+
+    // Breakpoint crossing: classes valid in one regime are inert/harmful in the
+    // other (e.g. sidebar-collapsed margin on a phone). Re-sanitize on change.
+    // jsdom (and some old browsers) lack matchMedia — degrade to "no listener".
+    const mdMq = typeof window.matchMedia === 'function' ? window.matchMedia('(min-width: 768px)') : null;
+    const onBreakpointChange = () => {
+        dom.sidebar.classList.remove('sidebar-collapsed');
+        if (mdMq.matches) {
+            dom.sidebar.classList.remove('-translate-x-full');
+        } else {
+            dom.sidebar.classList.add('-translate-x-full');
+        }
+        dom.sidebarOverlay.classList.add('hidden');
+        document.body.style.overflow = '';
+        dom.sidebarToggle?.setAttribute('aria-expanded', String(!dom.sidebar.classList.contains('-translate-x-full')));
+    };
+    if (mdMq) {
+        if (mdMq.addEventListener) mdMq.addEventListener('change', onBreakpointChange);
+        else if (mdMq.addListener) mdMq.addListener(onBreakpointChange); // old Safari/Edge
+    }
 
 
     dom.searchChats.addEventListener('input', (e) => renderChatList(e.target.value));
+
+    // --- C3 (v1.0.6): warm tooltips -----------------------------------------
+    // A tooltip waits ~240ms before appearing (so stray hovers don't flash),
+    // but once you have seen one, sweeping to the next control shows it
+    // immediately — the standard toolbar behaviour. One delegated listener.
+    let lastTooltipAt = 0;
+    document.addEventListener('pointerover', (e) => {
+        if (!(e.target instanceof Element)) return;
+        const trigger = e.target.closest('[data-tooltip]');
+        if (!trigger) return;
+        // Ignore pointer moves that stay inside the same trigger (icon → edge).
+        if (e.relatedTarget instanceof Element && trigger.contains(e.relatedTarget)) return;
+        const now = performance.now();
+        document.querySelectorAll('[data-tooltip-instant]').forEach(el => el.removeAttribute('data-tooltip-instant'));
+        if (now - lastTooltipAt < 1500) trigger.setAttribute('data-tooltip-instant', '');
+        lastTooltipAt = now;
+    }, { passive: true });
+
+    // --- C5 (v1.0.6): swipe the mobile drawer closed -------------------------
+    // Follows the finger 1:1 (transform only), then commits on either 35% of
+    // the drawer width or a flick. A gesture only claims the touch once it is
+    // clearly horizontal, so the chat list still scrolls normally.
+    if (dom.sidebar) {
+        const isMobileDrawer = () => !mdMq || !mdMq.matches;
+        let startX = 0, startY = 0, lastX = 0, lastT = 0, dx = 0, vx = 0;
+        let horizontal = false, swiping = false;
+        dom.sidebar.addEventListener('touchstart', (e) => {
+            if (!isMobileDrawer() || e.touches.length !== 1) return;
+            startX = lastX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+            lastT = performance.now();
+            dx = 0; vx = 0; horizontal = false; swiping = false;
+        }, { passive: true });
+        dom.sidebar.addEventListener('touchmove', (e) => {
+            if (!isMobileDrawer() || e.touches.length !== 1) return;
+            const touch = e.touches[0];
+            const ddx = touch.clientX - startX;
+            const ddy = touch.clientY - startY;
+            if (!horizontal) {
+                if (Math.abs(ddx) < 12 && Math.abs(ddy) < 12) return;
+                // Vertical intent → hand the gesture back to the scrollable list.
+                if (Math.abs(ddx) < Math.abs(ddy) * 1.3) { horizontal = true; swiping = false; return; }
+                horizontal = true;
+                swiping = true;
+                dom.sidebar.style.transition = 'none';
+            }
+            if (!swiping) return;
+            const now = performance.now();
+            vx = (touch.clientX - lastX) / Math.max(now - lastT, 1); // px/ms, <0 = closing
+            lastX = touch.clientX;
+            lastT = now;
+            dx = Math.min(0, ddx); // only leftward drags move the drawer
+            dom.sidebar.style.transform = `translateX(${dx}px)`;
+        }, { passive: true });
+        const endDrawerSwipe = () => {
+            if (!swiping) { horizontal = false; return; }
+            const width = dom.sidebar.getBoundingClientRect().width || 288;
+            const dismiss = -dx > width * 0.35 || vx < -0.5;
+            swiping = false;
+            horizontal = false;
+            dom.sidebar.style.transition = '';
+            dom.sidebar.style.transform = ''; // hand control back to the class
+            if (dismiss) closeSidebar();
+        };
+        dom.sidebar.addEventListener('touchend', endDrawerSwipe, { passive: true });
+        dom.sidebar.addEventListener('touchcancel', endDrawerSwipe, { passive: true });
+    }
 
     // --- Global Keyboard Shortcuts (Debugged) ---
     // --- Global Keyboard Shortcuts ---
@@ -350,6 +593,10 @@ function initApp() {
             }
             if (!dom.promptModal.classList.contains('hidden')) {
                 closePromptModal();
+                return;
+            }
+            if (!dom.searchPanel.classList.contains('hidden')) {
+                dom.searchPanel.classList.add('hidden');
                 return;
             }
             if (!dom.modelSelectorPanel.classList.contains('hidden')) {
@@ -415,6 +662,50 @@ function initApp() {
     dom.importFileInput.addEventListener('change', (e) => {
         if (e.target.files.length > 0) { importChat(e.target.files[0]); }
         e.target.value = null;
+    });
+
+    // --- Modal a11y (skills-audit): scroll-lock + focus restore for every
+    // dialog. Class mutations are the single source of truth — chat.js and
+    // app.js both open/close via classList, so one observer covers all paths.
+    const rememberOpener = new WeakMap();
+    const observeModal = (modalEl) => {
+        if (!modalEl) return;
+        new MutationObserver(() => {
+            const open = !modalEl.classList.contains('hidden');
+            if (open) {
+                if (document.activeElement && document.activeElement !== document.body) {
+                    rememberOpener.set(modalEl, document.activeElement);
+                }
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = '';
+                const opener = rememberOpener.get(modalEl);
+                if (opener && document.contains(opener)) {
+                    try { opener.focus({ preventScroll: true }); } catch { opener.focus(); }
+                }
+            }
+        }).observe(modalEl, { attributes: true, attributeFilter: ['class'] });
+    };
+    observeModal(dom.deleteModal);
+    observeModal(dom.guestLimitModal);
+    observeModal(dom.promptModal);
+
+    // Focus-trap for the delete/sign-out dialog (Tab cycles its two buttons)
+    dom.deleteModal.addEventListener('keydown', (e) => {
+        if (e.key !== 'Tab') return;
+        const cancel = dom.deleteModal.querySelector('#deleteCancelBtn');
+        const confirm = dom.deleteModal.querySelector('#deleteConfirmBtn');
+        const items = [cancel, confirm].filter(Boolean);
+        if (!items.length) return;
+        const first = items[0];
+        const last = items[items.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+            e.preventDefault(); last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault(); first.focus();
+        } else if (!items.includes(document.activeElement)) {
+            e.preventDefault(); first.focus();
+        }
     });
 
     // --- Delete Modal Listeners ---
@@ -498,7 +789,7 @@ function initApp() {
 
 // Phase 6.5: client-state reset + build identity
 // Visit <site>/#reset to wipe SW/caches/storage and reload (recovery tool).
-window.ABOT_BUILD = '2026-08-30.2';
+window.ABOT_BUILD = '2026-09-19.1';
 console.log(`[ABot] build ${window.ABOT_BUILD}`);
 if (location.hash === '#reset') {
     (async () => {
@@ -553,11 +844,9 @@ function main() {
     initMessageActions();      // was statements #43-44
     registerInitApp(initApp);  // auth's onAuthStateChanged needs initApp
     initAuth();                // was statements #52,54-58,60-65
-    // footer years (replaces the old inline document.write scripts)
-    for (const id of ['footer-year', 'footer-year2']) {
-        const el = document.getElementById(id);
-        if (el) el.textContent = new Date().getFullYear();
-    }
+    // footer year (the old duplicate in-app footer was removed in the revamp)
+    const yearEl = document.getElementById('footer-year');
+    if (yearEl) yearEl.textContent = new Date().getFullYear();
 }
 
 // --- Phase 6.5b: #diag — in-page interaction self-test (mobile-friendly) ---
@@ -630,11 +919,11 @@ async function runDiagnostics() {
     } catch (e) { add('sidebar toggle', false, e.message); }
 
     try {
-        click(dom.settingsToggleBtn); await sleep(60);
-        const sp = dom.settingsPanel && !dom.settingsPanel.classList.contains('hidden');
-        add('settings panel opens', !!sp);
-        if (sp) click(dom.settingsToggleBtn);
-    } catch (e) { add('settings panel opens', false, e.message); }
+        click(dom.profileMenuBtn); await sleep(60);
+        const pm = dom.profileMenu && !dom.profileMenu.classList.contains('hidden');
+        add('account menu opens', !!pm);
+        if (pm) click(dom.profileMenuBtn);
+    } catch (e) { add('account menu opens', false, e.message); }
     try {
         click(dom.searchToggleBtn); await sleep(60);
         const sp = dom.searchPanel && !dom.searchPanel.classList.contains('hidden');
@@ -667,7 +956,7 @@ async function runDiagnostics() {
         const vw = window.innerWidth, vh = window.innerHeight;
         document.querySelectorAll('body *').forEach((el) => {
             if (dom.appContainer && (el === dom.appContainer || dom.appContainer.contains(el))) return;
-            if (el.id === 'vanta-bg') return;
+            if (el.id === 'auth-scene') return; // decorative backdrop, by design
             const cs = getComputedStyle(el);
             if (cs.position !== 'fixed' && cs.position !== 'absolute') return;
             if (cs.display === 'none' || cs.visibility === 'hidden') return;

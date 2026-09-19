@@ -28,9 +28,7 @@ export const COLOR_MAP = {
     'indigo-600': { name: 'indigo-600', isLight: false }
 };
 
-export const generateColorClasses = (colorName) => {
-    const config = COLOR_MAP[colorName] || { name: 'indigo-600', isLight: false };
-    const color = config.name;
+export const generateColorClasses = (_colorName) => {
     // Phase 3: primary actions are always coral; the model identity lives in
     // small accents (selector dot), not button colors. Bubbles are warm card.
     return {
@@ -46,17 +44,19 @@ export const generateColorClasses = (colorName) => {
 
 // Initialize the Firestore database
 
-// --- Provider identity colors (owner spec: OpenRouter=yellow, Groq=purple,
-// Gemini=blue, NVIDIA=green; OpenRouter-hosted models inherit yellow) ---
+// --- Provider identity colors (owner spec: OpenRouter=amber, Groq=violet,
+// Gemini=blue, NVIDIA=green; OpenRouter-hosted models inherit amber).
+// Skills-audit Phase 2: raw Tailwind palette classes replaced with semantic
+// tokens (--c-provider-*) so hues stay warm-harmonized and dark-mode aware.
 export const PROVIDER_COLORS = {
-    google:               { dot: 'bg-sky-500',     text: 'text-sky-500',     label: 'Google Gemini' },
-    groq:                 { dot: 'bg-purple-500',  text: 'text-purple-500',  label: 'Groq' },
-    nvidia:               { dot: 'bg-emerald-500', text: 'text-emerald-500', label: 'NVIDIA' },
-    openrouter:           { dot: 'bg-yellow-400',  text: 'text-yellow-400',  label: 'OpenRouter' },
-    deepseek:             { dot: 'bg-yellow-400',  text: 'text-yellow-400',  label: 'OpenRouter · DeepSeek' },
-    qwen:                 { dot: 'bg-yellow-400',  text: 'text-yellow-400',  label: 'OpenRouter · Qwen' },
-    'z-ai':               { dot: 'bg-yellow-400',  text: 'text-yellow-400',  label: 'OpenRouter · GLM' },
-    cognitivecomputations:{ dot: 'bg-yellow-400',  text: 'text-yellow-400',  label: 'OpenRouter · Venice' },
+    google:               { dot: 'bg-provider-google',     text: 'text-provider-google',     label: 'Google Gemini' },
+    groq:                 { dot: 'bg-provider-groq',       text: 'text-provider-groq',       label: 'Groq' },
+    nvidia:               { dot: 'bg-provider-nvidia',     text: 'text-provider-nvidia',     label: 'NVIDIA' },
+    openrouter:           { dot: 'bg-provider-openrouter', text: 'text-provider-openrouter', label: 'OpenRouter' },
+    deepseek:             { dot: 'bg-provider-openrouter', text: 'text-provider-openrouter', label: 'OpenRouter · DeepSeek' },
+    qwen:                 { dot: 'bg-provider-openrouter', text: 'text-provider-openrouter', label: 'OpenRouter · Qwen' },
+    'z-ai':               { dot: 'bg-provider-openrouter', text: 'text-provider-openrouter', label: 'OpenRouter · GLM' },
+    cognitivecomputations:{ dot: 'bg-provider-openrouter', text: 'text-provider-openrouter', label: 'OpenRouter · Venice' },
 };
 
 export const getProviderColor = (model) => {
@@ -98,6 +98,24 @@ export const MODEL_CONFIG = {
 // =================================================================================
 
 export const GUEST_MESSAGE_LIMIT = 5;
+
+// Per-model capability gates for the composer chips (v1.0.3).
+//  - webSearch: OpenRouter-routed models support the `:online` plugin and
+//    Gemini supports google_search grounding; Groq/NVIDIA direct APIs offer
+//    neither, so the chip is disabled there.
+//  - thinking: only models with a real on/off thinking control. DeepSeek R1
+//    variants always reason (no toggle to offer) — chip stays disabled with
+//    an explanatory tooltip.
+const THINKING_MODELS = new Set(['google/gemini-2.5-pro']);
+
+export const modelCapabilities = (model) => {
+    const m = String(model || '');
+    return {
+        webSearch: !m.startsWith('groq/') && !m.startsWith('nvidia/'),
+        thinking: THINKING_MODELS.has(m),
+        alwaysThinks: /deepseek-r1/.test(m),
+    };
+};
 
 export const SYSTEM_PROMPTS = [
     { title: "Standard Assistant", prompt: "You are a helpful AI assistant." },

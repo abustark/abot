@@ -1,31 +1,28 @@
-/* Self-hosted fonts (Phase 4) — latin subsets, display=swap */
+/* Self-hosted fonts — latin subsets, display=swap.
+   Geist (Vercel, SIL OFL) is the UI voice (400/500/600 — markup never asks for
+   a heavier weight). Inter was removed in v1.0.5: Geist always won the stack, so
+   its four faces were dead weight (~92 KB). Source Serif 4 stays the display
+   voice. System fonts carry the fallback. */
 @font-face {
-  font-family: 'Inter';
+  font-family: 'Geist';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url('/dist/fonts/inter-latin-400-normal.woff2') format('woff2');
+  src: url('/dist/fonts/geist-latin-400-normal.woff2') format('woff2');
 }
 @font-face {
-  font-family: 'Inter';
+  font-family: 'Geist';
   font-style: normal;
   font-weight: 500;
   font-display: swap;
-  src: url('/dist/fonts/inter-latin-500-normal.woff2') format('woff2');
+  src: url('/dist/fonts/geist-latin-500-normal.woff2') format('woff2');
 }
 @font-face {
-  font-family: 'Inter';
+  font-family: 'Geist';
   font-style: normal;
   font-weight: 600;
   font-display: swap;
-  src: url('/dist/fonts/inter-latin-600-normal.woff2') format('woff2');
-}
-@font-face {
-  font-family: 'Inter';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url('/dist/fonts/inter-latin-700-normal.woff2') format('woff2');
+  src: url('/dist/fonts/geist-latin-600-normal.woff2') format('woff2');
 }
 @font-face {
   font-family: 'JetBrains Mono';
@@ -68,7 +65,7 @@
 @tailwind utilities;
 
 /* ---------------------------------------------------------------------------
-   ABot design tokens — Claude-style calm (docs/PHASE3_PLAN.md §1)
+   ABot design tokens — Claude-style calm tokens
    RGB triplets so Tailwind opacity modifiers work: bg-coral/20 etc.
    Light values = claude DESIGN.md light theme; .dark flips the surfaces.
 --------------------------------------------------------------------------- */
@@ -77,6 +74,7 @@
     --c-canvas: 250 249 245;   /* #faf9f5 */
     --c-surface: 245 240 232;  /* #f5f0e8 */
     --c-card: 239 233 222;     /* #efe9de */
+    --c-raised: 252 250 246;   /* #fcfaf6 — light: panels lift toward white */
     --c-hairline: 230 223 216; /* #e6dfd8 */
     --c-ink: 20 20 19;         /* #141413 */
     --c-body: 61 61 58;        /* #3d3d3a */
@@ -91,6 +89,14 @@
     --c-amber: 232 165 90;     /* #e8a55a */
     --c-code-bg: 31 30 27;     /* #1f1e1b — code blocks stay dark in both themes */
 
+    /* Provider identity accents (skills audit: was raw Tailwind palette
+       sky-500/purple-500/emerald-500/yellow-400 — now token-owned so the
+       hues harmonize with the warm canvas and flip cleanly in dark mode). */
+    --c-provider-google: 3 132 199;      /* #0384c8 Google blue, warm-adjusted */
+    --c-provider-groq: 138 76 201;       /* #8a4cc9 Groq violet */
+    --c-provider-nvidia: 45 138 91;      /* #2d8a5b NVIDIA green, warm-tuned */
+    --c-provider-openrouter: 198 138 27; /* #c68a1b warm amber (AA on light) */
+
     /* Motion tokens (animate skill) — strong curves, never weak defaults */
     --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
     --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
@@ -102,6 +108,7 @@
     --c-canvas: 24 23 21;      /* #181715 */
     --c-surface: 31 30 27;     /* #1f1e1b */
     --c-card: 37 35 32;        /* #252320 */
+    --c-raised: 43 41 37;      /* #2b2925 — dark: panels lift off the canvas */
     --c-hairline: 55 51 45;
     --c-ink: 250 249 245;      /* #faf9f5 */
     --c-body: 232 228 220;
@@ -114,6 +121,10 @@
     --c-danger: 198 69 69;
     --c-teal: 93 184 166;
     --c-amber: 232 165 90;
+    --c-provider-google: 125 190 235;    /* lightened for dark contrast */
+    --c-provider-groq: 190 150 235;
+    --c-provider-nvidia: 118 196 152;
+    --c-provider-openrouter: 232 176 92;
     color-scheme: dark;
   }
 
@@ -124,13 +135,14 @@
   body {
     background-color: rgb(var(--c-canvas));
     color: rgb(var(--c-body));
-    font-family: 'Inter', sans-serif;
+    font-family: 'Geist', ui-sans-serif, system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
 
-  /* Phase 0 fix A2: visible keyboard focus everywhere */
+  /* Phase 0 fix A2: visible keyboard focus everywhere (tokenized color) */
   :focus-visible {
     outline: 2px solid rgb(var(--c-coral));
+    outline-color: rgb(var(--c-coral));
     outline-offset: 2px;
     border-radius: 4px;
   }
@@ -215,6 +227,86 @@
    Kept OUTSIDE @layer so Tailwind never purges them. Retuned to tokens.
 --------------------------------------------------------------------------- */
 
+/* Signature moment (v1.0.7): the auth backdrop is a CSS-only aurora — three
+   slow-drifting blooms plus a hairline grid — replacing the three.js/vanta.net
+   canvas that used to load from two CDNs before the sign-in card could appear.
+   Rules: transform/opacity only (no blur filters, no background-position
+   animation), 46–62s ambient loops so it reads as weather, not animation, and
+   the whole thing is inert: pointer-events:none all the way down. */
+.auth-scene {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Blobs. No `filter: blur()` — on layers this large a blurred paint is far more
+   expensive than the radial gradient's own falloff, which looks the same. */
+.auth-bloom {
+    position: absolute;
+    border-radius: 50%;
+    animation: authDrift 46s var(--ease-in-out) infinite alternate;
+    will-change: transform;
+}
+.auth-bloom-1 {
+    width: 82vmax;
+    height: 82vmax;
+    top: -38vmax;
+    left: 50%;
+    translate: -50% 0;
+    background: radial-gradient(circle, rgb(var(--c-coral) / 0.26), transparent 62%);
+}
+.auth-bloom-2 {
+    width: 62vmax;
+    height: 62vmax;
+    right: -18vmax;
+    bottom: -28vmax;
+    background: radial-gradient(circle, rgb(var(--c-amber) / 0.16), transparent 62%);
+    animation-duration: 62s;
+    animation-delay: -14s;
+}
+.auth-bloom-3 {
+    width: 48vmax;
+    height: 48vmax;
+    left: -14vmax;
+    bottom: -22vmax;
+    background: radial-gradient(circle, rgb(var(--c-coral) / 0.13), transparent 62%);
+    animation-duration: 54s;
+    animation-delay: -27s;
+}
+@keyframes authDrift {
+    from { transform: translate3d(0, 0, 0) scale(1); }
+    to { transform: translate3d(2.5vmax, -3vmax, 0) scale(1.14); }
+}
+
+/* Hairline grid, dissolved toward the edges so it never competes with the card.
+   --c-ink is dark on the light theme and light on the dark one, so one rule
+   covers both without a dark-mode override. */
+.auth-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+        repeating-linear-gradient(to right, rgb(var(--c-ink) / 0.05) 0 1px, transparent 1px 46px),
+        repeating-linear-gradient(to bottom, rgb(var(--c-ink) / 0.05) 0 1px, transparent 1px 46px);
+    -webkit-mask-image: radial-gradient(72% 62% at 50% 44%, #000 0%, transparent 78%);
+    mask-image: radial-gradient(72% 62% at 50% 44%, #000 0%, transparent 78%);
+}
+
+/* Vignette: settles the edges and keeps the card's immediate surroundings calm
+   so the headline contrast stays honest at every viewport size. */
+.auth-scene::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(125% 95% at 50% 40%, transparent 42%, rgb(var(--c-canvas) / 0.8) 100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    /* Gentle still-life: the composition stays, the drift goes. */
+    .auth-bloom { animation: none; }
+}
+
 /* App loader spinner (indigo -> coral) */
 .loader-circle-22 {
     width: 70px;
@@ -242,10 +334,33 @@
     to { border-color: rgb(var(--c-coral) / 0); }
 }
 
+/* Empty-state ambient glow — a whisper of the auth coral radial, so the new-chat
+   screen has a focal warmth instead of a flat void. Compositor-only. */
+.empty-state { overflow: hidden; }
+.empty-glow {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(48% 38% at 50% 38%, rgb(var(--c-coral) / 0.07), transparent 70%);
+}
+
+/* Sidebar depth — the rail sits a half-step below the canvas so the two
+   regions read as layered, not one flat plane. Subtle inner edge light. */
+@media (min-width: 768px) {
+    #sidebar { box-shadow: inset -1px 0 0 rgb(var(--c-hairline) / 0.5); }
+}
+
+/* Composer seam — soften the hard edge where the dock meets the message list */
+#composerDock { border-top: 1px solid transparent; }
+@media (min-width: 768px) {
+    #composerDock { box-shadow: 0 -8px 24px -16px rgb(var(--c-ink) / 0.18); }
+}
+
 /* Chat bubbles */
-.chat-bubble { max-width: 85%; transition: transform 0.2s ease, opacity 0.3s ease; }
-.user-bubble { border-radius: 18px 4px 18px 18px; }
-.bot-bubble { border-radius: 4px 18px 18px 18px; }
+.chat-bubble { max-width: 85%; transition: transform 0.2s var(--ease-out), opacity 0.3s var(--ease-out); }
+.user-bubble { border-radius: 18px 18px 6px 18px; }
+.bot-bubble { border-radius: 18px 18px 18px 6px; }
 .chat-bubble .prose p { margin: 0; }
 
 /* Typing indicator */
@@ -265,7 +380,29 @@
     40% { transform: scale(1.0); }
 }
 
-.sidebar { transition: transform 0.3s ease; }
+.sidebar { transition: transform 0.3s var(--ease-drawer), margin-left 0.3s var(--ease-drawer); }
+
+/* Desktop collapse: at md+ the drawer becomes a static flex column, so the
+   translate classes are inert (md:translate-x-0 wins). Collapsing is done by
+   sliding the 18rem (w-72) column out via negative margin — the flex sibling
+   reflows, and the transition keeps it animated. */
+@media (min-width: 768px) {
+    .sidebar.sidebar-collapsed { margin-left: -18rem; border-right-width: 0; }
+}
+
+/* Floating composer dock (revamp): fixed sheet on mobile, static flow on
+   desktop. --kb-h (visualViewport offset) lifts it above the mobile keyboard
+   when the browser resizes only the visual viewport. */
+.composer-anim { transition: bottom 180ms var(--ease-out); }
+@media (min-width: 768px) {
+  .composer-anim { transition: none; bottom: auto !important; }
+}
+
+/* Floating header hairline — appears only when the message list is scrolled */
+.header-scrolled {
+  border-bottom-color: rgb(var(--c-hairline));
+  background-color: rgb(var(--c-canvas) / 0.92);
+}
 
 /* Message entrance */
 .message-enter { animation: messageEnter 240ms var(--ease-out) both; }
@@ -326,13 +463,24 @@
     color: rgb(var(--c-muted));
 }
 .copy-code-btn {
-    background-color: transparent;
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background-color: rgb(var(--c-card));
     color: rgb(var(--c-muted));
-    padding: 0.25rem;
-    border-radius: 0.25rem;
-    transition: color 0.2s;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 0.25rem 0.6rem;
+    border-radius: 0.375rem;
+    opacity: 0;
+    transition: opacity 0.15s ease, color 0.2s;
 }
 .copy-code-btn:hover { color: rgb(var(--c-ink)); }
+pre:hover .copy-code-btn,
+pre:focus-within .copy-code-btn { opacity: 1; }
+@media (hover: none) {
+    .copy-code-btn { opacity: 1; }
+}
 .prose pre > code {
     border-top-left-radius: 0 !important;
     border-top-right-radius: 0 !important;
@@ -369,7 +517,7 @@ mark {
     border-radius: 2px;
 }
 
-/* Small popovers (chat item menus): origin-aware, enter-only.
+/* Small popovers (chat ⋮ menus): origin-aware, enter-only.
    @starting-style degrades to instant appearance on old browsers — fine. */
 .chat-options-menu {
     transform-origin: top right;
@@ -377,4 +525,452 @@ mark {
 }
 @starting-style {
     .chat-options-menu { opacity: 0; transform: scale(0.95); }
+}
+
+/* ---------------------------------------------------------------------------
+   Skills-audit improvements (web-design-guidelines + UI roadmap)
+--------------------------------------------------------------------------- */
+
+/* Chat ⋮ affordance: discoverable on touch, quiet on pointer devices.
+   Replaces the hover-only opacity-0 (invisible without a mouse). */
+.chat-list-item .chat-options-btn { opacity: 0.5; }
+@media (hover: none) {
+    .chat-list-item .chat-options-btn { opacity: 1; }
+}
+
+/* Message actions (copy etc.): keyboard-focus + touch reveal.
+   The default is still hover-reveal via group-hover utilities in markup. */
+.message-container:focus-within .copy-message-btn,
+.message-container:focus-within .edit-msg-btn { opacity: 1 !important; }
+@media (hover: none) {
+    .copy-message-btn,
+    .edit-msg-btn,
+    .copy-code-btn { opacity: 1 !important; }
+}
+
+/* v1.0.6: every icon-only control acknowledges the press (design rule: no
+   silent buttons). Immediate, no transition — press feedback should feel
+   instant, not eased. */
+#themeToggle:active,
+#sidebarToggle:active,
+#searchToggleBtn:active,
+#profileMenuBtn:active,
+#voiceBtn:active,
+#sidebarSearchBtn:active,
+#sidebarPromptBtn:active,
+.chat-options-btn:active,
+.copy-message-btn:active,
+.speak-btn:active,
+.regen-btn:active,
+.edit-msg-btn:active { transform: scale(0.94); }
+
+/* Typing indicator dots follow the accent token (was template gray/currentColor) */
+.typing-indicator span { background-color: rgb(var(--c-coral)); }
+
+/* ---------------------------------------------------------------------------
+   v1.0.5 — A3: long-thread render cost
+--------------------------------------------------------------------------- */
+
+/* Off-screen messages skip layout + paint. contain-intrinsic-size keeps the
+   scrollbar honest for skipped boxes (the placeholder height is an average of
+   short AI/user messages). Interaction-test + owner scroll check cover the
+   search-jump path, which is the only code that scrolls to a message. */
+.message-container {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 120px;
+}
+
+/* ---------------------------------------------------------------------------
+   v1.0.3 — composer chips (B3/B4), jump-to-latest pill (E1)
+--------------------------------------------------------------------------- */
+
+/* Composer toggle chips (Web search / Think): pill toggle-buttons under the
+   input. Token-only colors, 150ms ease-out, coral tint when active, disabled
+   at 40% with not-allowed cursor. Per AGENTS.md: ≤300ms, reduced-motion safe. */
+.composer-chip {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: 9999px;
+    border: 1px solid rgb(var(--c-hairline));
+    background-color: transparent;
+    color: rgb(var(--c-muted));
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.25;
+    cursor: pointer;
+    user-select: none;
+    transition: color 150ms var(--ease-out), border-color 150ms var(--ease-out),
+        background-color 150ms var(--ease-out), transform 140ms var(--ease-out);
+}
+/* Hover is a pointer affordance only — on touch it just sticks after a tap. */
+@media (hover: hover) and (pointer: fine) {
+    .composer-chip:hover:enabled { color: rgb(var(--c-ink)); border-color: rgb(var(--c-ink) / 0.25); }
+}
+/* B4 (v1.0.6): the chips toggled state with no tactile response at all. */
+.composer-chip:active:enabled { transform: scale(0.96); }
+.composer-chip:focus-visible { outline: 2px solid rgb(var(--c-coral) / 0.6); outline-offset: 2px; }
+.composer-chip.chip-active {
+    color: rgb(var(--c-coral));
+    border-color: rgb(var(--c-coral) / 0.5);
+    background-color: rgb(var(--c-coral-soft) / 0.6);
+}
+.composer-chip:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+@media (prefers-reduced-motion: reduce) {
+    .composer-chip { transition: none; }
+}
+
+/* B2 morph — CRITICAL FIX (v1.0.4): `.stop-hidden` was referenced by markup and
+   chat.js but never defined, so the stop control (absolute inset-0, opaque) sat
+   on top of the send button permanently. Geometry is shared with #sendBtn so the
+   two states cross-fade; `visibility` (delayed on hide) keeps the hidden control
+   out of the tab order — opacity alone would leave an invisible focus stop. */
+.stop-hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 140ms var(--ease-out), visibility 0s linear 140ms;
+}
+#stopBtn:not(.stop-hidden) { transition: opacity 140ms var(--ease-out); }
+@media (prefers-reduced-motion: reduce) {
+    .stop-hidden,
+    #stopBtn:not(.stop-hidden) { transition: none; }
+}
+
+/* Settings switch track (theme row). Matches the peer-checked switches exactly
+   (w-10 h-5, 1rem knob) but is driven by `data-on` so a button-based row can
+   reuse the same visual. */
+/* Switch (v1.0.7): one component for every toggle in the account menu. The knob
+   slides off the checkbox's own :checked state (`peer`), not a JS-written data
+   attribute — the old .switch-track depended on app.js remembering to sync it,
+   which is why the dark-mode switch could sit still while the theme flipped. */
+.switch {
+    position: relative;
+    flex-shrink: 0;
+    width: 2.5rem;
+    height: 1.25rem;
+    border-radius: 9999px;
+    background-color: rgb(var(--c-hairline));
+    transition: background-color 150ms var(--ease-out);
+}
+.switch::after {
+    content: '';
+    position: absolute;
+    top: 0.125rem;
+    left: 0.125rem;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 9999px;
+    background-color: #fff;
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.08);
+    transition: transform 150ms var(--ease-out);
+}
+.peer:checked ~ .switch { background-color: rgb(var(--c-coral)); }
+.peer:checked ~ .switch::after { transform: translateX(1.25rem); }
+.peer:focus-visible ~ .switch { outline: 2px solid rgb(var(--c-coral) / 0.5); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+    .switch,
+    .switch::after { transition: none; }
+}
+
+/* --- Account menu (v1.0.7): opens above the account row in the sidebar. ----- */
+.menu-panel {
+    transform-origin: bottom left;
+    transition: opacity 150ms var(--ease-out), transform 150ms var(--ease-out);
+}
+@starting-style {
+    .menu-panel { opacity: 0; transform: translateY(8px) scale(0.98); }
+}
+.menu-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    width: 100%;
+    min-height: 44px; /* a11y: every row is a comfortable tap target */
+    padding: 0.625rem 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.35;
+    color: rgb(var(--c-body));
+    text-align: left;
+    transition: background-color 150ms var(--ease-out), color 150ms var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+    .menu-row:hover { background-color: rgb(var(--c-card)); color: rgb(var(--c-ink)); }
+}
+.menu-row:focus-visible {
+    outline: 2px solid rgb(var(--c-coral) / 0.6);
+    outline-offset: -2px;
+}
+.menu-label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+}
+.menu-icon {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+    color: rgb(var(--c-muted));
+}
+.menu-row:hover .menu-icon { color: rgb(var(--c-ink)); }
+/* Sign out is the only destructive row — red label, red icon, red-tinted hover. */
+.menu-row-danger,
+.menu-row-danger .menu-icon { color: rgb(var(--c-danger)); }
+@media (hover: hover) and (pointer: fine) {
+    .menu-row-danger:hover {
+        background-color: rgb(var(--c-danger) / 0.08);
+        color: rgb(var(--c-danger));
+    }
+    .menu-row-danger:hover .menu-icon { color: rgb(var(--c-danger)); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .menu-panel { transition: none; }
+}
+
+/* C2 (v1.0.5): the visual pill stays slim but the tap target must clear 44px.
+   A vertical-only ::before expansion avoids overlapping the neighbouring chip. */
+.composer-chip::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -9px;
+    bottom: -9px;
+}
+
+/* C1 (v1.0.5): the jump pill floats above the composer, so it has to lift with
+   the mobile keyboard exactly like the dock does (--kb-h) — otherwise a
+   mid-stream reveal hides under the keyboard. ID beats the bottom-28 utility. */
+#jumpToLatest {
+    bottom: calc(7rem + var(--kb-h, 0px));
+}
+
+/* Jump-to-latest pill (E1): `hidden` toggles to `flex` from markup; entry is
+   a short rise+fade via the .jump-enter helper class added on show. */
+@keyframes jumpEnter {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.jump-enter { animation: jumpEnter 180ms var(--ease-out) both; }
+@media (prefers-reduced-motion: reduce) {
+    .jump-enter { animation: none; }
+}
+
+/* Headings never orphan a single word (web-design-guidelines: typography) */
+h1, h2, h3, .prose h1, .prose h2, .prose h3 { text-wrap: balance; }
+
+/* Timestamps align in columns (web-design-guidelines: tabular-nums) */
+.msg-timestamp { font-variant-numeric: tabular-nums; }
+
+/* CSS-only tooltips (roadmap #7) — token colors, 150–200ms, no JS.
+   Usage: <button data-tooltip="New chat">. Pseudo-element, so zero DOM cost. */
+[data-tooltip] { position: relative; }
+[data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    translate: -50% 0;
+    padding: 4px 8px;
+    border-radius: 6px;
+    background-color: rgb(var(--c-ink));
+    color: rgb(var(--c-canvas));
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.3;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(2px);
+    transition: opacity 150ms var(--ease-out), transform 150ms var(--ease-out);
+    z-index: 40;
+}
+[data-tooltip]:hover::after,
+[data-tooltip]:focus-visible::after {
+    opacity: 1;
+    transform: translateY(0);
+}
+/* C3 (v1.0.6): a hover tooltip waits so a stray pass-over doesn't flash it,
+   but a *repeat* hover (sweeping along a toolbar) is instant. Keyboard focus
+   is never delayed — keyboard-first UI stays immediate. app.js marks the
+   repeat case with [data-tooltip-instant]. */
+[data-tooltip]:hover::after { transition-delay: 240ms; }
+[data-tooltip][data-tooltip-instant]:hover::after { transition-delay: 0ms; }
+/* Bottom-positioned variant for triggers in the TOP bar (header, sidebar
+   brand). Default above-position would clip off the viewport top there. */
+[data-tooltip-pos="bottom"]::after {
+    bottom: auto;
+    top: calc(100% + 6px);
+    transform: translateY(-2px);
+}
+[data-tooltip-pos="bottom"]:hover::after,
+[data-tooltip-pos="bottom"]:focus-visible::after {
+    transform: translateY(0);
+}
+/* Hide tooltips on touch (no hover) and for reduced-motion users */
+@media (hover: none) {
+    [data-tooltip]::after { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+    [data-tooltip]::after { transition: none; }
+}
+
+/* Command palette (Ctrl+K): instant open (animate-skill rule for
+   keyboard-first UI), quick fade-out, no width/height animation. */
+.command-palette-panel {
+    transition: opacity 120ms var(--ease-out);
+}
+.palette-kbd {
+    display: inline-block;
+    min-width: 1.4em;
+    padding: 1px 5px;
+    border: 1px solid rgb(var(--c-hairline));
+    border-bottom-width: 2px;
+    border-radius: 4px;
+    background-color: rgb(var(--c-surface));
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-align: center;
+    color: rgb(var(--c-muted));
+}
+.palette-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    text-align: left;
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-size: 14px;
+    color: rgb(var(--c-body));
+}
+.palette-item[aria-selected="true"] {
+    background-color: rgb(var(--c-coral-soft));
+    color: rgb(var(--c-ink));
+}
+.palette-item .palette-hint {
+    margin-left: auto;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: rgb(var(--c-muted));
+}
+
+/* ===========================================================================
+   v1.0.6 — new-chat landing · motion polish (B2/B4–B7) · warm tooltips (C3)
+   Motion rules: transform/opacity only, ≤300ms with the --ease-* tokens,
+   hover motion only on hover-capable pointers, reduced-motion honoured.
+--------------------------------------------------------------------------- */
+
+/* The mobile-keyboard offset lives in CSS (not an inline style) so the
+   empty-chat layout below can release it. --kb-h is set on <html> by app.js. */
+#composerDock { bottom: var(--kb-h, 0px); }
+
+/* --- New-chat landing: greeting · composer · suggestions centre as one unit.
+   The messages area is hidden (it only ever held the greeting) and the dock
+   becomes the centred block, so the composer sits mid-screen on first open. */
+body.chat-empty #chatHistoryContainer { display: none; }
+body.chat-empty #composerDock {
+    position: fixed;
+    top: 50%;
+    bottom: auto;
+    /* Centre within the *visible* viewport: half the keyboard height lifts the
+       block so the input can never end up behind the mobile keyboard. */
+    transform: translateY(calc(-50% - var(--kb-h, 0px) / 2));
+    background-color: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: 0;
+    box-shadow: none;
+    padding-top: 0;
+}
+body.chat-empty #jumpToLatest { display: none; }
+
+/* Suggestion cards: desktop-only hover lift (token shadow), press always. */
+.suggestion-card { cursor: pointer; }
+@media (hover: hover) and (pointer: fine) {
+    .suggestion-card:hover {
+        transform: translateY(-2px);
+        border-color: rgb(var(--c-coral) / 0.45);
+        box-shadow: 0 1px 2px rgb(var(--c-ink) / 0.04), 0 8px 24px -8px rgb(var(--c-ink) / 0.14);
+    }
+}
+@keyframes suggestionEnter {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.suggestion-enter { animation: suggestionEnter 220ms var(--ease-out) both; }
+.suggestion-enter:nth-child(2) { animation-delay: 40ms; }
+.suggestion-enter:nth-child(3) { animation-delay: 80ms; }
+.suggestion-enter:nth-child(4) { animation-delay: 120ms; }
+@media (prefers-reduced-motion: reduce) {
+    .suggestion-enter { animation: none; }
+}
+
+/* --- B2: while a response streams, the stop control wears a soft coral ring.
+   Driven by the button's own `.stop-hidden` state, so no extra JS flag. */
+#stopBtn::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: inherit;
+    border: 2px solid rgb(var(--c-coral) / 0.6);
+    opacity: 0;
+    pointer-events: none;
+}
+#stopBtn:not(.stop-hidden)::after { animation: stopRing 1.8s var(--ease-in-out) infinite; }
+@keyframes stopRing {
+    0% { opacity: 0.7; transform: scale(0.92); }
+    70% { opacity: 0; transform: scale(1.18); }
+    100% { opacity: 0; transform: scale(1.18); }
+}
+@media (prefers-reduced-motion: reduce) {
+    #stopBtn:not(.stop-hidden)::after { animation: none; opacity: 0.5; transform: none; }
+}
+
+/* --- B5: model panel — enter-only, origin-aware, same pattern as the ⋮ menus
+   (@starting-style degrades to instant appearance on older browsers). */
+.model-panel { transition: opacity 160ms var(--ease-out), transform 160ms var(--ease-out); }
+@starting-style {
+    .model-panel { opacity: 0; transform: translateY(-6px) scale(0.97); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .model-panel { transition: none; }
+}
+
+/* --- B6: theme icon cross-fade + rotate. The pair used to swap via `hidden`
+   (display:none), which cannot animate — so make both icons overlap and fade. */
+.theme-icon {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    transition: opacity 200ms var(--ease-out), transform 200ms var(--ease-out);
+}
+.theme-icon.is-off { opacity: 0; transform: rotate(-75deg) scale(0.6); }
+@media (prefers-reduced-motion: reduce) {
+    .theme-icon { transition: opacity 120ms linear; }
+    .theme-icon.is-off { transform: none; }
+}
+
+/* --- B7: a toast is dragged horizontally, so let the browser keep vertical
+   scroll gestures for itself instead of cancelling the drag. */
+#toast-notification { touch-action: pan-y; }
+
+/* --- Brand mark (owner request 2026-09-19): the violet glyph renders as a flat
+   silhouette — black on the light canvas, white on the dark one — so it stays
+   legible in both themes. brightness(0) flattens hue only; alpha is untouched,
+   so the artwork's soft edges survive. The browser-tab icon cannot be filtered,
+   so it uses real per-theme PNGs (favicon-32-light/dark.png). */
+.logo-mark { filter: brightness(0); }
+html.dark .logo-mark { filter: brightness(0) invert(1); }
+@media (forced-colors: active) {
+    /* Windows high-contrast overrides colors wholesale — let it win. */
+    .logo-mark { filter: none; }
 }
