@@ -73,30 +73,35 @@ function initApp() {
         // the button's own label).
         dom.sunIcon.classList.toggle('is-off', !dark);
         dom.moonIcon.classList.toggle('is-off', dark);
-        // v1.0.4: keep the settings "Dark mode" switch in sync — it is a button
-        // (role=switch), so it can't use the peer-checked styling the
-        // timestamps/TTS checkboxes rely on.
-        dom.sidebarThemeBtn?.setAttribute('aria-checked', String(dark));
-        const track = dom.sidebarThemeBtn?.querySelector('.switch-track');
-        if (track) track.dataset.on = String(dark);
+        // v1.0.7: the account-menu switch is a real checkbox, so its knob slides
+        // off :checked in CSS — mirror the state onto it and nothing else.
+        if (dom.sidebarThemeSwitch) dom.sidebarThemeSwitch.checked = dark;
     };
     syncThemeIcons();
-    const applyThemeToggle = () => {
-        const dark = document.documentElement.classList.toggle('dark');
+    // One owner of "set the theme", taking an explicit value so the header button
+    // and the menu switch can never drift apart.
+    const applyTheme = (dark) => {
+        document.documentElement.classList.toggle('dark', dark);
         localStorage.setItem('darkMode', String(dark));
         syncThemeIcons();
     };
-    dom.themeToggle.addEventListener('click', () => {
+    const setTheme = (dark) => {
         // B1 (v1.0.5): crossfade the theme flip where the View Transitions API
         // exists (progressive enhancement, ~0 cost); instant on browsers
         // without it. Reduced-motion users always get the instant swap.
         const reduceMotion = typeof window.matchMedia === 'function'
             && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         if (!reduceMotion && typeof document.startViewTransition === 'function') {
-            document.startViewTransition(applyThemeToggle);
+            document.startViewTransition(() => applyTheme(dark));
         } else {
-            applyThemeToggle();
+            applyTheme(dark);
         }
+    };
+    dom.themeToggle.addEventListener('click', () => {
+        setTheme(!document.documentElement.classList.contains('dark'));
+    });
+    dom.sidebarThemeSwitch?.addEventListener('change', () => {
+        setTheme(dom.sidebarThemeSwitch.checked);
     });
 
     // --- Mobile keyboard offset: keep the fixed composer dock above the
@@ -354,9 +359,36 @@ function initApp() {
         searchDebounce = setTimeout(() => renderSearchResults(e.target.value.trim()), 200);
     });
 
-    dom.settingsToggleBtn?.addEventListener('click', () => {
-        const hidden = dom.settingsPanel.classList.toggle('hidden');
-        dom.settingsToggleBtn.setAttribute('aria-expanded', String(!hidden));
+    // --- Account menu (v1.0.7) ------------------------------------------------
+    // The profile row opens a popup above itself. Dismissal follows the same
+    // contract as every other popover here: outside click, Escape, or activating
+    // an item — and focus goes back to the trigger. The switch rows deliberately
+    // stay open, so several settings can be flipped in one visit.
+    const setProfileMenu = (open) => {
+        if (!dom.profileMenu || !dom.profileMenuBtn) return;
+        dom.profileMenu.classList.toggle('hidden', !open);
+        dom.profileMenuBtn.setAttribute('aria-expanded', String(open));
+        if (open) dom.profileMenu.querySelector('[role="menuitem"]')?.focus();
+    };
+    const closeProfileMenu = ({ restoreFocus = false } = {}) => {
+        if (!dom.profileMenu || dom.profileMenu.classList.contains('hidden')) return;
+        setProfileMenu(false);
+        if (restoreFocus) dom.profileMenuBtn.focus();
+    };
+    dom.profileMenuBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        setProfileMenu(dom.profileMenu.classList.contains('hidden'));
+    });
+    dom.profileMenu?.addEventListener('click', (e) => {
+        if (e.target.closest('[role="menuitem"]')) closeProfileMenu();
+    });
+    document.addEventListener('click', (e) => {
+        if (!dom.profileMenu || dom.profileMenu.classList.contains('hidden')) return;
+        if (dom.profileMenu.contains(e.target) || dom.profileMenuBtn.contains(e.target)) return;
+        closeProfileMenu();
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeProfileMenu({ restoreFocus: true });
     });
     if (dom.ttsToggle) {
         dom.ttsToggle.checked = localStorage.getItem('abot-auto-tts') === 'true';
@@ -434,7 +466,6 @@ function initApp() {
         closeSidebar();
         openPromptModal();
     });
-    dom.sidebarThemeBtn?.addEventListener('click', () => dom.themeToggle.click());
 
     // Breakpoint crossing: classes valid in one regime are inert/harmful in the
     // other (e.g. sidebar-collapsed margin on a phone). Re-sanitize on change.
@@ -888,11 +919,11 @@ async function runDiagnostics() {
     } catch (e) { add('sidebar toggle', false, e.message); }
 
     try {
-        click(dom.settingsToggleBtn); await sleep(60);
-        const sp = dom.settingsPanel && !dom.settingsPanel.classList.contains('hidden');
-        add('settings panel opens', !!sp);
-        if (sp) click(dom.settingsToggleBtn);
-    } catch (e) { add('settings panel opens', false, e.message); }
+        click(dom.profileMenuBtn); await sleep(60);
+        const pm = dom.profileMenu && !dom.profileMenu.classList.contains('hidden');
+        add('account menu opens', !!pm);
+        if (pm) click(dom.profileMenuBtn);
+    } catch (e) { add('account menu opens', false, e.message); }
     try {
         click(dom.searchToggleBtn); await sleep(60);
         const sp = dom.searchPanel && !dom.searchPanel.classList.contains('hidden');
@@ -925,7 +956,7 @@ async function runDiagnostics() {
         const vw = window.innerWidth, vh = window.innerHeight;
         document.querySelectorAll('body *').forEach((el) => {
             if (dom.appContainer && (el === dom.appContainer || dom.appContainer.contains(el))) return;
-            if (el.id === 'vanta-bg') return;
+            if (el.id === 'auth-scene') return; // decorative backdrop, by design
             const cs = getComputedStyle(el);
             if (cs.position !== 'fixed' && cs.position !== 'absolute') return;
             if (cs.display === 'none' || cs.visibility === 'hidden') return;

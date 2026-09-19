@@ -152,68 +152,11 @@ const showGuestLimitModal = () => {
 };
 export { closeGuestLimitModal, showGuestLimitModal };
 
-// --- Phase 3.5b: ambient background for the AUTH SCREEN only ---
-// Lazy-loads three.js/vanta on first need; theme-aware colors (coral on
-// warm dark / warm cream). Destroyed on login (see auth.js).
-let vantaScriptsLoading = null;
-const ensureVanta = () => {
-    if (window.VANTA) return Promise.resolve();
-    if (!vantaScriptsLoading) {
-        vantaScriptsLoading = new Promise((resolve, reject) => {
-            console.log('[ABot] ambient bg: loading three.js…');
-            const three = document.createElement('script');
-            three.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js';
-            three.onload = () => {
-                console.log('[ABot] ambient bg: three.js OK, loading vanta…');
-                const vanta = document.createElement('script');
-                vanta.src = 'https://cdn.jsdelivr.net/npm/vanta@0.5.24/dist/vanta.net.min.js';
-                vanta.onload = () => { console.log('[ABot] ambient bg: vanta OK'); resolve(); };
-                vanta.onerror = () => reject(new Error('vanta script failed to load (network/CDN blocked?)'));
-                document.head.appendChild(vanta);
-            };
-            three.onerror = () => reject(new Error('three.js failed to load (network/CDN blocked?)'));
-            document.head.appendChild(three);
-            setTimeout(() => reject(new Error('CDN load timed out after 20s')), 20000);
-        });
-        vantaScriptsLoading.catch(() => { vantaScriptsLoading = null; }); // allow retry on next sign-out
-    }
-    return vantaScriptsLoading;
-};
-
-export const startAuthVanta = async () => {
-    const el = document.getElementById('vanta-bg');
-    if (!el) { console.warn('[ABot] ambient bg: #vanta-bg element not found'); return; }
-    console.log('[ABot] ambient bg: starting…');
-    try {
-        await ensureVanta();
-    } catch (e) {
-        console.warn('[ABot] ambient bg unavailable:', e.message);
-        return;
-    }
-    if (!window.VANTA || state.vantaEffect) return;
-
-    const init = () => {
-        const dark = document.documentElement.classList.contains('dark');
-        try {
-            state.vantaEffect = VANTA.NET({
-                el: '#vanta-bg',
-                mouseControls: true, touchControls: true, gyroControls: false,
-                scale: 1.00, scaleMobile: 1.20,
-                color: 0xcc785c,
-                backgroundColor: dark ? 0x181715 : 0xfaf9f5,
-                points: 12.00, maxDistance: 18.00
-            });
-            console.log('[ABot] ambient bg: active (dark=' + dark + ')');
-        } catch (e) {
-            console.error('[ABot] ambient bg: VANTA.NET threw:', e);
-        }
-    };
-
-    // VANTA.NET needs a laid-out element; if the section just un-hid, wait a frame
-    if (el.offsetWidth === 0 || el.offsetHeight === 0) {
-        console.log('[ABot] ambient bg: waiting for layout…');
-        requestAnimationFrame(() => requestAnimationFrame(init));
-    } else {
-        init();
-    }
-};
+// --- Auth screen backdrop -----------------------------------------------
+// v1.0.7: this used to lazy-load three.js + vanta.net from two CDNs and render
+// a `VANTA.NET` canvas behind the sign-in card. That meant every signed-out
+// visitor pulled several hundred KB of third-party JS before seeing anything,
+// and it failed silently whenever a CDN was blocked. The backdrop is now pure
+// CSS (see `.auth-scene` in src/input.css): no scripts, no network, no failure
+// mode — and the app no longer depends on any CDN at all.
+// Nothing to start or tear down, so the old startAuthVanta() export is gone.

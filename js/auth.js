@@ -5,7 +5,7 @@
  * Verify with: node tools/verify-parity.js
  */
 
-import { closeGuestLimitModal, startAuthVanta } from './ui.js';
+import { closeGuestLimitModal } from './ui.js';
 import { createNewChat } from './chat.js';
 import { dom } from './dom.js';
 import { loadUserChatsFromFirestore } from './chat.js';
@@ -223,10 +223,6 @@ state.auth.onAuthStateChanged(async (user) => {
     if (user) {
         state.isAppInitialized = true; // Set the lock immediately
         // --- USER IS LOGGED IN ---
-        if (state.vantaEffect) {
-            state.vantaEffect.destroy();
-            state.vantaEffect = null;
-        }
 
         dom.authSection.style.display = 'none';
         dom.appContainer.style.display = 'flex';
@@ -271,7 +267,7 @@ state.auth.onAuthStateChanged(async (user) => {
 
         // --- USER IS LOGGED OUT ---
         dom.appContainer.style.display = 'none';
-        startAuthVanta();
+        // The backdrop is CSS-only now (`.auth-scene`) — nothing to spin up.
 
         dom.authSection.style.display = 'flex';
         state.chats = {};

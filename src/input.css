@@ -227,17 +227,84 @@
    Kept OUTSIDE @layer so Tailwind never purges them. Retuned to tokens.
 --------------------------------------------------------------------------- */
 
-/* Signature moment (skills audit): one fixed coral radial glow behind the
-   auth card — single layer, compositor-only, no Vanta JS needed for the
-   default view. Replaces three.js CDN round-trips for first impression. */
-.auth-glow {
+/* Signature moment (v1.0.7): the auth backdrop is a CSS-only aurora — three
+   slow-drifting blooms plus a hairline grid — replacing the three.js/vanta.net
+   canvas that used to load from two CDNs before the sign-in card could appear.
+   Rules: transform/opacity only (no blur filters, no background-position
+   animation), 46–62s ambient loops so it reads as weather, not animation, and
+   the whole thing is inert: pointer-events:none all the way down. */
+.auth-scene {
     position: fixed;
     inset: 0;
+    overflow: hidden;
     pointer-events: none;
     z-index: 0;
-    background:
-        radial-gradient(42% 34% at 50% 12%, rgb(var(--c-coral) / 0.14), transparent 70%),
-        radial-gradient(30% 26% at 82% 78%, rgb(var(--c-amber) / 0.06), transparent 70%);
+}
+
+/* Blobs. No `filter: blur()` — on layers this large a blurred paint is far more
+   expensive than the radial gradient's own falloff, which looks the same. */
+.auth-bloom {
+    position: absolute;
+    border-radius: 50%;
+    animation: authDrift 46s var(--ease-in-out) infinite alternate;
+    will-change: transform;
+}
+.auth-bloom-1 {
+    width: 82vmax;
+    height: 82vmax;
+    top: -38vmax;
+    left: 50%;
+    translate: -50% 0;
+    background: radial-gradient(circle, rgb(var(--c-coral) / 0.26), transparent 62%);
+}
+.auth-bloom-2 {
+    width: 62vmax;
+    height: 62vmax;
+    right: -18vmax;
+    bottom: -28vmax;
+    background: radial-gradient(circle, rgb(var(--c-amber) / 0.16), transparent 62%);
+    animation-duration: 62s;
+    animation-delay: -14s;
+}
+.auth-bloom-3 {
+    width: 48vmax;
+    height: 48vmax;
+    left: -14vmax;
+    bottom: -22vmax;
+    background: radial-gradient(circle, rgb(var(--c-coral) / 0.13), transparent 62%);
+    animation-duration: 54s;
+    animation-delay: -27s;
+}
+@keyframes authDrift {
+    from { transform: translate3d(0, 0, 0) scale(1); }
+    to { transform: translate3d(2.5vmax, -3vmax, 0) scale(1.14); }
+}
+
+/* Hairline grid, dissolved toward the edges so it never competes with the card.
+   --c-ink is dark on the light theme and light on the dark one, so one rule
+   covers both without a dark-mode override. */
+.auth-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+        repeating-linear-gradient(to right, rgb(var(--c-ink) / 0.05) 0 1px, transparent 1px 46px),
+        repeating-linear-gradient(to bottom, rgb(var(--c-ink) / 0.05) 0 1px, transparent 1px 46px);
+    -webkit-mask-image: radial-gradient(72% 62% at 50% 44%, #000 0%, transparent 78%);
+    mask-image: radial-gradient(72% 62% at 50% 44%, #000 0%, transparent 78%);
+}
+
+/* Vignette: settles the edges and keeps the card's immediate surroundings calm
+   so the headline contrast stays honest at every viewport size. */
+.auth-scene::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(125% 95% at 50% 40%, transparent 42%, rgb(var(--c-canvas) / 0.8) 100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    /* Gentle still-life: the composition stays, the drift goes. */
+    .auth-bloom { animation: none; }
 }
 
 /* App loader spinner (indigo -> coral) */
@@ -487,9 +554,8 @@ mark {
 #themeToggle:active,
 #sidebarToggle:active,
 #searchToggleBtn:active,
-#settingsToggleBtn:active,
+#profileMenuBtn:active,
 #voiceBtn:active,
-#sidebarThemeBtn:active,
 #sidebarSearchBtn:active,
 #sidebarPromptBtn:active,
 .chat-options-btn:active,
@@ -579,7 +645,11 @@ mark {
 /* Settings switch track (theme row). Matches the peer-checked switches exactly
    (w-10 h-5, 1rem knob) but is driven by `data-on` so a button-based row can
    reuse the same visual. */
-.switch-track {
+/* Switch (v1.0.7): one component for every toggle in the account menu. The knob
+   slides off the checkbox's own :checked state (`peer`), not a JS-written data
+   attribute — the old .switch-track depended on app.js remembering to sync it,
+   which is why the dark-mode switch could sit still while the theme flipped. */
+.switch {
     position: relative;
     flex-shrink: 0;
     width: 2.5rem;
@@ -588,7 +658,7 @@ mark {
     background-color: rgb(var(--c-hairline));
     transition: background-color 150ms var(--ease-out);
 }
-.switch-track::after {
+.switch::after {
     content: '';
     position: absolute;
     top: 0.125rem;
@@ -600,11 +670,68 @@ mark {
     box-shadow: 0 1px 2px rgb(0 0 0 / 0.08);
     transition: transform 150ms var(--ease-out);
 }
-.switch-track[data-on="true"] { background-color: rgb(var(--c-coral)); }
-.switch-track[data-on="true"]::after { transform: translateX(1.25rem); }
+.peer:checked ~ .switch { background-color: rgb(var(--c-coral)); }
+.peer:checked ~ .switch::after { transform: translateX(1.25rem); }
+.peer:focus-visible ~ .switch { outline: 2px solid rgb(var(--c-coral) / 0.5); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) {
-    .switch-track,
-    .switch-track::after { transition: none; }
+    .switch,
+    .switch::after { transition: none; }
+}
+
+/* --- Account menu (v1.0.7): opens above the account row in the sidebar. ----- */
+.menu-panel {
+    transform-origin: bottom left;
+    transition: opacity 150ms var(--ease-out), transform 150ms var(--ease-out);
+}
+@starting-style {
+    .menu-panel { opacity: 0; transform: translateY(8px) scale(0.98); }
+}
+.menu-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    width: 100%;
+    min-height: 44px; /* a11y: every row is a comfortable tap target */
+    padding: 0.625rem 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.35;
+    color: rgb(var(--c-body));
+    text-align: left;
+    transition: background-color 150ms var(--ease-out), color 150ms var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+    .menu-row:hover { background-color: rgb(var(--c-card)); color: rgb(var(--c-ink)); }
+}
+.menu-row:focus-visible {
+    outline: 2px solid rgb(var(--c-coral) / 0.6);
+    outline-offset: -2px;
+}
+.menu-label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+}
+.menu-icon {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+    color: rgb(var(--c-muted));
+}
+.menu-row:hover .menu-icon { color: rgb(var(--c-ink)); }
+/* Sign out is the only destructive row — red label, red icon, red-tinted hover. */
+.menu-row-danger,
+.menu-row-danger .menu-icon { color: rgb(var(--c-danger)); }
+@media (hover: hover) and (pointer: fine) {
+    .menu-row-danger:hover {
+        background-color: rgb(var(--c-danger) / 0.08);
+        color: rgb(var(--c-danger));
+    }
+    .menu-row-danger:hover .menu-icon { color: rgb(var(--c-danger)); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .menu-panel { transition: none; }
 }
 
 /* C2 (v1.0.5): the visual pill stays slim but the tap target must clear 44px.

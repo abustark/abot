@@ -130,22 +130,48 @@ function stubChain(label) {
         window.matchMedia = realMatchMedia || ((q) => ({ matches: false, media: String(q), addEventListener() {}, addListener() {}, removeEventListener() {}, removeListener() {} }));
         sb.classList.add('-translate-x-full');
     }
-    // settings
+    // account menu (v1.0.7): the profile row owns import / theme / TTS / timestamps
     {
-        click($('settingsToggleBtn'));
+        const menu = $('profileMenu');
+        const trigger = $('profileMenuBtn');
+        check('menu closed at rest', menu.classList.contains('hidden'));
+        click(trigger);
         await sleep(50);
-        check('settings panel opens', $('settingsPanel') && !$('settingsPanel').classList.contains('hidden'));
-        // v1.0.4: dark mode is a switch row inside the panel (was a cramped link).
-        const sw = $('sidebarThemeBtn');
-        check('theme switch lives in settings', !!sw && sw.getAttribute('role') === 'switch' && $('settingsPanel').contains(sw));
+        check('account menu opens from the profile row', !menu.classList.contains('hidden'));
+        check('trigger reports expanded state', trigger.getAttribute('aria-expanded') === 'true');
+        check('menu carries menu semantics', menu.getAttribute('role') === 'menu');
+        check('import chat lives in the menu', menu.contains($('importChatBtn')));
+        check('read-aloud switch lives in the menu', menu.contains($('ttsToggle')));
+        check('timestamps switch lives in the menu', menu.contains($('timestampsToggle')));
+        const rows = [...menu.querySelectorAll('.menu-row')];
+        check('sign out is the last row', rows.length > 0 && rows[rows.length - 1].id === 'signoutBtn');
+        check('sign out is the red row',
+            rows.length > 0 && rows[rows.length - 1].classList.contains('menu-row-danger'));
+        // Dark mode is a real checkbox now, so the knob slides via :checked in CSS.
+        const sw = $('sidebarThemeSwitch');
+        check('theme switch is a checkbox in the menu',
+            !!sw && sw.type === 'checkbox' && sw.getAttribute('role') === 'switch' && menu.contains(sw));
         const darkBefore = window.document.documentElement.classList.contains('dark');
-        click(sw);
+        sw.checked = !sw.checked;
+        sw.dispatchEvent(new window.Event('change', { bubbles: true }));
         await sleep(50);
         const darkAfter = window.document.documentElement.classList.contains('dark');
         check('theme switch toggles dark mode', darkBefore !== darkAfter, `${darkBefore}->${darkAfter}`);
-        check('theme switch aria-checked tracks state', sw.getAttribute('aria-checked') === String(darkAfter));
-        click(sw); // restore
+        check('theme switch checked state tracks the theme', sw.checked === darkAfter);
+        // Flip it back through the switch itself.
+        sw.checked = !sw.checked;
+        sw.dispatchEvent(new window.Event('change', { bubbles: true }));
         await sleep(50);
+        check('theme restored', window.document.documentElement.classList.contains('dark') === darkBefore);
+        // Switch rows keep the menu open; Escape closes it and restores focus.
+        sw.dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
+        await sleep(30);
+        check('switch rows keep the menu open', !menu.classList.contains('hidden'));
+        window.document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+        await sleep(30);
+        check('Escape closes the account menu', menu.classList.contains('hidden'));
+        check('focus returns to the profile row', window.document.activeElement === trigger);
+        if (sw.checked !== darkBefore) { sw.checked = darkBefore; sw.dispatchEvent(new window.Event('change', { bubbles: true })); }
     }
     // composer layout + morph state (v1.0.4): chips inside the box, stop hidden at rest
     {
@@ -311,6 +337,17 @@ function stubChain(label) {
         check('tab icon has a per-theme pair',
             themed.includes('/favicon-32-light.png') && themed.includes('/favicon-32-dark.png'),
             themed.join(' '));
+    }
+    // --- v1.0.7: auth backdrop is CSS-only; the app ships no CDN scripts -------
+    {
+        const scene = $('auth-scene');
+        const blooms = scene ? scene.querySelectorAll('.auth-bloom') : [];
+        check('auth backdrop renders aurora layers', !!scene && blooms.length >= 3, blooms.length + ' blooms');
+        check('old vanta canvas is gone', !$('vanta-bg'));
+        const cdnScripts = [...window.document.querySelectorAll('script[src]')]
+            .map(s => s.getAttribute('src'))
+            .filter(src => /cdn\.jsdelivr|cdnjs\.cloudflare|unpkg/.test(src));
+        check('no third-party CDN scripts are loaded', cdnScripts.length === 0, cdnScripts.join(' '));
     }
     // --- v1.0.6: keyboard hints in tooltips (C3) ------------------------------
     {

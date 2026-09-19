@@ -199,6 +199,32 @@
 - ✅ **Model panel inline `style` removed** and the composer's `--kb-h` offset
   moved from an inline style into CSS, so layout states can override it.
 
+### v1.0.7 — auth backdrop, account menu, composer alignment (shipped)
+
+- ✅ **Auth backdrop is CSS-only.** The sign-in screen lazy-loaded three.js +
+  vanta.net from two CDNs and painted a `VANTA.NET` canvas: several hundred KB
+  of third-party JS on the very first screen, plus a silent failure whenever a
+  CDN was blocked. It is now an aurora — three slow-drifting blooms plus a
+  masked hairline grid — transform/opacity only, ~0 KB, offline-safe, and under
+  reduced motion the composition stays while the drift stops. The app now ships
+  **no third-party scripts at all** (`marked` and `highlight.js` are vendored).
+  ⚠️ Follow-up for the owner: `cdn.jsdelivr.net` / `cdnjs.cloudflare.com` in
+  `vercel.json`'s CSP `script-src` are now unused and could be removed.
+- ✅ **Account menu** replaces the settings panel. The profile row is the trigger
+  for a `role="menu"` popup above it holding Import chat, Dark mode, Read replies
+  aloud, Show timestamps, and Sign out last in red. Outside-click and Escape
+  dismiss it; the switch rows deliberately stay open.
+- ✅ **The dark-mode switch actually slides.** The old `.switch-track` needed
+  app.js to write `data-on` after every theme change; the new `.switch` follows
+  the checkbox's own `:checked` through `peer`, so the knob cannot disagree with
+  the theme.
+- ✅ **Composer right edge fixed.** The chips and the action buttons shared one
+  `flex-wrap` container with `order-*` + `mr-auto` re-ordering, which left dead
+  space after the send button. The box is now a textarea over one explicit
+  `justify-between` row.
+- ✅ Brand mark is a flat silhouette — black on light, white on dark — with
+  per-theme tab icons (see the v1.0.6-logo commit).
+
 ## Execution order
 
 1. ~~v1.0.4 "light & motion": A1 → A2 → A3 → A4 + B1 + C1 (+ C2/C4).~~ ✅ shipped

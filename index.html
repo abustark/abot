@@ -26,7 +26,7 @@
     <link rel="preload" href="/dist/fonts/geist-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/dist/fonts/geist-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/dist/fonts/source-serif-4-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link href="./dist/output.css?v=p12" rel="stylesheet">
+    <link href="./dist/output.css?v=p13" rel="stylesheet">
     <script src="/vendor/marked.min.js" defer></script>
     <!-- A1 (v1.0.5): highlight.js + its theme are lazy-loaded on the first code
          block (js/chat.js) — they were head-linked here, costing every visitor
@@ -79,8 +79,8 @@
 
 </head>
 
-<!-- Vanta.js and Three.js for animated background -->
-<!-- three.js + vanta.net are lazy-loaded only when "Ambient background" is enabled (Settings) -->
+<!-- No third-party scripts: the auth backdrop is pure CSS and the app is fully
+     self-hosted (marked + highlight.js are vendored, fonts are local). -->
 
 
 <body
@@ -93,14 +93,18 @@
         <div class="loader-circle-22"></div>
     </div>
 
-    <!-- This is the background. It is separate and covers the full screen. -->
-
-
-    <!-- This is the content, stacked on top of the background. -->
+    <!-- This is the content, stacked on top of the backdrop. -->
     <section id="auth-section" class="relative z-10 flex items-center justify-center w-full min-h-screen p-4 overflow-hidden"
         style="display: none;">
-        <div id="vanta-bg" class="absolute inset-0" aria-hidden="true"></div>
-        <div class="auth-glow" aria-hidden="true"></div>
+        <!-- v1.0.7 counterpart of the aurora in src/input.css. Three drifting
+             blooms + a hairline grid, all transform/opacity only, all
+             pointer-events:none so nothing here can ever intercept a tap. -->
+        <div id="auth-scene" class="auth-scene" aria-hidden="true">
+            <span class="auth-bloom auth-bloom-1"></span>
+            <span class="auth-bloom auth-bloom-2"></span>
+            <span class="auth-bloom auth-bloom-3"></span>
+            <div class="auth-grid"></div>
+        </div>
 
         <!-- Double-bezel card (skills audit: high-end-visual-design §4A) —
              outer shell + inner core with concentric radii -->
@@ -317,86 +321,80 @@
             </div>
             <div class="px-3 pt-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-muted/80">Recent</div>
             <nav id="chatList" class="flex-1 overflow-y-auto p-2 pt-1 space-y-1 scrollbar-custom" aria-label="Chat history"></nav>
-            <div class="p-3 border-t border-hairline">
-                <div class="flex items-center gap-3 rounded-xl px-2 py-2 hover:bg-card/60 transition-colors">
+            <div class="relative p-3 border-t border-hairline">
+                <!-- v1.0.7 account menu (owner request): opens ABOVE the account row.
+                     Import chat, dark mode, read aloud and timestamps live here now
+                     instead of in a separate settings panel plus a stray import
+                     button; Sign out sits last, in red. -->
+                <div id="profileMenu" role="menu" aria-label="Account and settings"
+                    class="menu-panel hidden absolute bottom-full left-3 right-3 mb-2 z-30 rounded-2xl bg-canvas dark:bg-card border border-hairline shadow-lift overflow-hidden">
+                    <button id="importChatBtn" role="menuitem" class="menu-row">
+                        <span class="menu-label">
+                            <svg class="menu-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                            </svg>
+                            <span>Import chat</span>
+                        </span>
+                    </button>
+                    <div class="h-px bg-hairline/70 mx-3"></div>
+                    <label class="menu-row cursor-pointer select-none">
+                        <span class="menu-label">
+                            <svg class="menu-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+                            </svg>
+                            <span>Dark mode</span>
+                        </span>
+                        <input type="checkbox" id="sidebarThemeSwitch" role="switch" class="peer sr-only" aria-label="Dark mode">
+                        <span class="switch" aria-hidden="true"></span>
+                    </label>
+                    <label class="menu-row cursor-pointer select-none">
+                        <span class="menu-label">
+                            <svg class="menu-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" />
+                            </svg>
+                            <span>Read replies aloud</span>
+                        </span>
+                        <input type="checkbox" id="ttsToggle" class="peer sr-only" aria-label="Read AI replies aloud automatically">
+                        <span class="switch" aria-hidden="true"></span>
+                    </label>
+                    <label class="menu-row cursor-pointer select-none">
+                        <span class="menu-label">
+                            <svg class="menu-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>Show timestamps</span>
+                        </span>
+                        <input type="checkbox" id="timestampsToggle" class="peer sr-only" aria-label="Show timestamps">
+                        <span class="switch" aria-hidden="true"></span>
+                    </label>
+                    <div class="h-px bg-hairline/70 mx-3"></div>
+                    <button id="signoutBtn" role="menuitem" class="menu-row menu-row-danger">
+                        <span class="menu-label">
+                            <svg class="menu-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+                            </svg>
+                            <span>Sign out</span>
+                        </span>
+                    </button>
+                </div>
+
+                <button id="profileMenuBtn" type="button" aria-haspopup="menu" aria-expanded="false"
+                    aria-controls="profileMenu"
+                    class="w-full flex items-center gap-3 rounded-xl px-2 py-2 text-left hover:bg-card/60 transition-colors">
                     <div id="userAvatar"
                         class="w-8 h-8 rounded-full bg-coral-soft text-coral flex items-center justify-center text-[11px] font-semibold flex-shrink-0 select-none"
                         aria-hidden="true">AB</div>
                     <div class="min-w-0 flex-1">
                         <span id="userEmailDisplay"
                             class="block font-medium text-sm text-ink truncate">user@example.com</span>
-                        <div class="flex items-center gap-3">
-                            <button id="settingsToggleBtn"
-                                class="flex items-center gap-1.5 text-xs text-muted hover:text-coral transition-colors"
-                                aria-expanded="false">
-                                <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd"
-                                        d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                                <span>Settings</span>
-                            </button>
-                        </div>
+                        <span id="userPlanHint" class="block text-xs text-muted truncate">Account &amp; settings</span>
                     </div>
-                    <button id="signoutBtn" aria-label="Sign out" data-tooltip="Sign Out"
-                        class="p-2 rounded-lg hover:bg-card transition-colors flex-shrink-0">
-                        <svg class="w-5 h-5 text-muted" xmlns="http://www.w3.org/2000/svg" fill="none"
-                            viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
-                        </svg>
-                    </button>
-                </div>
-                <!-- v1.0.4: roomier settings — titled group, 44px rows, description
-                     under each label (the old -mt-1 pairs read as cramped). -->
-                <div id="settingsPanel" class="hidden mt-3 rounded-xl bg-card/70 border border-hairline overflow-hidden">
-                    <div class="px-3 pt-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-muted/80">Settings</div>
-                    <button id="sidebarThemeBtn" role="switch" aria-checked="false"
-                        class="w-full flex items-center justify-between gap-3 min-h-[44px] px-3 py-2.5 text-sm text-body hover:bg-card transition-colors">
-                        <span class="flex items-center gap-2.5">
-                            <svg class="w-4 h-4 text-muted" xmlns="http://www.w3.org/2000/svg" fill="none"
-                                viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
-                            </svg>
-                            <span>Dark mode</span>
-                        </span>
-                        <span class="switch-track" aria-hidden="true"></span>
-                    </button>
-                    <div class="h-px bg-hairline/70 mx-3"></div>
-                    <label
-                        class="flex items-center justify-between gap-3 min-h-[44px] px-3 py-2.5 cursor-pointer select-none hover:bg-card transition-colors">
-                        <span class="flex flex-col">
-                            <span class="text-sm text-body">Read replies aloud</span>
-                            <span class="text-[11px] text-muted mt-0.5">Device voice — free, offline</span>
-                        </span>
-                        <input type="checkbox" id="ttsToggle" class="peer sr-only" aria-label="Read AI replies aloud automatically">
-                        <span
-                            class="relative flex-shrink-0 w-10 h-5 rounded-full bg-hairline transition-colors peer-checked:bg-coral peer-focus-visible:ring-2 peer-focus-visible:ring-coral/40 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:w-4 after:h-4 after:rounded-full after:bg-white after:shadow-sm after:transition-transform peer-checked:after:translate-x-5"></span>
-                    </label>
-                    <div class="h-px bg-hairline/70 mx-3"></div>
-                    <label
-                        class="flex items-center justify-between gap-3 min-h-[44px] px-3 py-2.5 cursor-pointer select-none hover:bg-card transition-colors">
-                        <span class="flex flex-col">
-                            <span class="text-sm text-body">Show timestamps</span>
-                            <span class="text-[11px] text-muted mt-0.5">Time beside each message</span>
-                        </span>
-                        <input type="checkbox" id="timestampsToggle" class="peer sr-only" aria-label="Show timestamps">
-                        <span
-                            class="relative flex-shrink-0 w-10 h-5 rounded-full bg-hairline transition-colors peer-checked:bg-coral peer-focus-visible:ring-2 peer-focus-visible:ring-coral/40 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:w-4 after:h-4 after:rounded-full after:bg-white after:shadow-sm after:transition-transform peer-checked:after:translate-x-5"></span>
-                    </label>
-                </div>
-                <button id="importChatBtn" title="Import Chat" aria-label="Import chat"
-                    class="mt-3 w-full flex items-center justify-center p-2 rounded-lg text-sm border border-hairline hover:bg-card transition-colors">
-                    <svg class="w-4 h-4 mr-2 text-muted" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                        fill="currentColor">
-                        <path
-                            d="M9.25 13.25a.75.75 0 001.5 0V4.636l2.955 3.129a.75.75 0 001.09-1.03l-4.25-4.5a.75.75 0 00-1.09 0l-4.25 4.5a.75.75 0 101.09 1.03L9.25 4.636V13.25z" />
-                        <path
-                            d="M3.5 12.75a.75.75 0 00-1.5 0v2.5A2.75 2.75 0 004.75 18h10.5A2.75 2.75 0 0018 15.25v-2.5a.75.75 0 00-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5z" />
+                    <svg class="w-4 h-4 text-muted flex-shrink-0" xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
                     </svg>
-                    Import Chat
                 </button>
+
             </div>
         </aside>
 
@@ -511,12 +509,17 @@
                     <div id="emptyWelcome" class="hidden w-full max-w-3xl mx-auto px-1 pb-6"></div>
                     <div class="max-w-3xl mx-auto">
                         <div
-                            class="flex flex-wrap items-end bg-raised dark:bg-raised border border-hairline shadow-lift rounded-2xl px-2 py-1.5 transition-[border-color,box-shadow] duration-base ease-out focus-within:border-coral/50 focus-within:ring-2 focus-within:ring-coral/15">
+                            class="flex flex-col bg-raised dark:bg-raised border border-hairline shadow-lift rounded-2xl px-2 py-1.5 transition-[border-color,box-shadow] duration-base ease-out focus-within:border-coral/50 focus-within:ring-2 focus-within:ring-coral/15">
                             <textarea id="messageInput"
-                                class="order-first w-full bg-transparent px-2.5 pt-2.5 pb-1 resize-none focus:outline-none text-body placeholder:text-muted min-h-[56px] max-h-[40vh]"
+                                class="w-full bg-transparent px-2.5 pt-2.5 pb-1 resize-none focus:outline-none text-body placeholder:text-muted min-h-[56px] max-h-[40vh]"
                                 placeholder="Message ABot…" rows="1"></textarea>
+                            <!-- v1.0.7: one explicit row, no flex-wrap. The old layout
+                                 re-ordered the chips into the same wrapped line as the
+                                 buttons via order-2 + mr-auto, which left dead space
+                                 after the send button on wide screens. -->
+                            <div class="flex items-center justify-between gap-2 pr-0.5">
                             <button id="voiceBtn" aria-label="Voice input" data-tooltip="Voice input"
-                                class="order-3 w-11 h-11 flex items-center justify-center rounded-full text-muted hover:text-coral transition-colors flex-shrink-0">
+                                class="order-last w-11 h-11 flex items-center justify-center rounded-full text-muted hover:text-coral transition-colors flex-shrink-0">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
                                     fill="currentColor">
                                     <path fill-rule="evenodd"
@@ -524,7 +527,7 @@
                                         clip-rule="evenodd" />
                                 </svg>
                             </button>
-                            <div class="relative flex items-center order-4">
+                            <div class="relative flex items-center order-last flex-shrink-0">
                                 <button id="sendBtn" aria-label="Send message" data-tooltip="Send (Enter)" class="w-11 h-11 flex items-center justify-center rounded-full bg-coral text-white shadow-sm transition-transform hover:bg-coral-active active:scale-95">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
                                         fill="currentColor">
@@ -542,9 +545,11 @@
                                     </svg>
                                 </button>
                             </div>
-                        <!-- B3/B4 chips ride INSIDE the composer box (second flex line,
-                             order-2) with the action buttons right-aligned (order-3/4). -->
-                        <div class="order-2 mr-auto flex items-center gap-1.5 px-1 pt-1">
+                        <!-- B3/B4 chips ride INSIDE the composer box on the same
+                             row as the actions: order-first puts them left while
+                             mr-auto absorbs the slack, so voice/send sit flush
+                             against the right edge of the box. -->
+                        <div class="order-first mr-auto flex items-center gap-1.5 min-w-0 pl-1">
                             <button id="webSearchChip" type="button" aria-pressed="false"
                                 title="Search the web for current information before answering"
                                 class="composer-chip">
@@ -557,7 +562,8 @@
                                 <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" /></svg>
                                 <span>Think</span>
                             </button>
-                            </div>
+                            </div><!-- /chips -->
+                            </div><!-- /composer action row -->
                         </div><!-- /composer box -->
                         <div class="items-center justify-center gap-2 mt-1.5 hidden md:flex">
                             <span id="composerHint" class="text-[11px] text-muted/70 transition-opacity duration-fast">Enter to send · Shift+Enter for newline</span>

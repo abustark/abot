@@ -13,7 +13,7 @@ export const state = {
   abortController: null,
   guestSessionMessageCount: 0,
   isAppInitialized: false,
-  vantaEffect: null,
+
   recognition: undefined,
   titleAnimationInterval: null,
   tokenClient: undefined,

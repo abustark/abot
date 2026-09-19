@@ -3,7 +3,7 @@
  * Provides offline caching for local assets only
  */
 
-const CACHE_NAME = 'abot-cache-v26'; // v26: theme-aware logo + favicon variants, css v=p12
+const CACHE_NAME = 'abot-cache-v27'; // v27: CSS-only auth aurora, account menu, css v=p13
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -11,7 +11,7 @@ const STATIC_ASSETS = [
     '/favicon-32-light.png',
     '/favicon-32-dark.png',
     '/logo.png',
-    '/dist/output.css?v=p12',
+    '/dist/output.css?v=p13',
     '/js/app.js',
     '/js/config.js',
     '/js/dom.js',
