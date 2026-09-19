@@ -822,6 +822,36 @@ h1, h2, h3, .prose h1, .prose h2, .prose h3 { text-wrap: balance; }
     [data-tooltip]::after { transition: none; }
 }
 
+/* --- v2.0.7: header overflow menu + mobile search sheet + slimmer bar ------- */
+/* Slimmer header height (was h-14). Padding stays on the header utilities. */
+#appHeader { min-height: 3rem; }
+
+/* Overflow "⋯" menu: quick fade+rise, origin top-right. Tokens only. */
+#headerOverflowMenu {
+    transform-origin: top right;
+    transition: opacity 140ms var(--ease-out), transform 140ms var(--ease-out);
+}
+#headerOverflowMenu.hidden { display: none; }
+
+/* Mobile search sheet: the panel is a fixed top bar above every other layer
+   (composer z-10, jump pill z-20), with a backdrop below it. Desktop keeps the
+   original in-flow inline bar under the header. */
+#searchBackdrop { animation: searchFade 160ms var(--ease-out); }
+#searchPanel { animation: searchDrop 180ms var(--ease-out); }
+@media (max-width: 767px) {
+    #searchPanel {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+    }
+}
+@keyframes searchFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes searchDrop { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) {
+    #searchBackdrop, #searchPanel { animation: none; }
+}
+
 /* Command palette (Ctrl+K): instant open (animate-skill rule for
    keyboard-first UI), quick fade-out, no width/height animation. */
 .command-palette-panel {

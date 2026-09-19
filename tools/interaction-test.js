@@ -193,6 +193,32 @@ function stubChain(label) {
         click($('searchCloseBtn'));
         await sleep(50);
         check('search close button dismisses the panel', $('searchPanel').classList.contains('hidden'));
+        // v2.0.7: backdrop is part of the sheet — opens with it, dismisses on tap.
+        check('search backdrop hidden after close', $('searchBackdrop').classList.contains('hidden'));
+        click($('searchToggleBtn'));
+        await sleep(50);
+        check('search reopen shows backdrop', !$('searchBackdrop').classList.contains('hidden'));
+        click($('searchBackdrop'));
+        await sleep(50);
+        check('backdrop tap closes search', $('searchPanel').classList.contains('hidden') && $('searchBackdrop').classList.contains('hidden'));
+    }
+    // header overflow menu (v2.0.7): opens, closes on outside tap, hosts the moved controls.
+    {
+        click($('headerOverflowBtn'));
+        await sleep(50);
+        check('header overflow menu opens', $('headerOverflowMenu') && !$('headerOverflowMenu').classList.contains('hidden'));
+        check('overflow hosts search control', $('headerOverflowMenu').contains($('searchToggleBtn')));
+        check('overflow hosts theme control', $('headerOverflowMenu').contains($('themeToggle')));
+        check('overflow hosts prompt control', $('headerOverflowMenu').contains($('promptBtn')));
+        // theme still flips from inside the menu (IDs preserved).
+        const before = window.document.documentElement.classList.contains('dark');
+        click($('themeToggle'));
+        await sleep(50);
+        check('theme toggles from overflow menu', window.document.documentElement.classList.contains('dark') !== before);
+        click($('themeToggle')); // restore
+        click($('headerOverflowBtn')); // close
+        await sleep(50);
+        check('header overflow menu closes', $('headerOverflowMenu').classList.contains('hidden'));
     }
     // composer chips (v1.0.3 B3/B4): gated per model, toggle on/off.
     {
@@ -352,7 +378,7 @@ function stubChain(label) {
     // --- v1.0.6: keyboard hints in tooltips (C3) ------------------------------
     {
         check('send tooltip names the shortcut', ($('sendBtn').getAttribute('data-tooltip') || '').includes('Enter'));
-        check('search tooltip names the shortcut', ($('searchToggleBtn').getAttribute('data-tooltip') || '').includes('Alt+/'));
+        check('new-chat tooltip names the shortcut', ($('headerNewChatBtn').getAttribute('data-tooltip') || '').includes('Alt+N'));
         check('message rows offer no delete affordance',
             !window.document.querySelector('.delete-msg-btn'));
     }

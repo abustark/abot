@@ -524,6 +524,7 @@ export const renderSearchResults = (term) => {
             const idx = parseInt(btn.dataset.msgIndex, 10);
             switchChat(chatId);
             dom.searchPanel.classList.add('hidden');
+            document.getElementById('searchBackdrop')?.classList.add('hidden');
             requestAnimationFrame(() => {
                 const el = dom.chatHistory.querySelector(`[data-msg-index="${idx}"]`);
                 if (el) {
