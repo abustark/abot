@@ -9,12 +9,12 @@ not start MEDIUM or HARD work without explicit owner approval.
 
 ## Current Baseline
 
-- `npm.cmd run check` passes: all JS parses cleanly.
-- `npm.cmd run lint` passes with 0 errors and 26 warnings.
-- `npm.cmd run test` passes: security, smoke, and interaction tests are green.
-- `npm audit --omit=dev` fails with 22 production dependency advisories.
-- Email/password signup currently creates accounts without email verification.
-- Several HTML render paths need XSS hardening before new user-facing features.
+- `npm run check` passes: all JS parses cleanly.
+- `npm run lint` passes with 0 errors and 0 warnings.
+- `npm run test` passes: security, smoke, and interaction tests (73/73) are green.
+- `npm audit --omit=dev` passes with 0 production vulnerabilities.
+- L1–L4, M1–M4, and H1 completed.
+- H2 removed by owner directive.
 
 ## Ground Rules
 
@@ -150,18 +150,20 @@ Verification:
 - Firebase Admin token verification still works.
 - `npm.cmd run test` passes.
 
-### HARD Difficulty - Later
+### HARD Difficulty
 
-#### H1 - Backend-enforced verified-email policy
+#### H1 - Backend-enforced verified-email policy [COMPLETED]
 
-If Firebase tokens expose the needed provider/email verification state reliably,
-enforce unverified email/password blocking in `api/chat.js` and `server.js`.
-This touches protected backend security code and needs owner sign-off.
+Enforced unverified email/password blocking in `api/chat.js` and `server.js` via
+shared `verifyUserEmailStatus` in `lib/chat-security.js`.
+- Password auth requires `email_verified: true` (returns 403 otherwise).
+- Google and anonymous guest sign-ins remain allowed.
+- Tested via unit assertions in `tests/chat-security.test.js`.
 
-#### H2 - Account deletion and data export
+#### H2 - Account deletion and data export [REMOVED]
 
-Build a complete user data lifecycle: export all chats, delete all Firestore chat
-data, then delete the Firebase account where supported.
+Explicitly cancelled and removed by owner directive (2026-09-19).
+No account deletion or Firestore data purge will be implemented.
 
 #### H3 - Feature expansion after security fixes
 

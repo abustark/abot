@@ -10,7 +10,7 @@ import { MODEL_CONFIG } from './config.js';
 import { applyModelColorTheme, syncComposerChips } from './ui.js';
 import { closeSidebar } from './ui.js';
 import { dom } from './dom.js';
-import { getTimestamp, isSpeaking, speakText, stopSpeaking, setUnsentDraft, renderSafeMarkdown } from './utils.js';
+import { getTimestamp, isSpeaking, speakText, stopSpeaking, setUnsentDraft, renderSafeMarkdown, sanitizeHtml } from './utils.js';
 import { showGuestLimitModal } from './ui.js';
 import { showToast } from './utils.js';
 import { state } from './state.js';
@@ -656,6 +656,19 @@ export const sendMessage = async () => {
             signal: state.abortController.signal
         });
 
+        if (!response.ok) {
+            let errorMsg = "Could not get response from the server.";
+            try {
+                const errData = await response.json();
+                if (errData && typeof errData.error === 'string') {
+                    errorMsg = errData.error;
+                }
+            } catch {
+                // Ignore json parse error
+            }
+            throw new Error(errorMsg);
+        }
+
         if (!response.body) throw new Error("Response body is missing.");
 
         const reader = response.body.getReader();
@@ -756,7 +769,7 @@ export const sendMessage = async () => {
             currentChat.messages.push({ role: 'assistant', content: stoppedMessage, model: currentChat.model });
         } else {
             console.error("sendMessage stream error:", error);
-            latestBotMessageSpan.innerHTML = "<strong>Error:</strong> Could not get response from the server.";
+            latestBotMessageSpan.innerHTML = `<strong>Error:</strong> ${sanitizeHtml(error.message || "Could not get response from the server.")}`;
         }
     }
     finally {

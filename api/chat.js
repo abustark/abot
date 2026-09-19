@@ -1,7 +1,7 @@
 import admin from 'firebase-admin';
 import chatSecurity from '../lib/chat-security.js';
 
-const { validateChatRequest, MemoryRateLimiter, identityKey, clientIp, upstreamTimeout, sseError, logProviderError } = chatSecurity;
+const { validateChatRequest, verifyUserEmailStatus, MemoryRateLimiter, identityKey, clientIp, upstreamTimeout, sseError, logProviderError } = chatSecurity;
 
 // --- Firebase Admin SDK Initialization (runs once per cold start) ---
 if (!admin.apps.length) {
@@ -37,6 +37,10 @@ export default async function handler(req, res) {
     let uid = null;
     try {
         const decodedToken = await admin.auth().verifyIdToken(idToken);
+        const emailStatus = verifyUserEmailStatus(decodedToken);
+        if (!emailStatus.allowed) {
+            return res.status(emailStatus.code).json({ error: emailStatus.error });
+        }
         uid = decodedToken.uid;
     } catch {
         console.error('[chat] token verification failed');

@@ -58,4 +58,21 @@ assert(sec.identityKey('uid1', '1.2.3.4') === 'u:uid1', 'uid identity');
 assert(sec.identityKey(null, '1.2.3.4').startsWith('i:'), 'ip hashed');
 assert(sec.identityKey(null, '1.2.3.4') !== sec.identityKey(null, '5.6.7.8'), 'distinct IPs distinct keys');
 
+// --- email verification (H1) ---
+const E = sec.verifyUserEmailStatus;
+assert(E(null).allowed === false && E(null).code === 401, 'null token blocked 401');
+assert(E(undefined).allowed === false && E(undefined).code === 401, 'undefined token blocked 401');
+
+const unverifiedPass = { uid: 'u1', firebase: { sign_in_provider: 'password' }, email_verified: false };
+const verifiedPass = { uid: 'u2', firebase: { sign_in_provider: 'password' }, email_verified: true };
+const unverifiedCheck = E(unverifiedPass);
+assert(!unverifiedCheck.allowed && unverifiedCheck.code === 403, 'unverified password user blocked 403');
+assert(unverifiedCheck.error.includes('Email verification required'), 'clear email verification error message');
+assert(E(verifiedPass).allowed === true, 'verified password user allowed');
+
+const googleUser = { uid: 'u3', firebase: { sign_in_provider: 'google.com' }, email_verified: false };
+assert(E(googleUser).allowed === true, 'google user allowed');
+const anonUser = { uid: 'u4', firebase: { sign_in_provider: 'anonymous' } };
+assert(E(anonUser).allowed === true, 'anonymous guest user allowed');
+
 console.log('ALL CHAT-SECURITY TESTS PASSED ✅');

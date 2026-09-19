@@ -7,7 +7,7 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const chatSecurity = require('./lib/chat-security.js');
 
-const { validateChatRequest, MemoryRateLimiter, identityKey, clientIp, upstreamTimeout, sseError, logProviderError } = chatSecurity;
+const { validateChatRequest, verifyUserEmailStatus, MemoryRateLimiter, identityKey, clientIp, upstreamTimeout, sseError, logProviderError } = chatSecurity;
 
 // Initialize Firebase Admin SDK
 let serviceAccount;
@@ -56,8 +56,6 @@ app.use(helmet({
                 // hash-pinned pre-render blocks: theme flicker guard + SW registration
                 "'sha256-RED5nqgiGvlxFeR+VShxFCDMt7eps9C9vbu9UNGV6I8='",
                 "'sha256-VWaPoUOlzYoe9zCTZaYlk6twkMHt+udfeNAaXcYGi+4='",
-                "https://cdn.jsdelivr.net",
-                "https://cdnjs.cloudflare.com",
                 "https://www.gstatic.com",
                 "https://accounts.google.com"
             ],
@@ -149,6 +147,10 @@ const checkAuth = async (req, res, next) => {
         const idToken = authHeader.slice('Bearer '.length).trim();
         try {
             const decodedToken = await admin.auth().verifyIdToken(idToken);
+            const emailStatus = verifyUserEmailStatus(decodedToken);
+            if (!emailStatus.allowed) {
+                return res.status(emailStatus.code).json({ error: emailStatus.error });
+            }
             req.user = decodedToken;
             return next();
         } catch {
