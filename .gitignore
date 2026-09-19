@@ -33,3 +33,5 @@ npm-debug.log*
 tmp/
 temp/
 .freebuff/
+.playwright/
+.playwright-cli/

@@ -8,6 +8,12 @@ This document tracks every commit made on `main` following the `2.0.x` versionin
 
 ## Commit History
 
+### 2.0.3 - add playwright verification suite and ignore local sessions
+- **Date**: 2026-09-19
+- **Changes**:
+  - Added automated Playwright end-to-end verification script in `tools/test-playwright.py` covering auth views, guest session, model selector, account menu, dark mode toggle, and backend verified email enforcement.
+  - Added `.playwright/` and `.playwright-cli/` to `.gitignore`.
+
 ### 2.0.1 - update workflow rules in agents and add commit log
 - **Date**: 2026-09-19
 - **Changes**:
