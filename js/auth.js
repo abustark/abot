@@ -302,6 +302,17 @@ const hideAppLoader = () => {
 };
 
 const enterApp = async (user) => {
+    // Safety net: redirect unverified non-anonymous users back to the
+    // verification screen even if the onAuthStateChanged gate was bypassed
+    // (e.g. by a providerData race or direct call).
+    if (!user.isAnonymous && !user.emailVerified) {
+        state.isAppInitialized = false;
+        dom.appContainer.style.display = 'none';
+        dom.authSection.style.display = 'flex';
+        showVerifyEmailView(user.email);
+        hideAppLoader();
+        return;
+    }
     state.isAppInitialized = true; // Set the lock immediately
     // --- USER IS LOGGED IN ---
 
@@ -349,8 +360,10 @@ state.auth.onAuthStateChanged(async (user) => {
     if (user && state.isAppInitialized) return;
 
     if (user) {
-        const isPasswordUser = !user.isAnonymous && user.providerData?.some(p => p.providerId === 'password');
-        if (isPasswordUser && !user.emailVerified) {
+        // Gate all non-anonymous users whose email isn't verified.
+        // Google users always have emailVerified=true so they pass through.
+        // This avoids the providerData race where it's initially empty [].
+        if (!user.isAnonymous && !user.emailVerified) {
             state.isAppInitialized = false;
             dom.appContainer.style.display = 'none';
             dom.authSection.style.display = 'flex';

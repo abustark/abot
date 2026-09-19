@@ -60,7 +60,7 @@ function stubChain(label) {
     window.document.dispatchEvent(new window.Event('DOMContentLoaded'));
     await new Promise((r) => setTimeout(r, 300));
 
-    const fakeUser = { uid: 'u1', displayName: 'T', isAnonymous: false, photoURL: null };
+    const fakeUser = { uid: 'u1', displayName: 'T', isAnonymous: false, emailVerified: true, photoURL: null };
     for (const cb of authCallbacks) await cb(fakeUser);
     await new Promise((r) => setTimeout(r, 500));
 
