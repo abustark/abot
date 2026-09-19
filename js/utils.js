@@ -13,6 +13,15 @@ import { state } from './state.js';
 
 const REDUCED_MOTION_MQ = '(prefers-reduced-motion: reduce)';
 
+// Single owner of "take the toast away" — the auto-dismiss timer, the × button
+// and the swipe gesture all route through here so they cannot fight (the old
+// code cleared the timer in one place and not the other).
+const dismissToast = () => {
+    clearTimeout(state.toastTimeout);
+    dom.toastNotification.style.transition = 'transform 220ms var(--ease-out)';
+    dom.toastNotification.style.transform = 'translateX(150%)';
+};
+
 export const showToast = (message, type = 'success') => {
     dom.toastMessage.textContent = message;
 
@@ -34,31 +43,47 @@ export const showToast = (message, type = 'success') => {
     dom.toastNotification.style.transform = 'translateX(0)';
 
     clearTimeout(state.toastTimeout);
-    state.toastTimeout = setTimeout(() => {
-        dom.toastNotification.style.transform = 'translateX(150%)';
-    }, 4000);
+    state.toastTimeout = setTimeout(dismissToast, 4000);
 
-    // One-time wiring: explicit dismiss button (a11y) + flick-to-dismiss
-    // on touch (Sonner-style, roadmap #4). Flick right = slide-out direction.
+    // One-time wiring: explicit dismiss button (a11y) + swipe-to-dismiss.
     if (dom.toastCloseBtn && !dom.toastCloseBtn.dataset.wired) {
         dom.toastCloseBtn.dataset.wired = '1';
-        dom.toastCloseBtn.addEventListener('click', () => {
-            clearTimeout(state.toastTimeout);
-            dom.toastNotification.style.transform = 'translateX(150%)';
-        });
+        dom.toastCloseBtn.addEventListener('click', dismissToast);
     }
+    // B7 (v1.0.6): the toast now follows the finger instead of waiting for a
+    // 48px jump on release, and a quick flick dismisses it even when short.
+    // Touch/pen only — a mouse user has the × button, and a text selection
+    // drag should never fling the toast away.
     if (!dom.toastNotification.dataset.wired) {
         dom.toastNotification.dataset.wired = '1';
-        let startX = null;
-        dom.toastNotification.addEventListener('pointerdown', (e) => { startX = e.clientX; });
-        dom.toastNotification.addEventListener('pointerup', (e) => {
-            if (startX === null) return;
-            if (e.clientX - startX > 48) {
-                clearTimeout(state.toastTimeout);
-                dom.toastNotification.style.transform = 'translateX(150%)';
-            }
+        const toast = dom.toastNotification;
+        let startX = null, dx = 0, startTime = 0;
+        const settle = () => {
             startX = null;
+            toast.style.transition = 'transform 220ms var(--ease-out)';
+            toast.style.transform = 'translateX(0)';
+        };
+        toast.addEventListener('pointerdown', (e) => {
+            if (e.pointerType === 'mouse') return;
+            startX = e.clientX; dx = 0; startTime = performance.now();
+            toast.style.transition = 'none'; // follow the finger 1:1
+            try { toast.setPointerCapture(e.pointerId); } catch { /* not capturable */ }
         });
+        toast.addEventListener('pointermove', (e) => {
+            if (startX === null) return;
+            dx = Math.max(0, e.clientX - startX); // right = slide-out direction
+            toast.style.transform = `translateX(${dx}px)`;
+        });
+        const endSwipe = () => {
+            if (startX === null) return;
+            const velocity = dx / Math.max(performance.now() - startTime, 1); // px/ms
+            const dismiss = dx > 48 || velocity > 0.5;
+            startX = null;
+            if (dismiss) dismissToast();
+            else settle();
+        };
+        toast.addEventListener('pointerup', endSwipe);
+        toast.addEventListener('pointercancel', endSwipe);
     }
 };
 

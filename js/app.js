@@ -67,8 +67,12 @@ function initApp() {
     // here we only keep the icon pair in sync and persist explicit choices.
     const syncThemeIcons = () => {
         const dark = document.documentElement.classList.contains('dark');
-        dom.sunIcon.classList.toggle('hidden', !dark);
-        dom.moonIcon.classList.toggle('hidden', dark);
+        // B6 (v1.0.6): cross-fade + rotate instead of `hidden` — display:none
+        // can't animate, so the swap used to be a hard jump. `.is-off` only
+        // fades/scales (the icon stays in the layout, out of the a11y tree via
+        // the button's own label).
+        dom.sunIcon.classList.toggle('is-off', !dark);
+        dom.moonIcon.classList.toggle('is-off', dark);
         // v1.0.4: keep the settings "Dark mode" switch in sync — it is a button
         // (role=switch), so it can't use the peer-checked styling the
         // timestamps/TTS checkboxes rely on.
@@ -158,6 +162,25 @@ function initApp() {
 
     // --- Model Selector Listeners ---
 
+    // B5 (v1.0.6): enter-only, origin-aware motion via `@starting-style`
+    // (see .model-panel in src/input.css). The old code wrote inline
+    // opacity/transform and hid the panel 200ms later from five separate call
+    // sites — those timers raced each other, so open → close → open could
+    // leave the panel stuck invisible.
+    const openModelPanel = () => {
+        renderModelSelectorOptions(); // re-render options every time it's opened
+        dom.modelSelectorPanel.classList.remove('hidden');
+        const activeOrFirst = dom.modelSelectorPanel.querySelector('button[class*="bg-coral-soft"]')
+            || dom.modelSelectorPanel.querySelector('button');
+        if (activeOrFirst) activeOrFirst.focus();
+    };
+    const closeModelPanel = ({ restoreFocus = false } = {}) => {
+        if (!dom.modelSelectorPanel.classList.contains('hidden')) {
+            dom.modelSelectorPanel.classList.add('hidden');
+        }
+        if (restoreFocus) dom.modelSelectorBtn.focus();
+    };
+
     const handleModelSelectorNavigation = (e) => {
         if (dom.modelSelectorPanel.classList.contains('hidden')) return;
 
@@ -168,10 +191,7 @@ function initApp() {
 
         if (e.key === 'Escape') {
             e.preventDefault();
-            dom.modelSelectorPanel.style.opacity = '0';
-            dom.modelSelectorPanel.style.transform = 'scale(0.95)';
-            setTimeout(() => dom.modelSelectorPanel.classList.add('hidden'), 200);
-            dom.modelSelectorBtn.focus();
+            closeModelPanel({ restoreFocus: true });
             return;
         }
 
@@ -269,10 +289,7 @@ function initApp() {
                         await chatDocRef.update({ model: key }).catch(err => console.error("Failed to update model in DB", err));
 
                         renderActiveChat();
-
-                        dom.modelSelectorPanel.style.opacity = '0';
-                        dom.modelSelectorPanel.style.transform = 'scale(0.95)';
-                        setTimeout(() => dom.modelSelectorPanel.classList.add('hidden'), 200);
+                        closeModelPanel();
                     }
                 });
                 dom.modelSelectorPanel.appendChild(optionEl);
@@ -284,24 +301,8 @@ function initApp() {
 
     dom.modelSelectorBtn.addEventListener('click', e => {
         e.stopPropagation();
-        const isHidden = dom.modelSelectorPanel.classList.contains('hidden');
-        if (isHidden) {
-            renderModelSelectorOptions(); // Re-render options every time it's opened
-            dom.modelSelectorPanel.classList.remove('hidden');
-            setTimeout(() => {
-                dom.modelSelectorPanel.style.opacity = '1';
-                dom.modelSelectorPanel.style.transform = 'translateY(0) scale(1)';
-                // Focus the currently active model or the first one
-                const activeOrFirstButton = dom.modelSelectorPanel.querySelector('button[class*="bg-coral-soft"]') || dom.modelSelectorPanel.querySelector('button');
-                if (activeOrFirstButton) {
-                    activeOrFirstButton.focus();
-                }
-            }, 10); // A short delay ensures the transition plays
-        } else {
-            dom.modelSelectorPanel.style.opacity = '0';
-            dom.modelSelectorPanel.style.transform = 'translateY(-10px) scale(0.98)';
-            setTimeout(() => dom.modelSelectorPanel.classList.add('hidden'), 200); // Wait for animation to finish
-        }
+        if (dom.modelSelectorPanel.classList.contains('hidden')) openModelPanel();
+        else closeModelPanel();
     });
 
     document.addEventListener('click', (e) => {
@@ -312,10 +313,7 @@ function initApp() {
         const panel = dom.modelSelectorPanel;
         const isVisible = !panel.classList.contains('hidden');
         if (isVisible && !panel.contains(e.target) && !dom.modelSelectorBtn.contains(e.target)) {
-            panel.style.opacity = '0';
-            panel.style.transform = 'scale(0.95)';
-            setTimeout(() => panel.classList.add('hidden'), 200);
-            dom.modelSelectorBtn.focus();
+            closeModelPanel({ restoreFocus: true });
         }
 
         // Also, ensure the smaller chat options menus are closed.
@@ -460,6 +458,73 @@ function initApp() {
 
 
     dom.searchChats.addEventListener('input', (e) => renderChatList(e.target.value));
+
+    // --- C3 (v1.0.6): warm tooltips -----------------------------------------
+    // A tooltip waits ~240ms before appearing (so stray hovers don't flash),
+    // but once you have seen one, sweeping to the next control shows it
+    // immediately — the standard toolbar behaviour. One delegated listener.
+    let lastTooltipAt = 0;
+    document.addEventListener('pointerover', (e) => {
+        if (!(e.target instanceof Element)) return;
+        const trigger = e.target.closest('[data-tooltip]');
+        if (!trigger) return;
+        // Ignore pointer moves that stay inside the same trigger (icon → edge).
+        if (e.relatedTarget instanceof Element && trigger.contains(e.relatedTarget)) return;
+        const now = performance.now();
+        document.querySelectorAll('[data-tooltip-instant]').forEach(el => el.removeAttribute('data-tooltip-instant'));
+        if (now - lastTooltipAt < 1500) trigger.setAttribute('data-tooltip-instant', '');
+        lastTooltipAt = now;
+    }, { passive: true });
+
+    // --- C5 (v1.0.6): swipe the mobile drawer closed -------------------------
+    // Follows the finger 1:1 (transform only), then commits on either 35% of
+    // the drawer width or a flick. A gesture only claims the touch once it is
+    // clearly horizontal, so the chat list still scrolls normally.
+    if (dom.sidebar) {
+        const isMobileDrawer = () => !mdMq || !mdMq.matches;
+        let startX = 0, startY = 0, lastX = 0, lastT = 0, dx = 0, vx = 0;
+        let horizontal = false, swiping = false;
+        dom.sidebar.addEventListener('touchstart', (e) => {
+            if (!isMobileDrawer() || e.touches.length !== 1) return;
+            startX = lastX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+            lastT = performance.now();
+            dx = 0; vx = 0; horizontal = false; swiping = false;
+        }, { passive: true });
+        dom.sidebar.addEventListener('touchmove', (e) => {
+            if (!isMobileDrawer() || e.touches.length !== 1) return;
+            const touch = e.touches[0];
+            const ddx = touch.clientX - startX;
+            const ddy = touch.clientY - startY;
+            if (!horizontal) {
+                if (Math.abs(ddx) < 12 && Math.abs(ddy) < 12) return;
+                // Vertical intent → hand the gesture back to the scrollable list.
+                if (Math.abs(ddx) < Math.abs(ddy) * 1.3) { horizontal = true; swiping = false; return; }
+                horizontal = true;
+                swiping = true;
+                dom.sidebar.style.transition = 'none';
+            }
+            if (!swiping) return;
+            const now = performance.now();
+            vx = (touch.clientX - lastX) / Math.max(now - lastT, 1); // px/ms, <0 = closing
+            lastX = touch.clientX;
+            lastT = now;
+            dx = Math.min(0, ddx); // only leftward drags move the drawer
+            dom.sidebar.style.transform = `translateX(${dx}px)`;
+        }, { passive: true });
+        const endDrawerSwipe = () => {
+            if (!swiping) { horizontal = false; return; }
+            const width = dom.sidebar.getBoundingClientRect().width || 288;
+            const dismiss = -dx > width * 0.35 || vx < -0.5;
+            swiping = false;
+            horizontal = false;
+            dom.sidebar.style.transition = '';
+            dom.sidebar.style.transform = ''; // hand control back to the class
+            if (dismiss) closeSidebar();
+        };
+        dom.sidebar.addEventListener('touchend', endDrawerSwipe, { passive: true });
+        dom.sidebar.addEventListener('touchcancel', endDrawerSwipe, { passive: true });
+    }
 
     // --- Global Keyboard Shortcuts (Debugged) ---
     // --- Global Keyboard Shortcuts ---

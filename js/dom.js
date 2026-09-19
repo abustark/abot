@@ -96,6 +96,9 @@ dom.sidebarSearchBtn = document.getElementById('sidebarSearchBtn');
 dom.sidebarPromptBtn = document.getElementById('sidebarPromptBtn');
 dom.composerHint = document.getElementById('composerHint');
 dom.searchCloseBtn = document.getElementById('searchCloseBtn');
+// v1.0.6 new-chat landing (empty state centres the composer).
+dom.emptyWelcome = document.getElementById('emptyWelcome');
+dom.emptySuggestions = document.getElementById('emptySuggestions');
 
 export function initDomExtras() {
 dom.promptLibrary = document.getElementById('promptLibrary');

@@ -474,14 +474,29 @@ mark {
 /* Message actions (copy etc.): keyboard-focus + touch reveal.
    The default is still hover-reveal via group-hover utilities in markup. */
 .message-container:focus-within .copy-message-btn,
-.message-container:focus-within .edit-msg-btn,
-.message-container:focus-within .delete-msg-btn { opacity: 1 !important; }
+.message-container:focus-within .edit-msg-btn { opacity: 1 !important; }
 @media (hover: none) {
     .copy-message-btn,
     .edit-msg-btn,
-    .delete-msg-btn,
     .copy-code-btn { opacity: 1 !important; }
 }
+
+/* v1.0.6: every icon-only control acknowledges the press (design rule: no
+   silent buttons). Immediate, no transition — press feedback should feel
+   instant, not eased. */
+#themeToggle:active,
+#sidebarToggle:active,
+#searchToggleBtn:active,
+#settingsToggleBtn:active,
+#voiceBtn:active,
+#sidebarThemeBtn:active,
+#sidebarSearchBtn:active,
+#sidebarPromptBtn:active,
+.chat-options-btn:active,
+.copy-message-btn:active,
+.speak-btn:active,
+.regen-btn:active,
+.edit-msg-btn:active { transform: scale(0.94); }
 
 /* Typing indicator dots follow the accent token (was template gray/currentColor) */
 .typing-indicator span { background-color: rgb(var(--c-coral)); }
@@ -522,9 +537,14 @@ mark {
     cursor: pointer;
     user-select: none;
     transition: color 150ms var(--ease-out), border-color 150ms var(--ease-out),
-        background-color 150ms var(--ease-out);
+        background-color 150ms var(--ease-out), transform 140ms var(--ease-out);
 }
-.composer-chip:hover:enabled { color: rgb(var(--c-ink)); border-color: rgb(var(--c-ink) / 0.25); }
+/* Hover is a pointer affordance only — on touch it just sticks after a tap. */
+@media (hover: hover) and (pointer: fine) {
+    .composer-chip:hover:enabled { color: rgb(var(--c-ink)); border-color: rgb(var(--c-ink) / 0.25); }
+}
+/* B4 (v1.0.6): the chips toggled state with no tactile response at all. */
+.composer-chip:active:enabled { transform: scale(0.96); }
 .composer-chip:focus-visible { outline: 2px solid rgb(var(--c-coral) / 0.6); outline-offset: 2px; }
 .composer-chip.chip-active {
     color: rgb(var(--c-coral));
@@ -650,6 +670,12 @@ h1, h2, h3, .prose h1, .prose h2, .prose h3 { text-wrap: balance; }
     opacity: 1;
     transform: translateY(0);
 }
+/* C3 (v1.0.6): a hover tooltip waits so a stray pass-over doesn't flash it,
+   but a *repeat* hover (sweeping along a toolbar) is instant. Keyboard focus
+   is never delayed — keyboard-first UI stays immediate. app.js marks the
+   repeat case with [data-tooltip-instant]. */
+[data-tooltip]:hover::after { transition-delay: 240ms; }
+[data-tooltip][data-tooltip-instant]:hover::after { transition-delay: 0ms; }
 /* Bottom-positioned variant for triggers in the TOP bar (header, sidebar
    brand). Default above-position would clip off the viewport top there. */
 [data-tooltip-pos="bottom"]::after {
@@ -709,3 +735,103 @@ h1, h2, h3, .prose h1, .prose h2, .prose h3 { text-wrap: balance; }
     letter-spacing: 0.05em;
     color: rgb(var(--c-muted));
 }
+
+/* ===========================================================================
+   v1.0.6 — new-chat landing · motion polish (B2/B4–B7) · warm tooltips (C3)
+   Motion rules: transform/opacity only, ≤300ms with the --ease-* tokens,
+   hover motion only on hover-capable pointers, reduced-motion honoured.
+--------------------------------------------------------------------------- */
+
+/* The mobile-keyboard offset lives in CSS (not an inline style) so the
+   empty-chat layout below can release it. --kb-h is set on <html> by app.js. */
+#composerDock { bottom: var(--kb-h, 0px); }
+
+/* --- New-chat landing: greeting · composer · suggestions centre as one unit.
+   The messages area is hidden (it only ever held the greeting) and the dock
+   becomes the centred block, so the composer sits mid-screen on first open. */
+body.chat-empty #chatHistoryContainer { display: none; }
+body.chat-empty #composerDock {
+    position: fixed;
+    top: 50%;
+    bottom: auto;
+    /* Centre within the *visible* viewport: half the keyboard height lifts the
+       block so the input can never end up behind the mobile keyboard. */
+    transform: translateY(calc(-50% - var(--kb-h, 0px) / 2));
+    background-color: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: 0;
+    box-shadow: none;
+    padding-top: 0;
+}
+body.chat-empty #jumpToLatest { display: none; }
+
+/* Suggestion cards: desktop-only hover lift (token shadow), press always. */
+.suggestion-card { cursor: pointer; }
+@media (hover: hover) and (pointer: fine) {
+    .suggestion-card:hover {
+        transform: translateY(-2px);
+        border-color: rgb(var(--c-coral) / 0.45);
+        box-shadow: 0 1px 2px rgb(var(--c-ink) / 0.04), 0 8px 24px -8px rgb(var(--c-ink) / 0.14);
+    }
+}
+@keyframes suggestionEnter {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.suggestion-enter { animation: suggestionEnter 220ms var(--ease-out) both; }
+.suggestion-enter:nth-child(2) { animation-delay: 40ms; }
+.suggestion-enter:nth-child(3) { animation-delay: 80ms; }
+.suggestion-enter:nth-child(4) { animation-delay: 120ms; }
+@media (prefers-reduced-motion: reduce) {
+    .suggestion-enter { animation: none; }
+}
+
+/* --- B2: while a response streams, the stop control wears a soft coral ring.
+   Driven by the button's own `.stop-hidden` state, so no extra JS flag. */
+#stopBtn::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: inherit;
+    border: 2px solid rgb(var(--c-coral) / 0.6);
+    opacity: 0;
+    pointer-events: none;
+}
+#stopBtn:not(.stop-hidden)::after { animation: stopRing 1.8s var(--ease-in-out) infinite; }
+@keyframes stopRing {
+    0% { opacity: 0.7; transform: scale(0.92); }
+    70% { opacity: 0; transform: scale(1.18); }
+    100% { opacity: 0; transform: scale(1.18); }
+}
+@media (prefers-reduced-motion: reduce) {
+    #stopBtn:not(.stop-hidden)::after { animation: none; opacity: 0.5; transform: none; }
+}
+
+/* --- B5: model panel — enter-only, origin-aware, same pattern as the ⋮ menus
+   (@starting-style degrades to instant appearance on older browsers). */
+.model-panel { transition: opacity 160ms var(--ease-out), transform 160ms var(--ease-out); }
+@starting-style {
+    .model-panel { opacity: 0; transform: translateY(-6px) scale(0.97); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .model-panel { transition: none; }
+}
+
+/* --- B6: theme icon cross-fade + rotate. The pair used to swap via `hidden`
+   (display:none), which cannot animate — so make both icons overlap and fade. */
+.theme-icon {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    transition: opacity 200ms var(--ease-out), transform 200ms var(--ease-out);
+}
+.theme-icon.is-off { opacity: 0; transform: rotate(-75deg) scale(0.6); }
+@media (prefers-reduced-motion: reduce) {
+    .theme-icon { transition: opacity 120ms linear; }
+    .theme-icon.is-off { transform: none; }
+}
+
+/* --- B7: a toast is dragged horizontally, so let the browser keep vertical
+   scroll gestures for itself instead of cancelling the drag. */
+#toast-notification { touch-action: pan-y; }

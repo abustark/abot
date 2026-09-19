@@ -3,7 +3,7 @@
  * Provides offline caching for local assets only
  */
 
-const CACHE_NAME = 'abot-cache-v24'; // v24: lazy highlight.js, Inter removed, css v=p11
+const CACHE_NAME = 'abot-cache-v25'; // v25: centred new-chat landing, motion polish, css v=p12
 const STATIC_ASSETS = [
     '/',
     '/index.html',

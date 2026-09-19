@@ -229,49 +229,8 @@ export const renderChatList = (searchTerm = '') => {
 
 export function initMessageActions() {
 // --- Message Action Helpers ---
-window.deleteMessage = (chatId, msgIndex) => {
-    const chat = state.chats[chatId];
-    if (!chat || !chat.messages[msgIndex]) return;
-
-    // Simple confirm (reusing modal structure manually or just cloning button logic)
-    dom.deleteModal.querySelector('#modal-title').textContent = "Delete Message";
-    dom.deleteModalBody.textContent = "Are you sure you want to delete this message? This cannot be undone.";
-
-    const confirmBtn = dom.deleteConfirmBtn;
-    confirmBtn.textContent = "Delete";
-    confirmBtn.classList.remove('bg-indigo-600', 'hover:bg-indigo-700', 'bg-coral', 'hover:bg-coral-active');
-    confirmBtn.classList.add('bg-red-600', 'hover:bg-red-700');
-
-    // Clone and replace to handle click
-    const newBtn = confirmBtn.cloneNode(true);
-    confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
-    dom.deleteConfirmBtn = newBtn;
-
-    newBtn.addEventListener('click', async () => {
-        try {
-            chat.messages.splice(msgIndex, 1);
-            await state.db.collection('users').doc(state.auth.currentUser.uid).collection('chats').doc(chatId).update({ messages: chat.messages });
-            // Determine if we need to update active view
-            if (state.activeChatId === chatId) renderActiveChat();
-
-            // Close modal
-            dom.deletePanel.style.opacity = '0';
-            dom.deletePanel.style.transform = 'scale(0.95)';
-            setTimeout(() => dom.deleteModal.classList.add('hidden'), 200);
-            showToast("Message deleted.");
-        } catch (e) {
-            console.error(e);
-            showToast("Failed to delete message", "error");
-        }
-    }, { once: true });
-
-    dom.deleteModal.classList.remove('hidden');
-    setTimeout(() => {
-        dom.deletePanel.style.opacity = '1';
-        dom.deletePanel.style.transform = 'scale(1)';
-    }, 10);
-};
-
+// v1.0.6 (owner request): per-message deletion was removed from the UI. Only
+// the copy + edit helpers remain for user rows; AI rows keep copy/speak/regen.
 window.editMessage = (chatId, msgIndex) => {
     const chat = state.chats[chatId];
     const msg = chat?.messages[msgIndex];
@@ -367,8 +326,10 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
         }
     }
 
-    // --- Action Buttons (v1.0.3: owner spec — AI rows carry copy · read aloud ·
-    // regenerate only; 👍/👎/📌 removed as noise. User rows keep copy·edit·delete.) ---
+    // --- Action Buttons (v1.0.3/v1.0.6: owner spec — AI rows carry copy · read
+    // aloud · regenerate; user rows carry copy · edit. Nothing is deletable at
+    // message level any more, so there is no destructive affordance to mis-tap
+    // on mobile. Chats themselves are still deletable from the sidebar.) ---
                     const copyBtnHtml = `<button class="copy-message-btn p-1.5 rounded-md text-muted hover:text-ink transition-colors" title="Copy" aria-label="Copy message"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" /></svg></button>`;
 
     const speakBtnHtml = `<button class="speak-btn p-1.5 rounded-md transition-colors hover:text-coral text-muted" aria-label="Read aloud" aria-pressed="false" title="Read aloud"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M13 4.5c0-1.104-.806-2.03-1.886-2.03H11L9.66 5.33A2.5 2.5 0 017.5 6.5H5A2.5 2.5 0 002.5 9v6A2.5 2.5 0 005 17.5h2.5a2.5 2.5 0 012.16 1.17l1.34 2.83h.114C12.194 21.5 13 20.574 13 19.47v-14.97z"/><path d="M16.5 8.5a.75.75 0 011.06 0 5 5 0 010 7 .75.75 0 11-1.06-1.06 3.5 3.5 0 000-4.88.75.75 0 010-1.06z"/><path d="M19.09 5.5a.75.75 0 011.06 0 9 9 0 010 13 .75.75 0 11-1.06-1.06 7.5 7.5 0 000-10.88.75.75 0 010-1.06z"/></svg></button>`;
@@ -383,8 +344,7 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
     let actionButtonsHtml = '';
     if (typeof options.index === 'number') {
         actionButtonsHtml = `
-                            ${isUser ? `<button class="edit-msg-btn p-1.5 text-muted hover:text-coral transition-colors" title="Edit" aria-label="Edit message"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button>` : ''}
-                            ${isUser ? `<button class="delete-msg-btn p-1.5 text-muted hover:text-danger transition-colors" title="Delete" aria-label="Delete message"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.958L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>` : ''}`;
+                            ${isUser ? `<button class="edit-msg-btn p-1.5 text-muted hover:text-coral transition-colors" title="Edit" aria-label="Edit message"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button>` : ''}`;
     }
 
     const messageEl = document.createElement('div');
@@ -432,7 +392,6 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
 
     // Attach Event Listeners
     if (typeof options.index === 'number') {
-        messageEl.querySelector('.delete-msg-btn')?.addEventListener('click', (e) => { e.stopPropagation(); window.deleteMessage(state.activeChatId, options.index); });
         messageEl.querySelector('.edit-msg-btn')?.addEventListener('click', (e) => { e.stopPropagation(); window.editMessage(state.activeChatId, options.index); });
         const speakBtn = messageEl.querySelector('.speak-btn');
         speakBtn?.addEventListener('click', (e) => {
@@ -601,6 +560,7 @@ export const sendMessage = async () => {
     const userMessage = { role: 'user', content: message, model: currentChat.model };
     appendMessage(userMessage, false, { index: currentChat.messages.length });
     currentChat.messages.push(userMessage);
+    setEmptyMode(false); // first send leaves the new-chat layout immediately
     // A1: ONE deterministic scroll on send so the reply starts on screen —
     // never again during the stream; the user owns the viewport from here.
     dom.chatHistoryContainer.scrollTop = dom.chatHistoryContainer.scrollHeight;
@@ -862,30 +822,57 @@ export const sendMessage = async () => {
     }
 };
 
-const renderEmptyState = () => {
-    const suggestions = [
-        { title: 'Explain something', sub: 'Break down a hard concept in simple words', prompt: 'Explain how large language models work, in simple terms.' },
-        { title: 'Help me write', sub: 'Draft a polished email or message', prompt: 'Help me write a short, friendly follow-up email to a client.' },
-        { title: 'Debug my code', sub: 'Paste code and get a fix', prompt: 'I will paste some code — help me find and fix the bug.' },
-        { title: 'Brainstorm ideas', sub: 'Get creative options fast', prompt: 'Brainstorm 10 names for a warm, minimal AI chat app.' },
-    ];
-    dom.chatHistory.innerHTML = `
-        <div class="empty-state relative flex flex-col items-center justify-center text-center px-4 min-h-full">
-            <div class="empty-glow" aria-hidden="true"></div>
-            <img src="/logo.png" alt="" aria-hidden="true" class="h-14 w-14 rounded-2xl mb-6 select-none shadow-soft" draggable="false">
-            <h2 class="font-display text-3xl md:text-[2.5rem] leading-tight text-ink mb-3 tracking-tight">How can I help today?</h2>
-            <p class="text-muted text-sm mb-10 max-w-sm">Pick a suggestion or type your own prompt below.</p>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-2xl">
-                ${suggestions.map(sg => `
-                    <button class="suggestion-card text-left p-4 rounded-2xl bg-raised border border-hairline shadow-soft hover:shadow-lift hover:-translate-y-0.5 hover:border-coral/50 transition-[box-shadow,transform,border-color] duration-base ease-out" data-prompt="${sg.prompt.replace(/"/g, '&quot;')}">
-                        <span class="block text-sm font-medium text-ink">${sg.title}</span>
-                        <span class="block text-xs text-muted mt-1 leading-relaxed">${sg.sub}</span>
-                    </button>`).join('')}
-            </div>
+// v1.0.6 (owner request): the new-chat screen centers the composer and offers
+// ready-made prompts UNDER it. `chat-empty` on <body> switches the layout (CSS),
+// and the cards live outside the scroll area so they land below the composer
+// instead of above it. Hover motion is gated in CSS — touch never gets it.
+const SUGGESTIONS = [
+    { title: 'Explain something', sub: 'Break down a hard concept in simple words', prompt: 'Explain how large language models work, in simple terms.' },
+    { title: 'Help me write', sub: 'Draft a polished email or message', prompt: 'Help me write a short, friendly follow-up email to a client.' },
+    { title: 'Debug my code', sub: 'Paste code and get a fix', prompt: 'I will paste some code — help me find and fix the bug.' },
+    { title: 'Brainstorm ideas', sub: 'Get creative options fast', prompt: 'Brainstorm 10 names for a warm, minimal AI chat app.' },
+];
+
+const setEmptyMode = (isEmpty) => {
+    document.body.classList.toggle('chat-empty', isEmpty);
+    dom.emptyWelcome?.classList.toggle('hidden', !isEmpty);
+    dom.emptySuggestions?.classList.toggle('hidden', !isEmpty);
+
+    if (!isEmpty) {
+        if (dom.emptyWelcome) dom.emptyWelcome.innerHTML = '';
+        if (dom.emptySuggestions) dom.emptySuggestions.innerHTML = '';
+        return;
+    }
+    if (!dom.emptySuggestions) return;
+
+    dom.emptySuggestions.innerHTML = `
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            ${SUGGESTIONS.map(sg => `
+                <button class="suggestion-card suggestion-enter text-left p-4 rounded-2xl bg-raised border border-hairline shadow-soft transition-[box-shadow,transform,border-color] duration-base ease-out active:scale-[0.99]" data-prompt="${sg.prompt.replace(/"/g, '&quot;')}">
+                    <span class="block text-sm font-medium text-ink">${sg.title}</span>
+                    <span class="block text-xs text-muted mt-1 leading-relaxed">${sg.sub}</span>
+                </button>`).join('')}
         </div>`;
-    dom.chatHistory.querySelectorAll('.suggestion-card').forEach(card => {
+    dom.emptySuggestions.classList.remove('hidden');
+    dom.emptySuggestions.querySelectorAll('.suggestion-card').forEach(card => {
         card.addEventListener('click', () => { dom.messageInput.value = card.dataset.prompt; dom.messageInput.focus(); });
     });
+};
+
+const renderEmptyState = () => {
+    setEmptyMode(true);
+    dom.chatHistory.innerHTML = ''; // nothing to scroll — the landing lives in the dock
+    // v1.0.6: the greeting renders ABOVE the composer inside the dock, so the
+    // whole new-chat block (greeting · composer · suggestions) centres as one
+    // unit instead of the old full-height block fighting the fixed dock.
+    if (!dom.emptyWelcome) return;
+    dom.emptyWelcome.innerHTML = `
+        <div class="relative flex flex-col items-center justify-center text-center">
+            <div class="empty-glow" aria-hidden="true"></div>
+            <img src="/logo.png" alt="" aria-hidden="true" class="h-12 w-12 rounded-xl mb-4 select-none shadow-soft" draggable="false">
+            <h2 class="font-display text-2xl md:text-3xl leading-tight text-ink mb-2 tracking-tight">How can I help today?</h2>
+            <p class="text-muted text-sm max-w-sm">Pick a suggestion below or type your own prompt.</p>
+        </div>`;
 };
 
 export const renderActiveChat = () => {
@@ -901,6 +888,7 @@ export const renderActiveChat = () => {
     if (!chat.messages || chat.messages.length === 0) {
         renderEmptyState();
     } else {
+        setEmptyMode(false);
         chat.messages.forEach((msg, index) => appendMessage(msg, true, { index }));
     }
     // Update header elements

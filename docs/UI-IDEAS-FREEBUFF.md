@@ -132,7 +132,7 @@
 
 ---
 
-## Status (updated 2026-09-19 · shipped in v1.0.5)
+## Status (updated 2026-09-19 · shipped in v1.0.6)
 
 - ✅ **A1** highlight.js *and* its theme now lazy-load on the first code block;
   the eager head tags are gone (−159 KB on every first visit) and the SW no
@@ -154,14 +154,58 @@
   visible pill stays slim).
 - ✅ **C4** already satisfied before this pass — the chat column is `max-w-3xl`
   (48rem), matching the intended reading measure.
-- ☐ **B2–B7, C3, C5** remain — next slice (see execution order below).
+### v1.0.6 — motion + new-chat landing (shipped)
 
-## Execution order (suggested)
+- ✅ **B2** the stop control wears a coral ring that pulses while a response is
+  streaming. Driven by the button's own `.stop-hidden` state, so no extra JS
+  flag; the ring is static (not animated) under reduced motion. The icon
+  crossfade was folded into the same states instead of adding a second element.
+- ☐ **B3** *send tick — deliberately skipped:* the tick would report a success we
+  don't know about yet (the request may fail a moment later). A false-positive
+  confirmation is worse than no confirmation; revisit only if the send promise
+  resolves before the tick would end.
+- ✅ **B4** chips acknowledge the press (`scale(0.96)`, transform in the 150ms
+  transition), and chip hover now sits behind `@media (hover: hover)` so it
+  cannot stick after a tap on touch.
+- ✅ **B5** the model panel is now `@starting-style` enter-only, matching the ⋮
+  menus. **This also fixed a real bug:** five call sites each scheduled their own
+  `setTimeout(...hidden, 200)`, so open → close → open could leave the panel
+  stuck invisible. All five were replaced by one `openModelPanel` /
+  `closeModelPanel` pair.
+- ✅ **B6** sun/moon cross-fade + rotate via a new `.is-off` state (`display:none`
+  could never animate). Reduced motion keeps the fade, drops the rotation.
+- ✅ **B7** toasts follow the finger 1:1 (pointer capture) and dismiss on either
+  48px or a flick (>0.5 px/ms); a short drag settles back instead of vanishing.
+  Touch/pen only, so a mouse text-selection drag can't fling the toast away.
+  All three dismiss paths (timer, ×, swipe) now route through one `dismissToast`.
+- ✅ **C3** tooltips wait 240ms before appearing, but a repeat hover (sweeping a
+  toolbar) is instant — `[data-tooltip-instant]`, set by one delegated listener.
+  Keyboard focus is never delayed. Hints now read "Send (Enter)" and
+  "Search messages (Alt+/)".
+- ✅ **C5** the mobile drawer follows a horizontal drag and closes on 35% width or
+  a flick. A gesture only claims the touch once it is clearly horizontal, so the
+  chat list still scrolls; `ui.js`'s state machine is untouched (the inline
+  transform is handed back before `closeSidebar()` runs).
 
-1. **v1.0.4 "light & motion":** A1 → A2 → A3 → A4 + B1 + C1 (+ C2/C4 if time).
-   One commit per item, gates green per commit.
-2. **v1.0.5:** B2–B7 motion polish + C3.
-3. **C5 and any new ideas:** owner discussion first.
+### Owner-requested UI pass (v1.0.6, same release)
+
+- ✅ **New-chat landing:** on an empty chat the greeting, composer and four
+  suggestion cards centre together mid-screen (`body.chat-empty`); the composer
+  releases the bottom anchor and lifts by half the mobile-keyboard height, so it
+  can never hide behind the keyboard. Sending restores the normal layout.
+- ✅ **Message-level delete removed for good** — user rows are copy · edit, AI
+  rows are copy · read aloud · regenerate. The stale `.delete-msg-btn` CSS
+  selectors went with it. (Chats are still deletable from the sidebar ⋮ menu.)
+- ✅ **Model panel inline `style` removed** and the composer's `--kb-h` offset
+  moved from an inline style into CSS, so layout states can override it.
+
+## Execution order
+
+1. ~~v1.0.4 "light & motion": A1 → A2 → A3 → A4 + B1 + C1 (+ C2/C4).~~ ✅ shipped
+2. ~~v1.0.5: remaining perf + the two mobile bugs.~~ ✅ shipped
+3. ~~v1.0.6: B2/B4–B7 + C3 + C5 + the owner's new-chat landing and settings pass.~~ ✅ shipped
+4. **Next:** B3 revisit-trigger, the D-polish items in `IMPLEMENT-PLAN.md`, and
+   the optional drawer drag-handle affordance.
 
 ## Rules for every item
 - Token colors only, `--ease-*` motion ≤300ms, reduced-motion respected.

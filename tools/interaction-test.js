@@ -249,6 +249,64 @@ function stubChain(label) {
         await sleep(50);
         check('timestamps toggle change handled', true);
     }
+    // --- v1.0.6: new-chat landing (centred composer + suggestions) -------------
+    {
+        // Drive the real render path: an active chat with zero messages.
+        const chatMod = await import('file://' + path.join(esmDir, 'chat.js'));
+        const { state } = await import('file://' + path.join(esmDir, 'state.js'));
+        const activeChat = state.activeChatId ? state.chats[state.activeChatId] : null;
+        const savedMessages = activeChat ? activeChat.messages : null;
+        if (activeChat) activeChat.messages = [];
+        chatMod.renderActiveChat();
+        await sleep(30);
+
+        check('new chat puts body in empty-chat mode', window.document.body.classList.contains('chat-empty'));
+        const welcome = $('emptyWelcome');
+        check('greeting renders above the composer', welcome && !welcome.classList.contains('hidden')
+            && welcome.textContent.includes('How can I help today?'));
+        const suggestions = $('emptySuggestions');
+        check('suggestions render under the composer', suggestions && !suggestions.classList.contains('hidden'));
+        const cards = suggestions ? suggestions.querySelectorAll('.suggestion-card') : [];
+        check('suggestion cards available', cards.length === 4, cards.length + ' cards');
+        if (cards.length) {
+            click(cards[0]);
+            check('suggestion click fills the composer', $('messageInput').value.length > 0);
+        }
+        const dock = $('composerDock');
+        check('composer dock is no longer bottom-anchored in empty mode',
+            !dock.getAttribute('style') || !dock.getAttribute('style').includes('bottom'));
+
+        // ...and the normal layout returns as soon as the chat has messages.
+        if (activeChat && savedMessages) activeChat.messages = savedMessages;
+        chatMod.renderActiveChat();
+        await sleep(30);
+        check('normal layout returns once messages exist', !window.document.body.classList.contains('chat-empty'));
+    }
+    // --- v1.0.6: model panel opens/closes with no timer race -------------------
+    {
+        click($('modelSelectorBtn'));
+        check('model panel opens synchronously (no setTimeout)', !$('modelSelectorPanel').classList.contains('hidden'));
+        click($('modelSelectorBtn'));
+        check('model panel re-toggle closes synchronously', $('modelSelectorPanel').classList.contains('hidden'));
+    }
+    // --- v1.0.6: theme icons cross-fade (.is-off) instead of display swap -----
+    {
+        const before = $('sunIcon').classList.contains('is-off');
+        check('theme icons use the animatable is-off state', !$('sunIcon').classList.contains('hidden')
+            && !$('moonIcon').classList.contains('hidden'));
+        click($('themeToggle'));
+        await sleep(50);
+        check('theme toggle swaps the icon pair', $('sunIcon').classList.contains('is-off') !== before);
+        click($('themeToggle'));
+        await sleep(50);
+    }
+    // --- v1.0.6: keyboard hints in tooltips (C3) ------------------------------
+    {
+        check('send tooltip names the shortcut', ($('sendBtn').getAttribute('data-tooltip') || '').includes('Enter'));
+        check('search tooltip names the shortcut', ($('searchToggleBtn').getAttribute('data-tooltip') || '').includes('Alt+/'));
+        check('message rows offer no delete affordance',
+            !window.document.querySelector('.delete-msg-btn'));
+    }
     // toast: shows, dismiss button hides (roadmap #4 polish)
     {
         const { showToast } = await import('file://' + path.join(esmDir, 'utils.js'));

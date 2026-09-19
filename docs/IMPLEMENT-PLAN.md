@@ -163,6 +163,17 @@ Status legend: ☐ planned · ◐ in progress · ✅ done · ❌ rejected
 > E3 palette commands, SW cache v23. Gates: check ✅ lint 0 errors ✅ npm test ✅
 > (9 new interaction assertions incl. per-model chip gating) CSS rebuilt ✅.
 
+> **Session 2026-09-19 (v1.0.4–v1.0.6):** owner-reported bug pass (send+stop both
+> visible — `.stop-hidden` was never defined in CSS; search panel had no exit on
+> mobile; title moved to the sidebar; header carries the logo; settings rows
+> un-cramped + a real dark-mode switch), then the *ideas file* backlog: v1.0.5 =
+> A1–A4 + B1 + C1/C2/C4 (highlight.js −159KB, Inter dropped, content-visibility,
+> transition-all cleanup, View-Transitions theme flip, keyboard-safe jump pill,
+> 44px chips); v1.0.6 = B2/B4–B7 + C3 + C5 + the owner's new-chat landing
+> (centred composer + suggestion cards), message-level delete removed for good,
+> and the B5 model-panel refactor that fixed a five-way `setTimeout` race.
+> Full status: `docs/UI-IDEAS-FREEBUFF.md`. Gates green each release.
+
 | Item | Target version | Status | Evidence / commit |
 |------|---------------|--------|-------------------|
 | A1 no auto-scroll | 1.0.2 | ✅ | v1.0.3 — single scroll on send (`chat.js`), no in-stream scroll |
@@ -179,7 +190,8 @@ Status legend: ☐ planned · ◐ in progress · ✅ done · ❌ rejected
 | E2 regenerate 💰 | 1.0.7 | ✅ | v1.0.3 — `regenerateLastResponse()`, one AI call per use |
 | E3 palette additions | 1.0.6 | ✅ | v1.0.3 — web search / thinking / jump-to-latest commands |
 | E4 message search mobile placement | 1.0.6 | ✅ | v1.0.3 — drawer Search opens the panel |
-| B5 model capability badge | 1.0.6 | ☐ | |
-| C2 desktop header rhythm | 1.0.4 | ☐ | |
-| D1-D6 polish pass | 1.0.4 | ☐ | |
+| B5 model capability badge | 1.0.6 | ☐ | chips self-disable per model, badge still open |
+| C2 desktop header rhythm | 1.0.4 | ◐ | v1.0.4 — logo + title/actions rebalanced; fine-tune with D-pass |
+| D1-D6 polish pass | 1.0.9 | ☐ | D1 measure already satisfied (`max-w-3xl` = 48rem) |
+| UI ideas backlog (A/B/C) | 1.0.6 | ✅ | see `docs/UI-IDEAS-FREEBUFF.md` status section (B3 parked) |
 
