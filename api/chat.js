@@ -1,7 +1,7 @@
 import admin from 'firebase-admin';
 import chatSecurity from '../lib/chat-security.js';
 
-const { validateChatRequest, verifyUserEmailStatus, MemoryRateLimiter, identityKey, clientIp, upstreamTimeout, sseError, logProviderError } = chatSecurity;
+const { validateChatRequest, verifyUserEmailStatus, MemoryRateLimiter, identityKey, clientIp, upstreamTimeout, sseError, providerStatusError, logProviderError } = chatSecurity;
 
 // --- Firebase Admin SDK Initialization (runs once per cold start) ---
 if (!admin.apps.length) {
@@ -99,8 +99,8 @@ export default async function handler(req, res) {
                 body: JSON.stringify(requestBody)
             });
             if (!response.ok) {
-                logProviderError('google', response.status, await response.text());
-                throw new Error('The AI provider returned an error. Please try again.');
+                providerStatusError(res, 'google', response.status);
+                return;
             }
             const fullData = await response.json();
             const fullText = fullData.candidates?.[0]?.content?.parts?.[0]?.text || "";
@@ -123,8 +123,8 @@ export default async function handler(req, res) {
                 body: JSON.stringify({ model: providerModel, messages: cleanedMessages, stream: true })
             });
             if (!response.ok) {
-                logProviderError(isGroq ? 'groq' : 'nvidia', response.status, await response.text());
-                throw new Error('The AI provider returned an error. Please try again.');
+                providerStatusError(res, isGroq ? 'groq' : 'nvidia', response.status);
+                return;
             }
             for await (const chunk of response.body) { res.write(chunk); }
         } else { // OpenRouter
@@ -141,18 +141,22 @@ export default async function handler(req, res) {
                 body: JSON.stringify({ model: useWebSearch ? `${model}:online` : model, messages: cleanedMessages, stream: true })
             });
             if (!response.ok) {
-                logProviderError('openrouter', response.status, await response.text());
-                throw new Error('The AI provider returned an error. Please try again.');
+                providerStatusError(res, 'openrouter', response.status);
+                return;
             }
             for await (const chunk of response.body) { res.write(chunk); }
         }
     } catch (error) {
         if (error && (error.name === 'AbortError' || error.code === 'ABORT_ERR')) {
             logProviderError('stream', 'timeout', 'upstream exceeded time budget');
-            sseError(res, 'The AI provider took too long to respond. Please try again.');
+            sseError(res, 'The AI provider took too long to respond. Please try again.', 'timeout');
+        } else if (error && /_API_KEY not configured/.test(error.message || '')) {
+            const envVar = (error.message.match(/([A-Z_]+)_API_KEY/) || [])[1] || 'PROVIDER';
+            logProviderError('config', 'missing', envVar + '_API_KEY');
+            sseError(res, `AI provider not configured: ${envVar}_API_KEY is missing on the server (add it in Vercel → Settings → Environment Variables, then redeploy).`, 'config_missing');
         } else {
             console.error('[chat] stream error');
-            sseError(res, 'Something went wrong while generating a response. Please try again.');
+            sseError(res, 'Something went wrong while generating a response. Please try again.', 'server_error');
         }
     } finally {
         if (!res.writableEnded) {

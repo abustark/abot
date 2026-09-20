@@ -323,7 +323,9 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
     } else {
                         const uniqueId = `bot-msg-${Date.now()}`;
         if (isHistory) {
-                            messageContent = `<span id="${uniqueId}">${renderSafeMarkdown(text)}</span>`;
+                            messageContent = message.isError
+                                ? `<div class="text-sm leading-6 text-danger" role="alert">⚠️ ${text.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`
+                                : `<span id="${uniqueId}">${renderSafeMarkdown(text)}</span>`;
         } else {
             let indicatorHtml = '<div class="typing-indicator"><span></span><span></span><span></span></div>';
             if (options.isGoogle) {
@@ -560,6 +562,7 @@ export const sendMessage = async () => {
     if (!currentChat) return;
 
     let fullReply = "";
+    let streamFailed = false; // v2.0.13: an SSE/provider error occurred — skip title-gen, persist the error
 
     stopSpeaking(); // any ongoing narration ends when a new message is sent
     state.abortController = new AbortController(); // Create a new controller for this request
@@ -689,17 +692,22 @@ export const sendMessage = async () => {
                 buffer = buffer.substring(endOfChunk + 2);
 
                 if (chunk.startsWith('event: error')) {
+                    // v2.0.13: persist the error as a real assistant message.
+                    // It used to be DOM-only, and the title-generation rename in
+                    // the finally block re-rendered the chat ~2s later — wiping
+                    // the error (the "error vanishes" bug).
                     const dataLine = chunk.split('\n').find(l => l.startsWith('data: '));
-                    if (dataLine) {
-                        const jsonStr = dataLine.substring(6);
-                        try {
-                            const errorPayload = JSON.parse(jsonStr);
-                            const friendlyError = (errorPayload.message && errorPayload.message.includes("429"))
-                                                ? `<strong>Rate Limit Exceeded:</strong> The AI provider is busy. Please wait a moment and try again.`
-                                                : `<strong>Server Error:</strong> ${errorPayload.message}`;
-                            latestBotMessageSpan.innerHTML = friendlyError;
-                                        } catch { latestBotMessageSpan.innerHTML = `<strong>An unreadable error occurred.</strong>`; }
-                    }
+                    let errMsg = 'Something went wrong while generating a response. Please try again.';
+                    try {
+                        const errorPayload = dataLine ? JSON.parse(dataLine.substring(6)) : {};
+                        errMsg = errorPayload.message || errMsg;
+                        console.error('[ABot] stream error:', errorPayload.code || 'unknown', '-', errMsg);
+                    } catch { }
+                    streamFailed = true;
+                    const now = currentChat.messages.length;
+                    const errorMsg = { role: 'assistant', content: errMsg, model: currentChat.model, isError: true };
+                    currentChat.messages.push(errorMsg);
+                    appendMessage(errorMsg, false, { index: now });
                     return;
                 }
 
@@ -770,7 +778,10 @@ export const sendMessage = async () => {
             currentChat.messages.push({ role: 'assistant', content: stoppedMessage, model: currentChat.model });
         } else {
             console.error("sendMessage stream error:", error);
-            latestBotMessageSpan.innerHTML = `<strong>Error:</strong> ${sanitizeHtml(error.message || "Could not get response from the server.")}`;
+            streamFailed = true;
+            const netErrMsg = { role: 'assistant', content: 'Connection error: ' + (error.message || 'could not reach the server.'), model: currentChat.model, isError: true };
+            currentChat.messages.push(netErrMsg);
+            appendMessage(netErrMsg, false, { index: currentChat.messages.length - 1 });
         }
     }
     finally {
@@ -802,7 +813,9 @@ export const sendMessage = async () => {
         dom.modelSelectorBtn.classList.remove('opacity-50', 'cursor-not-allowed');
 
         // 3. Generate the title if it was the first message.
-        if (isFirstUserMessage) {
+        // v2.0.13: not after a failed stream — a failed first message keeps
+        // "New Chat" (the retry via regenerate will title it on success).
+        if (isFirstUserMessage && !streamFailed) {
             try {
                                 const conversationForTitle = currentChat.messages.slice(1, 3).map(m => `${m.role}: ${m.content}`).join('\n');
                                 const titlePrompt = `Based on this conversation, create a concise, 5-word-or-less title. Do not use quotation marks.\n\n---\n${conversationForTitle}`;

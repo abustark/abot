@@ -8,6 +8,14 @@ This document tracks every commit made on `main` following the `2.0.x` versionin
 
 ## Commit History
 
+### 2.0.13 - actionable stream errors + fix vanishing error message
+- **Date**: 2026-08-30
+- **Changes**:
+  - **Vanish fix (owner-reported)**: stream errors were rendered DOM-only inside the bot message span; the `finally` block's title-generation (Gemini — a working provider) renamed the chat and re-rendered it ~2s later, wiping the error. Errors are now persisted as real assistant messages (`isError: true`), rendered as danger cards (`role=alert`), and survive re-renders + sync. Title generation is skipped after a failed stream.
+  - **Actionable errors**: `sseError()` gained a machine `code`; backend maps upstream status → specific messages: 401/403 auth_failed, 404 model_unavailable ("free catalogs rotate"), 429 rate_limited, missing env var → config_missing naming the exact variable. No secrets leaked.
+  - Applied to both backends via shared `providerStatusError()`. Frontend logs `[ABot] stream error: <code>`.
+  - Root-cause note for "all :free fail except Groq GPT-OSS": Groq routes direct; :free routes through OpenRouter — top suspect is missing/expired OPENROUTER_API_KEY on Vercel (config_missing now says so) or free-tier 429s.
+
 ### 2.0.12 - add Qwen3.8 27B + GLM 5.2 (free variants, owner-requested)
 - **Date**: 2026-08-30
 - **Changes**:
