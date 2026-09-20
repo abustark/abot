@@ -59,6 +59,8 @@ export const PROVIDER_COLORS = {
     cognitivecomputations:{ dot: 'bg-provider-openrouter', text: 'text-provider-openrouter', label: 'OpenRouter · Venice' },
     // 2026 :free roster orgs (publisher prefix on OpenRouter)
     openai:               { dot: 'bg-provider-openrouter', text: 'text-provider-openrouter', label: 'OpenRouter · OpenAI' },
+    inclusionai:          { dot: 'bg-provider-openrouter', text: 'text-provider-openrouter', label: 'OpenRouter · inclusionAI' },
+    thinkingmachines:     { dot: 'bg-provider-openrouter', text: 'text-provider-openrouter', label: 'OpenRouter · Thinking Machines' },
     'meta-llama':         { dot: 'bg-provider-openrouter', text: 'text-provider-openrouter', label: 'OpenRouter · Meta' },
     poolside:             { dot: 'bg-provider-openrouter', text: 'text-provider-openrouter', label: 'OpenRouter · Poolside' },
     cohere:               { dot: 'bg-provider-openrouter', text: 'text-provider-openrouter', label: 'OpenRouter · Cohere' },
@@ -107,7 +109,11 @@ export const MODEL_CONFIG = {
     'meta-llama/llama-3.3-70b-instruct:free': { name: 'Llama 3.3 70B', color: 'openrouter-free' },
     'google/gemma-4-31b-it:free': { name: 'Gemma 4 31B', color: 'openrouter-free' },
     'nvidia/nemotron-3-ultra-550b-a55b:free': { name: 'Nemotron 3 Ultra', color: 'openrouter-free' },
-    'poolside/laguna-m.1:free': { name: 'Poolside Laguna', color: 'openrouter-free' },
+    // Live-site refresh 2026-08-30 (openrouter.ai/models?q=free+):
+    'poolside/laguna-s-2.1:free': { name: 'Poolside Laguna S 2.1', color: 'openrouter-free' },
+    'thinkingmachines/inkling:free': { name: 'Inkling 975B', color: 'openrouter-free' },
+    'nvidia/nemotron-3.5-lightning:free': { name: 'Nemotron 3.5 Lightning', color: 'openrouter-free' },
+    'inclusionai/ling-3.0-flash-vl:free': { name: 'Ling 3.0 Flash VL', color: 'openrouter-free' },
 };
 
 // =================================================================================

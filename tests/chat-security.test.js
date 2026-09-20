@@ -11,6 +11,15 @@ const V = sec.validateChatRequest;
 let r = V({ model: 'groq/llama-3.1-8b-instant', messages: [{ role: 'user', content: 'hi' }] });
 assert(r.ok && r.cleanedMessages.length === 1, 'valid request passes');
 
+// OpenRouter :free tier — colons allowed, org prefixes validated (v2.0.10/11)
+assert(V({ model: 'qwen/qwen3-coder:free', messages: [{ role: 'user', content: 'a' }] }).ok, ':free suffix passes validation');
+assert(V({ model: 'openai/gpt-oss-120b:free', messages: [{ role: 'user', content: 'a' }] }).ok, 'openai org :free accepted');
+assert(V({ model: 'poolside/laguna-s-2.1:free', messages: [{ role: 'user', content: 'a' }] }).ok, 'poolside S 2.1 accepted');
+assert(V({ model: 'thinkingmachines/inkling:free', messages: [{ role: 'user', content: 'a' }] }).ok, 'thinkingmachines accepted');
+assert(V({ model: 'inclusionai/ling-3.0-flash-vl:free', messages: [{ role: 'user', content: 'a' }] }).ok, 'inclusionai accepted');
+assert(!V({ model: 'google/../gemma:free', messages: [{ role: 'user', content: 'a' }] }).ok, 'traversal still blocked with :free');
+assert(!V({ model: 'groq/m:free;rm-rf', messages: [{ role: 'user', content: 'a' }] }).ok, 'semicolon still blocked with :free');
+assert(!V({ model: 'evilcorp/agent:free', messages: [{ role: 'user', content: 'a' }] }).ok, 'unknown org :free rejected');
 assert(!V({ model: 'evil/x', messages: [{ role: 'user', content: 'a' }] }).ok, 'disallowed provider rejected');
 assert(!V({ model: 'groq/x; rm -rf', messages: [{ role: 'user', content: 'a' }] }).ok, 'shell metachars rejected');
 assert(!V({ model: 'google/../secret', messages: [{ role: 'user', content: 'a' }] }).ok, 'path traversal rejected');
