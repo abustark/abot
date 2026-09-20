@@ -198,16 +198,21 @@ app.post('/api/chat', checkAuth, async (req, res) => {
     res.setHeader('Connection', 'keep-alive');
     res.flushHeaders();
 
-    const isGoogle = model.startsWith('google/');
-    const isGroq = model.startsWith('groq/');
-    const isNvidia = model.startsWith('nvidia/');
+    // ':free' models ALWAYS route to OpenRouter — the org prefix (openai/,
+    // google/, nvidia/, meta-llama/…) is the upstream publisher on OpenRouter,
+    // not a direct-provider routing key.
+    const isOpenRouterFree = model.endsWith(':free');
+    const isGoogle = !isOpenRouterFree && model.startsWith('google/');
+    const isGroq = !isOpenRouterFree && model.startsWith('groq/');
+    const isNvidia = !isOpenRouterFree && model.startsWith('nvidia/');
 
     // Per-message composer options (v1.0.3 B3/B4). Free-tier rule: these are
     // applied ONLY when the user explicitly toggled a chip — never always-on.
     // OpenRouter models take the `:online` suffix; Gemini takes google_search
     // grounding / thinkingConfig; Groq/NVIDIA offer neither (chips are disabled
     // client-side and ignored here), so the flags stay false for them.
-    const useWebSearch = !!chatOptions.webSearch && !isGroq && !isNvidia;
+    // ':online' cannot stack on ':free' — web search is a paid-model feature.
+    const useWebSearch = !!chatOptions.webSearch && !isGroq && !isNvidia && !isOpenRouterFree;
 
     try {
         if (isGoogle) {

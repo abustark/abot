@@ -57,11 +57,21 @@ export const PROVIDER_COLORS = {
     qwen:                 { dot: 'bg-provider-openrouter', text: 'text-provider-openrouter', label: 'OpenRouter · Qwen' },
     'z-ai':               { dot: 'bg-provider-openrouter', text: 'text-provider-openrouter', label: 'OpenRouter · GLM' },
     cognitivecomputations:{ dot: 'bg-provider-openrouter', text: 'text-provider-openrouter', label: 'OpenRouter · Venice' },
+    // 2026 :free roster orgs (publisher prefix on OpenRouter)
+    openai:               { dot: 'bg-provider-openrouter', text: 'text-provider-openrouter', label: 'OpenRouter · OpenAI' },
+    'meta-llama':         { dot: 'bg-provider-openrouter', text: 'text-provider-openrouter', label: 'OpenRouter · Meta' },
+    poolside:             { dot: 'bg-provider-openrouter', text: 'text-provider-openrouter', label: 'OpenRouter · Poolside' },
+    cohere:               { dot: 'bg-provider-openrouter', text: 'text-provider-openrouter', label: 'OpenRouter · Cohere' },
+    nousresearch:         { dot: 'bg-provider-openrouter', text: 'text-provider-openrouter', label: 'OpenRouter · Nous' },
 };
 
 export const getProviderColor = (model) => {
-    const provider = String(model || '').split('/')[0].toLowerCase();
-    return PROVIDER_COLORS[provider] || { dot: 'bg-coral', text: 'text-coral', label: 'ABot' };
+    const m = String(model || '');
+    // ':free' is OpenRouter's signature — identity beats the org prefix
+    // (openai/gemma/nvidia on OpenRouter still show OpenRouter yellow).
+    if (m.endsWith(':free')) return PROVIDER_COLORS.openrouter;
+    const provider = m.split('/')[0].toLowerCase();
+    return PROVIDER_COLORS[provider] || { dot: 'bg-provider-openrouter', text: 'text-provider-openrouter', label: 'OpenRouter' };
 };
 
 export const MODEL_CONFIG = {
@@ -86,11 +96,18 @@ export const MODEL_CONFIG = {
     'nvidia/deepseek-ai/deepseek-r1-0528': { name: 'DeepSeek R1', color: 'nvidia-green' },
     'nvidia/qwen/qwen2.5-coder-32b-instruct': { name: 'Qwen 2.5 Coder', color: 'nvidia-green' },
 
-    // --- OPENROUTER ---
-    'deepseek/deepseek-chat-v3-0324:free': { name: 'DeepSeek V3', color: 'deepseek-v3' },
-    'qwen/qwen3-coder:free': { name: 'Qwen 3 Coder', color: 'qwen-32b' },
-    'z-ai/glm-4.5-air:free': { name: 'GLM 4.5', color: 'llama-blue' },
-    'cognitivecomputations/dolphin-mistral-24b-venice-edition:free': { name: 'Venice AI', color: 'mistral-orange' },
+    // --- OPENROUTER (:free tier — refreshed 2026-08-30 against OpenRouter's
+    // current roster; deepseek-chat-v3-0324:free (provider paywalled) and
+    // dolphin-mistral-24b-venice (delisted) were REMOVED as deprecated.
+    // The :free catalog rotates — re-check openrouter.ai/models quarterly.) ---
+    'qwen/qwen3-coder:free': { name: 'Qwen 3 Coder', color: 'openrouter-free' },
+    'z-ai/glm-4.5-air:free': { name: 'GLM 4.5 Air', color: 'openrouter-free' },
+    'openai/gpt-oss-120b:free': { name: 'GPT-OSS 120B', color: 'openrouter-free' },
+    'openai/gpt-oss-20b:free': { name: 'GPT-OSS 20B', color: 'openrouter-free' },
+    'meta-llama/llama-3.3-70b-instruct:free': { name: 'Llama 3.3 70B', color: 'openrouter-free' },
+    'google/gemma-4-31b-it:free': { name: 'Gemma 4 31B', color: 'openrouter-free' },
+    'nvidia/nemotron-3-ultra-550b-a55b:free': { name: 'Nemotron 3 Ultra', color: 'openrouter-free' },
+    'poolside/laguna-m.1:free': { name: 'Poolside Laguna', color: 'openrouter-free' },
 };
 
 // =================================================================================
@@ -111,7 +128,7 @@ const THINKING_MODELS = new Set(['google/gemini-2.5-pro']);
 export const modelCapabilities = (model) => {
     const m = String(model || '');
     return {
-        webSearch: !m.startsWith('groq/') && !m.startsWith('nvidia/'),
+        webSearch: !m.startsWith('groq/') && !m.startsWith('nvidia/') && !m.endsWith(':free'),
         thinking: THINKING_MODELS.has(m),
         alwaysThinks: /deepseek-r1/.test(m),
     };

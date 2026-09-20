@@ -3,7 +3,7 @@
  * Provides offline caching for local assets only
  */
 
-const CACHE_NAME = 'abot-cache-v27'; // v27: CSS-only auth aurora, account menu, css v=p13
+const CACHE_NAME = 'abot-cache-v28'; // v27: CSS-only auth aurora, account menu, css v=p13
 const STATIC_ASSETS = [
     '/',
     '/index.html',
