@@ -114,6 +114,9 @@ export const MODEL_CONFIG = {
     'thinkingmachines/inkling:free': { name: 'Inkling 975B', color: 'openrouter-free' },
     'nvidia/nemotron-3.5-lightning:free': { name: 'Nemotron 3.5 Lightning', color: 'openrouter-free' },
     'inclusionai/ling-3.0-flash-vl:free': { name: 'Ling 3.0 Flash VL', color: 'openrouter-free' },
+    // Owner-requested adds (verified on model pages 2026-08-30):
+    'qwen/qwen3.8-27b:free': { name: 'Qwen 3.8 27B', color: 'openrouter-free' }, // 262K ctx, vision-language, flexible thinking
+    'z-ai/glm-5.2:free': { name: 'GLM 5.2', color: 'openrouter-free' }, // NOTE: free variant is 33K ctx (1M is paid)
 };
 
 // =================================================================================

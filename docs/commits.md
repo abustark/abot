@@ -8,6 +8,17 @@ This document tracks every commit made on `main` following the `2.0.x` versionin
 
 ## Commit History
 
+### 2.0.12 - add Qwen3.8 27B + GLM 5.2 (free variants, owner-requested)
+- **Date**: 2026-08-30
+- **Changes**:
+  - Verified each on OpenRouter model pages (not just search results):
+    - **`qwen/qwen3.8-27b:free`** — 262K ctx, dense vision-language, coding + flexible thinking. ADDED.
+    - **`z-ai/glm-5.2:free`** — exists as a free variant but with only **33K context** (the 1M-ctx GLM 5.2 is paid $0.55/$1.74). ADDED with a context caveat comment.
+    - `google/gemma-4-31b-it:free` — owner asked about "Gemma 4 27B"; the actual free model is 31B and already in the catalog (verified: Price Free, hosted by Google AI Studio).
+    - `z-ai/glm-4.5-air:free` — verified still free/alive ("Price: Free", 131K ctx).
+  - Fixed a self-introduced typo where the ling-3.0-flash-vl entry lost its `:free` suffix during editing (caught by post-edit grep before push).
+  - Final OpenRouter :free count: 13. SW bumped.
+
 ### 2.0.11 - live-site OpenRouter :free refresh (openrouter.ai/models)
 - **Date**: 2026-08-30
 - **Changes**:
