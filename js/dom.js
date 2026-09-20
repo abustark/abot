@@ -72,9 +72,7 @@ export const dom = {
     guestLimitCancelBtn: document.getElementById('guestLimitCancelBtn'),
     appHeader: document.getElementById('appHeader'),
     composerDock: document.getElementById('composerDock'),
-    toastNotification: document.getElementById('toast-notification'),
-    toastIcon: document.getElementById('toast-icon'),
-    toastMessage: document.getElementById('toast-message'),
+    toastStack: document.getElementById('toast-stack'),
     appLoader: document.getElementById('app-loader'),
 };
 
@@ -93,7 +91,6 @@ dom.profileMenuBtn = document.getElementById('profileMenuBtn');
 dom.profileMenu = document.getElementById('profileMenu');
 dom.timestampsToggle = document.getElementById('timestampsToggle');
 dom.ttsToggle = document.getElementById('ttsToggle');
-dom.toastCloseBtn = document.getElementById('toastCloseBtn');
 dom.webSearchChip = document.getElementById('webSearchChip');
 dom.thinkingChip = document.getElementById('thinkingChip');
 dom.jumpToLatest = document.getElementById('jumpToLatest');

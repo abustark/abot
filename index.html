@@ -26,7 +26,7 @@
     <link rel="preload" href="/dist/fonts/geist-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/dist/fonts/geist-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/dist/fonts/source-serif-4-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link href="./dist/output.css?v=p14" rel="stylesheet">
+    <link href="./dist/output.css?v=p15" rel="stylesheet">
     <script src="/vendor/marked.min.js" defer></script>
     <!-- A1 (v1.0.5): highlight.js + its theme are lazy-loaded on the first code
          block (js/chat.js) — they were head-linked here, costing every visitor
@@ -640,7 +640,7 @@
             </div>
         </div>
 
-        <div id="promptModal" class="fixed inset-0 z-30 flex items-center justify-center hidden">
+        <div id="promptModal" role="dialog" aria-modal="true" aria-label="Prompt library" class="fixed inset-0 z-30 flex items-center justify-center hidden">
             <div id="promptOverlay" class="absolute inset-0 bg-ink/30 backdrop-blur-[2px]"></div>
             <div id="promptPanel"
                 class="modal-transition relative bg-canvas dark:bg-card rounded-2xl shadow-lift border border-hairline w-full max-w-lg mx-4 p-6"
@@ -673,7 +673,7 @@
         <input type="file" id="importFileInput" class="hidden" accept="application/json">
 
         <!-- Guest User Limit Modal -->
-        <div id="guestLimitModal"
+        <div id="guestLimitModal" role="dialog" aria-modal="true" aria-labelledby="guest-modal-title"
             class="fixed inset-0 z-30 flex items-center justify-center bg-ink/60 hidden"
             aria-labelledby="guest-modal-title" role="dialog" aria-modal="true">
             <div id="guestLimitOverlay" class="absolute inset-0"></div>
@@ -729,7 +729,7 @@
 
         <!-- NEW Code to Add -->
         <!-- Delete Confirmation Modal -->
-        <div id="deleteModal" class="fixed inset-0 z-30 flex items-center justify-center bg-ink/60 hidden"
+        <div id="deleteModal" role="dialog" aria-modal="true" aria-labelledby="modal-title" class="fixed inset-0 z-30 flex items-center justify-center bg-ink/60 hidden"
             aria-labelledby="modal-title" role="dialog" aria-modal="true">
             <div id="deleteOverlay" class="absolute inset-0"></div>
             <div id="deletePanel"
@@ -754,19 +754,9 @@
             </div>
         </div>
 
-        <!-- Toast Notification -->
-        <div id="toast-notification"
-            role="status" aria-live="polite" class="fixed top-5 right-5 z-50 flex items-center w-full max-w-xs p-3.5 text-body bg-canvas dark:bg-card rounded-xl shadow-lift border border-hairline hidden transition-transform duration-200 ease-out will-change-transform"
-            style="transform: translateX(150%); transition: transform 0.4s var(--ease-out);">
-            <div id="toast-icon" class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg">
-                <!-- Icon will be dynamically inserted here -->
-            </div>
-            <div id="toast-message" class="ml-3 text-sm font-normal flex-1">Message goes here.</div>
-            <button id="toastCloseBtn" aria-label="Dismiss notification"
-                class="ml-1 p-1.5 rounded-md text-muted hover:text-ink transition-colors flex-shrink-0">
-                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-            </button>
-        </div>
+        <!-- Toast stack (v2.0.9): multiple toasts, newest on top -->
+        <div id="toast-stack" role="region" aria-live="polite" aria-label="Notifications"
+            class="fixed top-5 right-5 z-[70] flex flex-col items-end gap-2 w-full max-w-xs pointer-events-none"></div>
 
 
         <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js" defer></script>

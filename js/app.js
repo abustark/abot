@@ -314,6 +314,22 @@ function initApp() {
 
 
 
+    // Typeahead (v2.0.9 roadmap #5): typing letters jumps panel focus to the
+    // first matching model name. Buffer resets after 600ms of inactivity.
+    let typeaheadBuf = '';
+    let typeaheadTimer = null;
+    dom.modelSelectorPanel.addEventListener('keydown', (e) => {
+        if (e.ctrlKey || e.metaKey || e.altKey) return;
+        if (e.key.length !== 1 || !/\S/.test(e.key)) return;
+        e.preventDefault();
+        typeaheadBuf = (typeaheadBuf + e.key).toLowerCase();
+        clearTimeout(typeaheadTimer);
+        typeaheadTimer = setTimeout(() => { typeaheadBuf = ''; }, 600);
+        const match = Array.from(dom.modelSelectorPanel.querySelectorAll('button'))
+            .find((btn) => (btn.textContent || '').trim().toLowerCase().startsWith(typeaheadBuf));
+        if (match) match.focus();
+    });
+
     dom.modelSelectorBtn.addEventListener('click', e => {
         e.stopPropagation();
         if (dom.modelSelectorPanel.classList.contains('hidden')) openModelPanel();
@@ -740,23 +756,31 @@ function initApp() {
     observeModal(dom.guestLimitModal);
     observeModal(dom.promptModal);
 
-    // Focus-trap for the delete/sign-out dialog (Tab cycles its two buttons)
-    dom.deleteModal.addEventListener('keydown', (e) => {
-        if (e.key !== 'Tab') return;
-        const cancel = dom.deleteModal.querySelector('#deleteCancelBtn');
-        const confirm = dom.deleteModal.querySelector('#deleteConfirmBtn');
-        const items = [cancel, confirm].filter(Boolean);
-        if (!items.length) return;
-        const first = items[0];
-        const last = items[items.length - 1];
-        if (e.shiftKey && document.activeElement === first) {
-            e.preventDefault(); last.focus();
-        } else if (!e.shiftKey && document.activeElement === last) {
-            e.preventDefault(); first.focus();
-        } else if (!items.includes(document.activeElement)) {
-            e.preventDefault(); first.focus();
-        }
-    });
+    // Focus-trap for every dialog (v2.0.9): Tab cycles ALL focusable
+    // descendants — no more hardcoded two-button traps.
+    const FOCUSABLE = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+    const trapFocus = (modalEl) => {
+        if (!modalEl) return;
+        modalEl.addEventListener('keydown', (e) => {
+            if (e.key !== 'Tab') return;
+            // NOTE: offsetParent is null inside position:fixed containers
+            // (all our dialogs) — visibility is judged by the .hidden class
+            // instead, which is how dialogs are shown/hidden throughout.
+            const items = Array.from(modalEl.querySelectorAll(FOCUSABLE))
+                .filter((el) => !el.disabled && !el.closest('.hidden'));
+            if (!items.length) return;
+            const first = items[0];
+            const last = items[items.length - 1];
+            if (e.shiftKey && (document.activeElement === first || !modalEl.contains(document.activeElement))) {
+                e.preventDefault(); last.focus();
+            } else if (!e.shiftKey && (document.activeElement === last || !modalEl.contains(document.activeElement))) {
+                e.preventDefault(); first.focus();
+            }
+        });
+    };
+    trapFocus(dom.deleteModal);
+    trapFocus(dom.guestLimitModal);
+    trapFocus(dom.promptModal);
 
     // --- Delete Modal Listeners ---
     const closeDeleteModal = () => {

@@ -96,6 +96,15 @@ export const handleAuthError = (error) => {
             break;
     }
     setAuthMessage(message);
+    // v2.0.9 roadmap #3: mark the visible form's inputs invalid; any typing
+    // clears the state (delegated listener below).
+    const visibleView = ['login-view', 'signup-view', 'forgot-password-view']
+        .map((id) => document.getElementById(id))
+        .find((v) => v && !v.classList.contains('hidden') && v.style.display !== 'none');
+    if (visibleView) {
+        visibleView.querySelectorAll('input').forEach((inp) => inp.classList.add('input-error'));
+    }
+
 };
 
 export const signInAsGuest = () => {
@@ -373,6 +382,11 @@ const enterApp = async (user) => {
         await createNewChat();
     }
 };
+
+// v2.0.9 roadmap #3: typing clears validation styling; successful sends mark green.
+dom.authSection?.addEventListener('input', (e) => {
+    if (e.target.classList) e.target.classList.remove('input-error', 'input-success');
+});
 
 state.auth.onAuthStateChanged(async (user) => {
     if (user && state.isAppInitialized) return;

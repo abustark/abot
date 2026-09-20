@@ -1004,3 +1004,44 @@ html.dark .logo-mark { filter: brightness(0) invert(1); }
     /* Windows high-contrast overrides colors wholesale — let it win. */
     .logo-mark { filter: none; }
 }
+
+/* ---------------------------------------------------------------------------
+   Toast stack (v2.0.9) — Sonner-style: stacked cards, entrance via
+   @starting-style, exit via .toast-out. Individual toasts re-enable pointer
+   events (the container is pass-through).
+--------------------------------------------------------------------------- */
+.abot-toast {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: calc(100vw - 2.5rem);
+    padding: 0.875rem;
+    color: rgb(var(--c-body));
+    background-color: rgb(var(--c-canvas));
+    border: 1px solid rgb(var(--c-hairline));
+    border-radius: 0.75rem;
+    box-shadow: 0 8px 24px rgb(var(--c-ink) / 0.14);
+    transition: transform 220ms var(--ease-out), opacity 200ms var(--ease-out);
+}
+.dark .abot-toast { background-color: rgb(var(--c-card)); }
+@starting-style {
+    .abot-toast { opacity: 0; transform: translateX(120%); }
+}
+.abot-toast.toast-out { opacity: 0; transform: translateX(120%); }
+.toast-icon { border-radius: 0.5rem; }
+.toast-spinner {
+    display: inline-block;
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 2px solid rgb(var(--c-hairline));
+    border-top-color: rgb(var(--c-coral));
+    border-radius: 9999px;
+    animation: toast-spin 0.8s linear infinite;
+}
+@keyframes toast-spin { to { transform: rotate(360deg); } }
+
+/* Input validation states (v2.0.9 roadmap #3) */
+.input-error { border-color: rgb(var(--c-danger)) !important; }
+.input-error:focus { --tw-ring-color: rgb(var(--c-danger) / 0.4); }
+.input-success { border-color: rgb(var(--c-ok)) !important; }
+.input-success:focus { --tw-ring-color: rgb(var(--c-ok) / 0.4); }

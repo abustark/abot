@@ -11,78 +11,115 @@
 import { dom } from './dom.js';
 import { state } from './state.js';
 
-// Single owner of "take the toast away" — the auto-dismiss timer, the × button
-// and the swipe gesture all route through here so they cannot fight (the old
-// code cleared the timer in one place and not the other).
-const dismissToast = () => {
-    clearTimeout(state.toastTimeout);
-    dom.toastNotification.style.transition = 'transform 220ms var(--ease-out)';
-    dom.toastNotification.style.transform = 'translateX(150%)';
+// ---------------------------------------------------------------------------
+// Toasts (v2.0.9): Sonner-style stack — multiple toasts, promise states,
+// per-toast swipe-to-dismiss + close button. showToast() API unchanged.
+// ---------------------------------------------------------------------------
+const TOAST_ICONS = {
+    success: '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>',
+    error: '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.607a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>',
+    loading: '<span class="toast-spinner" aria-hidden="true"></span>',
+};
+const TOAST_LIMIT = 3;
+const toastTimers = new WeakMap();
+
+const setToastType = (el, type) => {
+    const icon = el.querySelector('.toast-icon');
+    icon.className = 'toast-icon inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg '
+        + (type === 'error' ? 'text-danger' : type === 'loading' ? 'text-muted' : 'text-ok');
+    icon.innerHTML = TOAST_ICONS[type] || TOAST_ICONS.success;
+};
+
+const dismissToast = (el) => {
+    clearTimeout(toastTimers.get(el));
+    el.classList.add('toast-out');
+    setTimeout(() => el.remove(), 220);
+};
+
+const scheduleAutoDismiss = (el, ms = 4000) => {
+    clearTimeout(toastTimers.get(el));
+    toastTimers.set(el, setTimeout(() => dismissToast(el), ms));
+};
+
+// Touch/pen only — a mouse user has the × button, and a text-selection drag
+// should never fling a toast away. Follows the finger; flick or 48px dismisses.
+const attachSwipe = (el) => {
+    let startX = null, dx = 0, startTime = 0;
+    const settle = () => {
+        startX = null;
+        el.style.transition = 'transform 220ms var(--ease-out)';
+        el.style.transform = 'translateX(0)';
+    };
+    el.addEventListener('pointerdown', (e) => {
+        if (e.pointerType === 'mouse') return;
+        startX = e.clientX; dx = 0; startTime = Date.now();
+        el.style.transition = 'none';
+    });
+    el.addEventListener('pointermove', (e) => {
+        if (startX === null) return;
+        dx = e.clientX - startX;
+        el.style.transform = `translateX(${Math.max(dx, -20)}px)`;
+    });
+    const release = (e) => {
+        if (startX === null) return;
+        e.preventDefault();
+        const elapsed = Date.now() - startTime;
+        const flick = elapsed < 240 && Math.abs(dx) > 24;
+        if (dx > 48 || flick) {
+            el.style.transition = 'transform 200ms var(--ease-out)';
+            el.style.transform = 'translateX(130%)';
+            dismissToast(el);
+        } else {
+            settle();
+        }
+    };
+    el.addEventListener('pointerup', release);
+    el.addEventListener('pointercancel', settle);
 };
 
 export const showToast = (message, type = 'success') => {
-    dom.toastMessage.textContent = message;
+    const el = document.createElement('div');
+    el.className = 'abot-toast pointer-events-auto';
+    el.setAttribute('role', 'status');
+    el.innerHTML = `
+        <span class="toast-icon inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg"></span>
+        <div class="toast-msg ml-3 text-sm flex-1"></div>
+        <button class="toast-close ml-1 p-1.5 rounded-md text-muted hover:text-ink transition-colors flex-shrink-0" aria-label="Dismiss notification">
+            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>`;
+    el.querySelector('.toast-msg').textContent = message; // textContent — never inject
+    setToastType(el, type);
 
-    const successClasses = ['text-ok'];
-    const errorClasses = ['text-danger'];
+    // Cap the stack: oldest toast leaves immediately when we exceed the limit.
+    const stack = dom.toastStack;
+    while (stack.children.length >= TOAST_LIMIT) stack.firstElementChild.remove();
+    stack.appendChild(el);
 
-    dom.toastIcon.classList.remove(...successClasses, ...errorClasses);
+    el.querySelector('.toast-close').addEventListener('click', () => dismissToast(el));
+    attachSwipe(el);
+    scheduleAutoDismiss(el);
+    return el;
+};
 
-    if (type === 'success') {
-        dom.toastIcon.innerHTML = `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>`;
-        dom.toastIcon.classList.add(...successClasses);
-    } else { // error
-        dom.toastIcon.innerHTML = `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.607a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>`;
-        dom.toastIcon.classList.add(...errorClasses);
-    }
-
-    dom.toastNotification.classList.remove('hidden');
-    dom.toastNotification.style.transition = 'transform 0.4s var(--ease-out)';
-    dom.toastNotification.style.transform = 'translateX(0)';
-
-    clearTimeout(state.toastTimeout);
-    state.toastTimeout = setTimeout(dismissToast, 4000);
-
-    // One-time wiring: explicit dismiss button (a11y) + swipe-to-dismiss.
-    if (dom.toastCloseBtn && !dom.toastCloseBtn.dataset.wired) {
-        dom.toastCloseBtn.dataset.wired = '1';
-        dom.toastCloseBtn.addEventListener('click', dismissToast);
-    }
-    // B7 (v1.0.6): the toast now follows the finger instead of waiting for a
-    // 48px jump on release, and a quick flick dismisses it even when short.
-    // Touch/pen only — a mouse user has the × button, and a text selection
-    // drag should never fling the toast away.
-    if (!dom.toastNotification.dataset.wired) {
-        dom.toastNotification.dataset.wired = '1';
-        const toast = dom.toastNotification;
-        let startX = null, dx = 0, startTime = 0;
-        const settle = () => {
-            startX = null;
-            toast.style.transition = 'transform 220ms var(--ease-out)';
-            toast.style.transform = 'translateX(0)';
+// Sonner-style promise states: toast.promise(p, { loading, success, error })
+// Strings or functions of the result/error. Returns the original promise.
+export const toast = {
+    promise(p, opts = {}) {
+        const el = showToast(
+            typeof opts.loading === 'function' ? opts.loading() : (opts.loading || 'Working…'),
+            'loading'
+        );
+        const finish = (msg, type) => {
+            el.querySelector('.toast-msg').textContent = msg;
+            setToastType(el, type);
+            scheduleAutoDismiss(el, 3500);
         };
-        toast.addEventListener('pointerdown', (e) => {
-            if (e.pointerType === 'mouse') return;
-            startX = e.clientX; dx = 0; startTime = performance.now();
-            toast.style.transition = 'none'; // follow the finger 1:1
-            try { toast.setPointerCapture(e.pointerId); } catch { /* not capturable */ }
-        });
-        toast.addEventListener('pointermove', (e) => {
-            if (startX === null) return;
-            dx = Math.max(0, e.clientX - startX); // right = slide-out direction
-            toast.style.transform = `translateX(${dx}px)`;
-        });
-        const endSwipe = () => {
-            if (startX === null) return;
-            const velocity = dx / Math.max(performance.now() - startTime, 1); // px/ms
-            const dismiss = dx > 48 || velocity > 0.5;
-            startX = null;
-            if (dismiss) dismissToast();
-            else settle();
-        };
-        toast.addEventListener('pointerup', endSwipe);
-        toast.addEventListener('pointercancel', endSwipe);
-    }
+        p.then(
+            (value) => finish(typeof opts.success === 'function' ? opts.success(value) : (opts.success || 'Done'), 'success'),
+            (err) => finish(typeof opts.error === 'function' ? opts.error(err) : (opts.error || 'Something went wrong'), 'error')
+        );
+        return p;
+    },
 };
 
 export const getTimestamp = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });

@@ -20,7 +20,6 @@ export const state = {
   tokenClient: undefined,
   auth: null, // assigned by initFirebase()
   db: null, // assigned by initFirebase()
-  toastTimeout: null, // auto-dismiss timer (skills-audit: no double-hide race)
   isStreaming: false, // an assistant reply is being generated (drives stop state + jump-to-latest pill)
   webSearchEnabled: false, // per-message chip; reset after each send
   thinkingEnabled: false, // per-message chip; only for thinking-capable models

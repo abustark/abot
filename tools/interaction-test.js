@@ -387,16 +387,59 @@ function stubChain(label) {
         check('message rows offer no delete affordance',
             !window.document.querySelector('.delete-msg-btn'));
     }
-    // toast: shows, dismiss button hides (roadmap #4 polish)
+    // toast stack (v2.0.9 roadmap #4): multiple toasts, close, promise states
     {
-        const { showToast } = await import('file://' + path.join(esmDir, 'utils.js'));
-        showToast('test toast');
-        await sleep(50);
-        const toast = $('toast-notification');
-        check('toast becomes visible', toast.style.transform.includes('translateX(0)'));
-        click($('toastCloseBtn'));
-        await sleep(50);
-        check('toast close dismisses', toast.style.transform.includes('translateX(150%)'));
+        const utils = await import('file://' + path.join(esmDir, 'utils.js'));
+        utils.showToast('first toast');
+        utils.showToast('second toast');
+        await sleep(60);
+        const stack = $('toast-stack');
+        const count0 = stack.querySelectorAll('.abot-toast').length;
+        check('toasts stack (2 visible)', count0 === 2, count0 + ' shown');
+
+        stack.querySelector('.abot-toast .toast-close').dispatchEvent(new window.MouseEvent('click', { bubbles: true }));
+        await sleep(280);
+        check('toast close removes it', stack.querySelectorAll('.abot-toast').length === 1);
+
+        await utils.toast.promise(Promise.resolve('ok'), { loading: 'Saving…', success: 'Saved!' });
+        await sleep(60);
+        const last = stack.querySelector('.abot-toast:last-child .toast-msg');
+        check('toast.promise swaps to success', last && last.textContent === 'Saved!', last && last.textContent);
+
+        stack.querySelectorAll('.abot-toast .toast-close').forEach((b) => b.dispatchEvent(new window.MouseEvent('click', { bubbles: true })));
+        await sleep(280);
+    }
+    // modal hardening (v2.0.9 roadmap #6): focus trap + Escape close
+    {
+        click($('signoutBtn'));
+        await sleep(60);
+        const modal = $('deleteModal');
+        check('signout dialog opens', !modal.classList.contains('hidden'));
+        // focus trap: Tab on last focusable wraps to first
+        window.document.getElementById('deleteConfirmBtn').focus();
+        modal.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true }));
+        await sleep(30);
+        check('focus trapped (Tab wraps to first focusable)',
+            modal.contains(window.document.activeElement) && window.document.activeElement !== window.document.getElementById('deleteConfirmBtn'),
+            window.document.activeElement.id || window.document.activeElement.tagName);
+        // Escape closes the dialog
+        window.document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+        await sleep(280);
+        check('Escape closes dialog', modal.classList.contains('hidden'));
+    }
+    // model panel typeahead (v2.0.9 roadmap #5)
+    {
+        click($('modelSelectorBtn'));
+        await sleep(320);
+        const panel = $('modelSelectorPanel');
+        panel.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'l', bubbles: true, cancelable: true }));
+        await sleep(30);
+        const active = window.document.activeElement;
+        check('typeahead jumps to matching model',
+            panel.contains(active) && (active.textContent || '').trim().toLowerCase().startsWith('l'),
+            active && (active.textContent || '').trim().slice(0, 24));
+        click(document.body);
+        await sleep(260);
     }
 
     // --- M1: email verification view and controls ----------------------------
