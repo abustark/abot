@@ -61,6 +61,16 @@ if ('serviceWorker' in navigator) {
 // =================================================================================
 
 function initApp() {
+    // v2.0.8 fix: initApp re-ran on EVERY sign-in (sign-out clears
+    // isAppInitialized), re-adding every click listener. Two logins = the
+    // sidebar/theme toggles fired twice per click and cancelled themselves
+    // out ("collapse menu not working"). Listener wiring is one-time work:
+    // all handlers read shared module state, so re-wiring is never needed.
+    if (window.__abotShellWired) {
+        console.log('[ABot] shell already wired — skipping re-init');
+        return;
+    }
+    window.__abotShellWired = true;
 
     // --- Theme: follow system until the user explicitly toggles ---
     // Head script applies the initial class (stored choice > system pref);

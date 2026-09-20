@@ -109,6 +109,15 @@ export const signInAsGuest = () => {
 
 export const signOutUser = () => {
     stopSpeaking();
+    // v2.0.8 fix: tell Google Identity Services the user is fully signed out.
+    // Without this, GIS keeps the previous account auto-selected and the
+    // Google button silently no-ops after sign-out until a refresh —
+    // matching the owner's "auth buttons dead until refresh" report.
+    try {
+        if (window.google && google.accounts && google.accounts.id) {
+            google.accounts.id.disableAutoSelect();
+        }
+    } catch (e) { console.warn('[ABot] GIS disableAutoSelect failed:', e); }
     // Actually end the Firebase session (was a no-op — only stopped TTS).
     // onAuthStateChanged(null) handles the teardown + UI flip.
     state.isAppInitialized = false;
@@ -384,6 +393,9 @@ state.auth.onAuthStateChanged(async (user) => {
         await enterApp(user);
     } else {
         // --- USER IS LOGGED OUT ---
+        // v2.0.8: wrap the whole teardown so a single failure can never leave
+        // the auth screen non-interactive (the owner's post-signout freeze).
+        try {
         dom.appContainer.style.display = 'none';
         // The backdrop is CSS-only now (`.auth-scene`) — nothing to spin up.
 
@@ -407,6 +419,16 @@ state.auth.onAuthStateChanged(async (user) => {
             }
         };
         initGoogleButton();
+        } catch (teardownError) {
+            console.error('[ABot] sign-out teardown failed:', teardownError);
+            window.__abotErrors = window.__abotErrors || [];
+            window.__abotErrors.push('sign-out teardown: ' + (teardownError.stack || teardownError.message));
+            // Belt-and-braces: force the auth screen visible + interactive
+            // even if something above threw.
+            dom.appContainer.style.display = 'none';
+            dom.authSection.style.display = 'flex';
+            showToast('Signed out — a UI glitch occurred. If buttons are dead, refresh once.', 'error');
+        }
     }
 
     hideAppLoader();
