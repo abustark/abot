@@ -215,8 +215,13 @@ function stubChain(label) {
         click($('themeToggle'));
         await sleep(50);
         check('theme toggles from overflow menu', window.document.documentElement.classList.contains('dark') !== before);
-        click($('themeToggle')); // restore
-        click($('headerOverflowBtn')); // close
+        check('menu closes after picking a row', $('headerOverflowMenu').classList.contains('hidden'));
+        click($('themeToggle')); // restore theme (menu now closed; element still dispatchable in jsdom)
+        // button re-opens and toggles closed
+        click($('headerOverflowBtn'));
+        await sleep(50);
+        check('overflow re-opens from button', !$('headerOverflowMenu').classList.contains('hidden'));
+        click($('headerOverflowBtn'));
         await sleep(50);
         check('header overflow menu closes', $('headerOverflowMenu').classList.contains('hidden'));
     }
