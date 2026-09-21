@@ -166,6 +166,33 @@ This document tracks every commit made on `main` following the `2.0.x` versionin
   - The logged-out branch of `onAuthStateChanged` is wrapped in try/catch with a belt-and-braces forced auth-screen reveal + toast, so a single teardown failure can never leave the auth screen non-interactive.
   - Interaction-test: fixed v2.0.7 overflow-menu sequencing (row-pick closes the menu; assert re-open via trigger) and cycle-test sidebar assertion (class-set semantics, not string order).
 
+---
+
+## Main-branch history (merged 2026-08-30 — versions below are main's own numbering)
+
+### 2.0.10 - live-site verification round: empty-state card order + dotmark radius fixes
+- **Date**: 2026-09-20
+- **Method:** owner approved running the site + full gates. Ran local `server.js`, the jsdom interaction suite, the Playwright real-browser suite (desktop 1280×800 + mobile 390×844), and DOM-order/geometry probes with screenshots.
+- **Bug fixed — empty-state order (owner-visible):** `#emptySuggestions` was a sibling AFTER the fixed `#composerDock`, so on a fresh chat the 4 suggestion cards rendered in normal flow above the (fixed, centred) composer — clipped against the header. Moved the div INSIDE the dock under the composer so greeting + composer + cards centre as ONE unit; verified desktop + mobile (cards_top 456 >= composer_bottom 368; correct DOM order). (index.html)
+- **Bug fixed:** `body.chat-empty #composerDock` now gets `max-height: 100dvh; overflow-y: auto; overscroll-behavior: contain` so the taller one-unit block scrolls instead of clipping on short viewports. (src/input.css)
+- **Bug fixed:** all 55 dot-matrix wordmark circles were missing `r="2.3"` (default r=0 → zero-size, invisible dots — the loader showed only the spinner). Radius restored via regex pass; verified dots now paint 5×5 px with `dotRise` animation applied. (index.html)
+- **Tests updated to real behavior:** overflow menu row-click closes the menu (asserted), trigger-toggle and outside-tap close paths added; "normal layout" assertion now seeds a message explicitly (new chats start empty since 2.0.9). (tools/interaction-test.js)
+- **Tooling:** `tools/test-playwright.py` artifact dir is now repo-relative (`tmp/playwright/`, overridable via `ABOT_ARTIFACT_DIR`) instead of a hardcoded Antigravity path; self-creates the directory.
+- **Noted (no code change):** local `server.js` `generalLimiter` is 100 req/15 min per IP — repeated full-page loads (Playwright SW cold loads) trip 429 with no friendly UI. Production is unaffected (Vercel). Owner may want a dev-mode relax later.
+- **Gates run (green):** interaction suite (2 stale assertions updated to match intended behavior), smoke, chat-security, `lint` 0 errors, `check` clean, `tsc -p jsconfig.json` 0 errors, `build:css` rebuilt and verified (`100dvh`, `mt-5`, `.dotmark` present), Playwright auth/shell/theme/backend-policy suite all PASS with no page errors.
+
+
+### 2.0.9 - new-chat landing fix, dotted loader, header + micro-interaction polish
+- **Date**: 2026-09-20
+- **Bug fixed (owner-reported):** the new-chat landing (centred composer + greeting + suggestion cards) never appeared. Root cause: `createNewChat()` seeded every new chat with a fake assistant message (`"Hello! How can I assist you today?"`), so `messages.length > 0` and `renderActiveChat()` always took the "has messages" branch — `renderEmptyState()` was unreachable. New chats now start with `messages: []`, so the Phase-0 landing renders on PC and mobile. (js/chat.js)
+- **Phase 1 — Nothing-style dotted loader:** replaced the bare spinner with a self-generated dot-matrix "ABot" wordmark. Each dot rises bottom-left → top per letter, and letters sweep A → b → o → t via per-dot `animation-delay` baked into the SVG. Zero font download/FOUC. New reproducible generator `tools/make-dotmark.js`; loader shows the wordmark above the existing spinner. (index.html, src/input.css, tools/make-dotmark.js)
+- **Phase 3 — header polish:** overflow menu rows sat on the same surface as the menu (invisible hover/active in dark mode). Menu now uses a raised/card surface with real hover, press and focus-visible states. Added full keyboard access: ArrowDown/Up cycle rows, ArrowDown on the trigger opens, Esc closes and returns focus; `aria-expanded` kept in sync. (src/input.css, js/app.js)
+- **Phase 5 — micro-interactions:** pointer-only press feedback (`scale(.94)` trigger, `.985` rows) with token-based 140ms `--ease-out`, plus consistent coral `focus-visible` rings across header and search controls. (src/input.css)
+- **Phase 7 — mobile ergonomics:** ≥40px tap targets on header buttons and 44px on menu rows/close button on touch devices only, plus momentum scrolling in the thread. (src/input.css)
+- **Cache-busting:** `dist/output.css` + `js/app.js` bumped to `?v=p16`, service worker `CACHE_NAME` → `abot-cache-v29` and precache CSS → `?v=p16`, so Vercel cannot serve the stale precached bundles again.
+- **Note:** quality gates intentionally skipped per owner instruction (`--no-verify`). Hard phases (chat-screen depth, interactive auth backdrop, feature layer) deferred pending owner go-ahead.
+
+
 ### 2.0.7 - fix mobile freeze + mobile search close, declutter PC header
 - **Date**: 2026-09-20
 - **Changes**:

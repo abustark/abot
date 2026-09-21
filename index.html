@@ -90,7 +90,70 @@
     <div id="app-loader"
         class="fixed inset-0 z-50 flex items-center justify-center bg-canvas transition-opacity duration-300 ease-in-out"
         role="status" aria-label="Loading ABot" aria-hidden="true">
-        <div class="loader-circle-22"></div>
+        <!-- v2.0.9: Nothing-style dot-matrix wordmark. Each dot rises
+             bottom-left -> top, letters sweep A -> b -> o -> t. Static SVG +
+             pure CSS animation: no font download, no FOUC.
+             Generator: node tools/make-dotmark.js -->
+        <div class="flex flex-col items-center gap-7">
+            <svg class="dotmark" viewBox="-4 -4 128 44" width="128" height="44" role="img" aria-label="ABot">
+                <circle cx="6" cy="0" r="2.3" style="animation-delay:140ms"/>
+                <circle cx="12" cy="0" r="2.3" style="animation-delay:148ms"/>
+                <circle cx="18" cy="0" r="2.3" style="animation-delay:156ms"/>
+                <circle cx="0" cy="6" r="2.3" style="animation-delay:110ms"/>
+                <circle cx="24" cy="6" r="2.3" style="animation-delay:142ms"/>
+                <circle cx="0" cy="12" r="2.3" style="animation-delay:88ms"/>
+                <circle cx="24" cy="12" r="2.3" style="animation-delay:120ms"/>
+                <circle cx="0" cy="18" r="2.3" style="animation-delay:66ms"/>
+                <circle cx="6" cy="18" r="2.3" style="animation-delay:74ms"/>
+                <circle cx="12" cy="18" r="2.3" style="animation-delay:82ms"/>
+                <circle cx="18" cy="18" r="2.3" style="animation-delay:90ms"/>
+                <circle cx="24" cy="18" r="2.3" style="animation-delay:98ms"/>
+                <circle cx="0" cy="24" r="2.3" style="animation-delay:44ms"/>
+                <circle cx="24" cy="24" r="2.3" style="animation-delay:76ms"/>
+                <circle cx="0" cy="30" r="2.3" style="animation-delay:22ms"/>
+                <circle cx="24" cy="30" r="2.3" style="animation-delay:54ms"/>
+                <circle cx="0" cy="36" r="2.3" style="animation-delay:0ms"/>
+                <circle cx="24" cy="36" r="2.3" style="animation-delay:32ms"/>
+                <circle cx="32" cy="0" r="2.3" style="animation-delay:272ms"/>
+                <circle cx="32" cy="6" r="2.3" style="animation-delay:250ms"/>
+                <circle cx="32" cy="12" r="2.3" style="animation-delay:228ms"/>
+                <circle cx="32" cy="18" r="2.3" style="animation-delay:206ms"/>
+                <circle cx="38" cy="18" r="2.3" style="animation-delay:214ms"/>
+                <circle cx="44" cy="18" r="2.3" style="animation-delay:222ms"/>
+                <circle cx="50" cy="18" r="2.3" style="animation-delay:230ms"/>
+                <circle cx="32" cy="24" r="2.3" style="animation-delay:184ms"/>
+                <circle cx="56" cy="24" r="2.3" style="animation-delay:216ms"/>
+                <circle cx="32" cy="30" r="2.3" style="animation-delay:162ms"/>
+                <circle cx="56" cy="30" r="2.3" style="animation-delay:194ms"/>
+                <circle cx="32" cy="36" r="2.3" style="animation-delay:140ms"/>
+                <circle cx="38" cy="36" r="2.3" style="animation-delay:148ms"/>
+                <circle cx="44" cy="36" r="2.3" style="animation-delay:156ms"/>
+                <circle cx="50" cy="36" r="2.3" style="animation-delay:164ms"/>
+                <circle cx="70" cy="12" r="2.3" style="animation-delay:376ms"/>
+                <circle cx="76" cy="12" r="2.3" style="animation-delay:384ms"/>
+                <circle cx="82" cy="12" r="2.3" style="animation-delay:392ms"/>
+                <circle cx="64" cy="18" r="2.3" style="animation-delay:346ms"/>
+                <circle cx="88" cy="18" r="2.3" style="animation-delay:378ms"/>
+                <circle cx="64" cy="24" r="2.3" style="animation-delay:324ms"/>
+                <circle cx="88" cy="24" r="2.3" style="animation-delay:356ms"/>
+                <circle cx="64" cy="30" r="2.3" style="animation-delay:302ms"/>
+                <circle cx="88" cy="30" r="2.3" style="animation-delay:334ms"/>
+                <circle cx="70" cy="36" r="2.3" style="animation-delay:288ms"/>
+                <circle cx="76" cy="36" r="2.3" style="animation-delay:296ms"/>
+                <circle cx="82" cy="36" r="2.3" style="animation-delay:304ms"/>
+                <circle cx="108" cy="0" r="2.3" style="animation-delay:568ms"/>
+                <circle cx="108" cy="6" r="2.3" style="animation-delay:546ms"/>
+                <circle cx="102" cy="12" r="2.3" style="animation-delay:516ms"/>
+                <circle cx="108" cy="12" r="2.3" style="animation-delay:524ms"/>
+                <circle cx="114" cy="12" r="2.3" style="animation-delay:532ms"/>
+                <circle cx="108" cy="18" r="2.3" style="animation-delay:502ms"/>
+                <circle cx="108" cy="24" r="2.3" style="animation-delay:480ms"/>
+                <circle cx="108" cy="30" r="2.3" style="animation-delay:458ms"/>
+                <circle cx="114" cy="36" r="2.3" style="animation-delay:444ms"/>
+                <circle cx="120" cy="36" r="2.3" style="animation-delay:452ms"/>
+            </svg>
+            <div class="loader-circle-22"></div>
+        </div>
     </div>
 
     <!-- This is the content, stacked on top of the backdrop. -->
