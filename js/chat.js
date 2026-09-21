@@ -428,6 +428,7 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
     }
 
     dom.chatHistory.appendChild(messageEl);
+    window.__abotFollowBottom?.(); // v2.0.15: keep up if the user is parked at the bottom
 
     // Syntax Highlighting for AI messages
     if (!isUser) {
@@ -541,6 +542,11 @@ export const renderSearchResults = (term) => {
 
 /* NEW Code to Add (This replaces the old start of the function) */
 export const sendMessage = async () => {
+    // v2.0.15 fix (owner report: "two identical responses for one question"):
+    // sendMessage had NO in-flight guard, and isStreaming was set only after a
+    // Firestore await — Enter keydown + send tap (or a double-tap) in that
+    // window launched TWO streams for one prompt. Guard first, set immediately.
+    if (state.isStreaming) return;
     const activeUser = state.auth.currentUser; // Define user ONCE at the top.
     if (!activeUser) {
         console.error("Attempted to send message without an active user.");
@@ -565,6 +571,7 @@ export const sendMessage = async () => {
     let streamFailed = false; // v2.0.13: an SSE/provider error occurred — skip title-gen, persist the error
 
     stopSpeaking(); // any ongoing narration ends when a new message is sent
+    state.isStreaming = true; // set BEFORE any await (double-fire window fix)
     state.abortController = new AbortController(); // Create a new controller for this request
 
     // Create the user message object, now including the current model.
@@ -730,6 +737,7 @@ export const sendMessage = async () => {
                                     contentHolder.innerHTML = renderSafeMarkdown(fullReply);
                                     const __mc = contentHolder.closest('.message-container');
                                     if (__mc) maybeCollapse(__mc);
+                                    window.__abotFollowBottom?.();
                                 }
                             }
                         }

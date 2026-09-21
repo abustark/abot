@@ -368,6 +368,34 @@ function initApp() {
     // New chat (Sidebar)
     dom.newChatBtn?.addEventListener('click', createNewChatWrapper);
 
+    // --- v2.0.15: composer overlap fixes (owner report, mobile) ---
+    // (a) The dock is fixed and its height changes (keyboard offset, growing
+    //     textarea). Keep the scroll area's bottom padding in sync so the
+    //     newest message can never sit behind the composer.
+    const syncScrollPadding = () => {
+        if (!dom.composerDock || !dom.chatHistoryContainer) return;
+        const h = dom.composerDock.offsetHeight;
+        dom.chatHistoryContainer.style.paddingBottom = (window.innerWidth < 768 ? h + 16 : 24) + 'px';
+    };
+    syncScrollPadding();
+    if (typeof ResizeObserver === 'function' && dom.composerDock) {
+        new ResizeObserver(syncScrollPadding).observe(dom.composerDock);
+    }
+    window.addEventListener('resize', syncScrollPadding);
+
+    // (b) Auto-follow during streaming: only while the user is already at the
+    //     bottom (scrolling up mutes the follow until they return — the user
+    //     still owns the viewport when they want to read).
+    window.__abotAutoFollow = true;
+    dom.chatHistoryContainer?.addEventListener('scroll', () => {
+        const el = dom.chatHistoryContainer;
+        window.__abotAutoFollow = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
+    }, { passive: true });
+    window.__abotFollowBottom = () => {
+        if (!window.__abotAutoFollow) return;
+        dom.chatHistoryContainer.scrollTop = dom.chatHistoryContainer.scrollHeight;
+    };
+
     // --- Phase 3: search + settings wiring ---
     // v2.0.7: search is a sheet with its own backdrop so the close control can
     // never be covered by the fixed composer/jump-pill layers on mobile. The

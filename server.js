@@ -311,8 +311,14 @@ app.post('/api/chat', checkAuth, async (req, res) => {
             logProviderError('config', 'missing', envVar + '_API_KEY');
             sseError(res, `AI provider not configured: ${envVar}_API_KEY is missing on the server (add it in Vercel → Settings → Environment Variables, then redeploy).`, 'config_missing');
         } else {
-            console.error('[chat] stream error');
-            sseError(res, 'Something went wrong while generating a response. Please try again.', 'server_error');
+            // v2.0.15: carry a SAFE discriminator (error class + provider leg).
+            // Never the raw message — it can contain upstream details.
+            const providerLeg = (typeof isGoogle !== 'undefined' && isGoogle) ? 'google'
+                : (typeof isGroq !== 'undefined' && isGroq) ? 'groq'
+                : (typeof isNvidia !== 'undefined' && isNvidia) ? 'nvidia' : 'openrouter';
+            const cause = (error && error.name) || 'UnknownError';
+            console.error('[chat] stream error:', cause, 'leg:', providerLeg, error && (error.stack || error.message));
+            sseError(res, `Something went wrong while generating a response (${providerLeg}/${cause}). Check the deployment's function logs, or try again.`, 'server_error');
         }
     } finally {
         if (!res.writableEnded) {

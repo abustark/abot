@@ -112,6 +112,19 @@ function stubChain(label) {
     const d2 = htmlEl.classList.contains('dark');
     check('theme toggles exactly once per click (2nd login)', d1 !== d2, `double-fire would return to ${d1}`);
 
+    // --- double-send guard (v2.0.15): two rapid sendBtn clicks -> ONE user message ---
+    {
+        const input = $('messageInput');
+        input.value = 'double fire probe';
+        const send = () => click($('sendBtn'));
+        send(); send(); send();
+        await sleep(500);
+        const stateMod = await import('file://' + path.join(esmDir, 'state.js'));
+        const chats = stateMod.state.chats;
+        const count = chats[Object.keys(chats)[0]].messages.filter(m => m.role === 'user' && m.content === 'double fire probe').length;
+        check('double-send guard (3 clicks -> 1 message)', count === 1, count + ' messages');
+    }
+
     console.log(fails ? `\n${fails} CYCLE FAILURE(S) ❌` : '\nAUTH CYCLE: ALL PASS ✅');
     process.exit(fails ? 1 : 0);
 })().catch(e => { console.error('CRASHED:', e); process.exit(1); });
