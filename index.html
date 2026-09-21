@@ -26,7 +26,7 @@
     <link rel="preload" href="/dist/fonts/geist-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/dist/fonts/geist-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/dist/fonts/source-serif-4-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link href="./dist/output.css?v=p15" rel="stylesheet">
+    <link href="./dist/output.css?v=p16" rel="stylesheet">
     <script src="/vendor/marked.min.js" defer></script>
     <!-- A1 (v1.0.5): highlight.js + its theme are lazy-loaded on the first code
          block (js/chat.js) — they were head-linked here, costing every visitor
@@ -558,7 +558,7 @@
                                  after the send button on wide screens. -->
                             <div class="flex items-center justify-between gap-2 pr-0.5">
                             <!-- voice input removed (owner request, v2.0.20) -->
-                            <div class="relative flex items-center order-last flex-shrink-0">
+                            <div class="relative flex items-center order-last flex-shrink-0" style="position:relative;">
                                 <button id="sendBtn" aria-label="Send message" data-tooltip="Send (Enter)" class="w-11 h-11 flex items-center justify-center rounded-full bg-coral text-white shadow-sm transition-transform hover:bg-coral-active active:scale-95">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
                                         fill="currentColor">
@@ -569,6 +569,7 @@
                                     </svg>
                                 </button>
                                 <button id="stopBtn" aria-label="Stop generating" data-tooltip="Stop"
+                                    style="position:absolute;inset:0;background:rgb(var(--c-danger));"
                                     class="stop-hidden absolute inset-0 w-11 h-11 flex items-center justify-center rounded-full text-white bg-danger hover:bg-danger/90 transition-opacity duration-150">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
                                         fill="currentColor">

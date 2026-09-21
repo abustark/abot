@@ -374,9 +374,14 @@ function initApp() {
     const syncScrollPadding = () => {
         if (!dom.composerDock || !dom.chatHistoryContainer) return;
         const h = dom.composerDock.offsetHeight;
-        dom.chatHistoryContainer.style.paddingBottom = (window.innerWidth < 768 ? h + 16 : 24) + 'px';
+        // v2.0.21: mobile clamp raised — dock height alone under-measures the
+        // visual footprint (safe-area + chip row + shadow), which left the last
+        // reply partially behind the composer with zero scroll left.
+        dom.chatHistoryContainer.style.paddingBottom =
+            (window.innerWidth < 768 ? Math.max(h + 40, 170) : 24) + 'px';
     };
     syncScrollPadding();
+    window.__abotSyncScrollPadding = syncScrollPadding;
     if (typeof ResizeObserver === 'function' && dom.composerDock) {
         new ResizeObserver(syncScrollPadding).observe(dom.composerDock);
     }
@@ -393,6 +398,15 @@ function initApp() {
     window.__abotFollowBottom = () => {
         if (!window.__abotAutoFollow) return;
         dom.chatHistoryContainer.scrollTop = dom.chatHistoryContainer.scrollHeight;
+    };
+    // v2.0.21: unlock helper — if any code path left body scroll locked
+    // (modal overflow-lock without a matching close), the page became
+    // unscrollable until refresh (owner report). Releases only when NO
+    // dialog is actually open.
+    window.__abotUnlockScroll = () => {
+        const anyOpen = [dom.deleteModal, dom.guestLimitModal, dom.promptModal]
+            .some((m) => m && !m.classList.contains('hidden'));
+        if (!anyOpen) document.body.style.overflow = '';
     };
 
     // --- Phase 3: search + settings wiring ---
@@ -889,7 +903,7 @@ function initApp() {
 
 // Phase 6.5: client-state reset + build identity
 // Visit <site>/#reset to wipe SW/caches/storage and reload (recovery tool).
-window.ABOT_BUILD = '2026-09-19.2';
+window.ABOT_BUILD = '2026-09-21.1';
 console.log(`[ABot] build ${window.ABOT_BUILD}`);
 if (location.hash === '#reset') {
     (async () => {

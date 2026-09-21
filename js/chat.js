@@ -834,6 +834,12 @@ export const sendMessage = async () => {
         state.webSearchEnabled = false;
         state.thinkingEnabled = false;
         syncComposerChips();
+        // v2.0.21: release any stray scroll lock + settle the view so the
+        // latest content is never stuck behind the composer (owner report:
+        // "can't scroll until refresh" on mobile).
+        window.__abotUnlockScroll?.();
+        window.__abotSyncScrollPadding?.();
+        window.__abotFollowBottom?.();
         dom.modelSelectorBtn.disabled = false;
         dom.modelSelectorBtn.classList.remove('opacity-50', 'cursor-not-allowed');
 

@@ -8,6 +8,14 @@ This document tracks every commit made on `main` following the `2.0.x` versionin
 
 ## Commit History
 
+### 2.0.21 - cache-proof stop overlay + scroll-lock release + padding clamp (persistent regressions)
+- **Date**: 2026-08-30
+- **Changes**:
+  - **B-35**: stop button now has inline critical styles (position:absolute;inset:0;danger bg) — the send/stop overlay cannot break on stale/purged CSS. Wrapper inline relative. Build id 2026-09-21.1 so stale clients are identifiable.
+  - **B-36**: mobile scroll clamp raised (max(dock+40px,170px)); `__abotUnlockScroll()` releases stray body scroll locks (only when no dialog open) in sendMessage finally; padding re-sync + follow-bottom after every stream. Fixes "last reply stuck behind composer + can't scroll until refresh".
+  - Playwright: attempted again — browser binary download is network-blocked in this sandbox (TLS to cdn.playwright.dev dies). Real-browser verification stays an owner-side step; documented honestly.
+  - Registry: B-35, B-36 added as NEW entries (per owner instruction — persistent regressions get new entries, not edits to old ones). SW bump, CSS bust p16.
+
 ### 2.0.20 - composer fixes (mic removed, send flush right, stop=danger), in-place error morph, OpenRouter 404 reason surfaced
 - **Date**: 2026-08-30
 - **Changes**:
