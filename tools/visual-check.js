@@ -126,6 +126,86 @@ async function runViewport(browser, { w, h, label, mobile }) {
     // final screenshot with the error card
     await page.screenshot({ path: path.join(OUT, `visual-${label}-error.png`), fullPage: false });
 
+    // ---- v2.0.26: the owner's two streaming scenarios (real streamed fetch) ----
+    // Mock /api/chat with a genuine SSE stream so the app's real streaming
+    // path (placeholders, chunk innerHTML updates, finalize) is exercised.
+    await page.evaluate(() => {
+        window.fetch = (url, opts) => {
+            if (!String(url).includes('/api/chat')) {
+                return Promise.reject(new TypeError('only /api/chat mocked'));
+            }
+            const { ReadableStream } = window;
+            const enc = new TextEncoder();
+            const longText = Array.from({ length: 40 }, (_, i) =>
+                `Paragraph ${i + 1}: lorem ipsum dolor sit amet, streaming layout probe line.`).join('\n\n');
+            const body = { model: 'probe/model', choices: [{ delta: { content: longText } }] };
+            const rs = new ReadableStream({
+                start(c) {
+                    // drip the response in chunks over ~1.2s like a real stream
+                    const parts = 8;
+                    for (let i = 0; i < parts; i++) {
+                        setTimeout(() => c.enqueue(enc.encode(`data: ${JSON.stringify(body)}\n\n`)), i * 150);
+                    }
+                    setTimeout(() => c.enqueue(enc.encode('data: [DONE]\n\n')), parts * 150 + 60);
+                    setTimeout(() => c.close(), parts * 150 + 100);
+                },
+            });
+            return Promise.resolve({ ok: true, body: rs });
+        };
+        // long-answer ask
+        const input = document.getElementById('messageInput');
+        input.value = 'long reply probe';
+        document.getElementById('sendBtn').click();
+    });
+    await new Promise((r) => setTimeout(r, 600)); // mid-stream
+    {
+        const mid = await page.evaluate(() => {
+            const el = document.getElementById('chatHistoryContainer');
+            return el.scrollHeight - el.scrollTop - el.clientHeight;
+        });
+        check(`[${label}] mid-stream: container pinned to bottom (follow live)`, mid < 140, `distance=${Math.round(mid)}px`);
+    }
+    await new Promise((r) => setTimeout(r, 1800)); // stream done + settle
+    {
+        const st = await page.evaluate(() => {
+            const cont = document.getElementById('chatHistoryContainer');
+            const dock = document.getElementById('composerDock').getBoundingClientRect();
+            const msgs = document.querySelectorAll('#chatHistory .message-container, #chatHistory > div');
+            const last = msgs[msgs.length - 1];
+            const lastRect = last ? last.getBoundingClientRect() : null;
+            return {
+                dist: cont.scrollHeight - cont.scrollTop - cont.clientHeight,
+                lastBottom: lastRect ? Math.round(lastRect.bottom) : null,
+                dockTop: Math.round(dock.top),
+            };
+        });
+        check(`[${label}] LONG reply: pinned to bottom after stream`, st.dist < 140, `distance=${Math.round(st.dist)}px`);
+        check(`[${label}] LONG reply: last content above composer top`, st.lastBottom === null || st.lastBottom <= st.dockTop + 24,
+            `lastBottom=${st.lastBottom} dockTop=${st.dockTop}`);
+        await page.screenshot({ path: path.join(OUT, `visual-${label}-long.png`), fullPage: false });
+    }
+    // SHORT reply: response smaller than the viewport
+    await page.evaluate(() => {
+        const input = document.getElementById('messageInput');
+        input.value = 'short reply probe';
+        document.getElementById('sendBtn').click();
+    });
+    await new Promise((r) => setTimeout(r, 1600));
+    {
+        const st = await page.evaluate(() => {
+            const cont = document.getElementById('chatHistoryContainer');
+            const dock = document.getElementById('composerDock').getBoundingClientRect();
+            const msgs = document.querySelectorAll('#chatHistory .message-container, #chatHistory > div');
+            const last = msgs[msgs.length - 1];
+            const lastRect = last ? last.getBoundingClientRect() : null;
+            return { lastBottom: lastRect ? Math.round(lastRect.bottom) : null, dockTop: Math.round(dock.top) };
+        });
+        check(`[${label}] SHORT reply: fully visible above composer`,
+            st.lastBottom === null || st.lastBottom <= st.dockTop + 24,
+            `lastBottom=${st.lastBottom} dockTop=${st.dockTop}`);
+        await page.screenshot({ path: path.join(OUT, `visual-${label}-short.png`), fullPage: false });
+    }
+
     if (consoleErrors.length) results.push(`--- console errors (${label}) ---\n` + consoleErrors.slice(0, 5).join('\n'));
     await page.close();
     return;

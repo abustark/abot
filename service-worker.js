@@ -3,7 +3,7 @@
  * Provides offline caching for local assets only
  */
 
-const CACHE_NAME = 'abot-cache-v41'; // merged: arena v41 wins; asset list from main
+const CACHE_NAME = 'abot-cache-v42'; // merged: arena v41 wins; asset list from main
 const STATIC_ASSETS = [
     '/',
     '/index.html',

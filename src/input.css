@@ -352,7 +352,14 @@
 }
 
 /* Composer seam — soften the hard edge where the dock meets the message list */
-#composerDock { border-top: 1px solid transparent; }
+#composerDock {
+    border-top: 1px solid transparent;
+    /* v2.0.26: ride above the mobile keyboard (matches #jumpToLatest). */
+    bottom: var(--kb-h, 0px);
+}
+/* v2.0.26: stop Chrome's scroll anchoring from fighting the streaming
+   auto-follow (it shifts scrollTop during innerHTML updates). */
+#chatHistoryContainer { overflow-anchor: none; }
 @media (min-width: 768px) {
     #composerDock { box-shadow: 0 -8px 24px -16px rgb(var(--c-ink) / 0.18); }
 }

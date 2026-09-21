@@ -42,6 +42,8 @@ function stubChain(label) {
     global.Event = window.Event;
     global.CustomEvent = window.CustomEvent;
     global.getComputedStyle = window.getComputedStyle;
+    global.requestAnimationFrame = (cb) => setTimeout(() => cb(Date.now()), 0);
+    window.requestAnimationFrame = global.requestAnimationFrame;
     // app.js initApp() uses MutationObserver (modal scroll-lock/focus-restore).
     // Without this global the import-time init crashes before any listener attaches.
     global.MutationObserver = window.MutationObserver;

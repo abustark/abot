@@ -373,12 +373,12 @@ function initApp() {
     //     newest message can never sit behind the composer.
     const syncScrollPadding = () => {
         if (!dom.composerDock || !dom.chatHistoryContainer) return;
-        const h = dom.composerDock.offsetHeight;
-        // v2.0.21: mobile clamp raised — dock height alone under-measures the
-        // visual footprint (safe-area + chip row + shadow), which left the last
-        // reply partially behind the composer with zero scroll left.
-        dom.chatHistoryContainer.style.paddingBottom =
-            (window.innerWidth < 768 ? Math.max(h + 40, 170) : 24) + 'px';
+        // v2.0.26: rect-measure (survives transforms/keyboard lift) + include
+        // the keyboard offset so the padded zone covers dock + keypad state.
+        const rect = dom.composerDock.getBoundingClientRect();
+        const kb = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--kb-h')) || 0;
+        const h = window.innerWidth < 768 ? Math.max(rect.height + kb, 170) : 24;
+        dom.chatHistoryContainer.style.paddingBottom = h + 'px';
     };
     syncScrollPadding();
     window.__abotSyncScrollPadding = syncScrollPadding;
@@ -386,18 +386,52 @@ function initApp() {
         new ResizeObserver(syncScrollPadding).observe(dom.composerDock);
     }
     window.addEventListener('resize', syncScrollPadding);
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', syncScrollPadding);
+    }
+    if (document.fonts && document.fonts.ready && document.fonts.ready.then) {
+        document.fonts.ready.then(syncScrollPadding).catch(() => {});
+    }
+    window.addEventListener('load', syncScrollPadding);
 
     // (b) Auto-follow during streaming: only while the user is already at the
     //     bottom (scrolling up mutes the follow until they return — the user
     //     still owns the viewport when they want to read).
+    // v2.0.26: autoFollow is USER-INTENT driven. The old version recomputed
+    // from scroll distance on every scroll event — Chrome's scroll anchoring
+    // (which shifts scrollTop during streaming innerHTML updates) could flip
+    // it to false mid-stream, silently killing all follow ("auto scrolls to
+    // half, rest hidden"). Now: only an explicit upward user gesture mutes it.
     window.__abotAutoFollow = true;
-    dom.chatHistoryContainer?.addEventListener('scroll', () => {
-        const el = dom.chatHistoryContainer;
-        window.__abotAutoFollow = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
+    const followContainer = dom.chatHistoryContainer;
+    followContainer?.addEventListener('wheel', (e) => {
+        if (e.deltaY < 0) window.__abotAutoFollow = false;
+    }, { passive: true });
+    let touchStartY = null;
+    followContainer?.addEventListener('touchstart', (e) => {
+        touchStartY = e.touches[0].clientY;
+    }, { passive: true });
+    followContainer?.addEventListener('touchmove', (e) => {
+        if (touchStartY !== null && e.touches[0].clientY > touchStartY + 10) {
+            window.__abotAutoFollow = false; // swiping up = reading up
+        }
+    }, { passive: true });
+    // Near-bottom on ANY scroll always re-arms follow.
+    followContainer?.addEventListener('scroll', () => {
+        const el = followContainer;
+        if (el.scrollHeight - el.scrollTop - el.clientHeight < 120) {
+            window.__abotAutoFollow = true;
+        }
     }, { passive: true });
     window.__abotFollowBottom = () => {
         if (!window.__abotAutoFollow) return;
-        dom.chatHistoryContainer.scrollTop = dom.chatHistoryContainer.scrollHeight;
+        const el = followContainer;
+        // Force instant positioning (never smooth), settled across paints:
+        const prev = el.style.scrollBehavior;
+        el.style.scrollBehavior = 'auto';
+        el.scrollTop = el.scrollHeight;
+        requestAnimationFrame(() => { el.scrollTop = el.scrollHeight; });
+        setTimeout(() => { el.scrollTop = el.scrollHeight; el.style.scrollBehavior = prev; }, 250);
     };
     // v2.0.21: unlock helper — if any code path left body scroll locked
     // (modal overflow-lock without a matching close), the page became

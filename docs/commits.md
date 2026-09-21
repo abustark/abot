@@ -8,6 +8,14 @@ This document tracks every commit made on `main` following the `2.0.x` versionin
 
 ## Commit History
 
+### 2.0.26 - REAL fix for persistent scroll/coverage bugs (scroll-anchoring + keyboard dock)
+- **Date**: 2026-08-30
+- **Changes**:
+  - **B-41 (long replies: "auto scrolls to half, rest hidden")**: root cause = Chrome scroll anchoring + distance-math autoFollow. During streaming innerHTML updates Chrome shifts scrollTop; one transient scroll event with distance >120 flipped `__abotAutoFollow=false` and every later follow was silently skipped. autoFollow is now user-intent driven (wheel-up/upward touchmove mutes; near-bottom re-arms), follow is instant + settled (rAF + 250ms, forced scrollBehavior:auto), and `overflow-anchor:none` on the container stops Chrome fighting. Real-browser proof: mid-stream AND post-stream distance = 0px.
+  - **B-42 (short replies hidden behind composer)**: padding now = max(dockRect.height + --kb-h, 170) measured with getBoundingClientRect; re-syncs on visualViewport resize (keyboard open/close), window resize, fonts.ready, load; `#composerDock` now lifts with the keyboard (`bottom: var(--kb-h)` — previously only the jump pill did); send-flow re-syncs 320ms after focus. Real-browser proof: SHORT reply lastBottom 675 ≤ dockTop 678; LONG reply lastBottom 501 ≤ 678.
+  - visual-check.js extended with the owner's two exact scenarios: long streamed reply (mocked multi-chunk SSE, mid-stream + post-stream assertions) and short reply (visibility assertion), both viewports → 23/23 PASS.
+  - jsdom harnesses gained requestAnimationFrame (follow-on-render paths). SW v42, CSS bust p17.
+
 ### 2.0.25 - NVIDIA catalog v2 (owner-extracted Free Endpoint IDs)
 - **Date**: 2026-08-30
 - **Changes**:

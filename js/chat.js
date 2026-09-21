@@ -534,14 +534,16 @@ export const renderSearchResults = (term) => {
             switchChat(chatId);
             dom.searchPanel.classList.add('hidden');
             document.getElementById('searchBackdrop')?.classList.add('hidden');
-            requestAnimationFrame(() => {
+            const jump = () => {
                 const el = dom.chatHistory.querySelector(`[data-msg-index="${idx}"]`);
                 if (el) {
                     el.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     el.classList.add('search-highlight');
                     setTimeout(() => el.classList.remove('search-highlight'), 2000);
                 }
-            });
+            };
+            if (typeof requestAnimationFrame === 'function') requestAnimationFrame(jump);
+            else setTimeout(jump, 0);
         });
     });
 };
@@ -623,6 +625,11 @@ export const sendMessage = async () => {
     dom.messageInput.style.height = 'auto';
     setUnsentDraft(false); // draft shipped — clear leave-guard
     dom.messageInput.focus();
+    // v2.0.26: focusing opens the keyboard → --kb-h grows and the dock lifts;
+    // re-sync padding + settle so the reply is never behind dock+keyboard.
+    if (typeof window.__abotSyncScrollPadding === 'function') {
+        setTimeout(() => { window.__abotSyncScrollPadding(); window.__abotFollowBottom?.(); }, 320);
+    }
 
     // B2: single morphing control — the stop state overlays the send button
     // (same geometry, crossfade), no layout jump.

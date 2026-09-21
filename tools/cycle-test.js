@@ -44,6 +44,8 @@ function stubChain(label) {
     global.Event = window.Event; global.CustomEvent = window.CustomEvent;
     global.getComputedStyle = window.getComputedStyle;
     global.firebase = window.firebase; global.marked = window.marked; global.hljs = window.hljs;
+    global.requestAnimationFrame = (cb) => setTimeout(() => cb(Date.now()), 0);
+    window.requestAnimationFrame = global.requestAnimationFrame;
     global.MutationObserver = window.MutationObserver || class { observe() {} disconnect() {} unobserve() {} };
     window.MutationObserver = global.MutationObserver;
     global.WeakMap = global.WeakMap || WeakMap;
