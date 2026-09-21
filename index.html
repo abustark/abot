@@ -557,15 +557,7 @@
                                  buttons via order-2 + mr-auto, which left dead space
                                  after the send button on wide screens. -->
                             <div class="flex items-center justify-between gap-2 pr-0.5">
-                            <button id="voiceBtn" aria-label="Voice input" data-tooltip="Voice input"
-                                class="order-last w-11 h-11 flex items-center justify-center rounded-full text-muted hover:text-coral transition-colors flex-shrink-0">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
-                                    fill="currentColor">
-                                    <path fill-rule="evenodd"
-                                        d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                            </button>
+                            <!-- voice input removed (owner request, v2.0.20) -->
                             <div class="relative flex items-center order-last flex-shrink-0">
                                 <button id="sendBtn" aria-label="Send message" data-tooltip="Send (Enter)" class="w-11 h-11 flex items-center justify-center rounded-full bg-coral text-white shadow-sm transition-transform hover:bg-coral-active active:scale-95">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
@@ -577,7 +569,7 @@
                                     </svg>
                                 </button>
                                 <button id="stopBtn" aria-label="Stop generating" data-tooltip="Stop"
-                                    class="stop-hidden absolute inset-0 w-11 h-11 flex items-center justify-center rounded-full text-white bg-ink hover:bg-ink/90 transition-opacity duration-150">
+                                    class="stop-hidden absolute inset-0 w-11 h-11 flex items-center justify-center rounded-full text-white bg-danger hover:bg-danger/90 transition-opacity duration-150">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
                                         fill="currentColor">
                                         <rect x="6" y="6" width="8" height="8" rx="1.5" fill="currentColor" />

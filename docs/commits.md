@@ -8,6 +8,14 @@ This document tracks every commit made on `main` following the `2.0.x` versionin
 
 ## Commit History
 
+### 2.0.20 - composer fixes (mic removed, send flush right, stop=danger), in-place error morph, OpenRouter 404 reason surfaced
+- **Date**: 2026-08-30
+- **Changes**:
+  - **Composer (owner report)**: mic button + all its wiring removed; send button flush right (justify-between slack gone); stop now overlays the send slot in `bg-danger` (was `bg-ink`, which flips with theme = invisible white-on-white/black-on-black).
+  - **Error morph (owner clarification)**: the loading bubble BECOMES the error card in place — never a second bubble appearing beside the placeholder.
+  - **OpenRouter 404 systemic (owner report: every :free model)**: upstream error body surfaced in the card ("OpenRouter (404): <reason>…"). Most likely cause: the new key was created with Model Limits enabled (openrouter.ai/keys) — a restricted key 404s every non-allowed model. Check key settings; also verify at openrouter.ai keys page.
+  - Registry B-32/B-33/B-34. SW v37. All gates green.
+
 ### 2.0.19 - stuck-dots fix on stream errors + remove non-servable Llama free
 - **Date**: 2026-08-30
 - **Changes**:

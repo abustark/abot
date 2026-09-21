@@ -30,7 +30,6 @@ import { saveSystemPrompt } from './ui.js';
 import { sendMessage } from './chat.js';
 import { showToast, stopSpeaking, installDraftLeaveGuard, setUnsentDraft, renderSafeMarkdown } from './utils.js';
 import { signOutUser } from './auth.js';
-import { startVoiceRecognition } from './utils.js';
 import { state } from './state.js';
 import { switchChat } from './chat.js';
 
@@ -537,7 +536,6 @@ function initApp() {
     });
 
     dom.sendBtn.addEventListener('click', sendMessage);
-    dom.voiceBtn.addEventListener('click', startVoiceRecognition);
     // Both the header hamburger (#sidebarToggle) and the in-drawer close
     // (#sidebarCloseBtn) drive the single setSidebar() state owner (ui.js).
     const onSidebarToggleClick = (e) => { e.stopPropagation(); toggleSidebar(); };
@@ -1033,7 +1031,7 @@ async function runDiagnostics() {
         if (sp) click(dom.searchToggleBtn);
     } catch (e) { add('search panel opens', false, e.message); }
 
-    ['signoutBtn', 'voiceBtn', 'promptBtn'].forEach((k) => {
+    ['signoutBtn', 'promptBtn'].forEach((k) => {
         const el = dom[k];
         add(`${k} present`, !!el);
     });

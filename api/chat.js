@@ -153,6 +153,20 @@ export default async function handler(req, res) {
                 body: JSON.stringify({ model: useWebSearch ? `${model}:online` : model, messages: cleanedMessages, stream: true })
             });
             if (!response.ok) {
+                // v2.0.20: surface OpenRouter's own user-facing reason (rotated
+                // model vs key model-limits vs data policy — the 404 body says
+                // which). Safe: it's OpenRouter's public message, length-capped.
+                let upstreamMsg = '';
+                try {
+                    const j = await response.clone().json();
+                    upstreamMsg = String(j?.error?.message || j?.message || '').slice(0, 200);
+                } catch { }
+                logProviderError('openrouter', response.status, upstreamMsg);
+                if (response.status === 404) {
+                    const reason = upstreamMsg || 'no serving endpoint for this free model right now (catalogs rotate)';
+                    sseError(res, `OpenRouter (404): ${reason}. If this persists for every model, check your key's Model Limits at openrouter.ai/keys, or try another model.`, 'model_unavailable');
+                    return;
+                }
                 providerStatusError(res, 'openrouter', response.status);
                 return;
             }

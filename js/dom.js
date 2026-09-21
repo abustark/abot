@@ -39,7 +39,6 @@ export const dom = {
     sidebarToggle: document.getElementById('sidebarToggle'),
     sidebarCloseBtn: document.getElementById('sidebarCloseBtn'),
     sidebarOverlay: document.getElementById('sidebarOverlay'),
-    voiceBtn: document.getElementById('voiceBtn'),
     newChatSpinner: document.getElementById('new-chat-spinner'),
     newChatBtn: document.getElementById('newChatBtn'),
     chatList: document.getElementById('chatList'),

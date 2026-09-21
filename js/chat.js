@@ -717,15 +717,20 @@ export const sendMessage = async () => {
                         console.error('[ABot] stream error:', errorPayload.code || 'unknown', '-', errMsg);
                     } catch { }
                     streamFailed = true;
-                    // v2.0.19: remove the streaming placeholder (typing dots)
-                    // BEFORE appending the error card — otherwise the stuck
-                    // dots bubble sat next to the error forever ("two
-                    // responses" look).
-                    dom.chatHistory.querySelector('.typing-indicator')?.closest('.message-container')?.remove();
-                    const now = currentChat.messages.length;
+                    // v2.0.20: the loading bubble BECOMES the error card (in
+                    // place) — the user sees one bubble morph, never a second
+                    // one appearing next to the placeholder.
+                    const safeErr = errMsg.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                    if (latestBotMessageSpan) {
+                        latestBotMessageSpan.innerHTML =
+                            `<div class="text-sm leading-6 text-danger" role="alert">⚠️ ${safeErr}</div>`;
+                    } else {
+                        dom.chatHistory.querySelector('.typing-indicator')?.closest('.message-container')?.remove();
+                        const now = currentChat.messages.length;
+                        appendMessage({ role: 'assistant', content: errMsg, model: currentChat.model, isError: true }, false, { index: now });
+                    }
                     const errorMsg = { role: 'assistant', content: errMsg, model: currentChat.model, isError: true };
                     currentChat.messages.push(errorMsg);
-                    appendMessage(errorMsg, false, { index: now });
                     return;
                 }
 
