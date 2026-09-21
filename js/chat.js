@@ -318,7 +318,13 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
     const providerColor = getProviderColor(messageModel || currentChat.model);
 
     let messageContent;
-    if (isUser) {
+    if (message.isError) {
+        // v2.0.16 fix: persisted error cards must render their TEXT in every
+        // path — as non-history assistant messages they used to fall into the
+        // streaming-placeholder branch and show a typing indicator forever
+        // (the "error looks like a second loading bubble" bug).
+        messageContent = `<div class="text-sm leading-6 text-danger" role="alert">⚠️ ${text.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
+    } else if (isUser) {
         messageContent = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
     } else {
                         const uniqueId = `bot-msg-${Date.now()}`;

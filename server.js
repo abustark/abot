@@ -266,12 +266,24 @@ app.post('/api/chat', checkAuth, async (req, res) => {
                 return;
             }
 
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-                res.write(decoder.decode(value));
+            if (!response.body) {
+                logProviderError('provider', 'body-null', '200 without body (getReader)');
+                sseError(res, 'The provider returned an empty response for this model. It may be rotating — try another model.', 'model_unavailable');
+                return;
+            }
+            try {
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    res.write(decoder.decode(value));
+                }
+            } catch (loopError) {
+                const cause = (loopError && loopError.name) || 'UnknownError';
+                logProviderError('provider', 'stream-loop', cause);
+                sseError(res, `The provider dropped the stream mid-response (${cause}). Please try again.`, 'stream_interrupted');
+                return;
             }
 
         } else { // OpenRouter
@@ -294,12 +306,24 @@ app.post('/api/chat', checkAuth, async (req, res) => {
                 return;
             }
 
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-                res.write(decoder.decode(value));
+            if (!response.body) {
+                logProviderError('provider', 'body-null', '200 without body (getReader)');
+                sseError(res, 'The provider returned an empty response for this model. It may be rotating — try another model.', 'model_unavailable');
+                return;
+            }
+            try {
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    res.write(decoder.decode(value));
+                }
+            } catch (loopError) {
+                const cause = (loopError && loopError.name) || 'UnknownError';
+                logProviderError('provider', 'stream-loop', cause);
+                sseError(res, `The provider dropped the stream mid-response (${cause}). Please try again.`, 'stream_interrupted');
+                return;
             }
         }
     } catch (error) {
@@ -317,7 +341,7 @@ app.post('/api/chat', checkAuth, async (req, res) => {
                 : (typeof isGroq !== 'undefined' && isGroq) ? 'groq'
                 : (typeof isNvidia !== 'undefined' && isNvidia) ? 'nvidia' : 'openrouter';
             const cause = (error && error.name) || 'UnknownError';
-            console.error('[chat] stream error:', cause, 'leg:', providerLeg, error && (error.stack || error.message));
+            console.error('[chat] stream error:', cause, 'leg:', providerLeg, 'model:', model, error && (error.stack || error.message));
             sseError(res, `Something went wrong while generating a response (${providerLeg}/${cause}). Check the deployment's function logs, or try again.`, 'server_error');
         }
     } finally {

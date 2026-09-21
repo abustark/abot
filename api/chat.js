@@ -126,7 +126,19 @@ export default async function handler(req, res) {
                 providerStatusError(res, isGroq ? 'groq' : 'nvidia', response.status);
                 return;
             }
-            for await (const chunk of response.body) { res.write(chunk); }
+            if (!response.body) {
+                logProviderError(isGroq ? 'groq' : 'nvidia', 'body-null', '200 without body');
+                sseError(res, 'The provider returned an empty response for this model. It may be rotating — try another model.', 'model_unavailable');
+                return;
+            }
+            try {
+                for await (const chunk of response.body) { res.write(chunk); }
+            } catch (loopError) {
+                const cause = (loopError && loopError.name) || 'UnknownError';
+                logProviderError(isGroq ? 'groq' : 'nvidia', 'stream-loop', cause);
+                sseError(res, `The provider dropped the stream mid-response (${cause}). Please try again.`, 'stream_interrupted');
+                return;
+            }
         } else { // OpenRouter
             const apiKey = process.env.OPENROUTER_API_KEY;
             if (!apiKey) throw new Error('OPENROUTER_API_KEY not configured.');
@@ -144,7 +156,19 @@ export default async function handler(req, res) {
                 providerStatusError(res, 'openrouter', response.status);
                 return;
             }
-            for await (const chunk of response.body) { res.write(chunk); }
+            if (!response.body) {
+                logProviderError('openrouter', 'body-null', '200 without body');
+                sseError(res, 'OpenRouter returned an empty response for this model. It may be rotating — try another model.', 'model_unavailable');
+                return;
+            }
+            try {
+                for await (const chunk of response.body) { res.write(chunk); }
+            } catch (loopError) {
+                const cause = (loopError && loopError.name) || 'UnknownError';
+                logProviderError('openrouter', 'stream-loop', cause);
+                sseError(res, `OpenRouter dropped the stream mid-response (${cause}). Please try again.`, 'stream_interrupted');
+                return;
+            }
         }
     } catch (error) {
         if (error && (error.name === 'AbortError' || error.code === 'ABORT_ERR')) {
@@ -161,7 +185,7 @@ export default async function handler(req, res) {
                 : (typeof isGroq !== 'undefined' && isGroq) ? 'groq'
                 : (typeof isNvidia !== 'undefined' && isNvidia) ? 'nvidia' : 'openrouter';
             const cause = (error && error.name) || 'UnknownError';
-            console.error('[chat] stream error:', cause, 'leg:', providerLeg, error && (error.stack || error.message));
+            console.error('[chat] stream error:', cause, 'leg:', providerLeg, 'model:', model, error && (error.stack || error.message));
             sseError(res, `Something went wrong while generating a response (${providerLeg}/${cause}). Check the deployment's function logs, or try again.`, 'server_error');
         }
     } finally {
