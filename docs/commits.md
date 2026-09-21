@@ -8,6 +8,14 @@ This document tracks every commit made on `main` following the `2.0.x` versionin
 
 ## Commit History
 
+### 2.0.25 - NVIDIA catalog v2 (owner-extracted Free Endpoint IDs)
+- **Date**: 2026-08-30
+- **Changes**:
+  - Owner extracted 9 model IDs directly from build.nvidia.com Free Endpoint cards; catalog replaced with that set (supersedes my 2.0.24 search-derived roster):
+    meta/muse-glimmer-30b · nvidia/nemotron-3.5-lightning-30b-a3b · moonshotai/kimi-k3 · z-ai/glm-5.3-flash · z-ai/glm-5.3 · openai/gpt-oss-20b · mistralai/mistral-nemotron · google/gemma-4-31b-it · nvidia/nemotron-3-super-120b-a12b
+  - New org prefixes allowlisted: `meta/`, `moonshotai/` (NVIDIA-hosted publishers).
+  - NVIDIA leg re-verified end-to-end with the mock harness. 4 new security tests. SW bump.
+
 ### 2.0.24 - NVIDIA catalog refresh (free tier confirmed alive; 4 of 5 old IDs stale)
 - **Date**: 2026-08-30
 - **Changes**:

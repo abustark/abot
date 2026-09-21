@@ -93,16 +93,18 @@ export const MODEL_CONFIG = {
     'groq/qwen/qwen3.8-27b': { name: 'Qwen 3.8 27B', color: 'groq-yellow' },
     'groq/minimaxai/minimax-m2.7': { name: 'MiniMax M2.7', color: 'groq-yellow' },
 
-    // --- NVIDIA (build.nvidia.com free tier, refreshed 2026-08-30 — one
-    // nvapi- key, ~40 RPM. Old IDs removed: deepseek-r1-0528 + qwen2.5-coder
-    // (delisted), nemotron-nano-9b-v2 (superseded by Nano 3). Groq rotates
-    // monthly, NVIDIA quarterly — re-check build.nvidia.com/models.) ---
-    'nvidia/openai/gpt-oss-20b': { name: 'GPT-OSS 20B', color: 'nvidia-green' },
-    'nvidia/nvidia/nemotron-3-ultra-550b-a55b': { name: 'Nemotron 3 Ultra', color: 'nvidia-green' }, // 1M ctx
-    'nvidia/nvidia/nemotron-3-super-120b-a12b': { name: 'Nemotron 3 Super', color: 'nvidia-green' }, // 262K
-    'nvidia/nvidia/nemotron-nano-3-30b-a3b': { name: 'Nemotron Nano 3', color: 'nvidia-green' },
-    'nvidia/minimaxai/minimax-m3': { name: 'MiniMax M3', color: 'nvidia-green' }, // 197K, tools
-    'nvidia/mistralai/mistral-nemotron': { name: 'Mistral Nemotron', color: 'nvidia-green' },
+    // --- NVIDIA (build.nvidia.com FREE ENDPOINT models — owner-extracted
+    // 2026-08-30 from the site's Free Endpoint cards. One nvapi- key, ~40 RPM.
+    // NVIDIA rotates quarterly — re-check build.nvidia.com/models.) ---
+    'meta/muse-glimmer-30b': { name: 'Muse Glimmer 30B', color: 'nvidia-green' },
+    'nvidia/nemotron-3.5-lightning-30b-a3b': { name: 'Nemotron 3.5 Lightning', color: 'nvidia-green' },
+    'moonshotai/kimi-k3': { name: 'Kimi K3', color: 'nvidia-green' },
+    'z-ai/glm-5.3-flash': { name: 'GLM 5.3 Flash', color: 'nvidia-green' },
+    'z-ai/glm-5.3': { name: 'GLM 5.3', color: 'nvidia-green' },
+    'openai/gpt-oss-20b': { name: 'GPT-OSS 20B', color: 'nvidia-green' },
+    'mistralai/mistral-nemotron': { name: 'Mistral Nemotron', color: 'nvidia-green' },
+    'google/gemma-4-31b-it': { name: 'Gemma 4 31B', color: 'nvidia-green' },
+    'nvidia/nemotron-3-super-120b-a12b': { name: 'Nemotron 3 Super', color: 'nvidia-green' },
 
     // --- OPENROUTER (:free tier — refreshed 2026-08-30 against OpenRouter's
     // current roster; deepseek-chat-v3-0324:free (provider paywalled) and
