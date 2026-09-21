@@ -127,6 +127,25 @@ function stubChain(label) {
         check('double-send guard (3 clicks -> 1 message)', count === 1, count + ' messages');
     }
 
+    // --- B-48 (2.1.3): keyboard dismiss after send — mobile blurs, desktop refocuses ---
+    {
+        const input = $('messageInput');
+        const setWidth = (w) => { try { Object.defineProperty(window, 'innerWidth', { value: w, configurable: true, writable: true }); } catch { /* jsdom width is fixed */ } };
+        setWidth(375); // mobile: the keyboard must DISMISS after send
+        input.focus();
+        input.value = 'mobile blur probe';
+        click($('sendBtn'));
+        await sleep(300);
+        check('mobile send blurs the input (keyboard dismisses)', window.document.activeElement !== input,
+            `active=${window.document.activeElement ? window.document.activeElement.id : 'body'}`);
+        setWidth(1024); // desktop: focus returns for fast typing
+        input.value = 'desktop focus probe';
+        click($('sendBtn'));
+        await sleep(300);
+        check('desktop send refocuses the input (fast typing)', window.document.activeElement === input,
+            `active=${window.document.activeElement ? window.document.activeElement.id : 'body'}`);
+    }
+
     console.log(fails ? `\n${fails} CYCLE FAILURE(S) ❌` : '\nAUTH CYCLE: ALL PASS ✅');
     process.exit(fails ? 1 : 0);
 })().catch(e => { console.error('CRASHED:', e); process.exit(1); });

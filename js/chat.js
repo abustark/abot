@@ -577,6 +577,11 @@ export const sendMessage = async () => {
 
     let fullReply = "";
     let streamFailed = false; // v2.0.13: an SSE/provider error occurred — skip title-gen, persist the error
+    // 2.1.3 (B-47): stream render throttle state — the chunk handler accumulates
+    // text cheaply and flushes the DOM at most every ~100ms (see below).
+    let streamFlushNeeded = false;
+    let streamFlushScheduled = false;
+    let streamDone = false;
 
     stopSpeaking(); // any ongoing narration ends when a new message is sent
     state.isStreaming = true; // set BEFORE any await (double-fire window fix)
@@ -624,7 +629,12 @@ export const sendMessage = async () => {
     dom.messageInput.value = '';
     dom.messageInput.style.height = 'auto';
     setUnsentDraft(false); // draft shipped — clear leave-guard
-    dom.messageInput.focus();
+    // 2.1.3 (B-48): desktop keeps focus for rapid follow-up typing; on mobile
+    // the keyboard must DISMISS after send — it stayed open over the reply,
+    // squished the viewport behind the composer, and caused mistyped
+    // accidental re-sends (owner report).
+    if (window.innerWidth >= 768) dom.messageInput.focus();
+    else dom.messageInput.blur();
     // v2.0.26: focusing opens the keyboard → --kb-h grows and the dock lifts;
     // re-sync padding + settle so the reply is never behind dock+keyboard.
     if (typeof window.__abotSyncScrollPadding === 'function') {
@@ -724,6 +734,7 @@ export const sendMessage = async () => {
                         console.error('[ABot] stream error:', errorPayload.code || 'unknown', '-', errMsg);
                     } catch { }
                     streamFailed = true;
+                    streamDone = true; // 2.1.3: kill any pending throttled flush — it must not overwrite the error card
                     // v2.0.20: the loading bubble BECOMES the error card (in
                     // place) — the user sees one bubble morph, never a second
                     // one appearing next to the placeholder.
@@ -755,12 +766,26 @@ export const sendMessage = async () => {
                                                 latestBotMessageSpan.innerHTML = `<span class="content-span">${renderSafeMarkdown(fullReply)}</span><span class="blinking-cursor"></span>`;
                                 isFirstChunk = false;
                             } else {
-                                const contentHolder = latestBotMessageSpan.querySelector('.content-span');
-                                if (contentHolder) {
-                                    contentHolder.innerHTML = renderSafeMarkdown(fullReply);
-                                    const __mc = contentHolder.closest('.message-container');
-                                    if (__mc) maybeCollapse(__mc);
-                                    window.__abotFollowBottom?.();
+                                // 2.1.3 (B-47): re-parsing + innerHTML + follow on EVERY
+                                // SSE chunk saturated the UI thread on phones — the screen
+                                // "froze" while a model responded (only the model selector
+                                // is meant to disable). Accumulate cheaply per chunk and
+                                // flush the DOM at most every ~100ms.
+                                streamFlushNeeded = true;
+                                if (!streamFlushScheduled) {
+                                    streamFlushScheduled = true;
+                                    setTimeout(() => {
+                                        streamFlushScheduled = false;
+                                        if (streamDone || !streamFlushNeeded) return;
+                                        streamFlushNeeded = false;
+                                        const contentHolder = latestBotMessageSpan.querySelector('.content-span');
+                                        if (contentHolder) {
+                                            contentHolder.innerHTML = renderSafeMarkdown(fullReply);
+                                            const __mc = contentHolder.closest('.message-container');
+                                            if (__mc) maybeCollapse(__mc);
+                                        }
+                                        window.__abotFollowBottom?.();
+                                    }, 100);
                                 }
                             }
                         }
@@ -774,6 +799,9 @@ export const sendMessage = async () => {
             // "catch up" if they scrolled away mid-stream).
         }
 
+        // 2.1.3 (B-47): stream over — any pending throttled flush must not fire
+        // (the full final render below already covers the complete reply).
+        streamDone = true;
         const contentHolder = latestBotMessageSpan.querySelector('.content-span');
         const cursor = latestBotMessageSpan.querySelector('.blinking-cursor');
         if (contentHolder) contentHolder.innerHTML = renderSafeMarkdown(fullReply);
@@ -810,6 +838,7 @@ export const sendMessage = async () => {
         } else {
             console.error("sendMessage stream error:", error);
             streamFailed = true;
+            streamDone = true; // 2.1.3: pending throttled flush must not overwrite the error card
             dom.chatHistory.querySelector('.typing-indicator')?.closest('.message-container')?.remove();
             const netErrMsg = { role: 'assistant', content: 'Connection error: ' + (error.message || 'could not reach the server.'), model: currentChat.model, isError: true };
             currentChat.messages.push(netErrMsg);
