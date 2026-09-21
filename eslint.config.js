@@ -19,7 +19,7 @@ const BROWSER_EXTRA = {
 
 module.exports = [
     js.configs.recommended,
-    { ignores: ['node_modules/**', 'dist/**', 'vendor/**', 'tmp/**', 'npx/**', '.claude/**', '.agents/**', '.freebuff/**', '.github/**', 'skills-lock.json'] },
+    { ignores: ['node_modules/**', 'dist/**', 'vendor/**', 'tmp/**', 'npx/**', '.claude/**', '.agents/**', '.freebuff/**', '.github/**', 'skills-lock.json', 'PASTE- sandbox browser/**'] },
 
     // Browser ESM app modules
     {

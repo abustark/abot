@@ -15,6 +15,13 @@ This document tracks every commit made on `main` following the `2.0.x` versionin
 
 ## Commit History
 
+### 2.0.29 - add "PASTE- sandbox browser" kit (self-contained browser-ability paste for online agents)
+- **Date**: 2026-09-21
+- **Changes**:
+  - New folder `PASTE- sandbox browser/` holding everything an online-only AI agent needs to gain real-browser ability in a CDN-blocked sandbox (owner request — files extracted from the repo, not rewritten): `SANDBOX-BROWSER-VISUAL-TESTS.md` (the full setup guide, verbatim copy of `docs/`), `visual-check.js` (verbatim copy of the working `tools/` reference implementation), `package-scripts-snippet.json` (the `visual` / `visual:local` npm scripts to merge), and a `README.md` mapping the files + quick start + production lessons (offline determinism / request interception, browser resolution order, geometric assertions).
+  - `eslint.config.js`: the kit folder is excluded from lint (it contains a verbatim tool copy — the live `tools/visual-check.js` remains the gated source of truth).
+  - No app code changes.
+
 ### 2.0.28 - docs: branch-version independence note (commit names/versions are per-branch)
 - **Date**: 2026-09-21
 - **Changes**:
