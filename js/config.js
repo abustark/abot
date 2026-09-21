@@ -84,12 +84,14 @@ export const MODEL_CONFIG = {
     'google/gemini-2.5-pro': { name: 'Gemini 2.5 Pro', color: 'gemini' },
     'google/gemini-2.5-flash': { name: 'Gemini 2.5 Flash', color: 'gemini-pro' },
 
-    // --- OTHER GROQ ---
-    'groq/deepseek-r1-distill-llama-70b': { name: 'DeepSeek R1 70B', color: 'groq-yellow' },
-    'groq/llama-3.1-8b-instant': { name: 'Llama 3.1', color: 'groq-yellow' },
-    'groq/meta-llama/llama-4-maverick-17b-128e-instruct': { name: 'Llama 4 Maverick', color: 'groq-yellow' },
-    'groq/meta-llama/llama-4-scout-17b-16e-instruct': { name: 'Llama 4 Scout', color: 'groq-yellow' },
-    'groq/moonshotai/kimi-k2-instruct': { name: 'Kimi K2', color: 'groq-yellow' },
+    // --- OTHER GROQ (refreshed 2026-08-30 against console.groq.com/docs/models
+    // + deprecations page. Groq shut down on 08/16/26: llama-3.1-8b-instant,
+    // llama-3.3-70b-versatile; earlier: llama-4-scout, qwen3-32b, kimi-k2-
+    // instruct, deepseek-r1-distill. Groq rotates FAST — re-check monthly.) ---
+    'groq/openai/gpt-oss-20b': { name: 'GPT-OSS 20B', color: 'groq-yellow' },
+    'groq/qwen/qwen3.6-27b': { name: 'Qwen 3.6 27B', color: 'groq-yellow' },
+    'groq/qwen/qwen3.8-27b': { name: 'Qwen 3.8 27B', color: 'groq-yellow' },
+    'groq/minimaxai/minimax-m2.7': { name: 'MiniMax M2.7', color: 'groq-yellow' },
 
     // --- NVIDIA ---
     'nvidia/openai/gpt-oss-20b': { name: 'GPT-oss 20b', color: 'nvidia-green' },

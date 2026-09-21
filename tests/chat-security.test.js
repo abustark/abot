@@ -17,6 +17,8 @@ assert(V({ model: 'openai/gpt-oss-120b:free', messages: [{ role: 'user', content
 assert(V({ model: 'poolside/laguna-s-2.1:free', messages: [{ role: 'user', content: 'a' }] }).ok, 'poolside S 2.1 accepted');
 assert(V({ model: 'thinkingmachines/inkling:free', messages: [{ role: 'user', content: 'a' }] }).ok, 'thinkingmachines accepted');
 assert(V({ model: 'inclusionai/ling-3.0-flash-vl:free', messages: [{ role: 'user', content: 'a' }] }).ok, 'inclusionai accepted');
+assert(V({ model: 'groq/openai/gpt-oss-20b', messages: [{ role: 'user', content: 'a' }] }).ok, 'groq nested-org model accepted');
+assert(V({ model: 'groq/minimaxai/minimax-m2.7', messages: [{ role: 'user', content: 'a' }] }).ok, 'minimaxai via groq accepted');
 assert(!V({ model: 'google/../gemma:free', messages: [{ role: 'user', content: 'a' }] }).ok, 'traversal still blocked with :free');
 assert(!V({ model: 'groq/m:free;rm-rf', messages: [{ role: 'user', content: 'a' }] }).ok, 'semicolon still blocked with :free');
 assert(!V({ model: 'evilcorp/agent:free', messages: [{ role: 'user', content: 'a' }] }).ok, 'unknown org :free rejected');
