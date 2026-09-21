@@ -1,0 +1,27 @@
+PASS  [mobile] app shell visible after mock login
+PASS  [mobile] mic button removed (B-33) — count=0
+PASS  [mobile] stop overlays send slot exactly (B-35) — send(312,753,41) stop(312,753,41)
+PASS  [mobile] send button flush right (B-33) — send right=353 box right=364
+PASS  [mobile] scroll padding >= dock height (B-36) — pad=174 dock=134
+PASS  [mobile] no duplicate ids
+PASS  [mobile] error surfaces as visible card (B-20/B-34) — ⚠️ Connection error: currentUser.getIdToken is not a function
+PASS  [mobile] stop button re-hidden after stream ends
+--- console errors (mobile) ---
+Failed to load resource: net::ERR_CONNECTION_CLOSED
+Failed to load resource: net::ERR_CONNECTION_CLOSED
+Failed to load resource: net::ERR_CONNECTION_CLOSED
+Failed to load resource: net::ERR_CONNECTION_CLOSED
+Error loading chats from Firestore: TypeError: chatsCollectionRef.orderBy is not a function
+PASS  [desktop] app shell visible after mock login
+PASS  [desktop] mic button removed (B-33) — count=0
+PASS  [desktop] stop overlays send slot exactly (B-35) — send(1083,719,41) stop(1083,719,41)
+PASS  [desktop] send button flush right (B-33) — send right=1125 box right=1135
+PASS  [desktop] no duplicate ids
+PASS  [desktop] error surfaces as visible card (B-20/B-34) — ⚠️ Connection error: currentUser.getIdToken is not a function
+PASS  [desktop] stop button re-hidden after stream ends
+--- console errors (desktop) ---
+Failed to load resource: net::ERR_CONNECTION_CLOSED
+Failed to load resource: net::ERR_CONNECTION_CLOSED
+Failed to load resource: net::ERR_CONNECTION_CLOSED
+Failed to load resource: net::ERR_CONNECTION_CLOSED
+Error loading chats from Firestore: TypeError: chatsCollectionRef.orderBy is not a function

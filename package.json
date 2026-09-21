@@ -11,7 +11,8 @@
     "lint": "eslint .",
     "check": "node tools/syntax-check.js",
     "typecheck": "tsc -p jsconfig.json",
-    "prepare": "git config core.hooksPath .githooks"
+    "prepare": "git config core.hooksPath .githooks",
+    "visual": "LD_LIBRARY_PATH=/tmp/al2023-libs/lib FONTCONFIG_PATH=/tmp/fonts node tools/visual-check.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
