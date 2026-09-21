@@ -54,20 +54,20 @@ ABot is a **vanilla-JS, multi-model AI chat app** (no framework):
 
 ---
 
-## 3. Quality gates (owner-gated — NOT automatic)
+## 3. Quality gates (owner-triggered ONLY — agents never run them on their own)
 
-**Gate policy (owner directive, 2026-09-21 — overrides "run gates before every push"):**
+**Gate policy (owner directive, 2026-09-21 — overrides everything ever written about "run gates"):**
 
-1. **Do NOT run the full gate suite automatically.** The suite below runs **only** when
-   (a) the update is **large** — multi-file features, anything touching `api/`, `server.js`,
-   `lib/`, security, routing, or a catalog overhaul — or (b) the **owner explicitly asks**
-   for the gates ("run the gates", "run checks", "verify", …).
-2. **Ask, don't assume:** after every **meaningful update** (anything beyond a typo/doc tweak),
-   the agent must **ask the owner whether to run the gate passes** before pushing — and wait
-   for the answer. Never decide on your own, never silently skip when the owner asked for them.
-3. Small fixes and docs-only changes ship without the full suite; the pre-commit hook still
-   runs `npm run check` + `npm run lint` on **every** commit automatically — keep the hook intact.
-4. When gates DO run (large update or owner request), **ALL** of the following must pass before push:
+1. **NEVER run gates, lints, checks, tests, builds, browser suites, or ANY verification
+   command on your own.** Not for small changes, not for large updates, not "just to be safe".
+   No `npm run lint`, no `npm run check`, no `npm run test`, no `npm run build:css`,
+   no `npm run visual`, no verification scripts of any kind — unless the owner explicitly
+   tells you to run them ("run the gates", "run checks", "verify", "test it", …).
+2. **Ask after every meaningful update — always, once, in plain words:** when a fix/change
+   is done, the agent reports what changed and then asks: *"Update done — want me to run
+   the gate passes / tests to verify, or leave it?"* Then it **waits for the answer**.
+   This reminder is mandatory and may not be skipped or folded into other text.
+3. When the owner says yes, **ALL** of the following must pass before push:
 
 ```bash
 npm ci                      # first time
@@ -79,6 +79,10 @@ npm run test                # security tests + jsdom smoke + interaction test
 ```
 
 `tools/interaction-test.js` clicks every shell control in jsdom and asserts the visible effect — if you broke a toggle, this is where it shows. Add a case there for every new interactive element you build.
+
+> **Note:** the pre-commit hook still runs `npm run check` + `npm run lint` automatically on every
+> commit (repo mechanism, not agent choice). If the owner ever wants even that removed, say so
+> and the agent will take the hook out of `.githooks/`.
 
 
 ---
@@ -94,6 +98,14 @@ For PHASE D: load `emil-design-eng` + `animate` + `taste-skill` before writing U
 ---
 
 ## 5. Hard rules
+
+0. **Commands: write-only — NO self-initiated runs.** When the owner asks to fix or change
+   a file/code, the agent does **exactly that and nothing else**. Commands may be used **only**
+   to write, read, copy, check, or move files and code (editing, creating, copying, listing,
+   `git add`/`commit`/`push`). The agent must **never** run verification of any kind on its own —
+   no tests, no lints, no builds, no checks, no browser suites, and no `git` probing to "confirm"
+   (no `git log`/`diff`/`ls-remote` fishing, no fetching just to look). **Only the owner may say
+   "run / verify / test / pass"** — and only then does the agent run those commands.
 
 1. **Do not rewrite the app shell or migrate frameworks.** Vanilla ES modules is a settled decision (`docs/UI-COMPONENTS-ROADMAP.md` documents why and its revisit-triggers).
 2. **Do not modify backend security hardening** (`api/chat.js`, `server.js`, `lib/chat-security.js`, `vercel.json`, `firestore.rules`) without owner sign-off.
