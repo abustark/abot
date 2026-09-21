@@ -104,24 +104,16 @@ export const MODEL_CONFIG = {
     // current roster; deepseek-chat-v3-0324:free (provider paywalled) and
     // dolphin-mistral-24b-venice (delisted) were REMOVED as deprecated.
     // The :free catalog rotates — re-check openrouter.ai/models quarterly.) ---
-    'qwen/qwen3-coder:free': { name: 'Qwen 3 Coder', color: 'openrouter-free' },
-    'z-ai/glm-4.5-air:free': { name: 'GLM 4.5 Air', color: 'openrouter-free' },
-    'openai/gpt-oss-120b:free': { name: 'GPT-OSS 120B', color: 'openrouter-free' },
-    'openai/gpt-oss-20b:free': { name: 'GPT-OSS 20B', color: 'openrouter-free' },
-    // meta-llama/llama-3.3-70b-instruct:free — REMOVED 2026-08-30: listed as
-    // free on OpenRouter but 404s (no provider currently serving the free
-    // variant). Restore if it comes back.
-
-    'google/gemma-4-31b-it:free': { name: 'Gemma 4 31B', color: 'openrouter-free' },
+    // --- OWNER'S AUTHORITATIVE FREE LIST (2026-08-30, supersedes prior
+    // refreshes — this is the set the owner confirmed working/valid) ---
     'nvidia/nemotron-3-ultra-550b-a55b:free': { name: 'Nemotron 3 Ultra', color: 'openrouter-free' },
-    // Live-site refresh 2026-08-30 (openrouter.ai/models?q=free+):
     'poolside/laguna-s-2.1:free': { name: 'Poolside Laguna S 2.1', color: 'openrouter-free' },
-    'thinkingmachines/inkling:free': { name: 'Inkling 975B', color: 'openrouter-free' },
     'nvidia/nemotron-3.5-lightning:free': { name: 'Nemotron 3.5 Lightning', color: 'openrouter-free' },
-    'inclusionai/ling-3.0-flash-vl:free': { name: 'Ling 3.0 Flash VL', color: 'openrouter-free' },
-    // Owner-requested adds (verified on model pages 2026-08-30):
-    'qwen/qwen3.8-27b:free': { name: 'Qwen 3.8 27B', color: 'openrouter-free' }, // 262K ctx, vision-language, flexible thinking
+    'qwen/qwen3.8-27b:free': { name: 'Qwen 3.8 27B', color: 'openrouter-free' },
     'z-ai/glm-5.2:free': { name: 'GLM 5.2', color: 'openrouter-free' }, // NOTE: free variant is 33K ctx (1M is paid)
+    'google/gemma-4-26b-a4b-it:free': { name: 'Gemma 4 26B A4B', color: 'openrouter-free' }, // MoE variant
+    'google/gemma-4-31b-it:free': { name: 'Gemma 4 31B', color: 'openrouter-free' },
+    'openrouter/free': { name: 'OpenRouter Auto (Free)', color: 'openrouter-free' }, // auto-routes to the best available free model
 };
 
 // =================================================================================

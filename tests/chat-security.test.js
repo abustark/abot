@@ -12,11 +12,12 @@ let r = V({ model: 'groq/llama-3.1-8b-instant', messages: [{ role: 'user', conte
 assert(r.ok && r.cleanedMessages.length === 1, 'valid request passes');
 
 // OpenRouter :free tier — colons allowed, org prefixes validated (v2.0.10/11)
-assert(V({ model: 'qwen/qwen3-coder:free', messages: [{ role: 'user', content: 'a' }] }).ok, ':free suffix passes validation');
-assert(V({ model: 'openai/gpt-oss-120b:free', messages: [{ role: 'user', content: 'a' }] }).ok, 'openai org :free accepted');
+assert(V({ model: 'qwen/qwen3.8-27b:free', messages: [{ role: 'user', content: 'a' }] }).ok, ':free suffix passes validation');
+assert(V({ model: 'google/gemma-4-26b-a4b-it:free', messages: [{ role: 'user', content: 'a' }] }).ok, 'gemma-4-26b-a4b accepted');
+assert(V({ model: 'openrouter/free', messages: [{ role: 'user', content: 'a' }] }).ok, 'openrouter/free auto-router accepted');
 assert(V({ model: 'poolside/laguna-s-2.1:free', messages: [{ role: 'user', content: 'a' }] }).ok, 'poolside S 2.1 accepted');
-assert(V({ model: 'thinkingmachines/inkling:free', messages: [{ role: 'user', content: 'a' }] }).ok, 'thinkingmachines accepted');
-assert(V({ model: 'inclusionai/ling-3.0-flash-vl:free', messages: [{ role: 'user', content: 'a' }] }).ok, 'inclusionai accepted');
+assert(V({ model: 'thinkingmachines/inkling:free', messages: [{ role: 'user', content: 'a' }] }).ok, 'thinkingmachines accepted (org remains allowlisted)');
+assert(V({ model: 'inclusionai/ling-3.0-flash-vl:free', messages: [{ role: 'user', content: 'a' }] }).ok, 'inclusionai accepted (org remains allowlisted)');
 assert(V({ model: 'groq/openai/gpt-oss-20b', messages: [{ role: 'user', content: 'a' }] }).ok, 'groq nested-org model accepted');
 assert(V({ model: 'groq/minimaxai/minimax-m2.7', messages: [{ role: 'user', content: 'a' }] }).ok, 'minimaxai via groq accepted');
 assert(!V({ model: 'google/../gemma:free', messages: [{ role: 'user', content: 'a' }] }).ok, 'traversal still blocked with :free');
