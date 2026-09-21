@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.1.3`** (current head is `2.1.2` — see below)
+> - **`main` → `2.1.4`** (current head is `2.1.3` — see below)
 > - **`arena/01a03fe9-abot` → its own sequence** (syncs are **unversioned** merge commits:
 >   `merge main <version> into arena/01a03fe9-abot`; arena's own feature commits use arena's numbers)
 
@@ -25,6 +25,15 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.1.3 - fix mobile UX: frozen screen during streams, 4th/5th+ replies behind composer, keyboard never dismissed
+- **Date**: 2026-09-21
+- **Owner report**: "when a model loads to respond the whole screen freezes instead of only model selector, causing can't scroll"; "long response or 4th/5th response goes behind the composer and can't be scrolled"; "after sending, the mobile keyboard stays up → mistypes → accidental second message".
+- **Changes**:
+  - **B-47 (screen freeze during streams)**: the SSE chunk handler re-parsed the ENTIRE accumulated reply (`renderSafeMarkdown(fullReply)` → `innerHTML`) + `maybeCollapse` + follow on **every chunk** — per-token full-markdown work saturated the phone's UI thread, freezing the whole app mid-stream. Now every chunk only accumulates text (cheap); the DOM flush runs **at most every ~100 ms**; the first chunk paints instantly; the final render after the loop covers the tail; a `streamDone` flag kills any pending flush on error/abort so it can never overwrite an error card.
+  - **B-48 (keyboard never dismissed)**: `sendMessage` unconditionally refocused the input after send. Desktop (≥768 px) still refocuses for fast typing; **mobile now blurs the input after send**, dismissing the keyboard — the `--kb-h` shrink + visualViewport-resize listener re-settle the padding/dock.
+  - **B-49**: the 4th/5th+-message coverage failure was the compounding of B-47 (frozen → unscrollable) + B-48 (keyboard squishing the viewport) on top of the correct B-36/B-41/B-42/B-43 machinery.
+  - **Guards:** cycle-test gains "mobile send blurs the input" + "desktop send refocuses"; visual-check asserts `activeElement` after send on both viewports. SW cache v45, build id `2026-09-21.4`.
 
 ### 2.1.2 - docs: "bug and fixes summary" kit — the Bug & Fix Registry protocol, shareable
 - **Date**: 2026-09-21

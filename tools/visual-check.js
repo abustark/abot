@@ -167,6 +167,14 @@ async function runViewport(browser, { w, h, label, mobile }) {
     });
     check(`[${label}] stop button re-hidden after stream ends`, stopCleared);
 
+    // 2.1.3 (B-48): after send the input must not hold focus on mobile (the
+    // keyboard must dismiss); desktop keeps focus for fast follow-up typing.
+    {
+        const focusProbe = await page.evaluate(() => (document.activeElement ? document.activeElement.id : ''));
+        if (mobile) check(`[${label}] B-48: input blurred after send (keyboard dismisses)`, focusProbe !== 'messageInput', `active=${focusProbe}`);
+        else check(`[${label}] B-48: input refocused after send (desktop typing)`, focusProbe === 'messageInput', `active=${focusProbe}`);
+    }
+
     // final screenshot with the error card
     await page.screenshot({ path: path.join(OUT, `visual-${label}-error.png`), fullPage: false });
 

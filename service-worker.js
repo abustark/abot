@@ -3,7 +3,7 @@
  * Provides offline caching for local assets only
  */
 
-const CACHE_NAME = 'abot-cache-v44'; // v2.0.30: NVIDIA catalog re-keyed under nvidia/ routing prefix (js/config.js changed)
+const CACHE_NAME = 'abot-cache-v45'; // v2.0.30: NVIDIA catalog re-keyed under nvidia/ routing prefix (js/config.js changed)
 const STATIC_ASSETS = [
     '/',
     '/index.html',
