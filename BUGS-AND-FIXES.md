@@ -41,6 +41,9 @@
 | B-26 | **Generic "Something went wrong" hid real causes** | `lib/chat-security.js` `sseError`/`providerStatusError` (~L157–180); backends' catch blocks | Machine `code` + status-specific messages (auth_failed / model_unavailable / rate_limited / config_missing naming the env var) | 2.0.13 `882e454` + 2.0.17 `176d371` |
 | B-27 | **OpenRouter `:free` 401 — key missing on Vercel** *(owner action required)* | Not a code bug — `OPENROUTER_API_KEY` absent/expired in Vercel env | Owner: Vercel → Project → Settings → Environment Variables → add/refresh `OPENROUTER_API_KEY` → redeploy. Error message now names this explicitly | Documented 2.0.16+ |
 | B-28 | **GIS token client lost after sign-out** — Google button could no-op | `js/auth.js` Google click handler (~L196) | On-demand rebuild of `tokenClient` if missing; explicit "still loading" message otherwise | 2.0.18 · current commit |
+| B-29 | **Stuck dots bubble next to the error card** — on stream error the typing placeholder was never removed, so the error persisted as a SECOND bubble ("two responses" look) | `js/chat.js` SSE-error branch + network catch (~L695, ~L790) | Remove the `.typing-indicator` placeholder's message container before appending the error card | 2.0.19 · current commit |
+| B-30 | **`llama-3.3-70b-instruct:free` 404** — listed free on OpenRouter but no provider currently serves the free variant (verified on the model page: exists, Price Free, but API 404). Removed from catalog; restore if it returns | `js/config.js` MODEL_CONFIG (removed entry, comment left in place) | Catalog removal; user's 401→404 change simultaneously confirmed the new `OPENROUTER_API_KEY` works | 2.0.19 · current commit |
+| B-31 | **Confirmed working / not a bug:** "two GPT-oss replies" in screenshots = two separate "hi" sends, each with its own response (correct behavior). `OPENROUTER_API_KEY` confirmed working (401 → 404 status change after key update) | — | — | verified 2026-08-30 |
 
 ---
 

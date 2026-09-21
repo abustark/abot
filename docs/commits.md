@@ -8,6 +8,14 @@ This document tracks every commit made on `main` following the `2.0.x` versionin
 
 ## Commit History
 
+### 2.0.19 - stuck-dots fix on stream errors + remove non-servable Llama free
+- **Date**: 2026-08-30
+- **Changes**:
+  - **Stuck dots bubble (owner screenshot)**: on stream error the typing placeholder was left in the DOM next to the persisted error card — the "two responses" look. Placeholder container is now removed before the error card is appended (SSE-error branch + network catch).
+  - **`llama-3.3-70b-instruct:free` removed**: model page exists and says Free, but API 404s — no provider currently serving the free variant. Comment left in catalog for restoration. Note: the 401→404 status change simultaneously CONFIRMED the owner's new `OPENROUTER_API_KEY` works.
+  - Clarified (B-31): the two GPT-oss replies in the screenshot were two separate sends — correct behavior.
+  - Registry: B-29, B-30, B-31 added to BUGS-AND-FIXES.md. SW bump. All gates green.
+
 ### 2.0.18 - follow-on-render, GIS on-demand rebuild, BUGS-AND-FIXES registry
 - **Date**: 2026-08-30
 - **Changes**:

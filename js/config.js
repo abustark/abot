@@ -108,7 +108,10 @@ export const MODEL_CONFIG = {
     'z-ai/glm-4.5-air:free': { name: 'GLM 4.5 Air', color: 'openrouter-free' },
     'openai/gpt-oss-120b:free': { name: 'GPT-OSS 120B', color: 'openrouter-free' },
     'openai/gpt-oss-20b:free': { name: 'GPT-OSS 20B', color: 'openrouter-free' },
-    'meta-llama/llama-3.3-70b-instruct:free': { name: 'Llama 3.3 70B', color: 'openrouter-free' },
+    // meta-llama/llama-3.3-70b-instruct:free — REMOVED 2026-08-30: listed as
+    // free on OpenRouter but 404s (no provider currently serving the free
+    // variant). Restore if it comes back.
+
     'google/gemma-4-31b-it:free': { name: 'Gemma 4 31B', color: 'openrouter-free' },
     'nvidia/nemotron-3-ultra-550b-a55b:free': { name: 'Nemotron 3 Ultra', color: 'openrouter-free' },
     // Live-site refresh 2026-08-30 (openrouter.ai/models?q=free+):

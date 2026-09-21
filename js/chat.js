@@ -717,6 +717,11 @@ export const sendMessage = async () => {
                         console.error('[ABot] stream error:', errorPayload.code || 'unknown', '-', errMsg);
                     } catch { }
                     streamFailed = true;
+                    // v2.0.19: remove the streaming placeholder (typing dots)
+                    // BEFORE appending the error card — otherwise the stuck
+                    // dots bubble sat next to the error forever ("two
+                    // responses" look).
+                    dom.chatHistory.querySelector('.typing-indicator')?.closest('.message-container')?.remove();
                     const now = currentChat.messages.length;
                     const errorMsg = { role: 'assistant', content: errMsg, model: currentChat.model, isError: true };
                     currentChat.messages.push(errorMsg);
@@ -793,6 +798,7 @@ export const sendMessage = async () => {
         } else {
             console.error("sendMessage stream error:", error);
             streamFailed = true;
+            dom.chatHistory.querySelector('.typing-indicator')?.closest('.message-container')?.remove();
             const netErrMsg = { role: 'assistant', content: 'Connection error: ' + (error.message || 'could not reach the server.'), model: currentChat.model, isError: true };
             currentChat.messages.push(netErrMsg);
             appendMessage(netErrMsg, false, { index: currentChat.messages.length - 1 });
