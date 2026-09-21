@@ -22,14 +22,20 @@ ABot is a **vanilla-JS, multi-model AI chat app** (no framework):
 
 1. **Always work on `main`**: All development, fixes, quality gates, and commits happen directly on the `main` branch.
 2. **Commit Naming & Versioning**:
-   - Every commit must follow this versioning structure:
-     `2.0.1`, `2.0.2`, ..., `2.0.9`, `2.0.10` ➔ rolls over to `2.1.0`.
-     Then `2.1.1`, ..., `2.1.10` ➔ rolls over to `2.2.0`, etc.
+   - Structure: `2.0.1` … `2.0.10` ➔ **rolls over to `2.1.0`**; then `2.1.1` … `2.1.10` ➔ **`2.2.0`**; and so on.
+     **The third number NEVER exceeds `.10`** — when it would, roll the second number
+     (`2.0.10` → `2.1.0`, `2.1.10` → `2.2.0`, `2.2.10` → `2.3.0`, …).
    - Format: `<version> - <short description>` (e.g., `2.0.2 - auth page ui changed`). Keep it short and clear, avoid overly long commit titles.
-   - **Branch independence:** `main` and `arena/01a03fe9-abot` carry **separate, independent version sequences and commit names** — equal version numbers on the two branches are NOT the same work (the branches converged at `2.0.27`; before that they diverged, e.g. main's `2.0.10` ≠ arena's `2.0.10`). Identify commits by hash, never by version alone.
+   - **Branch independence (strict):** `main` and `arena/01a03fe9-abot` each keep their **own** version
+     numbers and commit names. The same number on the two branches is NOT the same work — always compare
+     **hashes**, never numbers. Never give a `main` commit a number from arena's sequence (or vice versa).
+   - **Keep the `📌 Next version` line at the top of `docs/commits.md` current** so no session has to guess.
    - Every commit must also be logged in `docs/commits.md` with its version and what it did.
 3. **Arena Synchronization (`arena/01a03fe9-abot`)**:
-   - After updating `main`, merge `main` into `arena/01a03fe9-abot` so the integration branch stays synced with `main`.
+   - After updating `main`, sync arena with an **arena-named merge commit**:
+     `git switch arena/01a03fe9-abot && git merge --no-ff main -m "merge main <version> into arena/01a03fe9-abot"`.
+     **Never fast-forward / push `main`'s ref straight into arena** — that brands main's commit names onto
+     arena and wipes out arena's own sequence.
    - **`docs/updates.md`**: Exists **only on the `arena` branch** (never commit to `main`). It is updated only after major updates (not for every small commit) and documents the contrast between the old workflow and the updated workflow.
 4. **Secrets**: Never commit secrets (`.env`, `service-account-key.json` are gitignored — keep them that way).
 

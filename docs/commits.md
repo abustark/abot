@@ -1,19 +1,39 @@
 # ABot Commit Log
 
-This document tracks every commit made on `main` following the `2.0.x` versioning schema:
-- Sequence: `2.0.1`, `2.0.2`, ..., `2.0.9`, `2.0.10` ➔ `2.1.0`, `2.1.1`, ..., `2.1.10` ➔ `2.2.0`, etc.
+This document tracks every commit made on `main` following the versioning schema:
+- Structure: `2.0.1` … `2.0.10` ➔ **rolls over to `2.1.0`**; then `2.1.1` … `2.1.10` ➔ **`2.2.0`**; then `2.2.1` … `2.2.10` ➔ **`2.3.0`**, and so on.
+- **The third number NEVER exceeds `.10`.** When it would, roll the second number. Do not write `2.0.11`, `2.1.11`, … — that is the drift this rule exists to prevent.
 - Format: `<version> - <short sentence>`
 
-> **⚠️ Branch-version independence (read this before comparing branches):** `main` and
-> `arena/01a03fe9-abot` use **separate, independent version numbers and commit names**. The same
-> version number on both branches does **NOT** mean the same work — e.g. `main`'s `2.0.10` and
-> `arena`'s `2.0.10` were two different commits written by different agents before the branches
-> converged at `2.0.27` (from then on, commits land on `main` and `arena` is fast-forwarded).
+> ### 📌 Next version — **keep this line current, every commit**
+> - **`main` → `2.1.1`** (current head is `2.1.0`, the roll-over commit that introduced this line)
+> - **`arena/01a03fe9-abot` → its own sequence** (syncs are **unversioned** merge commits:
+>   `merge main <version> into arena/01a03fe9-abot`; arena's own feature commits use arena's numbers)
+
+> **⚠️ Branch-version independence (read before comparing branches):** `main` and
+> `arena/01a03fe9-abot` keep **separate, independent version numbers and commit names**. The same number
+> on both branches does **NOT** mean the same work — e.g. `main`'s `2.0.10` and arena's `2.0.10` were two
+> completely different commits by different agents. Sync direction is one-way (`main` → arena) and the
+> sync is done with an **arena-named merge commit**, never by fast-forwarding main's commits into arena.
 > **Always identify/compare commits by their hash, never by version number alone.**
+
+> **🧾 History note (why the numbering above looks odd):** commits `2.0.11`–`2.0.26` (arena) and
+> `2.0.27`–`2.0.31` (main, this session) were written **past the roll-over point** — `.10` was exceeded
+> instead of rolling to `2.1.0`. That drift is now corrected: the roll-over rule above is enforced from
+> **`2.1.0`** onward, and the `📌 Next version` line must be updated with each commit.
 
 ---
 
 ## Commit History
+
+### 2.1.0 - ROLL-OVER: enforce the version rule (.10 → next minor), fix branch-numbering discipline
+- **Date**: 2026-09-21
+- **Owner correction**: (1) the version rule was being violated — commits went past `2.0.10` (as `2.0.11` … `2.0.31`) instead of **rolling over to `2.1.0`**; (2) `main`'s commits were carrying **arena-style numbers/copies** because arena was synced by fast-forwarding main's ref, which put main's commit names on arena.
+- **Changes**:
+  - `docs/commits.md` header: roll-over rule stated explicitly (the third number never exceeds `.10`; `2.0.10` → `2.1.0`, `2.1.10` → `2.2.0`, `2.2.10` → `2.3.0`), plus a **`📌 Next version`** line agents must keep current, plus a history note recording the `2.0.11`–`2.0.31` drift.
+  - `AGENTS.md` §1: roll-over enforced; **branch independence (strict)** — `main` and `arena` each keep their own version numbers and commit names, compare by hash never by number; and arena syncs are now **arena-named merge commits** (`git merge --no-ff main -m "merge main <version> into arena/01a03fe9-abot"`) — **never** a fast-forward of main's ref into arena.
+  - This commit is the first under the corrected rule: the `2.0.x` line is closed at `2.0.31`; numbering continues at **`2.1.0`**.
+  - No code changes.
 
 ### 2.0.31 - docs: gate policy — full gates only for large updates or on explicit owner request
 - **Date**: 2026-09-21
