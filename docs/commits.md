@@ -8,6 +8,14 @@ This document tracks every commit made on `main` following the `2.0.x` versionin
 
 ## Commit History
 
+### 2.0.17 - ROOT CAUSE FIXED: providerStatusError missing from the shared lib
+- **Date**: 2026-08-30
+- **Owner's Vercel log export named it**: `TypeError: providerStatusError is not a function` at api/chat.js:126, on EVERY provider error.
+- **What happened**: v2.0.13 added `providerStatusError()` to lib/chat-security.js and made both backends call it — but a sandbox reset reverted the LIB while the callers kept the new code. Since then, any model hitting ANY provider error branch crashed the error-handler itself → generic "(groq/TypeError)". GPT-OSS-120b worked only because it never enters an error branch (200 OK).
+- **Fix**: providerStatusError + code-aware sseError restored in the lib and exported.
+- **Never again**: tests/chat-security.test.js now asserts the FULL export surface the backends destructure (10 names) AND invokes providerStatusError with a fake res (404 → model_unavailable envelope with machine code; ended stream → no write). Any future lib drift fails CI locally before push.
+- **What this explains**: every "(groq/TypeError)" was a REAL provider error (rotated models, 429s, etc.) being masked by the crash. With the fix, models will surface their true status — some may just work, others will show "rotated/limit" precisely.
+
 ### 2.0.16 - fix error-cards-render-as-typing-dots + guard null-body stream crashes
 - **Date**: 2026-08-30
 - **Changes**:

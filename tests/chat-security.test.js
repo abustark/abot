@@ -86,4 +86,29 @@ assert(E(googleUser).allowed === true, 'google user allowed');
 const anonUser = { uid: 'u4', firebase: { sign_in_provider: 'anonymous' } };
 assert(E(anonUser).allowed === true, 'anonymous guest user allowed');
 
+// --- v2.0.16 regression: API-surface drift guard ---
+// api/chat.js + server.js destructure these names from the lib; if the lib
+// loses one (sandbox resets have done exactly this), production 500s with
+// "X is not a function" on every provider error. Verify presence + behavior.
+const REQUIRED_API = ['validateChatRequest', 'verifyUserEmailStatus', 'MemoryRateLimiter', 'identityKey', 'clientIp', 'upstreamTimeout', 'sseError', 'providerStatusError', 'logProviderError', 'LIMITS'];
+for (const name of REQUIRED_API) {
+  assert(sec[name] !== undefined, `lib export drift: ${name} missing`);
+}
+// providerStatusError must write a code-tagged SSE envelope and stop silently on ended streams
+{
+  let written = '', ended = false;
+  const fakeRes = {
+    get writableEnded() { return ended; },
+    write(chunk) { written += chunk; return true; },
+  };
+  sec.providerStatusError(fakeRes, 'groq', 404);
+  assert(written.includes('event: error'), 'providerStatusError writes SSE event');
+  assert(written.includes('model_unavailable'), '404 maps to model_unavailable');
+  assert(written.includes('"code"'), 'envelope carries a machine code');
+  ended = true;
+  written = '';
+  sec.providerStatusError(fakeRes, 'groq', 429);
+  assert(written === '', 'ended stream is not written to');
+}
+
 console.log('ALL CHAT-SECURITY TESTS PASSED ✅');
