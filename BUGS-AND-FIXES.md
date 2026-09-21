@@ -56,6 +56,14 @@
 
 ---
 
+## §Merge 2026-08-30 (Option A) — main → arena
+
+- **Why:** owner chose to keep main's dot-matrix startup wordmark + v2.0.8–2.0.10 UI work AND arena's 2.0.8–2.0.25 fixes. Executed as `merge origin/main --allow-unrelated-histories` into arena.
+- **Resolution policy:** main wins for UI/design markup+CSS (dotmark loader, account menu, empty-state order, geist fonts); arena wins for backend security (`lib/chat-security.js`, `api/chat.js`, `server.js`), model catalogs (`js/config.js`), error/auth-cycle/composer fixes (`js/chat.js`, `js/auth.js`, `js/app.js`), tests/tooling.
+- **Verified post-merge:** all 6 gate suites green; real-browser visual check 15/15 PASS both viewports; dotmark + spinner present in served HTML; all dom.js ids resolve.
+- **Watch item:** arena's `initApp` idempotency guard (B-15) + scroll fixes (B-36) must keep working with main's account-menu/overflow wiring — covered by interaction + cycle tests.
+- Merge commit: `5ba3597`.
+
 ## §Re-verification Checklist (run after EVERY major/intermediate update)
 
 **Fast automated pass (local or CI):**
