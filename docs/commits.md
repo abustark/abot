@@ -8,6 +8,15 @@ This document tracks every commit made on `main` following the `2.0.x` versionin
 
 ## Commit History
 
+### 2.0.24 - NVIDIA catalog refresh (free tier confirmed alive; 4 of 5 old IDs stale)
+- **Date**: 2026-08-30
+- **Changes**:
+  - Confirmed via build.nvidia.com + cross-sources: NVIDIA NIM free API still exists (one nvapi- key, ~40 RPM, no credit card).
+  - REMOVED: `nvidia/deepseek-ai/deepseek-r1-0528` (delisted), `nvidia/qwen/qwen2.5-coder-32b-instruct` (2024-era), `nvidia/nvidia/nvidia-nemotron-nano-9b-v2` (superseded).
+  - KEPT: `nvidia/openai/gpt-oss-20b`, `nvidia/mistralai/mistral-nemotron`. ADDED: `nvidia/nvidia/nemotron-3-ultra-550b-a55b` (1M ctx), `nvidia/nvidia/nemotron-3-super-120b-a12b`, `nvidia/nvidia/nemotron-nano-3-30b-a3b`, `nvidia/minimaxai/minimax-m3`.
+  - NVIDIA proxy leg verified end-to-end with a mock harness (tmp/nvtest): URL, our `nvidia/` prefix stripped before sending upstream, Bearer header, streaming proxied + [DONE].
+  - NOTE for owner: on-device NVIDIA failures were most likely these dead IDs (404s now shown specifically) and/or NVIDIA_API_KEY missing on Vercel (config_missing card names it). SW bump.
+
 ### 2.0.23 - catalog reconciled to owner's authoritative OpenRouter free list
 - **Date**: 2026-08-30
 - **Changes**:
