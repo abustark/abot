@@ -195,10 +195,23 @@ dom.backToLogin.addEventListener('click', (e) => { e.preventDefault(); showLogin
 
 if (dom.googleSigninBtn) {
     dom.googleSigninBtn.addEventListener('click', () => {
-
-        // This command will ALWAYS open the pop-up because it's designed for a user click.
+        // v2.0.18: after sign-out, Google's script may have been GC'd/lost its
+        // init state in some browsers — rebuild the token client on demand
+        // instead of silently doing nothing.
         if (state.tokenClient) {
             state.tokenClient.requestAccessToken();
+            return;
+        }
+        if (window.google && google.accounts && google.accounts.oauth2) {
+            state.tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: "784623545561-f9qumqjcsek7g368657cloq8rqc0kurj.apps.googleusercontent.com",
+                scope: 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
+                callback: handleCredentialResponse,
+            });
+            state.tokenClient.requestAccessToken();
+        } else {
+            setAuthMessage('Google sign-in is still loading — try again in a few seconds.');
+            console.warn('[ABot] GIS not ready at Google button click');
         }
     });
 }

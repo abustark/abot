@@ -945,6 +945,10 @@ export const renderActiveChat = () => {
     dom.modelSelectorLabel.textContent = MODEL_CONFIG[chat.model]?.name || 'Select Model';
     applyModelColorTheme(chat.model);
     syncComposerChips();
+    // v2.0.18: re-renders (chat switch, model switch, reaction toggles) land
+    // the view wherever the old scroll was — pin to the newest content when
+    // the user is in follow mode so replies never sit behind the composer.
+    if (typeof requestAnimationFrame === 'function') requestAnimationFrame(() => window.__abotFollowBottom?.()); else window.__abotFollowBottom?.();
 };
 
 // E2 (owner-approved): drop the trailing assistant reply, keep the last user

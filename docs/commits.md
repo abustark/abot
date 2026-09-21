@@ -8,6 +8,14 @@ This document tracks every commit made on `main` following the `2.0.x` versionin
 
 ## Commit History
 
+### 2.0.18 - follow-on-render, GIS on-demand rebuild, BUGS-AND-FIXES registry
+- **Date**: 2026-08-30
+- **Changes**:
+  - **Composer overlap, part 2 (owner report: 3rd/4th reply still covered)**: re-renders (chat/model switch, reaction toggles) previously landed the viewport wherever the old scroll was. `renderActiveChat()` now follows the bottom in follow mode (rAF-guarded for jsdom).
+  - **GIS robustness**: the Google button rebuilds the OAuth token client on demand if it was lost after sign-out, with a visible "still loading" fallback message instead of a silent no-op.
+  - **401 message sharpened** for OpenRouter models: explicitly names `OPENROUTER_API_KEY` + the Vercel env path (owner's Gemma 4 31B screenshot = key missing/rejected on OpenRouter; Groq-direct + Gemini keys work).
+  - **BUGS-AND-FIXES.md** created at repo root: 28 arena entries (bug, file+approx fix lines, fix, version+commit ref), mandatory re-verification checklist for every update, catalog freshness schedule, and a dedicated §Main Repo section for the main branch's own history.
+
 ### 2.0.17 - ROOT CAUSE FIXED: providerStatusError missing from the shared lib
 - **Date**: 2026-08-30
 - **Owner's Vercel log export named it**: `TypeError: providerStatusError is not a function` at api/chat.js:126, on EVERY provider error.
