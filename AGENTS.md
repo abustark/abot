@@ -48,7 +48,20 @@ ABot is a **vanilla-JS, multi-model AI chat app** (no framework):
 
 ---
 
-## 3. Quality gates (ALL must pass before any push)
+## 3. Quality gates (owner-gated — NOT automatic)
+
+**Gate policy (owner directive, 2026-09-21 — overrides "run gates before every push"):**
+
+1. **Do NOT run the full gate suite automatically.** The suite below runs **only** when
+   (a) the update is **large** — multi-file features, anything touching `api/`, `server.js`,
+   `lib/`, security, routing, or a catalog overhaul — or (b) the **owner explicitly asks**
+   for the gates ("run the gates", "run checks", "verify", …).
+2. **Ask, don't assume:** after every **meaningful update** (anything beyond a typo/doc tweak),
+   the agent must **ask the owner whether to run the gate passes** before pushing — and wait
+   for the answer. Never decide on your own, never silently skip when the owner asked for them.
+3. Small fixes and docs-only changes ship without the full suite; the pre-commit hook still
+   runs `npm run check` + `npm run lint` on **every** commit automatically — keep the hook intact.
+4. When gates DO run (large update or owner request), **ALL** of the following must pass before push:
 
 ```bash
 npm ci                      # first time
@@ -60,6 +73,7 @@ npm run test                # security tests + jsdom smoke + interaction test
 ```
 
 `tools/interaction-test.js` clicks every shell control in jsdom and asserts the visible effect — if you broke a toggle, this is where it shows. Add a case there for every new interactive element you build.
+
 
 ---
 

@@ -15,6 +15,13 @@ This document tracks every commit made on `main` following the `2.0.x` versionin
 
 ## Commit History
 
+### 2.0.31 - docs: gate policy — full gates only for large updates or on explicit owner request
+- **Date**: 2026-09-21
+- **Changes**:
+  - `AGENTS.md` §3 rewritten per owner directive: agents must **not** run the full gate suite automatically. Gates run only for **large updates** (multi-file features; anything touching `api/`, `server.js`, `lib/`, security, routing, catalog overhauls) or when the **owner explicitly asks**. After every meaningful update the agent must **ask the owner whether to run the gates** before pushing.
+  - Small/doc changes ship without the full suite; the pre-commit hook still runs `check` + `lint` on every commit (kept intact).
+  - No code changes.
+
 ### 2.0.30 - fix NVIDIA models erroring: ids were routed to OpenRouter/Gemini (no nvidia/ prefix)
 - **Date**: 2026-09-21
 - **Changes**:
