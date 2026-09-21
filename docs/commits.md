@@ -15,6 +15,14 @@ This document tracks every commit made on `main` following the `2.0.x` versionin
 
 ## Commit History
 
+### 2.0.30 - fix NVIDIA models erroring: ids were routed to OpenRouter/Gemini (no nvidia/ prefix)
+- **Date**: 2026-09-21
+- **Changes**:
+  - **B-46**: choosing NVIDIA's GLM 5.3 / GLM 5.3 Flash / GPT-OSS 20B (and 4 more) returned "AI provider returned an error". Root cause: the v2.0.25 owner-extracted catalog stored NVIDIA's ids **bare** (`z-ai/glm-5.3`, `openai/gpt-oss-20b`, …). Backend routing only maps `:free`→OpenRouter, `google/`→Gemini, `groq/`→Groq, `nvidia/`→NVIDIA — everything else falls through to OpenRouter, so 7 of 9 NVIDIA models were sent to OpenRouter (404) and `google/gemma-4-31b-it` matched the **Gemini** rule. The selector also grouped them under "OpenRouter · …"/Gemini headings (exactly what the owner saw) and the web-search chip was wrongly enabled.
+  - **Fix:** all 9 NVIDIA ids re-keyed under the `nvidia/` routing prefix (`nvidia/z-ai/glm-5.3`, `nvidia/openai/gpt-oss-20b`, …) — mirroring the existing Groq pattern (`groq/openai/gpt-oss-120b`). Backends strip only the first segment, so NVIDIA still receives the bare NIM id (`z-ai/glm-5.3`) — **no backend change**. Selector now groups all of them under one NVIDIA heading; capability chips correct.
+  - **Guards:** smoke test now asserts every `MODEL_CONFIG` key routes unambiguously (a bare publisher id fails the suite); 8 new security-validator asserts for the wrapped ids; `renderActiveChat` migrates a saved chat whose model id no longer exists (self-heals stale selections instead of erroring forever).
+  - SW cache v44, build id `2026-09-21.3`.
+
 ### 2.0.29 - add "PASTE- sandbox browser" kit (self-contained browser-ability paste for online agents)
 - **Date**: 2026-09-21
 - **Changes**:

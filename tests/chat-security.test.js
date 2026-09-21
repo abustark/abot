@@ -25,6 +25,16 @@ assert(V({ model: 'nvidia/minimaxai/minimax-m3', messages: [{ role: 'user', cont
 assert(V({ model: 'meta/muse-glimmer-30b', messages: [{ role: 'user', content: 'a' }] }).ok, 'meta org (nvidia-hosted) accepted');
 assert(V({ model: 'moonshotai/kimi-k3', messages: [{ role: 'user', content: 'a' }] }).ok, 'moonshotai (nvidia-hosted) accepted');
 assert(V({ model: 'z-ai/glm-5.3', messages: [{ role: 'user', content: 'a' }] }).ok, 'glm-5.3 (nvidia-hosted) accepted');
+// v2.0.30: catalog re-keyed — NVIDIA ids carry the nvidia/ ROUTING prefix
+// (mirrors groq/…). Without it these fell through routing to OpenRouter/Gemini.
+assert(V({ model: 'nvidia/z-ai/glm-5.3', messages: [{ role: 'user', content: 'a' }] }).ok, 'nvidia/z-ai/glm-5.3 (routed NVIDIA) accepted');
+assert(V({ model: 'nvidia/z-ai/glm-5.3-flash', messages: [{ role: 'user', content: 'a' }] }).ok, 'nvidia/z-ai/glm-5.3-flash accepted');
+assert(V({ model: 'nvidia/openai/gpt-oss-20b', messages: [{ role: 'user', content: 'a' }] }).ok, 'nvidia/openai/gpt-oss-20b accepted');
+assert(V({ model: 'nvidia/meta/muse-glimmer-30b', messages: [{ role: 'user', content: 'a' }] }).ok, 'nvidia/meta/muse-glimmer-30b accepted');
+assert(V({ model: 'nvidia/moonshotai/kimi-k3', messages: [{ role: 'user', content: 'a' }] }).ok, 'nvidia/moonshotai/kimi-k3 accepted');
+assert(V({ model: 'nvidia/google/gemma-4-31b-it', messages: [{ role: 'user', content: 'a' }] }).ok, 'nvidia/google/gemma-4-31b-it accepted');
+assert(V({ model: 'nvidia/mistralai/mistral-nemotron', messages: [{ role: 'user', content: 'a' }] }).ok, 'nvidia/mistralai/mistral-nemotron accepted');
+assert(V({ model: 'nvidia/nvidia/nemotron-3-super-120b-a12b', messages: [{ role: 'user', content: 'a' }] }).ok, 'nvidia/nvidia/nemotron-3-super accepted');
 assert(!V({ model: 'google/../gemma:free', messages: [{ role: 'user', content: 'a' }] }).ok, 'traversal still blocked with :free');
 assert(!V({ model: 'groq/m:free;rm-rf', messages: [{ role: 'user', content: 'a' }] }).ok, 'semicolon still blocked with :free');
 assert(!V({ model: 'evilcorp/agent:free', messages: [{ role: 'user', content: 'a' }] }).ok, 'unknown org :free rejected');

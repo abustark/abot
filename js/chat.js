@@ -956,6 +956,19 @@ export const renderActiveChat = () => {
         return;
     }
     const chat = state.chats[state.activeChatId];
+    // 2.0.30: migrate stale model ids — a saved chat holding an id that is no
+    // longer in the catalog (e.g. the pre-2.0.30 bare NVIDIA ids like
+    // 'z-ai/glm-5.3', re-keyed under the 'nvidia/' routing prefix) would keep
+    // sending a dead id to the wrong provider on every message.
+    if (!MODEL_CONFIG[chat.model]) {
+        chat.model = Object.keys(MODEL_CONFIG)[0];
+        const cu = state.auth.currentUser;
+        if (cu && state.db) {
+            state.db.collection('users').doc(cu.uid).collection('chats').doc(state.activeChatId)
+                .update({ model: chat.model })
+                .catch((err) => console.error('Failed to migrate stale model in DB', err));
+        }
+    }
     dom.chatHistory.innerHTML = '';
     if (!chat.messages || chat.messages.length === 0) {
         renderEmptyState();

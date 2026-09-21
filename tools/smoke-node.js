@@ -102,6 +102,22 @@ async function main() {
   await import(appUrl);
   console.log('✓ module graph imported (app.js + all relative imports)');
 
+  // ---- 2.0.30: every catalog model must route UNAMBIGUOUSLY ----
+  // Backend routing (api/chat.js + server.js): ':free' → OpenRouter; else
+  // google/ → Gemini; groq/ → Groq; nvidia/ → NVIDIA; ANYTHING ELSE falls
+  // through to OpenRouter. A bare publisher id (e.g. 'z-ai/glm-5.3' — that's
+  // NVIDIA's copy) silently routes to the wrong provider and 404s. Every
+  // MODEL_CONFIG key must carry an explicit direct-provider prefix or ':free'.
+  {
+    const cfgUrl = 'file://' + path.join(esmDir, 'config.js') + '?t=' + Date.now();
+    const { MODEL_CONFIG } = await import(cfgUrl);
+    for (const key of Object.keys(MODEL_CONFIG)) {
+      const routable = key.endsWith(':free') || /^(google|groq|nvidia)\//.test(key) || key === 'openrouter/free';
+      if (!routable) errors.push(`MODEL_CONFIG '${key}' falls through to the OpenRouter fallback (missing direct-provider prefix or ':free' suffix)`);
+    }
+    if (!errors.some((e) => e.startsWith('MODEL_CONFIG'))) console.log('✓ every MODEL_CONFIG key routes unambiguously');
+  }
+
   // ---- fire DOMContentLoaded ----
   window.document.dispatchEvent(new window.Event('DOMContentLoaded'));
   console.log('✓ DOMContentLoaded dispatched without throwing');

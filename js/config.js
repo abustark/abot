@@ -95,16 +95,22 @@ export const MODEL_CONFIG = {
 
     // --- NVIDIA (build.nvidia.com FREE ENDPOINT models — owner-extracted
     // 2026-08-30 from the site's Free Endpoint cards. One nvapi- key, ~40 RPM.
-    // NVIDIA rotates quarterly — re-check build.nvidia.com/models.) ---
-    'meta/muse-glimmer-30b': { name: 'Muse Glimmer 30B', color: 'nvidia-green' },
-    'nvidia/nemotron-3.5-lightning-30b-a3b': { name: 'Nemotron 3.5 Lightning', color: 'nvidia-green' },
-    'moonshotai/kimi-k3': { name: 'Kimi K3', color: 'nvidia-green' },
-    'z-ai/glm-5.3-flash': { name: 'GLM 5.3 Flash', color: 'nvidia-green' },
-    'z-ai/glm-5.3': { name: 'GLM 5.3', color: 'nvidia-green' },
-    'openai/gpt-oss-20b': { name: 'GPT-OSS 20B', color: 'nvidia-green' },
-    'mistralai/mistral-nemotron': { name: 'Mistral Nemotron', color: 'nvidia-green' },
-    'google/gemma-4-31b-it': { name: 'Gemma 4 31B', color: 'nvidia-green' },
-    'nvidia/nemotron-3-super-120b-a12b': { name: 'Nemotron 3 Super', color: 'nvidia-green' },
+    // NVIDIA rotates quarterly — re-check build.nvidia.com/models.)
+    // 2.0.30: every NVIDIA model carries the 'nvidia/' ROUTING prefix (like
+    // Groq's 'groq/...' entries above). Without it, publisher-org ids such as
+    // 'z-ai/glm-5.3' or 'openai/gpt-oss-20b' fall through the backend's
+    // routing to the OpenRouter fallback (and 'google/gemma-4-31b-it' even
+    // matched the Gemini rule!) — "AI provider returned an error". The backend
+    // strips only the first segment, so NVIDIA receives the bare NIM id. ---
+    'nvidia/meta/muse-glimmer-30b': { name: 'Muse Glimmer 30B', color: 'nvidia-green' },
+    'nvidia/nvidia/nemotron-3.5-lightning-30b-a3b': { name: 'Nemotron 3.5 Lightning', color: 'nvidia-green' },
+    'nvidia/moonshotai/kimi-k3': { name: 'Kimi K3', color: 'nvidia-green' },
+    'nvidia/z-ai/glm-5.3-flash': { name: 'GLM 5.3 Flash', color: 'nvidia-green' },
+    'nvidia/z-ai/glm-5.3': { name: 'GLM 5.3', color: 'nvidia-green' },
+    'nvidia/openai/gpt-oss-20b': { name: 'GPT-OSS 20B', color: 'nvidia-green' },
+    'nvidia/mistralai/mistral-nemotron': { name: 'Mistral Nemotron', color: 'nvidia-green' },
+    'nvidia/google/gemma-4-31b-it': { name: 'Gemma 4 31B', color: 'nvidia-green' },
+    'nvidia/nvidia/nemotron-3-super-120b-a12b': { name: 'Nemotron 3 Super', color: 'nvidia-green' },
 
     // --- OPENROUTER (:free tier — refreshed 2026-08-30 against OpenRouter's
     // current roster; deepseek-chat-v3-0324:free (provider paywalled) and
