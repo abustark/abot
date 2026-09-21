@@ -8,6 +8,15 @@ This document tracks every commit made on `main` following the `2.0.x` versionin
 
 ## Commit History
 
+### 2.0.23 - catalog reconciled to owner's authoritative OpenRouter free list
+- **Date**: 2026-08-30
+- **Changes**:
+  - Owner supplied the definitive working free-model list; catalog now matches it exactly (8 entries):
+    - KEPT: nemotron-3-ultra, laguna-s-2.1, nemotron-3.5-lightning, qwen3.8-27b, glm-5.2, gemma-4-31b-it
+    - ADDED: `google/gemma-4-26b-a4b-it:free` (MoE Gemma variant), **`openrouter/free`** (the auto-router — routes to the best available free model; `openrouter/` org added to ALLOWED_PROVIDERS)
+    - REMOVED (superseded by owner's list): gpt-oss-120b/20b:free, qwen3-coder:free, glm-4.5-air:free, inkling:free, ling-3.0-flash-vl:free
+  - Security tests updated for the new IDs + auto-router. Typeahead test updated ('g' — 'l' leading names left the catalog). SW bump.
+
 ### 2.0.22 - REAL-browser visual verification in the sandbox (15/15 PASS)
 - **Date**: 2026-08-30
 - **Changes**:

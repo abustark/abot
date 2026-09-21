@@ -432,11 +432,11 @@ function stubChain(label) {
         click($('modelSelectorBtn'));
         await sleep(320);
         const panel = $('modelSelectorPanel');
-        panel.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'l', bubbles: true, cancelable: true }));
+        panel.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'g', bubbles: true, cancelable: true }));
         await sleep(30);
         const active = window.document.activeElement;
         check('typeahead jumps to matching model',
-            panel.contains(active) && (active.textContent || '').trim().toLowerCase().startsWith('l'),
+            panel.contains(active) && (active.textContent || '').trim().toLowerCase().startsWith('g'),
             active && (active.textContent || '').trim().slice(0, 24));
         click(document.body);
         await sleep(260);
