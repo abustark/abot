@@ -4,9 +4,22 @@ This document tracks every commit made on `main` following the `2.0.x` versionin
 - Sequence: `2.0.1`, `2.0.2`, ..., `2.0.9`, `2.0.10` ➔ `2.1.0`, `2.1.1`, ..., `2.1.10` ➔ `2.2.0`, etc.
 - Format: `<version> - <short sentence>`
 
+> **⚠️ Branch-version independence (read this before comparing branches):** `main` and
+> `arena/01a03fe9-abot` use **separate, independent version numbers and commit names**. The same
+> version number on both branches does **NOT** mean the same work — e.g. `main`'s `2.0.10` and
+> `arena`'s `2.0.10` were two different commits written by different agents before the branches
+> converged at `2.0.27` (from then on, commits land on `main` and `arena` is fast-forwarded).
+> **Always identify/compare commits by their hash, never by version number alone.**
+
 ---
 
 ## Commit History
+
+### 2.0.28 - docs: branch-version independence note (commit names/versions are per-branch)
+- **Date**: 2026-09-21
+- **Changes**:
+  - Added an explicit note (here at the top of this file + `AGENTS.md` §1) that `main` and `arena/01a03fe9-abot` use **separate, independent version numbers and commit names** — the same version on both branches is NOT the same work (e.g. main's `2.0.10` ≠ arena's `2.0.10`; branches converged at `2.0.27`). Compare commits by hash, not by version.
+  - No code changes (docs only).
 
 ### 2.0.27 - verification pass: un-break the CSS/asset gates (fix was inert), make lint green, make the visual suite portable
 - **Date**: 2026-09-21

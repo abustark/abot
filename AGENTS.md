@@ -26,6 +26,7 @@ ABot is a **vanilla-JS, multi-model AI chat app** (no framework):
      `2.0.1`, `2.0.2`, ..., `2.0.9`, `2.0.10` ➔ rolls over to `2.1.0`.
      Then `2.1.1`, ..., `2.1.10` ➔ rolls over to `2.2.0`, etc.
    - Format: `<version> - <short description>` (e.g., `2.0.2 - auth page ui changed`). Keep it short and clear, avoid overly long commit titles.
+   - **Branch independence:** `main` and `arena/01a03fe9-abot` carry **separate, independent version sequences and commit names** — equal version numbers on the two branches are NOT the same work (the branches converged at `2.0.27`; before that they diverged, e.g. main's `2.0.10` ≠ arena's `2.0.10`). Identify commits by hash, never by version alone.
    - Every commit must also be logged in `docs/commits.md` with its version and what it did.
 3. **Arena Synchronization (`arena/01a03fe9-abot`)**:
    - After updating `main`, merge `main` into `arena/01a03fe9-abot` so the integration branch stays synced with `main`.
