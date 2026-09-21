@@ -8,6 +8,14 @@ This document tracks every commit made on `main` following the `2.0.x` versionin
 
 ## Commit History
 
+### 2.0.22 - REAL-browser visual verification in the sandbox (15/15 PASS)
+- **Date**: 2026-08-30
+- **Changes**:
+  - **Tooling breakthrough (B-37)**: `@sparticuz/chromium` ships a Chromium binary inside the npm package (no CDN download — the thing that blocked Playwright). With `puppeteer-core` + the package's bundled system libs (extracted to /tmp/al2023-libs), the sandbox now runs a REAL browser.
+  - `tools/visual-check.js` (`npm run visual`): boots the real site at mobile (375×812, touch) + desktop (1280×800), mocks Firebase auth to enter the app, then pixel-measures the composer: mic absence, stop-overlays-send EXACTLY (same x/y/size), send flush right, scroll padding >= dock height, duplicate ids, error-card visibility after a real send, stop re-hidden after stream. Screenshots to docs/audits/visual-*.png.
+  - **First real-browser run: 15/15 PASS** — B-33/B-35/B-36 confirmed fixed pixel-exactly (send & stop both at (312,753) on mobile).
+  - Client-side guard for non-OK /api/chat JSON responses verified present.
+
 ### 2.0.21 - cache-proof stop overlay + scroll-lock release + padding clamp (persistent regressions)
 - **Date**: 2026-08-30
 - **Changes**:
