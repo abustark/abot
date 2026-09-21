@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.1.2`** (current head is `2.1.1` — see below)
+> - **`main` → `2.1.3`** (current head is `2.1.2` — see below)
 > - **`arena/01a03fe9-abot` → its own sequence** (syncs are **unversioned** merge commits:
 >   `merge main <version> into arena/01a03fe9-abot`; arena's own feature commits use arena's numbers)
 
@@ -25,6 +25,17 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.1.2 - docs: "bug and fixes summary" kit — the Bug & Fix Registry protocol, shareable
+- **Date**: 2026-09-21
+- **Owner request**: package the `BUGS-AND-FIXES.md` convention (bug → file + line region → fix → version/commit, plus re-verification) as a reference description to send to other projects.
+- **Changes**:
+  - New folder `bug and fixes summary/` with three files:
+    - `README.md` — what the kit is and how to use it (2 steps).
+    - `BUG-FIX-PROTOCOL.md` — the reference description: entry format (ID / symptom + root cause / files + approx fix lines / fix mechanism / version + commit), maintenance rules (append-only, regressions are new entries, tests name their B-id), the mandatory re-verification policy, and why it works.
+    - `BUGS-AND-FIXES.template.md` — copy-paste starter for any repo (rename to `BUGS-AND-FIXES.md`), with filled example entries (incl. a REGRESSION example mirroring the real B-43 stale-CSS case) and a checklist skeleton.
+  - `docs/commits.md`: `📌 Next version` advanced to `main → 2.1.3`.
+  - No code changes.
 
 ### 2.1.1 - docs: agents may NEVER verify on their own; ask the owner after every update
 - **Date**: 2026-09-21
