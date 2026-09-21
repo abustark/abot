@@ -108,8 +108,16 @@ LD_LIBRARY_PATH=/tmp/al2023-libs/lib FONTCONFIG_PATH=/tmp/fonts node your-script
 node server.js
 
 # terminal 2 — the real-browser suite (mobile 375×812 + desktop 1280×800)
-npm run visual
+npm run visual         # Linux sandbox: @sparticuz/chromium + its extracted libs
+npm run visual:local   # dev machine (Windows/macOS): uses installed Chrome/Edge
+# or point it at a specific binary:
+ABOT_CHROME="C:\Program Files\Google\Chrome\Application\chrome.exe" node tools/visual-check.js
 ```
+
+The tool resolves a browser in this order: `ABOT_CHROME` → `@sparticuz/chromium` (when installed) →
+a locally installed Chrome/Edge (Windows paths + macOS). It also **blocks every non-localhost request**:
+on a machine with internet the real Firebase SDK loads from gstatic and overwrites the injected mock,
+so the fake login would never happen (the sandbox is offline, which is why this only bites on dev machines).
 
 What it does (see `tools/visual-check.js`):
 - Injects a Firebase/marked/hljs mock via `evaluateOnNewDocument` so the app logs in without real creds

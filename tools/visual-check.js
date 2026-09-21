@@ -1,16 +1,51 @@
 'use strict';
 /**
  * REAL-browser visual verification (v2.0.22).
- * Uses @sparticuz/chromium (npm-shipped Chromium binary — no CDN needed)
- * driven by puppeteer-core against the local server.
+ * Drives a real Chromium with puppeteer-core against the local server.
  *
- * Run: LD_LIBRARY_PATH=/tmp/al2023-libs/lib FONTCONFIG_PATH=/tmp/fonts node tools/visual-check.js
+ * Run (Linux sandbox): LD_LIBRARY_PATH=/tmp/al2023-libs/lib FONTCONFIG_PATH=/tmp/fonts node tools/visual-check.js
+ * Run (dev machine):   npm run visual:local   (uses an installed Chrome/Edge)
+ * Override:            ABOT_CHROME=<path-to-chrome> node tools/visual-check.js
  * Requires: node server.js running on :3000.
  */
 const path = require('path');
 const fs = require('fs');
-const chromium = require('@sparticuz/chromium').default;
 const puppeteer = require('puppeteer-core');
+
+// @sparticuz/chromium is the sandbox's npm-shipped Linux Chromium; an ordinary
+// dev machine has no such package, so fall back to a locally installed browser.
+let chromium = null;
+try { chromium = require('@sparticuz/chromium').default; } catch { chromium = null; }
+
+const LOCAL_BROWSERS = [
+    process.env.ABOT_CHROME,
+    'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+    'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+    'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
+    'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe',
+    '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+];
+
+async function launchBrowser() {
+    const forced = process.env.ABOT_CHROME;
+    if (!forced && chromium) {
+        return puppeteer.launch({
+            args: [...chromium.args, '--no-sandbox', '--disable-setuid-sandbox'],
+            executablePath: await chromium.executablePath(),
+            headless: 'shell',
+        });
+    }
+    const localExe = forced || LOCAL_BROWSERS.find((p) => p && fs.existsSync(p));
+    if (!localExe) {
+        throw new Error('No Chromium available: install @sparticuz/chromium (sandbox) or set ABOT_CHROME=<path-to-chrome>');
+    }
+    console.log(`[visual] using local browser: ${localExe}`);
+    return puppeteer.launch({
+        executablePath: localExe,
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu'],
+        headless: true,
+    });
+}
 
 const ROOT = path.join(__dirname, '..');
 const OUT = path.join(ROOT, 'docs', 'audits');
@@ -28,6 +63,17 @@ async function runViewport(browser, { w, h, label, mobile }) {
     const consoleErrors = [];
     page.on('console', (m) => { if (m.type() === 'error') consoleErrors.push(m.text().slice(0, 160)); });
     page.on('pageerror', (e) => consoleErrors.push('pageerror: ' + String(e).slice(0, 160)));
+
+    // Deterministic run: block all external requests. On a machine WITH internet
+    // the real Firebase/GSI SDKs load from gstatic and overwrite the mocked
+    // window.firebase below, so the fake login never happens (the sandbox is
+    // offline, which is why this only shows up on dev machines).
+    await page.setRequestInterception(true);
+    page.on('request', (req) => {
+        const u = req.url();
+        const sameOrigin = u.startsWith('http://localhost:3000/') || u.startsWith('http://127.0.0.1:3000/') || u.startsWith('data:');
+        return sameOrigin ? req.continue() : req.abort();
+    });
 
     // Mock Firebase BEFORE any app script runs (placeholder creds can't really auth)
     await page.evaluateOnNewDocument(() => {
@@ -60,7 +106,6 @@ async function runViewport(browser, { w, h, label, mobile }) {
     await page.goto('http://localhost:3000/', { waitUntil: 'domcontentloaded', timeout: 30000 });
     await new Promise((r) => setTimeout(r, 2500)); // init + fake login + chat render
 
-    const $ = (sel) => page.$(sel);
     const rect = (sel) => page.$eval(sel, (el) => { const r = el.getBoundingClientRect(); return { x: r.x, y: r.y, w: r.width, h: r.height }; });
 
     // app shell visible?
@@ -103,7 +148,6 @@ async function runViewport(browser, { w, h, label, mobile }) {
 
     // screenshots
     await page.screenshot({ path: path.join(OUT, `visual-${label}-full.png`) });
-    const dockR = await rect('#composerDock');
     await page.screenshot({ path: path.join(OUT, `visual-${label}-composer.png`), clip: { x: 0, y: Math.max(0, h - 340), width: w, height: Math.min(340, h) } });
 
     // send a message → real server → 401 JSON → in-place error card should render
@@ -130,7 +174,7 @@ async function runViewport(browser, { w, h, label, mobile }) {
     // Mock /api/chat with a genuine SSE stream so the app's real streaming
     // path (placeholders, chunk innerHTML updates, finalize) is exercised.
     await page.evaluate(() => {
-        window.fetch = (url, opts) => {
+        window.fetch = (url, _opts) => {
             if (!String(url).includes('/api/chat')) {
                 return Promise.reject(new TypeError('only /api/chat mocked'));
             }
@@ -184,6 +228,26 @@ async function runViewport(browser, { w, h, label, mobile }) {
             `lastBottom=${st.lastBottom} dockTop=${st.dockTop}`);
         await page.screenshot({ path: path.join(OUT, `visual-${label}-long.png`), fullPage: false });
     }
+    // ---- v2.0.27 (B-43): the CSS half of the scroll fix must actually be LIVE ----
+    // v2.0.26 changed src/input.css but shipped a stale dist/output.css, so
+    // `overflow-anchor:none` + the keyboard-aware dock never reached clients.
+    {
+        const cssProbe = await page.evaluate(() => {
+            const cont = document.getElementById('chatHistoryContainer');
+            const dockStyle = getComputedStyle(document.getElementById('composerDock'));
+            return {
+                anchor: getComputedStyle(cont).overflowAnchor,
+                dockPos: dockStyle.position,
+                dockBottom: dockStyle.bottom,
+            };
+        });
+        check(`[${label}] B-43: overflow-anchor:none live (CSS not stale)`,
+            cssProbe.anchor === 'none', `overflow-anchor=${cssProbe.anchor}`);
+        const kbAware = cssProbe.dockPos !== 'fixed' || cssProbe.dockBottom !== 'auto';
+        check(`[${label}] B-42: dock is keyboard-aware (bottom:var(--kb-h))`,
+            kbAware, `position=${cssProbe.dockPos} bottom=${cssProbe.dockBottom}`);
+    }
+
     // SHORT reply: response smaller than the viewport
     await page.evaluate(() => {
         const input = document.getElementById('messageInput');
@@ -193,7 +257,6 @@ async function runViewport(browser, { w, h, label, mobile }) {
     await new Promise((r) => setTimeout(r, 1600));
     {
         const st = await page.evaluate(() => {
-            const cont = document.getElementById('chatHistoryContainer');
             const dock = document.getElementById('composerDock').getBoundingClientRect();
             const msgs = document.querySelectorAll('#chatHistory .message-container, #chatHistory > div');
             const last = msgs[msgs.length - 1];
@@ -212,12 +275,7 @@ async function runViewport(browser, { w, h, label, mobile }) {
 }
 
 (async () => {
-    const executablePath = await chromium.executablePath();
-    const browser = await puppeteer.launch({
-        args: [...chromium.args, '--no-sandbox', '--disable-setuid-sandbox'],
-        executablePath,
-        headless: 'shell',
-    });
+    const browser = await launchBrowser();
 
     try {
         await runViewport(browser, { w: 375, h: 812, label: 'mobile', mobile: true });

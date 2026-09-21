@@ -3,7 +3,7 @@
  * Provides offline caching for local assets only
  */
 
-const CACHE_NAME = 'abot-cache-v42'; // merged: arena v41 wins; asset list from main
+const CACHE_NAME = 'abot-cache-v43'; // v2.0.27: rebuilt output.css (B-43) + cache-bust mismatch fix
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -11,7 +11,7 @@ const STATIC_ASSETS = [
     '/favicon-32-light.png',
     '/favicon-32-dark.png',
     '/logo.png',
-    '/dist/output.css?v=p16',
+    '/dist/output.css?v=p18',
     '/js/app.js',
     '/js/config.js',
     '/js/dom.js',

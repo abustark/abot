@@ -8,6 +8,15 @@ This document tracks every commit made on `main` following the `2.0.x` versionin
 
 ## Commit History
 
+### 2.0.27 - verification pass: un-break the CSS/asset gates (fix was inert), make lint green, make the visual suite portable
+- **Date**: 2026-09-21
+- **Changes**:
+  - **B-43 (the big one): v2.0.26 shipped stale CSS.** `src/input.css` got `#chatHistoryContainer{overflow-anchor:none}` + `#composerDock{bottom:var(--kb-h,0px)}`, but `dist/output.css` was never rebuilt in that commit, so the CSS half of the B-41/B-42 scroll fix never reached clients — production still had Chrome's scroll anchoring fighting the auto-follow and a dock that never lifted for the keyboard. Found by running the §3 gate: `npm run build:css` produced a bundle that did not match the committed one. Fixed by committing the rebuild. Cache drift fixed too: `index.html` CSS `?v=p17`→`p18` (SW precache held `p16`), `js/app.js` `?v=p14`→`p15` (stale across several releases), SW cache `v42`→`v43`; build id → `2026-09-21.2`.
+  - **Regression guard:** `tools/visual-check.js` now asserts in a real browser that `overflow-anchor` computes to `none` on the chat container and that the dock's `bottom` comes from CSS (`var(--kb-h)`) — a stale/again-stale CSS bundle now fails the suite instead of shipping silently.
+  - **B-44: lint gate was red (25 errors).** Browser globals (`document`/`window`/`getComputedStyle`) inside the puppeteer `page.evaluate()` callbacks of `tools/visual-check.js` and `tools/interaction-test.js` were flagged because `tools/**` gets Node globals only. Added a dedicated `eslint.config.js` override (node + browser) with an explanatory comment; dropped the unused `sanitizeHtml` import (`js/chat.js`) and unused `$`/`dockR`/`opts` (`tools/visual-check.js`). Lint: **0 errors**.
+  - **B-45: the visual suite only ran in the Linux sandbox.** `puppeteer-core`/`@sparticuz/chromium` were ad hoc installs (not in `package.json`), the npm script used a bash-style env prefix, and determinism depended on the sandbox having no internet — on a networked machine the real Firebase SDK loads from gstatic and overwrites the mocked `window.firebase`, so the fake login never happens. `tools/visual-check.js` now resolves a browser cross-platform (`ABOT_CHROME` → installed Chrome/Edge/macOS → sparticuz when present) and blocks all non-localhost requests so the mock always wins; `package.json` gained the `puppeteer-core` devDependency and a `visual:local` script.
+  - **Verified:** `lint` 0 errors · `check` all files parse · `test` (security + smoke + interactions + auth cycle) all pass · `build:css` → `git diff --exit-code -- dist/output.css` clean · real-browser `visual:local` **27/27 PASS** (mobile + desktop), including mid-stream/post-stream follow distance `0px` and last-line-above-composer assertions.
+
 ### 2.0.26 - REAL fix for persistent scroll/coverage bugs (scroll-anchoring + keyboard dock)
 - **Date**: 2026-08-30
 - **Changes**:

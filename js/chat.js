@@ -10,7 +10,7 @@ import { MODEL_CONFIG } from './config.js';
 import { applyModelColorTheme, syncComposerChips } from './ui.js';
 import { closeSidebar } from './ui.js';
 import { dom } from './dom.js';
-import { getTimestamp, isSpeaking, speakText, stopSpeaking, setUnsentDraft, renderSafeMarkdown, sanitizeHtml } from './utils.js';
+import { getTimestamp, isSpeaking, speakText, stopSpeaking, setUnsentDraft, renderSafeMarkdown } from './utils.js';
 import { showGuestLimitModal } from './ui.js';
 import { showToast } from './utils.js';
 import { state } from './state.js';

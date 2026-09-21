@@ -82,5 +82,21 @@ module.exports = [
         },
     },
 
+    // Tools that embed browser-context code inside puppeteer page.evaluate()
+    // callbacks: those callbacks execute in the page, not in Node, so both
+    // global sets are legitimate for these two files.
+    {
+        files: ['tools/visual-check.js', 'tools/interaction-test.js'],
+        languageOptions: {
+            ecmaVersion: 2022,
+            sourceType: 'commonjs',
+            globals: { ...globals.node, ...globals.browser },
+        },
+        rules: {
+            'no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+            'no-empty': ['error', { allowEmptyCatch: true }],
+        },
+    },
+
     { ignores: ['eslint.config.js', 'tailwind.config.js'] },
 ];

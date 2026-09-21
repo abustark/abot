@@ -9,12 +9,14 @@ PASS  [mobile] stop button re-hidden after stream ends
 PASS  [mobile] mid-stream: container pinned to bottom (follow live) — distance=0px
 PASS  [mobile] LONG reply: pinned to bottom after stream — distance=0px
 PASS  [mobile] LONG reply: last content above composer top — lastBottom=501 dockTop=678
+PASS  [mobile] B-43: overflow-anchor:none live (CSS not stale) — overflow-anchor=none
+PASS  [mobile] B-42: dock is keyboard-aware (bottom:var(--kb-h)) — position=fixed bottom=0px
 PASS  [mobile] SHORT reply: fully visible above composer — lastBottom=675 dockTop=678
 --- console errors (mobile) ---
-Failed to load resource: net::ERR_CONNECTION_CLOSED
-Failed to load resource: net::ERR_CONNECTION_CLOSED
-Failed to load resource: net::ERR_CONNECTION_CLOSED
-Failed to load resource: net::ERR_CONNECTION_CLOSED
+Failed to load resource: net::ERR_FAILED
+Failed to load resource: net::ERR_FAILED
+Failed to load resource: net::ERR_FAILED
+Failed to load resource: net::ERR_FAILED
 Error loading chats from Firestore: TypeError: chatsCollectionRef.orderBy is not a function
 PASS  [desktop] app shell visible after mock login
 PASS  [desktop] mic button removed (B-33) — count=0
@@ -26,10 +28,12 @@ PASS  [desktop] stop button re-hidden after stream ends
 PASS  [desktop] mid-stream: container pinned to bottom (follow live) — distance=0px
 PASS  [desktop] LONG reply: pinned to bottom after stream — distance=0px
 PASS  [desktop] LONG reply: last content above composer top — lastBottom=467 dockTop=644
+PASS  [desktop] B-43: overflow-anchor:none live (CSS not stale) — overflow-anchor=none
+PASS  [desktop] B-42: dock is keyboard-aware (bottom:var(--kb-h)) — position=static bottom=auto
 PASS  [desktop] SHORT reply: fully visible above composer — lastBottom=619 dockTop=644
 --- console errors (desktop) ---
-Failed to load resource: net::ERR_CONNECTION_CLOSED
-Failed to load resource: net::ERR_CONNECTION_CLOSED
-Failed to load resource: net::ERR_CONNECTION_CLOSED
-Failed to load resource: net::ERR_CONNECTION_CLOSED
+Failed to load resource: net::ERR_FAILED
+Failed to load resource: net::ERR_FAILED
+Failed to load resource: net::ERR_FAILED
+Failed to load resource: net::ERR_FAILED
 Error loading chats from Firestore: TypeError: chatsCollectionRef.orderBy is not a function
