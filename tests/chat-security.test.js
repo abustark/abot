@@ -20,6 +20,8 @@ assert(V({ model: 'thinkingmachines/inkling:free', messages: [{ role: 'user', co
 assert(V({ model: 'inclusionai/ling-3.0-flash-vl:free', messages: [{ role: 'user', content: 'a' }] }).ok, 'inclusionai accepted (org remains allowlisted)');
 assert(V({ model: 'groq/openai/gpt-oss-20b', messages: [{ role: 'user', content: 'a' }] }).ok, 'groq nested-org model accepted');
 assert(V({ model: 'groq/minimaxai/minimax-m2.7', messages: [{ role: 'user', content: 'a' }] }).ok, 'minimaxai via groq accepted');
+assert(V({ model: 'nvidia/nvidia/nemotron-3-ultra-550b-a55b', messages: [{ role: 'user', content: 'a' }] }).ok, 'nemotron-3-ultra via nvidia accepted');
+assert(V({ model: 'nvidia/minimaxai/minimax-m3', messages: [{ role: 'user', content: 'a' }] }).ok, 'minimaxai via nvidia accepted');
 assert(!V({ model: 'google/../gemma:free', messages: [{ role: 'user', content: 'a' }] }).ok, 'traversal still blocked with :free');
 assert(!V({ model: 'groq/m:free;rm-rf', messages: [{ role: 'user', content: 'a' }] }).ok, 'semicolon still blocked with :free');
 assert(!V({ model: 'evilcorp/agent:free', messages: [{ role: 'user', content: 'a' }] }).ok, 'unknown org :free rejected');

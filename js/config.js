@@ -93,12 +93,16 @@ export const MODEL_CONFIG = {
     'groq/qwen/qwen3.8-27b': { name: 'Qwen 3.8 27B', color: 'groq-yellow' },
     'groq/minimaxai/minimax-m2.7': { name: 'MiniMax M2.7', color: 'groq-yellow' },
 
-    // --- NVIDIA ---
-    'nvidia/openai/gpt-oss-20b': { name: 'GPT-oss 20b', color: 'nvidia-green' },
-    'nvidia/nvidia/nvidia-nemotron-nano-9b-v2': { name: 'Nvidia Nim', color: 'nvidia-green' },
-    'nvidia/mistralai/mistral-nemotron': { name: 'Mistral', color: 'nvidia-green' },
-    'nvidia/deepseek-ai/deepseek-r1-0528': { name: 'DeepSeek R1', color: 'nvidia-green' },
-    'nvidia/qwen/qwen2.5-coder-32b-instruct': { name: 'Qwen 2.5 Coder', color: 'nvidia-green' },
+    // --- NVIDIA (build.nvidia.com free tier, refreshed 2026-08-30 — one
+    // nvapi- key, ~40 RPM. Old IDs removed: deepseek-r1-0528 + qwen2.5-coder
+    // (delisted), nemotron-nano-9b-v2 (superseded by Nano 3). Groq rotates
+    // monthly, NVIDIA quarterly — re-check build.nvidia.com/models.) ---
+    'nvidia/openai/gpt-oss-20b': { name: 'GPT-OSS 20B', color: 'nvidia-green' },
+    'nvidia/nvidia/nemotron-3-ultra-550b-a55b': { name: 'Nemotron 3 Ultra', color: 'nvidia-green' }, // 1M ctx
+    'nvidia/nvidia/nemotron-3-super-120b-a12b': { name: 'Nemotron 3 Super', color: 'nvidia-green' }, // 262K
+    'nvidia/nvidia/nemotron-nano-3-30b-a3b': { name: 'Nemotron Nano 3', color: 'nvidia-green' },
+    'nvidia/minimaxai/minimax-m3': { name: 'MiniMax M3', color: 'nvidia-green' }, // 197K, tools
+    'nvidia/mistralai/mistral-nemotron': { name: 'Mistral Nemotron', color: 'nvidia-green' },
 
     // --- OPENROUTER (:free tier — refreshed 2026-08-30 against OpenRouter's
     // current roster; deepseek-chat-v3-0324:free (provider paywalled) and
