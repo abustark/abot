@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.1.1`** (current head is `2.1.0`, the roll-over commit that introduced this line)
+> - **`main` → `2.1.2`** (current head is `2.1.1` — see below)
 > - **`arena/01a03fe9-abot` → its own sequence** (syncs are **unversioned** merge commits:
 >   `merge main <version> into arena/01a03fe9-abot`; arena's own feature commits use arena's numbers)
 
@@ -25,6 +25,19 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.1.1 - docs: agents may NEVER verify on their own; ask the owner after every update
+- **Date**: 2026-09-21
+- **Owner directive**: when the owner asks to fix/change files or code, the agent does **only that**.
+  Agents may use commands **only** to write/read/copy/check/move files and code (incl. `git add`/`commit`/`push`).
+  They must **never** run gates, lints, checks, tests, builds, browser suites, or any verification on their own —
+  only the owner may say "run / verify / test / pass". After every meaningful update the agent must **ask**
+  whether to run the gates/tests — in plain words, once — and wait for the answer.
+- **Changes**:
+  - `AGENTS.md` §3 rewritten: gates are **owner-triggered ONLY** (not even for large updates); item 2 is the mandatory ask-reminder with the exact wording to use.
+  - `AGENTS.md` §5: new rule **0 — Commands: write-only, NO self-initiated runs** (file ops + commit/push only; no `git log`/`diff`/`ls-remote` fishing either).
+  - `docs/commits.md`: `📌 Next version` advanced to `main → 2.1.2`.
+  - No code changes.
 
 ### 2.1.0 - ROLL-OVER: enforce the version rule (.10 → next minor), fix branch-numbering discipline
 - **Date**: 2026-09-21
