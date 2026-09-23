@@ -116,4 +116,15 @@ For PHASE D: load `emil-design-eng` + `animate` + `taste-skill` before writing U
 
 ---
 
+---
+
+## 6. Images / screenshots → project folder (mandatory)
+
+Any image the agent produces — browser screenshots, QA captures, crops, generated
+icons/mockups — must ALSO be saved to `D:\projects\abot\artifacts\` (in addition to
+any temp working dir on C:). Keep file names descriptive (e.g. `final-light-desktop.png`).
+Never leave a capture only in temp — if you snapped it, the project folder gets a copy.
+
+---
+
 *Prepared 2026-08-30 · Updated 2026-09-20 · Commit log: `docs/commits.md`*
