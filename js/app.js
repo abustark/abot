@@ -900,6 +900,12 @@ function initApp() {
             showToast("Error: Could not identify chat or user.", 'error');
             return;
         }
+        // v2.1.4 audit fix (BUG-1): abort an in-flight stream targeting the
+        // chat being deleted — otherwise the stream keeps running, mutates the
+        // detached object, and its finally-block re-creates the chat doc.
+        if (String(chatId) === String(state.activeChatId) && state.abortController) {
+            state.abortController.abort();
+        }
         try {
             await state.db.collection('users').doc(currentUser.uid).collection('chats').doc(chatId).delete();
             delete state.chats[chatId];

@@ -849,12 +849,21 @@ export const sendMessage = async () => {
         // --- THIS IS THE FINAL, CORRECT VERSION ---
 
         // 1. Save the final state of the chat to Firestore.
+        // v2.1.4 audit fix (BUG-1): if the user DELETED this chat mid-stream,
+        // skip the save — update() on the missing doc silently re-created a
+        // zombie chat containing the streamed reply.
+        const chatStillExists = !!state.chats[state.activeChatId];
+        if (!chatStillExists) {
+            console.log('[ABot] chat deleted mid-stream — skipping final save');
+        }
         try {
+        if (chatStillExists) {
             const chatDocRef = state.db.collection('users').doc(activeUser.uid).collection('chats').doc(state.activeChatId);
             await chatDocRef.update({
                 messages: currentChat.messages,
                 name: currentChat.name
             });
+        }
         } catch (dbError) {
             console.error("Error saving final chat state to Firestore:", dbError);
         }

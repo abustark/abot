@@ -11,6 +11,8 @@ import { dom } from './dom.js';
 import { loadUserChatsFromFirestore } from './chat.js';
 import { showToast, stopSpeaking } from './utils.js';
 import { state } from './state.js';
+// Single source of truth for the Google OAuth client id (was hardcoded 3x).
+const GOOGLE_CLIENT_ID = "784623545561-f9qumqjcsek7g368657cloq8rqc0kurj.apps.googleusercontent.com";
 import { switchChat } from './chat.js';
 export function initFirebase() {
 const firebaseConfig = {
@@ -178,7 +180,7 @@ export async function handleCredentialResponse(response) {
 export function initAuth() {
 if (window.google && google.accounts && google.accounts.id) {
     state.tokenClient = google.accounts.oauth2.initTokenClient({
-        client_id: "784623545561-f9qumqjcsek7g368657cloq8rqc0kurj.apps.googleusercontent.com",
+        client_id: GOOGLE_CLIENT_ID,
         scope: 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
         callback: handleCredentialResponse,
     });
@@ -204,7 +206,7 @@ if (dom.googleSigninBtn) {
         }
         if (window.google && google.accounts && google.accounts.oauth2) {
             state.tokenClient = google.accounts.oauth2.initTokenClient({
-                client_id: "784623545561-f9qumqjcsek7g368657cloq8rqc0kurj.apps.googleusercontent.com",
+                client_id: GOOGLE_CLIENT_ID,
                 scope: 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
                 callback: handleCredentialResponse,
             });
@@ -438,7 +440,7 @@ state.auth.onAuthStateChanged(async (user) => {
         const initGoogleButton = (attempt = 0) => {
             if (window.google && google.accounts && google.accounts.id) {
                 google.accounts.id.initialize({
-                    client_id: "784623545561-f9qumqjcsek7g368657cloq8rqc0kurj.apps.googleusercontent.com",
+                    client_id: GOOGLE_CLIENT_ID,
                     callback: handleCredentialResponse
                 });
             } else if (attempt < 30) { // ~6s of retries at 200ms

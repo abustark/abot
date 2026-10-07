@@ -1,7 +1,7 @@
 import admin from 'firebase-admin';
 import chatSecurity from '../lib/chat-security.js';
 
-const { validateChatRequest, verifyUserEmailStatus, MemoryRateLimiter, identityKey, clientIp, upstreamTimeout, sseError, providerStatusError, logProviderError } = chatSecurity;
+const { validateChatRequest, verifyUserEmailStatus, MemoryRateLimiter, identityKey, clientIp, upstreamTimeout, sseError, providerStatusError, checkChatLimit, logProviderError } = chatSecurity;
 
 // --- Firebase Admin SDK Initialization (runs once per cold start) ---
 if (!admin.apps.length) {
@@ -35,6 +35,7 @@ export default async function handler(req, res) {
     }
 
     let uid = null;
+    let isGuest = false;
     try {
         const decodedToken = await admin.auth().verifyIdToken(idToken);
         const emailStatus = verifyUserEmailStatus(decodedToken);
@@ -42,13 +43,16 @@ export default async function handler(req, res) {
             return res.status(emailStatus.code).json({ error: emailStatus.error });
         }
         uid = decodedToken.uid;
+        isGuest = decodedToken.firebase && decodedToken.firebase.sign_in_provider === 'anonymous';
     } catch {
         console.error('[chat] token verification failed');
         return res.status(403).json({ error: 'Unauthorized: Invalid token.' });
     }
 
     // --- Rate limit per uid (fall back to hashed IP) ---
-    const rl = chatLimiter.check(identityKey(uid, clientIp(req)));
+    // v2.1.4 audit (BUG-2): guests get a stricter SERVER-side cap (20/15min);
+    // the client's 5/session counter is UX-only and bypassable.
+    const rl = checkChatLimit(chatLimiter, { uid, isAnonymous: isGuest, ip: clientIp(req) });
     if (!rl.allowed) {
         res.setHeader('Retry-After', String(rl.retryAfterSec));
         return res.status(429).json({ error: 'Rate limit exceeded. Please wait before sending more messages.' });

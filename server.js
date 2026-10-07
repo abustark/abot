@@ -7,7 +7,7 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const chatSecurity = require('./lib/chat-security.js');
 
-const { validateChatRequest, verifyUserEmailStatus, MemoryRateLimiter, identityKey, clientIp, upstreamTimeout, sseError, providerStatusError, logProviderError } = chatSecurity;
+const { validateChatRequest, verifyUserEmailStatus, MemoryRateLimiter, identityKey, clientIp, upstreamTimeout, sseError, providerStatusError, checkChatLimit, logProviderError } = chatSecurity;
 
 // Initialize Firebase Admin SDK
 let serviceAccount;
@@ -180,7 +180,9 @@ const chatMemoryLimiter = new MemoryRateLimiter();
 
 app.post('/api/chat', checkAuth, async (req, res) => {
     // Rate limit per identity
-    const rl = chatMemoryLimiter.check(identityKey(req.user && req.user.uid, clientIp(req)));
+        // v2.1.4 audit (BUG-2): guests get a stricter SERVER-side cap (20/15min).
+    const isGuest = !!(req.user && req.user.firebase && req.user.firebase.sign_in_provider === 'anonymous');
+    const rl = checkChatLimit(chatMemoryLimiter, { uid: req.user && req.user.uid, isAnonymous: isGuest, ip: clientIp(req) });
     if (!rl.allowed) {
         res.setHeader('Retry-After', String(rl.retryAfterSec));
         return res.status(429).json({ error: 'Rate limit exceeded. Please wait before sending more messages.' });

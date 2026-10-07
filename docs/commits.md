@@ -26,6 +26,15 @@ This document tracks every commit made on `main` following the versioning schema
 
 ## Commit History
 
+### 2.1.4 - full audit fixes: guest cap (server), zombie-chat save, client_id single-source, bust drift
+- **Date**: 2026-08-30
+- **Full-stack audit findings + fixes**:
+  - **B-44 guest limit bypass (backend)**: client's 5/session counter was the ONLY guest cap (trivially reset). Server now enforces `GUEST_MAX_REQUESTS: 20` per 15 min via `checkChatLimit()` (guest-aware limiter wrapper) in both backends, keyed on `sign_in_provider === 'anonymous'`.
+  - **B-47 zombie-chat save (data)**: deleting the ACTIVE chat during an in-flight stream left the stream running; its finally-block `update()` re-created the deleted Firestore doc with the streamed reply. Delete handler now aborts the stream for the active chat, and the save is skipped when the chat no longer exists in state.
+  - **B-45 client_id drift risk**: Google OAuth client id was hardcoded in 3 sites in js/auth.js; now a single `GOOGLE_CLIENT_ID` constant.
+  - **B-46 asset bust drift**: `app.js?v=p15` vs `output.css?v=p18`; all busted to p19 in one pass, SW bumped.
+  - Gates: security/smoke/interactions/cycle/check all green; ESLint 0 errors. SW v46.
+
 ### 2.1.3 - fix mobile UX: frozen screen during streams, 4th/5th+ replies behind composer, keyboard never dismissed
 - **Date**: 2026-09-21
 - **Owner report**: "when a model loads to respond the whole screen freezes instead of only model selector, causing can't scroll"; "long response or 4th/5th response goes behind the composer and can't be scrolled"; "after sending, the mobile keyboard stays up → mistypes → accidental second message".
