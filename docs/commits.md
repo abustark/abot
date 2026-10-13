@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.1.4`** (current head is `2.1.3` — see below)
+> - **`main` → `2.1.6`** (current head is `2.1.5` — see below)
 > - **`arena/01a03fe9-abot` → its own sequence** (syncs are **unversioned** merge commits:
 >   `merge main <version> into arena/01a03fe9-abot`; arena's own feature commits use arena's numbers)
 
@@ -25,6 +25,15 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.1.5 - docs: repo README + live demo URL + PROJECT-INFO.md resume sheet
+- **Date**: 2026-10-13
+- **Owner directive**: canonical live URL `https://abot-eta.vercel.app/` (matches GitHub About page); all six projects get an AI-readable `PROJECT-INFO.md` for resume/portfolio summaries.
+- **Changes**:
+  - New root `README.md` (drafted earlier, never committed — folded in here): pitch, live-demo URL, screenshots section (captures pending, will live in `artifacts/` per AGENTS.md §6), feature highlights, mermaid architecture diagram, security & quality-gate summary, local setup from `.env.example`, project layout, docs index.
+  - New `PROJECT-INFO.md` — machine-readable facts (24 configured models across 4 providers, exact versions, architecture, metrics, ATS tags, ready-made resume bullets/paragraph/card) so future AI can summarize without reading the code; linked from `README.md`.
+  - `docs/commits.md`: `📌 Next version` advanced to `main → 2.1.6`.
+  - No code changes; no gates run per owner gate policy (pre-commit syntax + lint green).
 
 ### 2.1.4 - full audit fixes: guest cap (server), zombie-chat save, client_id single-source, bust drift
 - **Date**: 2026-08-30
