@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.1.8`** (current head is `2.1.7` — see below)
+> - **`main` → `2.1.9`** (current head is `2.1.8` — see below)
 > - **`arena/01a03fe9-abot` → its own sequence** (syncs are **unversioned** merge commits:
 >   `merge main <version> into arena/01a03fe9-abot`; arena's own feature commits use arena's numbers)
 
@@ -25,6 +25,14 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.1.8 - chore: untrack local-only visual audit screenshots
+- **Date**: 2026-10-16
+- **Owner directive**: audit/QA screenshots must never be pushed for any project.
+- **Changes**:
+  - Untracked all 10 `docs/audits/visual-*.png` (`git rm --cached`); `.gitignore` now ignores `docs/audits/visual-*.png`. Files stay on disk; the markdown/txt audit docs remain tracked.
+  - `docs/commits.md`: `📌 Next version` advanced to `main → 2.1.9`.
+  - No code changes; no gates run per owner gate policy.
 
 ### 2.1.7 - docs: PROJECT-INFO.md - add resume framing note to tone guide
 - **Date**: 2026-10-16
