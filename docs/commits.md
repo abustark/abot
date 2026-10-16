@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.1.6`** (current head is `2.1.5` — see below)
+> - **`main` → `2.1.7`** (current head is `2.1.6` — see below)
 > - **`arena/01a03fe9-abot` → its own sequence** (syncs are **unversioned** merge commits:
 >   `merge main <version> into arena/01a03fe9-abot`; arena's own feature commits use arena's numbers)
 
@@ -25,6 +25,14 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.1.6 - docs: fix stale PROJECT-INFO.md tone guide (live URL is canonical, not TODO)
+- **Date**: 2026-10-16
+- **Owner request**: audit all six project `PROJECT-INFO.md` sheets for stale/inaccurate facts; fix them.
+- **Changes**:
+  - `PROJECT-INFO.md` §9: removed "never claim a live public URL — URL is TODO" (stale since 2.1.5 added the canonical live URL to §1 and `README.md`); the guide now only forbids claiming 36 configured models or committed screenshots.
+  - `docs/commits.md`: `📌 Next version` advanced to `main → 2.1.7`.
+  - No code changes; no gates run per owner gate policy.
 
 ### 2.1.5 - docs: repo README + live demo URL + PROJECT-INFO.md resume sheet
 - **Date**: 2026-10-13

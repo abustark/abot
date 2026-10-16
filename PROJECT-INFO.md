@@ -149,4 +149,4 @@ AI chat, multi-model routing, LLM integration, prompt engineering, Google Gemini
 
 **Portfolio card (title + ~30 words + stack):** ABot — one calm hub for 24 AI models with streaming chat, prompt presets, voice, and deep chat management. Hardened proxy, Google + guest auth, installable PWA. `Vanilla JS · Tailwind · Firebase · Vercel · 4 AI providers`
 
-**Tone/length guide for the AI:** resume = 3–5 dense bullets or one 3-line paragraph, lead with verbs and numbers, keywords from §8; portfolio = friendly paragraph + feature list + stack chips, mention the 24-model routing, the hardened proxy, and the PWA; never claim a live public URL, 36 models as configured, or committed screenshots — URL is TODO, config holds 24, `artifacts/` is absent.
+**Tone/length guide for the AI:** resume = 3–5 dense bullets or one 3-line paragraph, lead with verbs and numbers, keywords from §8; portfolio = friendly paragraph + feature list + stack chips, mention the 24-model routing, the hardened proxy, and the PWA; never claim 36 models as configured or committed screenshots — config holds 24, `artifacts/` is absent.
