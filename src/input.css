@@ -958,8 +958,12 @@ body.chat-empty #jumpToLatest { display: none; }
 }
 
 /* --- B2: while a response streams, the stop control wears a soft coral ring.
-   Driven by the button's own `.stop-hidden` state, so no extra JS flag. */
-#stopBtn::after {
+   Driven by the button's own `.stop-hidden` state, so no extra JS flag.
+   v2.1.10: ring moved from ::after to ::before — ::after belongs to the
+   button's data-tooltip ("Stop"), and the two rules shared the pseudo: the
+   tooltip's ink disc, padding and -50% translate leaked into the ring,
+   rendering a gray blob beside the send button. */
+#stopBtn::before {
     content: '';
     position: absolute;
     inset: -3px;
@@ -968,14 +972,14 @@ body.chat-empty #jumpToLatest { display: none; }
     opacity: 0;
     pointer-events: none;
 }
-#stopBtn:not(.stop-hidden)::after { animation: stopRing 1.8s var(--ease-in-out) infinite; }
+#stopBtn:not(.stop-hidden)::before { animation: stopRing 1.8s var(--ease-in-out) infinite; }
 @keyframes stopRing {
     0% { opacity: 0.7; transform: scale(0.92); }
     70% { opacity: 0; transform: scale(1.18); }
     100% { opacity: 0; transform: scale(1.18); }
 }
 @media (prefers-reduced-motion: reduce) {
-    #stopBtn:not(.stop-hidden)::after { animation: none; opacity: 0.5; transform: none; }
+    #stopBtn:not(.stop-hidden)::before { animation: none; opacity: 0.5; transform: none; }
 }
 
 /* --- B5: model panel — enter-only, origin-aware, same pattern as the ⋮ menus

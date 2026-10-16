@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.1.10`** (current head is `2.1.9` — see below)
+> - **`main` → `2.2.0`** (current head is `2.1.10` — see below)
 > - **`arena/01a03fe9-abot` → its own sequence** (syncs are **unversioned** merge commits:
 >   `merge main <version> into arena/01a03fe9-abot`; arena's own feature commits use arena's numbers)
 
@@ -25,6 +25,14 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.1.10 - stop button ring no longer collides with tooltip
+- **Date**: 2026-10-16
+- **Owner-approved**: Phase 1 of the audit fix plan (this file only).
+- **Changes**:
+  - `src/input.css`: the streaming stop-ring sat on `#stopBtn::after` — the very pseudo-element the generic `[data-tooltip]::after` rule owns. The tooltip's ink disc, padding and `-50%` translate bled into the ring, so it rendered as a gray blob beside the send button (caught streaming→stop, desktop light theme) and as a detached disc (mobile dark). Ring moved to `#stopBtn::before` (incl. reduced-motion override); `dist/output.css` rebuilt. Side effect: the stop button's "Stop" tooltip now renders instead of being overridden.
+  - `docs/commits.md`: `📌 Next version` advanced to `main → 2.2.0`.
+  - No gates run per owner gate policy.
 
 ### 2.1.9 - fix guest rate-limit crash
 - **Date**: 2026-10-16
