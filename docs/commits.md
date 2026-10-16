@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.1.7`** (current head is `2.1.6` — see below)
+> - **`main` → `2.1.8`** (current head is `2.1.7` — see below)
 > - **`arena/01a03fe9-abot` → its own sequence** (syncs are **unversioned** merge commits:
 >   `merge main <version> into arena/01a03fe9-abot`; arena's own feature commits use arena's numbers)
 
@@ -25,6 +25,14 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.1.7 - docs: PROJECT-INFO.md - add resume framing note to tone guide
+- **Date**: 2026-10-16
+- **Owner request**: make the PROJECT-INFO.md sheets resume-ready without inventing KPIs.
+- **Changes**:
+  - `PROJECT-INFO.md` §9: tone guide now opens with "Frame impact as user capability + the hardest engineering problem solved (no business KPIs)."
+  - `docs/commits.md`: `📌 Next version` advanced to `main → 2.1.8`.
+  - No code changes; no gates run per owner gate policy.
 
 ### 2.1.6 - docs: fix stale PROJECT-INFO.md tone guide (live URL is canonical, not TODO)
 - **Date**: 2026-10-16
