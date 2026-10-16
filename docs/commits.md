@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.2.3`** (current head is `2.2.2` — see below)
+> - **`main` → `2.2.4`** (current head is `2.2.3` — see below)
 > - **`arena/01a03fe9-abot` → its own sequence** (syncs are **unversioned** merge commits:
 >   `merge main <version> into arena/01a03fe9-abot`; arena's own feature commits use arena's numbers)
 
@@ -25,6 +25,14 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.2.3 - surface command palette hint
+- **Date**: 2026-10-16
+- **Owner-approved**: Phase 1 of the audit fix plan.
+- **Changes**:
+  - `index.html`: the Ctrl/Cmd+K command palette had no discovery affordance anywhere in the shell — added "Ctrl K for commands" (with `.palette-kbd` key chips) to the desktop composer hint line, matching the palette's own footer kbd language. Hidden on mobile alongside the rest of that row.
+  - `docs/commits.md`: `📌 Next version` advanced to `main → 2.2.4`.
+  - No gates run per owner gate policy.
 
 ### 2.2.2 - contain overscroll in inner scroll areas
 - **Date**: 2026-10-16
