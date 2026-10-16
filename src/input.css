@@ -936,6 +936,17 @@ body.chat-empty #composerDock {
 }
 body.chat-empty #jumpToLatest { display: none; }
 
+/* v2.2.2: inner scroll areas keep their own overscroll boundary — without it a
+   scroll at the list edge chains to the page and rubber-bands / triggers
+   pull-to-refresh on mobile. #chatHistoryContainer already carries the
+   Tailwind `overscroll-contain` utility; these are the remaining scrollers. */
+#chatList,
+#modelSelectorPanel,
+#searchResults,
+#commandPaletteList {
+    overscroll-behavior: contain;
+}
+
 /* Suggestion cards: desktop-only hover lift (token shadow), press always. */
 .suggestion-card { cursor: pointer; }
 @media (hover: hover) and (pointer: fine) {

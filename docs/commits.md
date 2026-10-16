@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.2.2`** (current head is `2.2.1` — see below)
+> - **`main` → `2.2.3`** (current head is `2.2.2` — see below)
 > - **`arena/01a03fe9-abot` → its own sequence** (syncs are **unversioned** merge commits:
 >   `merge main <version> into arena/01a03fe9-abot`; arena's own feature commits use arena's numbers)
 
@@ -25,6 +25,14 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.2.2 - contain overscroll in inner scroll areas
+- **Date**: 2026-10-16
+- **Owner-approved**: Phase 1 of the audit fix plan.
+- **Changes**:
+  - `src/input.css`: `#chatList`, `#modelSelectorPanel`, `#searchResults` and `#commandPaletteList` had no `overscroll-behavior`, so a scroll at their edge chained to the page and rubber-banded (and could trigger pull-to-refresh) on mobile. Added one shared `overscroll-behavior: contain` rule; `#chatHistoryContainer` and the empty-state block already had containment. `dist/output.css` rebuilt.
+  - `docs/commits.md`: `📌 Next version` advanced to `main → 2.2.3`.
+  - No gates run per owner gate policy.
 
 ### 2.2.1 - csp: allow google identity styles
 - **Date**: 2026-10-16
