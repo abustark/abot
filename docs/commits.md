@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.2.7`** (current head is `2.2.6` — see below)
+> - **`main` → `2.2.8`** (current head is `2.2.7` — see below)
 > - **`arena/01a03fe9-abot` → its own sequence** (syncs are **unversioned** merge commits:
 >   `merge main <version> into arena/01a03fe9-abot`; arena's own feature commits use arena's numbers)
 
@@ -25,6 +25,12 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.2.7 - screenshot policy: agent-reference only
+- **Date**: 2026-10-17
+- **Owner directive**: screenshots/images the agent captures are for the agent's own inspection only — **no** copies into `artifacts/`, **no** commits, **no** uploads, to save time. `AGENTS.md` §6 rewritten from the old "must copy to `artifacts/`" rule to the reference-only policy (footer date bumped). `docs/audits/*.png` stay gitignored/local-only. The 10 just-copied `artifacts/2.2.6-revamp-*.png` were deleted.
+- **Also this session**: `arena/01a03fe9-abot` synced for 2.2.6 — arena-named merge commit `merge main 2.2.6 into arena/01a03fe9-abot` (`4b206f3`), pushed to `origin/arena/01a03fe9-abot`. Owner standing rule recorded: arena merge for every **major** update.
+- `docs/commits.md`: this entry; `📌 Next version` → `main → 2.2.8`.
 
 ### 2.2.6 - header + composer revamp (chat-app pattern)
 - **Date**: 2026-10-17
