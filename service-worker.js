@@ -3,7 +3,7 @@
  * Provides offline caching for local assets only
  */
 
-const CACHE_NAME = 'abot-cache-v54'; // 2.3.10: sidebar collapse/expand now slides over 1.5s (owner request)
+const CACHE_NAME = 'abot-cache-v55'; // 2.4.0: sidebar motion respects prefers-reduced-motion (snap switch)
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -11,7 +11,7 @@ const STATIC_ASSETS = [
     '/favicon-32-light.png',
     '/favicon-32-dark.png',
     '/logo.png',
-    '/dist/output.css?v=p28',
+    '/dist/output.css?v=p29',
     '/js/app.js',
     '/js/config.js',
     '/js/dom.js',

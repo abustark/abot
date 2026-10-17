@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.4.0`** (current head is `2.3.10` — the third number reached `.10`, so the sequence ROLLS to `2.4.0` — see below)
+> - **`main` → `2.4.1`** (current head is `2.4.0` — see below)
 > - **`arena/01a03fe9-abot` → mirrors `main`** (no version of its own: `git push origin main:arena/01a03fe9-abot --force`;
 >   both branches stay identical)
 
@@ -25,6 +25,14 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.4.0 - sidebar motion now respects prefers-reduced-motion (snaps instead of the 1.5s slide)
+- **Date**: 2026-10-17
+- **Owner request** (follow-up to the 2.3.10 note): add the missing reduced-motion off-switch for the sidebar.
+- **Change**: new `@media (prefers-reduced-motion: reduce)` guard in `src/input.css` — `.sidebar { transition: none; }`. Collapse/expand still works, it just snaps instantly; same pattern as the other component guards in the file.
+- **Cache-bust**: `?v=p28` → `?v=p29`, `abot-cache-v54` → `abot-cache-v55`.
+- **dist/output.css**: rebuilt via `npm run build:css` and committed.
+- **Note**: first `2.4.x` number (rolled over from `2.3.10` per the versioning scheme).
 
 ### 2.3.10 - sidebar collapse now slides over 1.5s so the motion is clearly visible
 - **Date**: 2026-10-17

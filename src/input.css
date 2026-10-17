@@ -405,6 +405,11 @@
         border-right-color 1.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+@media (prefers-reduced-motion: reduce) {
+    /* 2.4.0 (owner request): snap to the end state instead of the 1.5s slide. */
+    .sidebar { transition: none; }
+}
+
 /* Desktop collapse: at md+ the drawer becomes a static flex column, so the
    translate classes are inert (md:translate-x-0 wins). Collapsing is done by
    sliding the 18rem (w-72) column out via negative margin — the flex sibling
