@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.2.11`** (current head is `2.2.10` — see below)
+> - **`main` → `2.3.1`** (current head is `2.3.0` — see below)
 > - **`arena/01a03fe9-abot` → its own sequence** (syncs are **unversioned** merge commits:
 >   `merge main <version> into arena/01a03fe9-abot`; arena's own feature commits use arena's numbers)
 
@@ -25,6 +25,13 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.3.0 - sync one-version-per-response rule into docs/AGENTS.md duplicate
+- **Date**: 2026-10-17
+- **Why**: `docs/AGENTS.md` is a stale duplicate of the root `AGENTS.md`; a session reading it instead of the root would miss the new rule. Folded the cross-project sync of the same rule into the same owner request — one version number per batch, as the rule itself demands.
+- **Changes**:
+  - `docs/AGENTS.md` §1 item 2: added the "One version number per agent response / request batch" bullet (wording identical to the root `AGENTS.md`).
+  - Cross-repo same batch (each repo's own sequence, not abot numbers): `project_bmw/docs/commits.md` `2.0.20` + `HOUSE-PRICE/docs/commits.md` `2.0.9` headers; introduced the versioning scheme + rule into `price-trail/AGENTS.md`, `linkly/AGENTS.md` + `CLAUDE.md`, `cover_letter_gen/AGENTS.md` (start at `1.0.0`, history before it unversioned). `PhotoDuplicateCleaner` left untouched (owner call: not a git repo).
 
 ### 2.2.10 - clarify one version per agent response + advance next-version line
 - **Date**: 2026-10-17
