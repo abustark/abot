@@ -37,7 +37,7 @@ This document tracks every commit made on `main` following the versioning schema
   - `js/chat.js`: first-send logo flight — `flyLogoToHeader()` FLIP (WAAPI, 300 ms `--ease-drawer`-style curve, transform-only, reduced-motion-safe); `#emptyLogo` id on the landing logo; rect captured in `sendMessage` before `setEmptyMode(false)`; header logo visibility follows empty mode.
   - `src/input.css`: sidebar collapse targets `border-right-color: transparent` instead of snapping `border-right-width` to 0 (kills the 1 px mid-slide content shift) and the colour joins the transition; new mobile chip sizing rule.
   - Asset cache-bust `?v=p21` → `?v=p22` (`output.css`, `js/app.js`).
-- **Note**: `src/input.css` changed — `dist/output.css` needs a `npm run build:css` rebuild + commit before the new sidebar/chip CSS reaches production (owner-gated per §3).
+- **Note**: `dist/output.css` rebuilt via `npm run build:css` and committed as this batch's follow-up commit (brings the new sidebar/chip CSS plus earlier unbuilt utilities like `md:columns-2` to production).
 
 ### 2.3.3 - hard rules: do exactly the ask, give options when unsure
 - **Date**: 2026-10-17
