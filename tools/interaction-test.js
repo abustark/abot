@@ -239,14 +239,14 @@ function stubChain(label) {
         const { renderActiveChat } = await import('file://' + path.join(esmDir, 'chat.js'));
         const chat = state.chats[state.activeChatId];
         const prevModel = chat ? chat.model : null;
-        if (chat) { chat.model = 'google/gemini-2.5-pro'; renderActiveChat(); } // same path the model picker uses
+        if (chat) { chat.model = 'google/gemini-3.8-flash'; renderActiveChat(); } // same path the model picker uses
         click(ws);
         await sleep(50);
         check('web-search chip activates for capable model', ws.getAttribute('aria-pressed') === 'true' && ws.classList.contains('chip-active'));
         click(ws);
         await sleep(50);
         check('web-search chip deactivates', ws.getAttribute('aria-pressed') === 'false' && !ws.classList.contains('chip-active'));
-        check('thinking chip unlocks for gemini-2.5-pro', th && !th.disabled);
+        check('thinking chip unlocks for gemini-3.8-flash', th && !th.disabled);
         click(th);
         await sleep(50);
         check('thinking chip activates', th.getAttribute('aria-pressed') === 'true' && th.classList.contains('chip-active'));
@@ -481,6 +481,50 @@ function stubChain(label) {
         check('sanitizer strips javascript: hrefs', !sanitized.includes('javascript:'));
         const safeHtml = sanitizeHtml('<p><strong>bold text</strong> and <a href="https://example.com">link</a></p>');
         check('sanitizer preserves valid formatting and secures links', safeHtml.includes('<strong>bold text</strong>') && safeHtml.includes('rel="noopener noreferrer"'));
+    }
+    // --- 2.2.4: error-card Retry + FM-4 (a failed interim save no longer aborts the send) ---
+    {
+        const { state } = await import('file://' + path.join(esmDir, 'state.js'));
+        const { renderActiveChat } = await import('file://' + path.join(esmDir, 'chat.js'));
+        const prevActive = state.activeChatId;
+        const realDb = state.db;
+        const model = 'groq/openai/gpt-oss-120b';
+        const userMsg = () => ({ role: 'user', content: 'hello', model, ts: Date.now() });
+        const errMsg = () => ({ role: 'assistant', content: 'Connection error: test', model, isError: true, ts: Date.now() });
+
+        state.chats['8888'] = { id: 8888, name: 'Retry Test', messages: [userMsg(), errMsg()], model };
+        state.activeChatId = '8888';
+        renderActiveChat();
+        await sleep(30);
+        const retry = window.document.querySelector('.retry-btn');
+        check('trailing error card renders a labelled Retry', !!retry && retry.getAttribute('aria-label') === 'Retry');
+
+        // Error card no longer last (the user kept chatting) → Retry must hide.
+        state.chats['8888'].messages.push(userMsg());
+        renderActiveChat();
+        await sleep(30);
+        check('stale error cards hide Retry', !window.document.querySelector('.retry-btn'));
+
+        // Click route with a failing Firestore save (FM-4): the send must still
+        // proceed. jsdom has no network and the fake auth user has no
+        // getIdToken, so it lands on a fresh error card with a fresh Retry.
+        state.chats['8888'].messages = [userMsg(), errMsg()];
+        renderActiveChat();
+        await sleep(30);
+        state.db = { collection: () => ({ doc: () => ({ collection: () => ({ doc: () => ({ update: () => Promise.reject(new Error('simulated save failure')) }) }) }) }) };
+        const btn = window.document.querySelector('.retry-btn');
+        if (btn) click(btn);
+        await sleep(120);
+        const toastText = ($('toast-stack') || {}).textContent || '';
+        check('FM-4: failed save warns but keeps sending', toastText.includes("Couldn't save"));
+        check('FM-4: prompt still sent (composer cleared)', $('messageInput').value === '');
+        check('Retry re-attempted — fresh error card carries Retry', !!window.document.querySelector('.retry-btn'));
+
+        state.db = realDb;
+        delete state.chats['8888'];
+        state.activeChatId = prevActive;
+        renderActiveChat();
+        await sleep(30);
     }
 
     console.log(fails ? `\n${fails} INTERACTION FAILURE(S) ❌` : '\nALL INTERACTIONS PASS ✅');

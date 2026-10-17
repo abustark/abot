@@ -124,6 +124,22 @@ export const toast = {
 
 export const getTimestamp = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
+// 2.2.4 (audit): human-relative message timestamps. New messages carry a `ts`
+// (Date.now() at send time) — render "just now" / "5 min ago" / "2 hr ago" /
+// "3 days ago", then a short date once older than a week. Legacy messages
+// without a `ts` fall back to the old render-time clock so nothing vanishes.
+export const formatRelativeTime = (ts) => {
+    const then = Number(ts);
+    if (!Number.isFinite(then)) return getTimestamp();
+    const diff = Date.now() - then;
+    if (diff < 45 * 1000) return 'just now';
+    const rtf = new Intl.RelativeTimeFormat([], { numeric: 'auto', style: 'narrow' });
+    if (diff < 60 * 60 * 1000) return rtf.format(-Math.round(diff / 60000), 'minute');
+    if (diff < 24 * 60 * 60 * 1000) return rtf.format(-Math.round(diff / 3600000), 'hour');
+    if (diff < 7 * 24 * 60 * 60 * 1000) return rtf.format(-Math.round(diff / 86400000), 'day');
+    return new Date(then).toLocaleDateString([], { month: 'short', day: 'numeric' });
+};
+
 // --- Stream state (drives composer leave-guard; set by chat.js) ---
 export const isStreaming = () => !!state.abortController;
 

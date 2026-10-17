@@ -10,7 +10,7 @@ import { MODEL_CONFIG } from './config.js';
 import { applyModelColorTheme, syncComposerChips } from './ui.js';
 import { closeSidebar } from './ui.js';
 import { dom } from './dom.js';
-import { getTimestamp, isSpeaking, speakText, stopSpeaking, setUnsentDraft, renderSafeMarkdown } from './utils.js';
+import { formatRelativeTime, isSpeaking, speakText, stopSpeaking, setUnsentDraft, renderSafeMarkdown } from './utils.js';
 import { showGuestLimitModal } from './ui.js';
 import { showToast } from './utils.js';
 import { state } from './state.js';
@@ -306,6 +306,13 @@ export const createNewChat = async () => {
     }
 };
 
+// 2.2.4 (audit): trailing error cards get a Retry action. It replays the
+// failed prompt through the regenerate path (pop the error + prompt, refill
+// the composer, send again). Error cards deeper in the history must stay
+// text-only — regenerate pops everything above the prompt, so retrying a
+// stale error would silently drop every message sent after it.
+const RETRY_BTN_HTML = `<button class="retry-btn mt-3 inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-btn border border-danger/40 text-danger hover:bg-danger/10 transition-colors" aria-label="Retry" title="Retry this message"><svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>Retry</button>`;
+
 export const appendMessage = (message, isHistory = false, options = {}) => {
     const { role, content: text, model: messageModel } = message;
     const isUser = role === 'user';
@@ -323,7 +330,9 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
         // path — as non-history assistant messages they used to fall into the
         // streaming-placeholder branch and show a typing indicator forever
         // (the "error looks like a second loading bubble" bug).
-        messageContent = `<div class="text-sm leading-6 text-danger" role="alert">⚠️ ${text.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
+        // 2.2.4 (audit): only the LAST message may carry Retry (see the const above).
+        const isTrailingError = typeof options.index === 'number' && options.index === currentChat.messages.length - 1;
+        messageContent = `<div class="text-sm leading-6 text-danger" role="alert">⚠️ ${text.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>${isTrailingError ? RETRY_BTN_HTML : ''}`;
     } else if (isUser) {
         messageContent = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
     } else {
@@ -391,7 +400,7 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
                                          <span class="text-white text-[8px] font-semibold">${modelConf.name.substring(0, 2).toUpperCase()}</span>
                                     </div>
                                     <span class="text-xs font-semibold ${providerColor.text}">${modelConf.name}</span>
-                                    ${showTs ? `<span class="text-[11px] text-muted/80 msg-timestamp">${getTimestamp()}</span>` : ''}
+                                    ${showTs ? `<span class="text-[11px] text-muted/80 msg-timestamp">${formatRelativeTime(message.ts)}</span>` : ''}
                                     <div class="ml-auto flex items-center gap-0.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
                                         ${aiActionsHtml}
                                     </div>
@@ -422,6 +431,7 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
             }
         });
         messageEl.querySelector('.regen-btn')?.addEventListener('click', (e) => { e.stopPropagation(); regenerateLastResponse(); });
+        messageEl.querySelector('.retry-btn')?.addEventListener('click', (e) => { e.stopPropagation(); regenerateLastResponse(); });
     }
 
     const copyBtn = messageEl.querySelector('.copy-message-btn');
@@ -588,7 +598,10 @@ export const sendMessage = async () => {
     state.abortController = new AbortController(); // Create a new controller for this request
 
     // Create the user message object, now including the current model.
-    const userMessage = { role: 'user', content: message, model: currentChat.model };
+    // 2.2.4 (audit): every message now carries ts (Date.now()) — rendered as a
+    // relative time on AI rows; legacy messages without ts fall back to the
+    // old render-time clock.
+    const userMessage = { role: 'user', content: message, model: currentChat.model, ts: Date.now() };
     appendMessage(userMessage, false, { index: currentChat.messages.length });
     currentChat.messages.push(userMessage);
     setEmptyMode(false); // first send leaves the new-chat layout immediately
@@ -602,9 +615,12 @@ export const sendMessage = async () => {
         await chatDocRef.update({ messages: currentChat.messages });
     } catch (dbError) {
         console.error("Error saving user message to Firestore:", dbError);
-        showToast("Error: Could not save your message.", "error");
-        // We can choose to stop here if saving is critical
-        return;
+        // 2.2.4 (audit, FM-4): this used to `return;` — a transient save error
+        // (offline blip, rules hiccup) killed the send entirely and the prompt
+        // sat in a dead composer. The message is already on screen and in
+        // memory; carry on and let the finally-block save re-attempt
+        // persistence with the full exchange.
+        showToast("Couldn't save to history — sending anyway.", "error");
     }
 
     if (state.auth.currentUser && state.auth.currentUser.isAnonymous) {
@@ -651,7 +667,7 @@ export const sendMessage = async () => {
 
     const isGoogleModel = currentChat.model.startsWith('google/');
     // Append the placeholder message with the current model's info
-    appendMessage({ role: 'assistant', content: '', model: currentChat.model }, false, { isGoogle: isGoogleModel });
+    appendMessage({ role: 'assistant', content: '', model: currentChat.model, ts: Date.now() }, false, { isGoogle: isGoogleModel });
 
     const allBotSpans = dom.chatHistory.querySelectorAll('span[id^="bot-msg-"]');
     const latestBotMessageSpan = allBotSpans[allBotSpans.length - 1];
@@ -741,13 +757,16 @@ export const sendMessage = async () => {
                     const safeErr = errMsg.replace(/</g, '&lt;').replace(/>/g, '&gt;');
                     if (latestBotMessageSpan) {
                         latestBotMessageSpan.innerHTML =
-                            `<div class="text-sm leading-6 text-danger" role="alert">⚠️ ${safeErr}</div>`;
+                            `<div class="text-sm leading-6 text-danger" role="alert">⚠️ ${safeErr}</div>${RETRY_BTN_HTML}`;
+                        // 2.2.4 (audit): these morphed-in cards bypass the
+                        // index-based wiring inside appendMessage — attach here.
+                        latestBotMessageSpan.querySelector('.retry-btn')?.addEventListener('click', (e) => { e.stopPropagation(); regenerateLastResponse(); });
                     } else {
                         dom.chatHistory.querySelector('.typing-indicator')?.closest('.message-container')?.remove();
                         const now = currentChat.messages.length;
                         appendMessage({ role: 'assistant', content: errMsg, model: currentChat.model, isError: true }, false, { index: now });
                     }
-                    const errorMsg = { role: 'assistant', content: errMsg, model: currentChat.model, isError: true };
+                    const errorMsg = { role: 'assistant', content: errMsg, model: currentChat.model, isError: true, ts: Date.now() };
                     currentChat.messages.push(errorMsg);
                     return;
                 }
@@ -823,7 +842,7 @@ export const sendMessage = async () => {
             highlightWhenReady(block);
         });
 
-        currentChat.messages.push({ role: 'assistant', content: fullReply, model: currentChat.model });
+        currentChat.messages.push({ role: 'assistant', content: fullReply, model: currentChat.model, ts: Date.now() });
         if (localStorage.getItem('abot-auto-tts') === 'true' && fullReply) {
             speakText(fullReply);
         }
@@ -834,13 +853,13 @@ export const sendMessage = async () => {
             console.log("Chat generation aborted. Saving partial response.");
             const finalContent = fullReply || "";
             const stoppedMessage = finalContent + '\n\n*-- Generation stopped --*';
-            currentChat.messages.push({ role: 'assistant', content: stoppedMessage, model: currentChat.model });
+            currentChat.messages.push({ role: 'assistant', content: stoppedMessage, model: currentChat.model, ts: Date.now() });
         } else {
             console.error("sendMessage stream error:", error);
             streamFailed = true;
             streamDone = true; // 2.1.3: pending throttled flush must not overwrite the error card
             dom.chatHistory.querySelector('.typing-indicator')?.closest('.message-container')?.remove();
-            const netErrMsg = { role: 'assistant', content: 'Connection error: ' + (error.message || 'could not reach the server.'), model: currentChat.model, isError: true };
+            const netErrMsg = { role: 'assistant', content: 'Connection error: ' + (error.message || 'could not reach the server.'), model: currentChat.model, isError: true, ts: Date.now() };
             currentChat.messages.push(netErrMsg);
             appendMessage(netErrMsg, false, { index: currentChat.messages.length - 1 });
         }
@@ -899,7 +918,7 @@ export const sendMessage = async () => {
                 const response = await fetch('/api/chat', {
                     method: 'POST',
                                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` },
-                    body: JSON.stringify({ model: 'google/gemini-2.5-flash', messages: [{ role: 'user', content: titlePrompt }] })
+                    body: JSON.stringify({ model: 'google/gemini-3.5-flash-lite', messages: [{ role: 'user', content: titlePrompt }] }) // 2.2.4 (audit): registry id refreshed (was gemini-2.5-flash, retired)
                 });
 
                 const reader = response.body.getReader();

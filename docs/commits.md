@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.2.4`** (current head is `2.2.3` — see below)
+> - **`main` → `2.2.5`** (current head is `2.2.4` — see below)
 > - **`arena/01a03fe9-abot` → its own sequence** (syncs are **unversioned** merge commits:
 >   `merge main <version> into arena/01a03fe9-abot`; arena's own feature commits use arena's numbers)
 
@@ -25,6 +25,20 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.2.4 - error retry, model refresh, relative timestamps
+- **Date**: 2026-10-17
+- **Owner-approved**: Phase 2 of the audit fix plan (all four items in one commit, per the owner's one-version-per-phase directive).
+- **Changes**:
+  - `js/chat.js` (FM-4): a failed interim Firestore save of the user's message `return;`-ed out of `sendMessage`, killing the send and stranding the prompt in a dead composer. It now toasts "Couldn't save to history — sending anyway." and continues — the message is already on screen and in memory, and the finally-block save re-attempts persistence with the full exchange.
+  - `js/chat.js` (retry): trailing error cards now carry a "Retry" button (danger-bordered, `aria-label="Retry"`) that replays the failed prompt through `regenerateLastResponse()`. Only the LAST message gets it — regenerate pops everything above the prompt, so an older error card would silently drop later messages. Covers both error paths: `appendMessage`'s isError branch and the in-place loading-bubble morph (which bypasses appendMessage wiring, so its listener attaches inline).
+  - `js/chat.js` + `js/utils.js` (timestamps): messages now store `ts: Date.now()` at creation (user prompt, streaming placeholder, final reply, stopped, both error paths). The AI-row clock renders `formatRelativeTime(ts)` — "just now" / "5 min ago" / "2 hr ago" / "3 days ago" via `Intl.RelativeTimeFormat`, then a short date; legacy messages without `ts` keep the old render-time clock.
+  - `js/config.js`: registry refreshed — `google/gemini-2.5-pro` → `google/gemini-3.8-flash` and `google/gemini-2.5-flash` → `google/gemini-3.5-flash-lite` (2.5 ids retired upstream), `THINKING_MODELS` follows the 3.8 id; removed `groq/qwen/qwen3.6-27b` (deprecated), `groq/qwen/qwen3.8-27b` (duplicate of the OpenRouter :free entry), `groq/minimaxai/minimax-m2.7` (not free-tier) and `nvidia/mistralai/mistral-nemotron` (off the free roster); `kimi-k3` left as-is (unverifiable without live calls).
+  - `js/chat.js`: title-gen hardcoded `google/gemini-2.5-flash` → `google/gemini-3.5-flash-lite`. `index.html` + `js/ui.js`: Think chip tooltip now names Gemini 3.8 Flash.
+  - `tools/interaction-test.js`: thinking-chip case updated to the new Gemini id; new case block covers Retry presence/aria-label, Retry hidden on stale (non-trailing) error cards, and FM-4 (a failing `state.db` save still sends — toast shown, composer cleared, fresh error card re-rendered).
+  - `dist/output.css` rebuilt (new retry-button utilities).
+  - `docs/commits.md`: `📌 Next version` advanced to `main → 2.2.5`.
+  - No gates run per owner gate policy. FM-4/retry have no real-browser repro — jsdom interaction coverage added instead.
 
 ### 2.2.3 - surface command palette hint
 - **Date**: 2026-10-16

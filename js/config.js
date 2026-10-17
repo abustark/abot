@@ -80,18 +80,19 @@ export const MODEL_CONFIG = {
     // --- NEW DEFAULT ---
     'groq/openai/gpt-oss-120b': { name: 'GPT-oss', color: 'groq-yellow' },
 
-    // --- GOOGLE (GEMINI) ---
-    'google/gemini-2.5-pro': { name: 'Gemini 2.5 Pro', color: 'gemini' },
-    'google/gemini-2.5-flash': { name: 'Gemini 2.5 Flash', color: 'gemini-pro' },
+    // --- GOOGLE (GEMINI) — 2.2.4 (audit): refreshed to current 3.x ids
+    // (2.5-pro / 2.5-flash were retired upstream). ---
+    'google/gemini-3.8-flash': { name: 'Gemini 3.8 Flash', color: 'gemini' },
+    'google/gemini-3.5-flash-lite': { name: 'Gemini 3.5 Flash Lite', color: 'gemini-pro' },
 
     // --- OTHER GROQ (refreshed 2026-08-30 against console.groq.com/docs/models
     // + deprecations page. Groq shut down on 08/16/26: llama-3.1-8b-instant,
     // llama-3.3-70b-versatile; earlier: llama-4-scout, qwen3-32b, kimi-k2-
-    // instruct, deepseek-r1-distill. Groq rotates FAST — re-check monthly.) ---
+    // instruct, deepseek-r1-distill. Groq rotates FAST — re-check monthly.)
+    // 2.2.4 (audit): qwen3.6-27b (deprecated), qwen3.8-27b (duplicate of the
+    // OpenRouter :free entry below) and minimax-m2.7 (not on the free tier)
+    // removed. ---
     'groq/openai/gpt-oss-20b': { name: 'GPT-OSS 20B', color: 'groq-yellow' },
-    'groq/qwen/qwen3.6-27b': { name: 'Qwen 3.6 27B', color: 'groq-yellow' },
-    'groq/qwen/qwen3.8-27b': { name: 'Qwen 3.8 27B', color: 'groq-yellow' },
-    'groq/minimaxai/minimax-m2.7': { name: 'MiniMax M2.7', color: 'groq-yellow' },
 
     // --- NVIDIA (build.nvidia.com FREE ENDPOINT models — owner-extracted
     // 2026-08-30 from the site's Free Endpoint cards. One nvapi- key, ~40 RPM.
@@ -108,7 +109,8 @@ export const MODEL_CONFIG = {
     'nvidia/z-ai/glm-5.3-flash': { name: 'GLM 5.3 Flash', color: 'nvidia-green' },
     'nvidia/z-ai/glm-5.3': { name: 'GLM 5.3', color: 'nvidia-green' },
     'nvidia/openai/gpt-oss-20b': { name: 'GPT-OSS 20B', color: 'nvidia-green' },
-    'nvidia/mistralai/mistral-nemotron': { name: 'Mistral Nemotron', color: 'nvidia-green' },
+    // 2.2.4 (audit): mistralai/mistral-nemotron removed — no longer on the
+    // free-endpoint roster.
     'nvidia/google/gemma-4-31b-it': { name: 'Gemma 4 31B', color: 'nvidia-green' },
     'nvidia/nvidia/nemotron-3-super-120b-a12b': { name: 'Nemotron 3 Super', color: 'nvidia-green' },
 
@@ -141,7 +143,7 @@ export const GUEST_MESSAGE_LIMIT = 5;
 //  - thinking: only models with a real on/off thinking control. DeepSeek R1
 //    variants always reason (no toggle to offer) — chip stays disabled with
 //    an explanatory tooltip.
-const THINKING_MODELS = new Set(['google/gemini-2.5-pro']);
+const THINKING_MODELS = new Set(['google/gemini-3.8-flash']); // 2.2.4 (audit): id refreshed
 
 export const modelCapabilities = (model) => {
     const m = String(model || '');

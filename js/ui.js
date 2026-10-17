@@ -77,7 +77,7 @@ export const syncComposerChips = () => {
             ? 'Extended thinking on/off (higher quality, slower and more tokens when on)'
             : caps.alwaysThinks
                 ? 'This model always reasons — nothing to toggle'
-                : 'Select a thinking-capable model (e.g. Gemini 2.5 Pro) to enable';
+                : 'Select a thinking-capable model (e.g. Gemini 3.8 Flash) to enable';
     }
 };
 
