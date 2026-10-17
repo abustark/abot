@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.2.10`** (current head is `2.2.9` — see below)
+> - **`main` → `2.2.11`** (current head is `2.2.10` — see below)
 > - **`arena/01a03fe9-abot` → its own sequence** (syncs are **unversioned** merge commits:
 >   `merge main <version> into arena/01a03fe9-abot`; arena's own feature commits use arena's numbers)
 
@@ -25,6 +25,13 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.2.10 - clarify one version per agent response + advance next-version line
+- **Date**: 2026-10-17
+- **Why**: codify the rule (already practiced) that a single owner request / agent response batch consumes exactly **one** version number — not one per issue, not one per commit. Folded the dead-helper cleanup and this doc line into the same version instead of burning a second number.
+- **Changes**:
+  - `AGENTS.md` §1 item 2: the "one version per agent response / request batch" rule made explicit (multiple commits in one response may not each take a new number; follow-up fixes fold into the same version).
+  - `docs/commits.md`: `?? Next version` advanced to `main` → `2.2.11`.
 
 ### 2.2.9 - remove dead isSearchOpen helper
 - **Date**: 2026-10-17
