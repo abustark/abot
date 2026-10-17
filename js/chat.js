@@ -598,7 +598,14 @@ export const sendMessage = async () => {
     const userMessage = { role: 'user', content: message, model: currentChat.model, ts: Date.now() };
     appendMessage(userMessage, false, { index: currentChat.messages.length });
     currentChat.messages.push(userMessage);
+    // 2.3.4: if this send leaves the new-chat landing, capture the landing
+    // logo's position first so it can fly to the header mark after the layout
+    // swaps (setEmptyMode clears the welcome markup).
+    const landingLogoRect = document.body.classList.contains('chat-empty')
+        ? document.getElementById('emptyLogo')?.getBoundingClientRect() || null
+        : null;
     setEmptyMode(false); // first send leaves the new-chat layout immediately
+    if (landingLogoRect) flyLogoToHeader(landingLogoRect);
     // A1: ONE deterministic scroll on send so the reply starts on screen —
     // never again during the stream; the user owns the viewport from here.
     dom.chatHistoryContainer.scrollTop = dom.chatHistoryContainer.scrollHeight;
@@ -958,6 +965,9 @@ const setEmptyMode = (isEmpty) => {
     document.body.classList.toggle('chat-empty', isEmpty);
     dom.emptyWelcome?.classList.toggle('hidden', !isEmpty);
     dom.emptySuggestions?.classList.toggle('hidden', !isEmpty);
+    // 2.3.4: the header centre hosts the brand mark whenever a real chat is on
+    // screen; the empty landing keeps its own (bigger) logo instead.
+    dom.headerLogo?.classList.toggle('opacity-0', isEmpty);
 
     if (!isEmpty) {
         if (dom.emptyWelcome) dom.emptyWelcome.innerHTML = '';
@@ -980,6 +990,30 @@ const setEmptyMode = (isEmpty) => {
     });
 };
 
+// 2.3.4 (owner request): first-send logo flight — the landing logo glides from
+// its spot above the composer into the header's centre mark. FLIP: measure both
+// rects, animate the header logo from the landing position back to rest
+// (transform-only, 300ms, --ease-drawer curve; skipped entirely for
+// reduced-motion / no-WAAPI browsers).
+const flyLogoToHeader = (fromRect) => {
+    const logo = dom.headerLogo;
+    if (!logo || !fromRect?.width) return;
+    if (typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (typeof logo.animate !== 'function') return;
+    const to = logo.getBoundingClientRect();
+    if (!to.width) return;
+    const dx = (fromRect.left + fromRect.width / 2) - (to.left + to.width / 2);
+    const dy = (fromRect.top + fromRect.height / 2) - (to.top + to.height / 2);
+    const scale = fromRect.width / to.width;
+    logo.animate(
+        [
+            { transform: `translate(${dx}px, ${dy}px) scale(${scale})` },
+            { transform: 'none' }
+        ],
+        { duration: 300, easing: 'cubic-bezier(0.32, 0.72, 0, 1)' }
+    );
+};
+
 const renderEmptyState = () => {
     setEmptyMode(true);
     dom.chatHistory.innerHTML = ''; // nothing to scroll — the landing lives in the dock
@@ -990,7 +1024,7 @@ const renderEmptyState = () => {
     dom.emptyWelcome.innerHTML = `
         <div class="relative flex flex-col items-center justify-center text-center">
             <div class="empty-glow" aria-hidden="true"></div>
-            <img src="/logo.png" alt="" aria-hidden="true" class="logo-mark h-12 w-12 rounded-xl mb-4 select-none shadow-soft" draggable="false">
+            <img id="emptyLogo" src="/logo.png" alt="" aria-hidden="true" class="logo-mark h-12 w-12 rounded-xl mb-4 select-none shadow-soft" draggable="false">
             <h2 class="font-display text-2xl md:text-3xl leading-tight text-ink mb-2 tracking-tight">How can I help today?</h2>
             <p class="text-muted text-sm max-w-sm">Pick a suggestion below or type your own prompt.</p>
         </div>`;

@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.3.4`** (current head is `2.3.3` — see below)
+> - **`main` → `2.3.5`** (current head is `2.3.4` — see below)
 > - **`arena/01a03fe9-abot` → mirrors `main`** (no version of its own: `git push origin main:arena/01a03fe9-abot --force`;
 >   both branches stay identical)
 
@@ -25,6 +25,19 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.3.4 - desktop polish: landing overlap fix, header logo flight, sidebar/composer tweaks
+- **Date**: 2026-10-17
+- **Owner request** (desktop walk-through + mobile composer chips): ugly landing layout; logo should move to the header centre on first send; smoother sidebar expand/collapse; trim the under-composer hint row; move message search to the header; slim the sidebar quick actions; bigger right-aligned chips on mobile.
+- **Changes**:
+  - `index.html`: `#emptySuggestions` moved INSIDE `#composerDock`, below the composer — as an outside sibling it sat in normal flow at the top of the empty main and the centred fixed dock overlapped it (root cause of the screenshot bug: cards top-anchored with the logo floating between them).
+  - Header rebuilt as a 3-zone grid (inline style): new centred `#headerLogo` brand mark (desktop-only, opacity-toggled) between the left cluster and the right actions; new `#headerSearchBtn` (message search) sits left of `#headerNewChatBtn`.
+  - Sidebar: `#sidebarSearchBtn` removed (search moved to the header); `Ctrl K for commands` kbd hint now sits below the New Chat button (desktop-only); Prompts is the only remaining quick action.
+  - Composer: under-composer row trimmed to the disclaimer only (Enter/Ctrl-K hints gone); mobile chips (`Web search`/`Think`) pushed right (`ml-auto` + wider gap) and enlarged via a CSS media query.
+  - `js/chat.js`: first-send logo flight — `flyLogoToHeader()` FLIP (WAAPI, 300 ms `--ease-drawer`-style curve, transform-only, reduced-motion-safe); `#emptyLogo` id on the landing logo; rect captured in `sendMessage` before `setEmptyMode(false)`; header logo visibility follows empty mode.
+  - `src/input.css`: sidebar collapse targets `border-right-color: transparent` instead of snapping `border-right-width` to 0 (kills the 1 px mid-slide content shift) and the colour joins the transition; new mobile chip sizing rule.
+  - Asset cache-bust `?v=p21` → `?v=p22` (`output.css`, `js/app.js`).
+- **Note**: `src/input.css` changed — `dist/output.css` needs a `npm run build:css` rebuild + commit before the new sidebar/chip CSS reaches production (owner-gated per §3).
 
 ### 2.3.3 - hard rules: do exactly the ask, give options when unsure
 - **Date**: 2026-10-17

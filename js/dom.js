@@ -43,6 +43,8 @@ export const dom = {
     modelSelectorLabel: document.getElementById('modelSelectorLabel'),
     modelSelectorPanel: document.getElementById('modelSelectorPanel'),
     headerChatTitle: document.getElementById('headerChatTitle'),
+    headerLogo: document.getElementById('headerLogo'),
+    headerSearchBtn: document.getElementById('headerSearchBtn'),
     promptModal: document.getElementById('promptModal'),
     promptOverlay: document.getElementById('promptOverlay'),
     promptPanel: document.getElementById('promptPanel'),
@@ -87,9 +89,9 @@ dom.webSearchChip = document.getElementById('webSearchChip');
 dom.thinkingChip = document.getElementById('thinkingChip');
 dom.jumpToLatest = document.getElementById('jumpToLatest');
 dom.sidebarThemeSwitch = document.getElementById('sidebarThemeSwitch');
-dom.sidebarSearchBtn = document.getElementById('sidebarSearchBtn');
 dom.sidebarPromptBtn = document.getElementById('sidebarPromptBtn');
-dom.composerHint = document.getElementById('composerHint');
+// 2.3.4: composerHint removed with the under-composer shortcut row (only the
+// disclaimer stays there); message search moved to the header.
 dom.searchCloseBtn = document.getElementById('searchCloseBtn');
 // v1.0.6 new-chat landing (empty state centres the composer).
 dom.emptyWelcome = document.getElementById('emptyWelcome');

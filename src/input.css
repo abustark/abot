@@ -389,14 +389,19 @@
     .typing-a circle { animation: none; opacity: 1; transform: none; }
 }
 
-.sidebar { transition: transform 0.3s var(--ease-drawer), margin-left 0.3s var(--ease-drawer); }
+.sidebar {
+    transition: transform 0.3s var(--ease-drawer), margin-left 0.3s var(--ease-drawer),
+        border-right-color 0.3s var(--ease-drawer);
+}
 
 /* Desktop collapse: at md+ the drawer becomes a static flex column, so the
    translate classes are inert (md:translate-x-0 wins). Collapsing is done by
    sliding the 18rem (w-72) column out via negative margin — the flex sibling
-   reflows, and the transition keeps it animated. */
+   reflows, and the transition keeps it animated. 2.3.4: the hairline fades out
+   (color transition) instead of snapping to width 0, which used to shift the
+   content by 1px mid-animation. */
 @media (min-width: 768px) {
-    .sidebar.sidebar-collapsed { margin-left: -18rem; border-right-width: 0; }
+    .sidebar.sidebar-collapsed { margin-left: -18rem; border-right-color: transparent; }
 }
 
 /* Floating composer dock (revamp): fixed sheet on mobile, static flow on
@@ -606,6 +611,12 @@ mark {
 .composer-chip:disabled {
     opacity: 0.4;
     cursor: not-allowed;
+}
+/* 2.3.4 (owner request): phones get roomier chips — bigger tap target and a
+   slightly larger glyph (labels are hidden below md, the icon carries it). */
+@media (max-width: 767px) {
+    .composer-chip { padding: 0.5rem 0.8rem; }
+    .composer-chip svg { width: 1.125rem; height: 1.125rem; }
 }
 @media (prefers-reduced-motion: reduce) {
     .composer-chip { transition: none; }

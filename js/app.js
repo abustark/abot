@@ -458,11 +458,9 @@ function initApp() {
         searchBackdrop?.classList.add('hidden');
         if (dom.searchResults) dom.searchResults.innerHTML = '';
     };
-    // 2.2.8: the header search toggle was removed with the overflow menu —
-    // search is now opened from the sidebar quick actions / palette only, and
-    // the in-panel close button below is the single explicit dismiss.
-    // v1.0.4: search had no way out once opened — on mobile it is entered from
-    // the drawer, so the header toggle was never reachable to dismiss it.
+    // 2.3.4: message search re-opened from a dedicated header button (left of
+    // New chat) or the palette; the in-panel close button is the explicit
+    // dismiss, so search still has a way out on every viewport.
     dom.searchCloseBtn?.addEventListener('click', closeSearch);
     // Tap outside (backdrop) closes the sheet — the mobile-natural affordance.
     searchBackdrop?.addEventListener('click', closeSearch);
@@ -539,8 +537,6 @@ function initApp() {
         this.style.height = 'auto';
         this.style.height = (this.scrollHeight) + 'px';
         setUnsentDraft(this.value.trim().length > 0);
-        // B1: the hint carries the Enter shortcut — fade it once typing starts.
-        if (dom.composerHint) dom.composerHint.style.opacity = this.value ? '0' : '1';
     });
     installDraftLeaveGuard(); // warn before leaving with an unsent draft or mid-stream
     initPalette(); // Ctrl+K command palette (roadmap #8)
@@ -569,10 +565,10 @@ function initApp() {
     if (dom.sidebarCloseBtn) dom.sidebarCloseBtn.addEventListener('click', onSidebarToggleClick);
     dom.sidebarOverlay.addEventListener('click', closeSidebar);
 
-    // --- Sidebar quick actions (C1): mobile header declutter re-homed search,
-    // prompt library and theme into the drawer. Actions close the drawer on
-    // mobile first so the target UI isn't covered. ---
-    dom.sidebarSearchBtn?.addEventListener('click', () => {
+    // --- Quick actions: 2.3.4 — message search moved from the sidebar to the
+    // header (left of New chat); the drawer keeps the prompt library. Actions
+    // close the drawer on mobile first so the target UI isn't covered. ---
+    dom.headerSearchBtn?.addEventListener('click', () => {
         closeSidebar();
         openSearch();
     });
@@ -1020,9 +1016,9 @@ async function runDiagnostics() {
         if (pm) click(dom.profileMenuBtn);
     } catch (e) { add('account menu opens', false, e.message); }
     try {
-        click(dom.sidebarSearchBtn); await sleep(60);
+        click(dom.headerSearchBtn); await sleep(60);
         const sp = dom.searchPanel && !dom.searchPanel.classList.contains('hidden');
-        add('search panel opens (sidebar quick action)', !!sp);
+        add('search panel opens (header button)', !!sp);
         if (sp) click(dom.searchCloseBtn);
     } catch (e) { add('search panel opens', false, e.message); }
 
