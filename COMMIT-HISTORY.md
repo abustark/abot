@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.4.3`** (current head is `2.4.2` — see below)
+> - **`main` → `2.4.4`** (current head is `2.4.3` — see below)
 > - **`arena/01a03fe9-abot` → mirrors `main`** (no version of its own: `git push origin main:arena/01a03fe9-abot --force`;
 >   both branches stay identical)
 
@@ -25,6 +25,17 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.4.3 - starting loader: dot-matrix animation under the "abot" wordmark (Pace UI Dot Loader port)
+- **Date**: 2026-10-18
+- **Owner request** (reference: 21st.dev / @paceui "Dot Loader"): use that loader as the starting-site loader, below the dotted abot wordmark. Owner asked if the exact component could be found elsewhere — it was: Pace UI's public registry (`gsap.paceui.com/r/dot-loader.json`) serves the full source file, and the demo `game` frames were extracted from the component page payload, so this is a verbatim port (frames, timing, geometry), not an approximation.
+- **Source facts kept 1:1**: 7×7 grid of 49 dots, 6px dots, 2px gap (`gap-0.5`), `rounded-sm` corners, per-frame `classList.toggle("active", frame.includes(index))`, 100ms default interval, loops forever.
+- **New `js/dotloader.js`**: holds the 16-frame "Playing" demo sequence verbatim (a snake traversing the grid, dot indices 0–48); `initDotLoader(grid)` applies the first frame immediately then advances every 100ms. The interval stops once `#app-loader` is hidden (auth.js flips visibility/display) — no idle 10 Hz timer.
+- **Markup**: the old `.loader-circle-22` ring spinner was replaced by the 7×7 `<span>` grid (`#dot-loader`) in the same flex slot under the dotmark wordmark.
+- **Styling uses theme tokens** (not the demo's `bg-white/15`): idle dots `rgb(var(--c-ink) / 0.14)`, `active` dots `rgb(var(--c-coral))` — the coral the spinner used before it.
+- **No reduced-motion guard**: it is a status indicator (the spinner it replaces had none either) — the motion is functional, not decorative.
+- **Cache-bust**: `?v=p31` → `?v=p32`, `abot-cache-v57` → `abot-cache-v58`; `/js/dotloader.js` added to the SW precache.
+- **dist/output.css**: rebuilt via `npm run build:css` and committed (the spinner keyframes were removed, the `.dot-loader` rules added).
 
 ### 2.4.2 - sparkle field retuned to the original Sparkles demo parameters
 - **Date**: 2026-10-17

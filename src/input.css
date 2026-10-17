@@ -259,31 +259,22 @@
     background: radial-gradient(125% 95% at 50% 40%, transparent 42%, rgb(var(--c-canvas) / 0.8) 100%);
 }
 
-/* App loader spinner (indigo -> coral) */
-.loader-circle-22 {
-    width: 70px;
-    height: 70px;
-    position: relative;
-    border: 8px solid transparent;
-    border-radius: 50%;
-    animation: spinner-3--border-opacity 0.7s linear infinite;
-    animation-delay: 0.24s;
+/* 2.4.3 (owner request): dot-matrix loader under the wordmark — a vanilla
+   port of the 21st.dev / Pace UI "Dot Loader" (replaces the old coral ring
+   spinner). Same geometry as the original: 7×7 grid, 6px dots, 2px gap,
+   rounded-sm corners; js/dotloader.js toggles .active at 100ms/frame. */
+.dot-loader {
+    display: grid;
+    grid-template-columns: repeat(7, 6px);
+    grid-auto-rows: 6px;
+    gap: 2px;
 }
-.loader-circle-22:before,
-.loader-circle-22:after {
-    content: '';
-    display: block;
-    position: absolute;
-    border: 8px solid transparent;
-    border-radius: 50%;
-    box-sizing: border-box;
-    animation: spinner-3--border-opacity 0.7s linear infinite;
+.dot-loader span {
+    border-radius: 2px;
+    background-color: rgb(var(--c-ink) / 0.14);
 }
-.loader-circle-22:before { top: 12px; left: 12px; right: 12px; bottom: 12px; }
-.loader-circle-22:after { top: 2px; left: 2px; right: 2px; bottom: 2px; animation-delay: 0.12s; }
-@keyframes spinner-3--border-opacity {
-    from { border-color: rgb(var(--c-coral)); }
-    to { border-color: rgb(var(--c-coral) / 0); }
+.dot-loader span.active {
+    background-color: rgb(var(--c-coral));
 }
 
 /* Empty-state ambient glow — a whisper of the auth coral radial, so the new-chat

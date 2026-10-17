@@ -3,7 +3,7 @@
  * Provides offline caching for local assets only
  */
 
-const CACHE_NAME = 'abot-cache-v57'; // 2.4.2: sparkle field retuned to the original Sparkles demo parameters
+const CACHE_NAME = 'abot-cache-v58'; // 2.4.3: starting-site dot-matrix loader (Dot Loader port)
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -11,7 +11,7 @@ const STATIC_ASSETS = [
     '/favicon-32-light.png',
     '/favicon-32-dark.png',
     '/logo.png',
-    '/dist/output.css?v=p31',
+    '/dist/output.css?v=p32',
     '/js/app.js',
     '/js/config.js',
     '/js/dom.js',
@@ -22,6 +22,7 @@ const STATIC_ASSETS = [
     '/js/auth.js',
     '/js/chat.js',
     '/js/sparkles.js',
+    '/js/dotloader.js',
     '/vendor/marked.min.js',
     // A1/A2 (v1.0.5): atom-one-dark.css is injected with the lazy highlight.js
     // load, and the Inter faces are gone — neither belongs in the precache.

@@ -26,7 +26,7 @@
     <link rel="preload" href="/dist/fonts/geist-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/dist/fonts/geist-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/dist/fonts/source-serif-4-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link href="./dist/output.css?v=p31" rel="stylesheet">
+    <link href="./dist/output.css?v=p32" rel="stylesheet">
     <script src="/vendor/marked.min.js" defer></script>
     <!-- A1 (v1.0.5): highlight.js + its theme are lazy-loaded on the first code
          block (js/chat.js) — they were head-linked here, costing every visitor
@@ -153,7 +153,18 @@
                 <circle cx="114" cy="36" r="2.3" style="animation-delay:444ms"/>
                 <circle cx="120" cy="36" r="2.3" style="animation-delay:452ms"/>
             </svg>
-            <div class="loader-circle-22"></div>
+            <!-- 2.4.3 (owner request): dot-matrix loader under the wordmark —
+                 vanilla port of the 21st.dev / Pace UI "Dot Loader" (7×7
+                 grid, 100ms frames; frame sequence in js/dotloader.js). -->
+            <div id="dot-loader" class="dot-loader" aria-hidden="true">
+                <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+            </div>
         </div>
     </div>
 
@@ -789,7 +800,7 @@
         <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js" defer></script>
         <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js" defer></script>
 
-        <script type="module" src="js/app.js?v=p31"></script>
+        <script type="module" src="js/app.js?v=p32"></script>
 
         <!--
       Tailwind CSS Purge-Safe-List:

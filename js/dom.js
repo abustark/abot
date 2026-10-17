@@ -70,6 +70,7 @@ export const dom = {
     composerDock: document.getElementById('composerDock'),
     toastStack: document.getElementById('toast-stack'),
     appLoader: document.getElementById('app-loader'),
+    loaderDots: document.getElementById('dot-loader'), // 2.4.3: starting-site dot-matrix loader
 };
 
 // --- Phase 3 additions (search + settings) ---

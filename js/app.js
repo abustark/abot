@@ -17,6 +17,7 @@ import { createNewChat } from './chat.js';
 import { dom } from './dom.js';
 import { importChat } from './chat.js';
 import { initDomExtras } from './dom.js';
+import { initDotLoader } from './dotloader.js';
 import { renderSearchResults } from './chat.js';
 import { initFirebase, initAuth, registerInitApp } from './auth.js';
 import { initPalette } from './palette.js';
@@ -930,6 +931,7 @@ function main() {
     initFirebase();            // was statements #3-6
     initDomExtras();           // was statements #33 and #59
     initSparkles(dom.authSparkles); // 2.4.1: auth backdrop starfield
+    initDotLoader(dom.loaderDots); // 2.4.3: starting-site dot-matrix loader
     initMessageActions();      // was statements #43-44
     registerInitApp(initApp);  // auth's onAuthStateChanged needs initApp
     initAuth();                // was statements #52,54-58,60-65
