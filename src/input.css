@@ -391,7 +391,12 @@
 
 /* 2.3.5 (owner request): the 300ms drawer curve read as "flight speed" and
    jumped visually on the trailing edge — the snake-glide comes from a longer
-   420ms + a gentler ease-in-out (slow ramp in AND out). */
+   420ms + a gentler ease-in-out (slow ramp in AND out).
+   2.3.6: the aside's Tailwind utilities (transition-transform duration-300
+   ease-drawer) were overriding this rule in the cascade, and margin-left was
+   not in their property list — so the desktop collapse snapped with NO
+   transition. Utilities removed from index.html; this rule is now the single
+   owner of the sidebar motion (420ms on every regime). */
 .sidebar {
     transition: transform 0.42s cubic-bezier(0.4, 0, 0.2, 1),
         margin-left 0.42s cubic-bezier(0.4, 0, 0.2, 1),
@@ -798,12 +803,12 @@ h1, h2, h3, .prose h1, .prose h2, .prose h3 { text-wrap: balance; }
     opacity: 1;
     transform: translateY(0);
 }
-/* C3 (v1.0.6): a hover tooltip waits so a stray pass-over doesn't flash it,
-   but a *repeat* hover (sweeping along a toolbar) is instant. Keyboard focus
-   is never delayed — keyboard-first UI stays immediate. app.js marks the
-   repeat case with [data-tooltip-instant]. */
-[data-tooltip]:hover::after { transition-delay: 240ms; }
-[data-tooltip][data-tooltip-instant]:hover::after { transition-delay: 0ms; }
+/* C3 (v1.0.6) · 2.3.6 (owner request): hover tooltips now behave like the
+   browser/OS title bubble — the pointer must rest ~2.5s before the label
+   appears (the old "instant sweep" repeat case is gone). Keyboard focus is
+   never delayed, and leaving the trigger hides the bubble at once (the
+   reverse transition carries no delay). */
+[data-tooltip]:hover::after { transition-delay: 2500ms; }
 /* Bottom-positioned variant for triggers in the TOP bar (header, sidebar
    brand). Default above-position would clip off the viewport top there. */
 [data-tooltip-pos="bottom"]::after {
@@ -815,6 +820,39 @@ h1, h2, h3, .prose h1, .prose h2, .prose h3 { text-wrap: balance; }
 [data-tooltip-pos="bottom"]:focus-visible::after {
     transform: translateY(0);
 }
+/* 2.3.6 (owner request): edge-anchored variants so bubbles are never trimmed
+   by clipping containers or the viewport — sidebar rows open to the LEFT
+   (inside the rail), the header's right cluster drops down anchored to its
+   right edge, and the jump pill sits above, right-aligned. */
+[data-tooltip-pos="left"]::after {
+    bottom: auto;
+    top: 50%;
+    left: auto;
+    right: calc(100% + 8px);
+    translate: 0 -50%;
+    transform: translateX(2px);
+}
+[data-tooltip-pos="left"]:hover::after,
+[data-tooltip-pos="left"]:focus-visible::after { transform: translateX(0); }
+[data-tooltip-pos="bottom-right"]::after {
+    bottom: auto;
+    top: calc(100% + 6px);
+    left: auto;
+    right: 0;
+    translate: 0 0;
+    transform: translateY(-2px);
+}
+[data-tooltip-pos="bottom-right"]:hover::after,
+[data-tooltip-pos="bottom-right"]:focus-visible::after { transform: translateY(0); }
+[data-tooltip-pos="right"]::after {
+    bottom: calc(100% + 6px);
+    left: auto;
+    right: 0;
+    translate: 0 0;
+    transform: translateY(2px);
+}
+[data-tooltip-pos="right"]:hover::after,
+[data-tooltip-pos="right"]:focus-visible::after { transform: translateY(0); }
 /* Hide tooltips on touch (no hover) and for reduced-motion users */
 @media (hover: none) {
     [data-tooltip]::after { display: none; }

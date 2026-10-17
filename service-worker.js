@@ -3,7 +3,7 @@
  * Provides offline caching for local assets only
  */
 
-const CACHE_NAME = 'abot-cache-v49'; // 2.3.5: polish batch — the bump drops stale pre-2.3.5 JS/CSS in returning browsers (landing/pills/sidebar-speed fixes)
+const CACHE_NAME = 'abot-cache-v50'; // 2.3.6: sidebar glide + tooltip delay/positions + landing spacing — bump drops stale JS/CSS
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -11,7 +11,7 @@ const STATIC_ASSETS = [
     '/favicon-32-light.png',
     '/favicon-32-dark.png',
     '/logo.png',
-    '/dist/output.css?v=p23',
+    '/dist/output.css?v=p24',
     '/js/app.js',
     '/js/config.js',
     '/js/dom.js',

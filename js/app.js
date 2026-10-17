@@ -608,21 +608,10 @@ function initApp() {
     dom.searchChats.addEventListener('input', (e) => renderChatList(e.target.value));
 
     // --- C3 (v1.0.6): warm tooltips -----------------------------------------
-    // A tooltip waits ~240ms before appearing (so stray hovers don't flash),
-    // but once you have seen one, sweeping to the next control shows it
-    // immediately — the standard toolbar behaviour. One delegated listener.
-    let lastTooltipAt = 0;
-    document.addEventListener('pointerover', (e) => {
-        if (!(e.target instanceof Element)) return;
-        const trigger = e.target.closest('[data-tooltip]');
-        if (!trigger) return;
-        // Ignore pointer moves that stay inside the same trigger (icon → edge).
-        if (e.relatedTarget instanceof Element && trigger.contains(e.relatedTarget)) return;
-        const now = performance.now();
-        document.querySelectorAll('[data-tooltip-instant]').forEach(el => el.removeAttribute('data-tooltip-instant'));
-        if (now - lastTooltipAt < 1500) trigger.setAttribute('data-tooltip-instant', '');
-        lastTooltipAt = now;
-    }, { passive: true });
+    // Pure-CSS bubbles — src/input.css owns the motion. 2.3.6 (owner request):
+    // a 2.5s rest-before-show delay plus edge-anchored position variants
+    // replaced the old JS "instant sweep" helper (removed here; it was the
+    // only consumer of [data-tooltip-instant]).
 
     // --- C5 (v1.0.6): swipe the mobile drawer closed -------------------------
     // Follows the finger 1:1 (transform only), then commits on either 35% of
