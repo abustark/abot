@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.3.10`** (current head is `2.3.9` — see below — next number after this rolls to `2.4.0`!)
+> - **`main` → `2.4.0`** (current head is `2.3.10` — the third number reached `.10`, so the sequence ROLLS to `2.4.0` — see below)
 > - **`arena/01a03fe9-abot` → mirrors `main`** (no version of its own: `git push origin main:arena/01a03fe9-abot --force`;
 >   both branches stay identical)
 
@@ -25,6 +25,14 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.3.10 - sidebar collapse now slides over 1.5s so the motion is clearly visible
+- **Date**: 2026-10-17
+- **Owner request**: "make the collapse menu atleast a 1.5sec sliding transition so that we can see it slide."
+- **Change**: `.sidebar` transition duration `0.42s` → **`1.5s`** on all three properties (transform, margin-left, border-right-color). Still the single motion owner — applies to the desktop collapse and the mobile drawer alike (consistent with the owner's desktop/mobile parity ask). Curve (`cubic-bezier(0.4, 0, 0.2, 1)`) and all state/positioning rules unchanged.
+- **Cache-bust**: `?v=p27` → `?v=p28`, `abot-cache-v53` → `abot-cache-v54`.
+- **dist/output.css**: rebuilt via `npm run build:css` and committed.
+- **Note**: `2.3.10` is the rollover boundary — **the next version number is `2.4.0`.**
 
 ### 2.3.9 - model selector fixed: two-column grid (no horizontal overflow) + drops below the pill on the landing
 - **Date**: 2026-10-17

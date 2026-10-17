@@ -391,16 +391,18 @@
 
 /* 2.3.5 (owner request): the 300ms drawer curve read as "flight speed" and
    jumped visually on the trailing edge — the snake-glide comes from a longer
-   420ms + a gentler ease-in-out (slow ramp in AND out).
+   duration + a gentler ease-in-out (slow ramp in AND out).
    2.3.6: the aside's Tailwind utilities (transition-transform duration-300
    ease-drawer) were overriding this rule in the cascade, and margin-left was
    not in their property list — so the desktop collapse snapped with NO
    transition. Utilities removed from index.html; this rule is now the single
-   owner of the sidebar motion (420ms on every regime). */
+   owner of the sidebar motion on every regime.
+   2.3.10 (owner request): duration raised to a deliberate 1.5s so the slide
+   is clearly visible. */
 .sidebar {
-    transition: transform 0.42s cubic-bezier(0.4, 0, 0.2, 1),
-        margin-left 0.42s cubic-bezier(0.4, 0, 0.2, 1),
-        border-right-color 0.42s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 1.5s cubic-bezier(0.4, 0, 0.2, 1),
+        margin-left 1.5s cubic-bezier(0.4, 0, 0.2, 1),
+        border-right-color 1.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Desktop collapse: at md+ the drawer becomes a static flex column, so the
