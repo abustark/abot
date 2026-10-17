@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.2.5`** (current head is `2.2.4` — see below)
+> - **`main` → `2.2.6`** (current head is `2.2.5` — see below)
 > - **`arena/01a03fe9-abot` → its own sequence** (syncs are **unversioned** merge commits:
 >   `merge main <version> into arena/01a03fe9-abot`; arena's own feature commits use arena's numbers)
 
@@ -25,6 +25,14 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.2.5 - fix short replies hidden behind composer on mobile
+- **Date**: 2026-10-17
+- **Changes**:
+  - `index.html`: `#chatHistory` carried `h-full`, which made it exactly the container height and absorbed the container's `padding-bottom` — so padding never created scroll space and short replies overlapped the fixed composer on mobile (visual check: `lastBottom=796 > dockTop=678`). Dropped `h-full` so the element grows with content and the padding creates the scrollable zone. Real-browser proof: mobile SHORT `lastBottom=612 ≤ dockTop=678`, LONG `547 ≤ 640`; desktop unchanged.
+  - `docs/commits.md`: `📌 Next version` advanced to `main → 2.2.6`.
+  - No gates skipped — lint 0 errors, check clean, test all pass, visual 27/27.
+- **Owner-requested**: full verification pass (visual + interaction + cycle + smoke + security + lint + check + build:css).
 
 ### 2.2.4 - error retry, model refresh, relative timestamps
 - **Date**: 2026-10-17
