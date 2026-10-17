@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.4.1`** (current head is `2.4.0` — see below)
+> - **`main` → `2.4.2`** (current head is `2.4.1` — see below)
 > - **`arena/01a03fe9-abot` → mirrors `main`** (no version of its own: `git push origin main:arena/01a03fe9-abot --force`;
 >   both branches stay identical)
 
@@ -25,6 +25,15 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.4.1 - auth page gets a twinkling sparkle backdrop (replaces the blooms + grid)
+- **Date**: 2026-10-17
+- **Owner request** (reference: 21st.dev / @manuarora700 "Sparkles"): put a background effect like that on the auth page — owner chose to **replace** the v1.0.7 blooms + grid, with **mixed multi-colour** sparkles.
+- **New `js/sparkles.js`** — vanilla canvas port (no third-party script, no framework): twinkling dots (soft halo + bright core, sine-pulsed alpha/radius), density ~1 per 9k css px² (70–240 dots), DPR capped at 2. Palette is read from the existing theme tokens (coral, amber, teal, Google blue, Groq violet, NVIDIA green) — no new colours, dark mode flips automatically.
+- **Lifecycle**: the rAF loop runs only while `#auth-section` is visible (MutationObserver on its inline `display`) and the tab is on screen; `prefers-reduced-motion: reduce` draws one still frame instead. jsdom-safe (null 2D-context guard — smoke test unaffected).
+- **Markup/CSS**: `#auth-scene` now holds `<canvas id="auth-sparkles">`; `.auth-bloom*`, `.auth-grid` and the `authDrift` keyframes were removed with it (scene wrapper + vignette kept).
+- **Cache-bust**: `?v=p29` → `?v=p30`, `abot-cache-v55` → `abot-cache-v56`; `/js/sparkles.js` added to the SW precache.
+- **dist/output.css**: rebuilt via `npm run build:css` and committed.
 
 ### 2.4.0 - sidebar motion now respects prefers-reduced-motion (snaps instead of the 1.5s slide)
 - **Date**: 2026-10-17

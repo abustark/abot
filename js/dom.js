@@ -6,6 +6,7 @@
  */
 export const dom = {
     authSection: document.getElementById('auth-section'),
+    authSparkles: document.getElementById('auth-sparkles'),
     appContainer: document.getElementById('app-container'),
     loginView: document.getElementById('login-view'),
     signupView: document.getElementById('signup-view'),

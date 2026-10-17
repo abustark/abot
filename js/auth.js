@@ -442,7 +442,8 @@ state.auth.onAuthStateChanged(async (user) => {
         // the auth screen non-interactive (the owner's post-signout freeze).
         try {
         dom.appContainer.style.display = 'none';
-        // The backdrop is CSS-only now (`.auth-scene`) — nothing to spin up.
+        // The auth backdrop (sparkles canvas) starts and stops itself from
+        // the auth-section display — nothing to spin up here.
 
         dom.authSection.style.display = 'flex';
         state.chats = {};

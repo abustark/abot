@@ -20,6 +20,7 @@ import { initDomExtras } from './dom.js';
 import { renderSearchResults } from './chat.js';
 import { initFirebase, initAuth, registerInitApp } from './auth.js';
 import { initPalette } from './palette.js';
+import { initSparkles } from './sparkles.js';
 import { initMessageActions } from './chat.js';
 import { linkGuestToGoogle } from './auth.js';
 import { openPromptModal } from './ui.js';
@@ -928,6 +929,7 @@ function main() {
     registerServiceWorker();
     initFirebase();            // was statements #3-6
     initDomExtras();           // was statements #33 and #59
+    initSparkles(dom.authSparkles); // 2.4.1: auth backdrop starfield
     initMessageActions();      // was statements #43-44
     registerInitApp(initApp);  // auth's onAuthStateChanged needs initApp
     initAuth();                // was statements #52,54-58,60-65

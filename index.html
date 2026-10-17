@@ -26,7 +26,7 @@
     <link rel="preload" href="/dist/fonts/geist-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/dist/fonts/geist-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/dist/fonts/source-serif-4-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link href="./dist/output.css?v=p29" rel="stylesheet">
+    <link href="./dist/output.css?v=p30" rel="stylesheet">
     <script src="/vendor/marked.min.js" defer></script>
     <!-- A1 (v1.0.5): highlight.js + its theme are lazy-loaded on the first code
          block (js/chat.js) — they were head-linked here, costing every visitor
@@ -79,8 +79,9 @@
 
 </head>
 
-<!-- No third-party scripts: the auth backdrop is pure CSS and the app is fully
-     self-hosted (marked + highlight.js are vendored, fonts are local). -->
+<!-- No third-party scripts: the auth backdrop is a self-hosted canvas
+     starfield and the app is fully self-hosted (marked + highlight.js are
+     vendored, fonts are local). -->
 
 
 <body
@@ -159,14 +160,11 @@
     <!-- This is the content, stacked on top of the backdrop. -->
     <section id="auth-section" class="relative z-10 flex items-center justify-center w-full min-h-screen p-4 overflow-hidden"
         style="display: none;">
-        <!-- v1.0.7 counterpart of the aurora in src/input.css. Three drifting
-             blooms + a hairline grid, all transform/opacity only, all
-             pointer-events:none so nothing here can ever intercept a tap. -->
+        <!-- 2.4.1 (owner request): twinkling sparkle field (vanilla canvas,
+             reference: 21st.dev / Aceternity "Sparkles") replaces the v1.0.7
+             blooms + grid. Inert: pointer-events:none all the way down. -->
         <div id="auth-scene" class="auth-scene" aria-hidden="true">
-            <span class="auth-bloom auth-bloom-1"></span>
-            <span class="auth-bloom auth-bloom-2"></span>
-            <span class="auth-bloom auth-bloom-3"></span>
-            <div class="auth-grid"></div>
+            <canvas id="auth-sparkles" class="auth-sparkles"></canvas>
         </div>
 
         <!-- Double-bezel card (skills audit: high-end-visual-design §4A) —
@@ -791,7 +789,7 @@
         <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js" defer></script>
         <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js" defer></script>
 
-        <script type="module" src="js/app.js?v=p29"></script>
+        <script type="module" src="js/app.js?v=p30"></script>
 
         <!--
       Tailwind CSS Purge-Safe-List:

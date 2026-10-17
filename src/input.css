@@ -227,12 +227,13 @@
    Kept OUTSIDE @layer so Tailwind never purges them. Retuned to tokens.
 --------------------------------------------------------------------------- */
 
-/* Signature moment (v1.0.7): the auth backdrop is a CSS-only aurora — three
-   slow-drifting blooms plus a hairline grid — replacing the three.js/vanta.net
-   canvas that used to load from two CDNs before the sign-in card could appear.
-   Rules: transform/opacity only (no blur filters, no background-position
-   animation), 46–62s ambient loops so it reads as weather, not animation, and
-   the whole thing is inert: pointer-events:none all the way down. */
+/* Signature moment (v1.0.7 → 2.4.1): the auth backdrop is a twinkling
+   sparkle field — a vanilla-canvas port of the 21st.dev / Aceternity
+   "Sparkles" look (tiny light-dots fading in and out in place), which
+   replaced the v1.0.7 CSS aurora (blooms + hairline grid) at the owner's
+   request. The canvas paints from the theme tokens (see js/sparkles.js),
+   pauses while the auth section is hidden, and honours prefers-reduced-motion
+   with a single still frame. The scene stays inert: pointer-events:none. */
 .auth-scene {
     position: fixed;
     inset: 0;
@@ -241,56 +242,12 @@
     z-index: 0;
 }
 
-/* Blobs. No `filter: blur()` — on layers this large a blurred paint is far more
-   expensive than the radial gradient's own falloff, which looks the same. */
-.auth-bloom {
-    position: absolute;
-    border-radius: 50%;
-    animation: authDrift 46s var(--ease-in-out) infinite alternate;
-    will-change: transform;
-}
-.auth-bloom-1 {
-    width: 82vmax;
-    height: 82vmax;
-    top: -38vmax;
-    left: 50%;
-    translate: -50% 0;
-    background: radial-gradient(circle, rgb(var(--c-coral) / 0.26), transparent 62%);
-}
-.auth-bloom-2 {
-    width: 62vmax;
-    height: 62vmax;
-    right: -18vmax;
-    bottom: -28vmax;
-    background: radial-gradient(circle, rgb(var(--c-amber) / 0.16), transparent 62%);
-    animation-duration: 62s;
-    animation-delay: -14s;
-}
-.auth-bloom-3 {
-    width: 48vmax;
-    height: 48vmax;
-    left: -14vmax;
-    bottom: -22vmax;
-    background: radial-gradient(circle, rgb(var(--c-coral) / 0.13), transparent 62%);
-    animation-duration: 54s;
-    animation-delay: -27s;
-}
-@keyframes authDrift {
-    from { transform: translate3d(0, 0, 0) scale(1); }
-    to { transform: translate3d(2.5vmax, -3vmax, 0) scale(1.14); }
-}
-
-/* Hairline grid, dissolved toward the edges so it never competes with the card.
-   --c-ink is dark on the light theme and light on the dark one, so one rule
-   covers both without a dark-mode override. */
-.auth-grid {
+.auth-sparkles {
     position: absolute;
     inset: 0;
-    background-image:
-        repeating-linear-gradient(to right, rgb(var(--c-ink) / 0.05) 0 1px, transparent 1px 46px),
-        repeating-linear-gradient(to bottom, rgb(var(--c-ink) / 0.05) 0 1px, transparent 1px 46px);
-    -webkit-mask-image: radial-gradient(72% 62% at 50% 44%, #000 0%, transparent 78%);
-    mask-image: radial-gradient(72% 62% at 50% 44%, #000 0%, transparent 78%);
+    width: 100%;
+    height: 100%;
+    display: block;
 }
 
 /* Vignette: settles the edges and keeps the card's immediate surroundings calm
@@ -300,11 +257,6 @@
     position: absolute;
     inset: 0;
     background: radial-gradient(125% 95% at 50% 40%, transparent 42%, rgb(var(--c-canvas) / 0.8) 100%);
-}
-
-@media (prefers-reduced-motion: reduce) {
-    /* Gentle still-life: the composition stays, the drift goes. */
-    .auth-bloom { animation: none; }
 }
 
 /* App loader spinner (indigo -> coral) */
