@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.3.6`** (current head is `2.3.5` — see below)
+> - **`main` → `2.3.7`** (current head is `2.3.6` — see below)
 > - **`arena/01a03fe9-abot` → mirrors `main`** (no version of its own: `git push origin main:arena/01a03fe9-abot --force`;
 >   both branches stay identical)
 
@@ -25,6 +25,18 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.3.6 - sidebar collapse root-cause fix, tooltip idle-delay + edge-aware positions, landing spacing
+- **Date**: 2026-10-17
+- **Owner request** (walkthrough, round 3 + screenshots): add breathing room between the composer, the disclaimer line and the suggestion pills; tooltips should behave like OS title bubbles (rest ~2–3 s before showing); the "Chat options" bubble was trimmed at the sidebar edge; the header "New chat" bubble was cut at the top-right viewport edge; the sidebar collapse still showed no visible smooth transition.
+- **Changes**:
+  - Root cause of the "collapse too fast": the `<aside>` carried Tailwind utilities `transition-transform duration-300 ease-drawer` which overrode the `.sidebar` rule in the cascade — and `margin-left` (the actual desktop collapse property) was not in their transition list, so the collapse **snapped with no animation at all**. Utilities removed from `index.html`; the `.sidebar` rule (420 ms `cubic-bezier(0.4, 0, 0.2, 1)`, transform + margin-left + border-right-color) is now the single owner of the sidebar motion.
+  - `src/input.css`: hover tooltip delay `240 ms` → **`2500 ms`** (rest-to-see, like the browser title bubble; the old "instant sweep" repeat case removed); keyboard focus stays immediate and leaving a trigger hides the bubble at once. Three new edge-anchored tooltip variants — `left` (sidebar rows), `bottom-right` (header right cluster), `right` (jump pill) — so bubbles are never trimmed by clipping containers or the viewport.
+  - `index.html`: disclaimer row `mt-1.5` → `mt-3`; `#emptySuggestions` gains `mt-4` (composer → disclaimer → pills now 12 px / 16 px); `headerSearchBtn` / `headerNewChatBtn` → `data-tooltip-pos="bottom-right"`; `jumpToLatest` → `data-tooltip-pos="right"`; asset cache-bust `?v=p23` → `?v=p24`.
+  - `js/chat.js`: chat-row options button gets `data-tooltip-pos="left"` (bubble opens inside the rail instead of clipping at the list edge).
+  - `js/app.js`: tooltip "instant sweep" pointerover helper deleted (it was the only consumer of `[data-tooltip-instant]`).
+  - `service-worker.js`: `abot-cache-v49` → `abot-cache-v50`, `?v=p23` → `?v=p24`.
+- **Note**: code committed as `e4cf4e0` under the owner's "commit and push only" instruction at the time; this entry is the immediate follow-up commit of the same 2.3.6 batch. `dist/output.css` was rebuilt via `npm run build:css` and committed with the code.
 
 ### 2.3.5 - polish batch: calmer sidebar glide, pane-centred landing, suggestion pills, mobile header fix, message tooltips
 - **Date**: 2026-10-17
