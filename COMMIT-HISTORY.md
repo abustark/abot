@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.3.3`** (current head is `2.3.2` — see below)
+> - **`main` → `2.3.4`** (current head is `2.3.3` — see below)
 > - **`arena/01a03fe9-abot` → mirrors `main`** (no version of its own: `git push origin main:arena/01a03fe9-abot --force`;
 >   both branches stay identical)
 
@@ -25,6 +25,14 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.3.3 - hard rules: do exactly the ask, give options when unsure
+- **Date**: 2026-10-17
+- **Why**: owner directive — two recurring failures (inventing extra scope around a request; guessing / self-debating side-decisions) written down as hard rules so every future session inherits them.
+- **Changes**:
+  - `AGENTS.md` §5: new hard rules **7** (do exactly what the owner asked — invent nothing; adjacent issues get one line in the report, no unrequested fixes) and **8** (unsure / side-decision → offer 2–4 options and wait; never re-decide repeatedly).
+  - Global `C:\Users\abu\.config\opencode\AGENTS.md` (outside this repo): same two rules added as a "Working discipline" section, so they apply to every project.
+  - Lessons half of the request skipped per owner call (agentmemory MCP not wired in this session; no `LESSONS.md` created).
 
 ### 2.3.2 - arena sync policy: mirror main (no merge commits)
 - **Date**: 2026-10-17

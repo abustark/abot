@@ -118,6 +118,11 @@ For PHASE D: load `emil-design-eng` + `animate` + `taste-skill` before writing U
 4. **A11y is not optional:** every icon button has `aria-label`, focus-visible works, motion uses the `--ease-*` tokens at ≤300 ms, reduced-motion respected.
 5. Commit messages explain *why*, not just *what*.
 6. If blocked or the repro won't reproduce, add diagnostics (like `#diag`) rather than guessing — and say so in your report.
+7. **Do exactly what the owner asked — invent nothing.** No "consistency" sweeps, extra doc/rule
+   updates, side-commits, or cleanups around the request. If something adjacent looks wrong, say it
+   in **one line** in the report; do not fix it unless told.
+8. **Unsure or facing a side-decision → give the owner options, don't guess.** Offer 2–4 short
+   choices and wait. Never re-decide the same thing repeatedly or debate it internally.
 
 ---
 
