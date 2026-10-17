@@ -973,6 +973,15 @@ body.chat-empty #jumpToLatest { display: none; }
     }
 }
 
+/* 2.3.9 (owner request): on the empty landing the composer floats mid-screen,
+   so the upward-opening model panel covered the greeting heading — it now
+   drops BELOW the pill while the landing is showing. */
+body.chat-empty #modelSelectorPanel {
+    bottom: auto;
+    top: calc(100% + 8px);
+    transform-origin: top left;
+}
+
 /* v2.2.2: inner scroll areas keep their own overscroll boundary — without it a
    scroll at the list edge chains to the page and rubber-bands / triggers
    pull-to-refresh on mobile. #chatHistoryContainer already carries the

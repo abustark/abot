@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.3.9`** (current head is `2.3.8` — see below)
+> - **`main` → `2.3.10`** (current head is `2.3.9` — see below — next number after this rolls to `2.4.0`!)
 > - **`arena/01a03fe9-abot` → mirrors `main`** (no version of its own: `git push origin main:arena/01a03fe9-abot --force`;
 >   both branches stay identical)
 
@@ -25,6 +25,18 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.3.9 - model selector fixed: two-column grid (no horizontal overflow) + drops below the pill on the landing
+- **Date**: 2026-10-17
+- **Owner request** (screenshot): the model selector panel "is like this — fix it" — the open panel showed only half the models with a bottom scrollbar, empty space, and it covered the "How can I help today?" heading on the landing.
+- **Root cause**: the panel used CSS multicols (`md:columns-2`) with `max-h-[55vh]` + `overflow-y-auto`. Once the model list outgrew the max height, multicols fragment into **extra columns to the right** — horizontal overflow (off-screen models + bottom scrollbar) instead of vertical scroll. It also broke the keyboard nav silently: `handleModelSelectorNavigation` reads `gridTemplateColumns` for its ArrowUp/Down jump distance, which computed to `none` here (= 1 column).
+- **Changes**:
+  - `index.html`: `#modelSelectorPanel` `md:columns-2` → **`md:grid md:grid-cols-2 md:gap-x-2`** — grid flows into rows and scrolls vertically under `max-h`; no horizontal overflow possible (names truncate), and ArrowUp/Down works against a real 2-column grid again.
+  - `src/input.css`: `body.chat-empty #modelSelectorPanel` now opens **downward** (`top: calc(100% + 8px)`, `transform-origin: top left`) — on the landing the composer floats mid-screen, so the upward panel covered the greeting heading; in normal chats it still opens upward.
+  - `js/app.js`: stale multicol comments in `renderModelSelectorOptions` updated (grid item per provider — headings can never split from their options).
+  - `index.html` + `service-worker.js`: cache-bust `?v=p26` → `?v=p27`, `abot-cache-v52` → `abot-cache-v53`.
+  - `dist/output.css` rebuilt via `npm run build:css` and committed with the change (grid/gap utilities).
+- **Note**: next version number is `2.3.10` — the last before the mandatory roll to `2.4.0`.
 
 ### 2.3.8 - New Chat guard shows an info toast on repeat clicks
 - **Date**: 2026-10-17

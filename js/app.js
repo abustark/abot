@@ -248,8 +248,11 @@ function initApp() {
         dom.modelSelectorPanel.innerHTML = ''; // Clear previous options
         const currentChatModel = state.activeChatId ? state.chats[state.activeChatId].model : null;
 
-        // Provider-grouped menu (single column on phones, two CSS columns from
-        // md up — 2.2.8 owner request for better model visibility).
+        // Provider-grouped menu (single column on phones, two-column grid from
+        // md up — 2.2.8 owner request). 2.3.9: grid replaced CSS columns, which
+        // overflowed HORIZONTALLY (off-screen models + a bottom scrollbar) once
+        // the list outgrew max-h; grid also keeps the ArrowUp/Down maths in
+        // handleModelSelectorNavigation honest (it reads gridTemplateColumns).
         const groups = new Map();
         Object.keys(MODEL_CONFIG).forEach(key => {
             const provider = getProviderColor(key).label;
@@ -258,8 +261,8 @@ function initApp() {
         });
 
         groups.forEach((keys, providerLabel) => {
-            // Each provider is one unbreakable block so the two-column flow
-            // never splits a heading away from its options.
+            // Each provider is one grid item, so a heading can never be
+            // separated from its options.
             const groupEl = document.createElement('div');
             groupEl.className = 'break-inside-avoid';
 
