@@ -26,7 +26,7 @@
     <link rel="preload" href="/dist/fonts/geist-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/dist/fonts/geist-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/dist/fonts/source-serif-4-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link href="./dist/output.css?v=p22" rel="stylesheet">
+    <link href="./dist/output.css?v=p23" rel="stylesheet">
     <script src="/vendor/marked.min.js" defer></script>
     <!-- A1 (v1.0.5): highlight.js + its theme are lazy-loaded on the first code
          block (js/chat.js) — they were head-linked here, costing every visitor
@@ -440,7 +440,7 @@
                 </div>
 
                 <button id="profileMenuBtn" type="button" aria-haspopup="menu" aria-expanded="false"
-                    aria-controls="profileMenu"
+                    aria-controls="profileMenu" data-tooltip="Account &amp; settings"
                     class="w-full flex items-center gap-3 rounded-xl px-2 py-2 text-left hover:bg-card/60 transition-colors">
                     <div id="userAvatar"
                         class="w-8 h-8 rounded-full bg-coral-soft text-coral flex items-center justify-center text-[11px] font-semibold flex-shrink-0 select-none"
@@ -459,7 +459,7 @@
             </div>
         </aside>
 
-    <div class="flex-1 flex flex-col w-full">
+    <div class="relative flex-1 flex flex-col w-full">
         <a href="#chatHistory" class="skip-link">Skip to conversation</a>
 
             <!-- Floating chat header: sits over the message list, hairline only
@@ -486,7 +486,7 @@
                      empty-landing logo physically flies here on first send. -->
                 <img id="headerLogo" src="/logo.png" alt="" aria-hidden="true" draggable="false"
                     class="logo-mark h-6 w-6 rounded-md select-none opacity-0 transition-opacity duration-200 ease-out pointer-events-none hidden md:block">
-                <div style="justify-self:end;" class="flex items-center gap-1.5">
+                <div style="justify-self:end;grid-column:3;" class="flex items-center gap-1.5">
                     <!-- 2.3.4: message search moved here from the sidebar quick actions. -->
                     <button id="headerSearchBtn" aria-label="Search in messages" data-tooltip="Search messages" data-tooltip-pos="bottom"
                         class="p-2 rounded-lg text-muted hover:text-ink hover:bg-card transition-colors">
@@ -561,7 +561,7 @@
                                  the composer's action row (quiet pill, bottom-left); the
                                  panel opens UPWARD from the pill. -->
                             <div class="relative flex items-center flex-shrink-0">
-                                <button id="modelSelectorBtn"
+                                <button id="modelSelectorBtn" data-tooltip="Choose model"
                                     class="flex items-center gap-1.5 bg-transparent border border-hairline/70 pl-2 pr-1.5 py-1 rounded-full text-[12px] font-normal text-body hover:border-coral/40 hover:text-ink focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-coral/40 dark:focus:ring-offset-canvas transition-[border-color,color] duration-fast ease-out">
                                     <span id="modelSelectorDot" class="w-1.5 h-1.5 rounded-full bg-coral"></span>
                                     <span id="modelSelectorLabel" class="font-medium whitespace-nowrap truncate max-w-[104px] md:max-w-[200px]">Select Model</span>
@@ -577,41 +577,44 @@
                             </div>
                             <div class="relative flex items-center order-last flex-shrink-0" style="position:relative;">
                                 <button id="sendBtn" aria-label="Send message" data-tooltip="Send (Enter)" class="w-11 h-11 flex items-center justify-center rounded-full bg-coral text-white shadow-sm transition-transform hover:bg-coral-active active:scale-95">
+                                    <!-- 2.3.5 (owner request): one clean centred arrow — the old
+                                         underline bar read as a stray square under the glyph. -->
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
-                                        fill="currentColor">
+                                        fill="currentColor" aria-hidden="true">
                                         <path fill-rule="evenodd"
-                                            d="M10 17.25a.75.75 0 01-.75-.75V6.56L6.03 9.78a.75.75 0 01-1.06-1.06l4.5-4.5a.75.75 0 011.06 0l4.5 4.5a.75.75 0 11-1.06 1.06L10.75 6.56v9.94a.75.75 0 01-.75.75z"
+                                            d="M10 17a.75.75 0 01-.75-.75V5.612L5.29 9.77a.75.75 0 01-1.08-1.04l5.25-5.5a.75.75 0 011.08 0l5.25 5.5a.75.75 0 11-1.08 1.04l-3.96-4.158V16.25A.75.75 0 0110 17z"
                                             clip-rule="evenodd" />
-                                        <path d="M4.25 17.5a.75.75 0 000 1.5h11.5a.75.75 0 000-1.5H4.25z" />
                                     </svg>
                                 </button>
                                 <button id="stopBtn" aria-label="Stop generating" data-tooltip="Stop"
                                     style="position:absolute;inset:0;background:rgb(var(--c-danger));"
                                     class="stop-hidden absolute inset-0 w-11 h-11 flex items-center justify-center rounded-full text-white bg-danger hover:bg-danger/90 transition-opacity duration-150">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
-                                        fill="currentColor">
-                                        <rect x="6" y="6" width="8" height="8" rx="1.5" fill="currentColor" />
+                                        fill="currentColor" aria-hidden="true">
+                                        <!-- 2.3.5 (owner request): softer rounded square, optically
+                                             centred in the circle. -->
+                                        <rect x="6.5" y="6.5" width="7" height="7" rx="2" fill="currentColor" />
                                     </svg>
                                 </button>
                             </div>
                         <!-- B3/B4 chips ride INSIDE the composer box on the same
                              row as the actions. 2.2.6: the model pill is the
-                             leftmost action. 2.3.4: on phones the chips hug the
-                             send side (ml-auto + a touch more gap + bigger pills
-                             via CSS); from md up they sit next to the model pill
-                             (mr-auto absorbs the slack so send stays flush right). -->
-                        <div class="ml-auto md:ml-0 md:mr-auto flex items-center gap-2.5 md:gap-1.5 min-w-0">
+                             leftmost action. 2.3.5 (owner request): the chips hug
+                             the model pill on phones too (reverting 2.3.4's
+                             send-side placement) — mr-auto absorbs the slack so
+                             send stays flush right; bigger pills via CSS. -->
+                        <div class="mr-auto flex items-center gap-2.5 md:gap-1.5 min-w-0">
                             <!-- 2.2.8: on phones the chips collapse to icon-only (globe /
                                  brain) so the action row can never overlap; labels return
                                  from md up where there is horizontal room. -->
                             <button id="webSearchChip" type="button" aria-pressed="false" aria-label="Web search"
-                                title="Search the web for current information before answering"
+                                data-tooltip="Search the web for current information before answering"
                                 class="composer-chip">
                                 <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 100-18 9 9 0 000 18zm0 0c1.5-1.5 2.5-4 2.5-9S13.5 4.5 12 3m0 18c-1.5-1.5-2.5-4-2.5-9S10.5 4.5 12 3M3.6 9h16.8M3.6 15h16.8" /></svg>
                                 <span class="hidden md:inline">Web search</span>
                             </button>
                             <button id="thinkingChip" type="button" aria-pressed="false" disabled aria-label="Think"
-                                title="Select a thinking-capable model (e.g. Gemini 3.8 Flash) to enable"
+                                data-tooltip="Select a thinking-capable model (e.g. Gemini 3.8 Flash) to enable"
                                 class="composer-chip">
                                 <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4" /></svg>
                                 <span class="hidden md:inline">Think</span>
@@ -634,7 +637,7 @@
                 </div>
                 <!-- 2.2.6 revamp: circular icon-only jump button (the show logic
                      adds `flex` + `jump-enter`; base stays hidden, no flex). -->
-                <button id="jumpToLatest" aria-label="Jump to latest message"
+                <button id="jumpToLatest" aria-label="Jump to latest message" data-tooltip="Jump to latest"
                     class="fixed bottom-28 right-5 z-20 hidden items-center justify-center w-11 h-11 rounded-full bg-raised border border-hairline shadow-lift text-ink hover:border-coral/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-coral/40 transition-[border-color,box-shadow,transform] duration-base ease-out active:scale-95">
                     <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3" /></svg>
                 </button>
@@ -783,7 +786,7 @@
         <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js" defer></script>
         <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js" defer></script>
 
-        <script type="module" src="js/app.js?v=p22"></script>
+        <script type="module" src="js/app.js?v=p23"></script>
 
         <!--
       Tailwind CSS Purge-Safe-List:

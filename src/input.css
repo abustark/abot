@@ -389,9 +389,13 @@
     .typing-a circle { animation: none; opacity: 1; transform: none; }
 }
 
+/* 2.3.5 (owner request): the 300ms drawer curve read as "flight speed" and
+   jumped visually on the trailing edge — the snake-glide comes from a longer
+   420ms + a gentler ease-in-out (slow ramp in AND out). */
 .sidebar {
-    transition: transform 0.3s var(--ease-drawer), margin-left 0.3s var(--ease-drawer),
-        border-right-color 0.3s var(--ease-drawer);
+    transition: transform 0.42s cubic-bezier(0.4, 0, 0.2, 1),
+        margin-left 0.42s cubic-bezier(0.4, 0, 0.2, 1),
+        border-right-color 0.42s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Desktop collapse: at md+ the drawer becomes a static flex column, so the
@@ -920,6 +924,17 @@ body.chat-empty #composerDock {
 }
 body.chat-empty #jumpToLatest { display: none; }
 
+/* 2.3.5 (owner request): on desktop the landing composer centres on the PANE,
+   not the viewport — the pane already animates its width when the sidebar
+   collapses, so the absolute dock re-centres in perfect sync (no extra motion). */
+@media (min-width: 768px) {
+    body.chat-empty #composerDock {
+        position: absolute;
+        left: 0;
+        right: 0;
+    }
+}
+
 /* v2.2.2: inner scroll areas keep their own overscroll boundary — without it a
    scroll at the list edge chains to the page and rubber-bands / triggers
    pull-to-refresh on mobile. #chatHistoryContainer already carries the
@@ -931,13 +946,14 @@ body.chat-empty #jumpToLatest { display: none; }
     overscroll-behavior: contain;
 }
 
-/* Suggestion cards: desktop-only hover lift (token shadow), press always. */
-.suggestion-card { cursor: pointer; }
+/* 2.3.5 (owner request): suggestion CARDS became single-line PILLS — a warm
+   row that hugs the composer. Hover lift stays desktop-only (token shadow),
+   press always; reduced-motion is covered by the global kill switch. */
 @media (hover: hover) and (pointer: fine) {
-    .suggestion-card:hover {
-        transform: translateY(-2px);
+    .suggestion-pill:hover {
+        transform: translateY(-1px);
         border-color: rgb(var(--c-coral) / 0.45);
-        box-shadow: 0 1px 2px rgb(var(--c-ink) / 0.04), 0 8px 24px -8px rgb(var(--c-ink) / 0.14);
+        box-shadow: 0 1px 2px rgb(var(--c-ink) / 0.04), 0 6px 16px -6px rgb(var(--c-ink) / 0.12);
     }
 }
 @keyframes suggestionEnter {
@@ -948,9 +964,10 @@ body.chat-empty #jumpToLatest { display: none; }
 .suggestion-enter:nth-child(2) { animation-delay: 40ms; }
 .suggestion-enter:nth-child(3) { animation-delay: 80ms; }
 .suggestion-enter:nth-child(4) { animation-delay: 120ms; }
-@media (prefers-reduced-motion: reduce) {
-    .suggestion-enter { animation: none; }
-}
+.suggestion-enter:nth-child(5) { animation-delay: 160ms; }
+.suggestion-enter:nth-child(6) { animation-delay: 200ms; }
+.suggestion-enter:nth-child(7) { animation-delay: 240ms; }
+.suggestion-enter:nth-child(8) { animation-delay: 280ms; }
 
 /* --- B2: while a response streams, the stop control wears a soft coral ring.
    Driven by the button's own `.stop-hidden` state, so no extra JS flag.

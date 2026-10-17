@@ -370,15 +370,31 @@ const enterApp = async (user) => {
         showToast('App init failed — open ' + location.origin + '/#diag', 'error');
     }
 
+    // 2.3.5 (owner request): show the account photo when one exists — DOM-built
+    // img (never innerHTML with a user-controlled URL), letters stay the fallback.
+    const setAvatar = (label, photoURL) => {
+        dom.userAvatar.textContent = '';
+        if (photoURL) {
+            const img = document.createElement('img');
+            img.src = photoURL;
+            img.alt = '';
+            img.referrerPolicy = 'no-referrer';
+            img.className = 'w-full h-full rounded-full object-cover';
+            img.addEventListener('error', () => { dom.userAvatar.textContent = label; }, { once: true });
+            dom.userAvatar.appendChild(img);
+        } else {
+            dom.userAvatar.textContent = label;
+        }
+    };
     if (user.isAnonymous) {
         dom.userEmailDisplay.textContent = 'Guest User';
-        dom.userAvatar.textContent = 'G';
+        setAvatar('G', null);
         dom.importChatBtn.style.display = 'none';
     } else {
         dom.userEmailDisplay.textContent = user.displayName || user.email;
         const initials = (user.displayName || user.email || '?')
             .trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
-        dom.userAvatar.textContent = initials || 'A';
+        setAvatar(initials || 'A', user.photoURL);
         dom.importChatBtn.style.display = 'flex';
     }
 

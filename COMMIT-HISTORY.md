@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.3.5`** (current head is `2.3.4` — see below)
+> - **`main` → `2.3.6`** (current head is `2.3.5` — see below)
 > - **`arena/01a03fe9-abot` → mirrors `main`** (no version of its own: `git push origin main:arena/01a03fe9-abot --force`;
 >   both branches stay identical)
 
@@ -25,6 +25,21 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.3.5 - polish batch: calmer sidebar glide, pane-centred landing, suggestion pills, mobile header fix, message tooltips
+- **Date**: 2026-10-17
+- **Owner request** (walkthrough, round 2): the sidebar expand/collapse felt like "flight speed" with a stutter; the landing composer centred on the viewport (not the pane) and jumped around the sidebar; opening a new chat (New Chat) still showed the greeting + normal layout; suggestion cards should become a row of chips; the mobile header's right cluster sat next to the title; on phones the composer chips should hug the model pill again; searching an empty chat opened a dead panel; the send arrow + stop square needed optical polish; message actions used the raw browser title bubble; the account avatar stayed initials even with a photo set.
+- **Changes**:
+  - `src/input.css`: `.sidebar` transition 300 ms `--ease-drawer` → **420 ms `cubic-bezier(0.4, 0, 0.2, 1)`** (slow ramp in AND out — kills the flight-speed jump); md+ `body.chat-empty #composerDock` becomes `position: absolute` so the landing composer centres on the **pane** and re-centres in sync while the sidebar width animates (mobile stays fixed); `.suggestion-card` → `.suggestion-pill` (hover lift kept desktop-only) with stagger slots extended to 8.
+  - `index.html`: header right cluster pinned with `grid-column:3` (sub-md, `#headerLogo` is `hidden md:block` so the cluster used to land in column 2 next to the title); composer pane gets `relative` (anchor for the landing dock); chips row back to `mr-auto` (hug the model pill on phones too); send icon → single clean arrow path + `aria-hidden`; stop icon → 7×7 `rx=2` optically-centred square; `data-tooltip` on `modelSelectorBtn` / `profileMenuBtn` / `jumpToLatest`; asset cache-bust `?v=p22` → `?v=p23`.
+  - `js/chat.js`: `createNewChat` now stores `messages: []` (the seeded "Hello! How can I assist you today?" greeting made every new chat skip the landing); `renderActiveChat` clears a lone legacy greeting; `SUGGESTIONS` become 8 single-line pills (Explain a concept · Brainstorm ideas · Help me write · Debug my code · Plan a trip · Check my reasoning · Summarize a text · Translate something) — click-to-fill only, zero extra AI calls; message action buttons (`retry` / `copy` / `speak` / `edit` / chat options) switch `title` → `data-tooltip` (app-styled bubble).
+  - `js/app.js`: `openSearch` guard — an empty chat shows an info toast ("This chat has no messages to search yet.") instead of a dead sheet; `#diag` search self-check updated to expect the gate on an empty chat.
+  - `js/utils.js`: new muted `info` toast type (icon + `text-muted`).
+  - `js/ui.js`: composer chips get `data-tooltip` via `setAttribute` (state-dependent strings preserved).
+  - `js/auth.js`: account avatar renders the real `photoURL` as a DOM-built `<img>` (`no-referrer`, error → initials fallback; guest keeps `G`).
+  - `service-worker.js`: `abot-cache-v48` → `abot-cache-v49`, stylesheet `?v=p19` → `?v=p23` (returning browsers drop pre-2.3.5 JS/CSS).
+  - `tools/interaction-test.js`: search block updated for the header toggle + seeded-message state + new empty-chat guard case; header button count 2 → 3; suggestion checks moved to `.suggestion-pill` (8).
+- **Note**: `dist/output.css` rebuilt via `npm run build:css` and committed **in this commit** — the 2.3.4 stale-CSS window (runtime classes missing from the committed build) is why the rebuild rides along this time.
 
 ### 2.3.4 - desktop polish: landing overlap fix, header logo flight, sidebar/composer tweaks
 - **Date**: 2026-10-17

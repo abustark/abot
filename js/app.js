@@ -448,7 +448,14 @@ function initApp() {
     // backdrop lives in the DOM (index.html); these helpers keep panel +
     // backdrop + aria in lockstep.
     const searchBackdrop = document.getElementById('searchBackdrop');
+    // 2.3.5 (owner request): an empty chat has nothing to find — tell the user
+    // instead of opening a dead sheet over a blank conversation.
     const openSearch = () => {
+        const chat = state.activeChatId ? state.chats[state.activeChatId] : null;
+        if (!chat || !chat.messages || chat.messages.length === 0) {
+            showToast('This chat has no messages to search yet.', 'info');
+            return;
+        }
         dom.searchPanel.classList.remove('hidden');
         searchBackdrop?.classList.remove('hidden');
         dom.messageSearchInput?.focus();
@@ -1017,8 +1024,12 @@ async function runDiagnostics() {
     } catch (e) { add('account menu opens', false, e.message); }
     try {
         click(dom.headerSearchBtn); await sleep(60);
+        const dgChat = state.activeChatId ? state.chats[state.activeChatId] : null;
+        const dgEmpty = !dgChat || !dgChat.messages || dgChat.messages.length === 0;
         const sp = dom.searchPanel && !dom.searchPanel.classList.contains('hidden');
-        add('search panel opens (header button)', !!sp);
+        // 2.3.5: an empty chat is gated with an info toast — expect whichever
+        // is correct for the current chat instead of a false FAIL.
+        add(dgEmpty ? 'search gated on empty chat (info toast)' : 'search panel opens (header button)', dgEmpty ? !sp : !!sp);
         if (sp) click(dom.searchCloseBtn);
     } catch (e) { add('search panel opens', false, e.message); }
 

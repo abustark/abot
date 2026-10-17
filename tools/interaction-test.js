@@ -188,24 +188,44 @@ function stubChain(label) {
         check('sidebar no longer duplicates the current chat',
             !$('sidebarCurrentChat') && !$('chatTitle') && !$('chatTitleInput') && !$('renameChatBtn'));
     }
-    // search (2.2.8: the header toggle was removed — search is opened from the
-    // sidebar quick actions / palette only; the in-panel X is the dismiss)
+    // search (2.3.5: the header toggle opens it, and an EMPTY chat now gets an
+    // info toast instead of a dead sheet — seed a chat with messages first)
     {
-        click($('sidebarSearchBtn'));
+        const { state } = await import('file://' + path.join(esmDir, 'state.js'));
+        const priorChats = state.chats;
+        const priorActive = state.activeChatId;
+        const srchChat = (messages) => ({ id: 'srch1', name: 'Search test', model: 'gemini-2.5-flash', messages });
+
+        // guard: nothing to search in an empty chat — info toast, panel stays shut
+        state.chats = { srch1: srchChat([]) };
+        state.activeChatId = 'srch1';
+        click($('headerSearchBtn'));
+        await sleep(60);
+        check('search stays closed on an empty chat', $('searchPanel').classList.contains('hidden'));
+        const guardToast = [...window.document.querySelectorAll('.abot-toast .toast-msg')].find((n) => n.textContent.includes('no messages'));
+        check('empty-chat search shows an info toast', !!guardToast, guardToast ? guardToast.textContent : 'no toast found');
+        if (guardToast) guardToast.closest('.abot-toast').remove();
+
+        // happy path: a chat with messages opens the sheet + backdrop
+        state.chats = { srch1: srchChat([{ role: 'user', content: 'hello world' }, { role: 'assistant', content: 'hi there' }]) };
+        click($('headerSearchBtn'));
         await sleep(50);
-        check('sidebar search button opens search panel', $('searchPanel') && !$('searchPanel').classList.contains('hidden'));
+        check('header search button opens search panel', $('searchPanel') && !$('searchPanel').classList.contains('hidden'));
         // v1.0.4: explicit dismiss — the panel had no way out once opened.
         click($('searchCloseBtn'));
         await sleep(50);
         check('search close button dismisses the panel', $('searchPanel').classList.contains('hidden'));
         // v2.0.7: backdrop is part of the sheet — opens with it, dismisses on tap.
         check('search backdrop hidden after close', $('searchBackdrop').classList.contains('hidden'));
-        click($('sidebarSearchBtn'));
+        click($('headerSearchBtn'));
         await sleep(50);
         check('search reopen shows backdrop', !$('searchBackdrop').classList.contains('hidden'));
         click($('searchBackdrop'));
         await sleep(50);
         check('backdrop tap closes search', $('searchPanel').classList.contains('hidden') && $('searchBackdrop').classList.contains('hidden'));
+
+        state.chats = priorChats;
+        state.activeChatId = priorActive;
     }
     // header (2.2.8): the "⋯" overflow menu was removed (owner request) — the
     // header carries the sidebar toggle + new chat only; theme/search/prompts
@@ -214,9 +234,9 @@ function stubChain(label) {
         check('header overflow menu removed', !$('headerOverflowBtn') && !$('headerOverflowMenu'));
         check('removed header controls are gone',
             !$('themeToggle') && !$('searchToggleBtn') && !$('promptBtn') && !$('sunIcon') && !$('moonIcon'));
-        check('new chat is the only header control',
+        check('header carries history, search and new-chat controls',
             !!$('headerNewChatBtn') && $('appHeader').contains($('headerNewChatBtn'))
-            && $('appHeader').querySelectorAll('button').length === 2);
+            && $('appHeader').querySelectorAll('button').length === 3);
         check('sidebar quick actions visible on desktop too',
             !!$('sidebarQuickActions') && !$('sidebarQuickActions').classList.contains('md:hidden'));
         check('composer chips carry aria-labels',
@@ -321,8 +341,8 @@ function stubChain(label) {
             && welcome.textContent.includes('How can I help today?'));
         const suggestions = $('emptySuggestions');
         check('suggestions render under the composer', suggestions && !suggestions.classList.contains('hidden'));
-        const cards = suggestions ? suggestions.querySelectorAll('.suggestion-card') : [];
-        check('suggestion cards available', cards.length === 4, cards.length + ' cards');
+        const cards = suggestions ? suggestions.querySelectorAll('.suggestion-pill') : [];
+        check('suggestion pills available', cards.length === 8, cards.length + ' pills');
         if (cards.length) {
             click(cards[0]);
             check('suggestion click fills the composer', $('messageInput').value.length > 0);

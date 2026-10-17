@@ -19,6 +19,7 @@ const TOAST_ICONS = {
     success: '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>',
     error: '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.607a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>',
     loading: '<span class="toast-spinner" aria-hidden="true"></span>',
+    info: '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clip-rule="evenodd"></path></svg>',
 };
 const TOAST_LIMIT = 3;
 const toastTimers = new WeakMap();
@@ -26,7 +27,7 @@ const toastTimers = new WeakMap();
 const setToastType = (el, type) => {
     const icon = el.querySelector('.toast-icon');
     icon.className = 'toast-icon inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg '
-        + (type === 'error' ? 'text-danger' : type === 'loading' ? 'text-muted' : 'text-ok');
+        + (type === 'error' ? 'text-danger' : type === 'loading' || type === 'info' ? 'text-muted' : 'text-ok');
     icon.innerHTML = TOAST_ICONS[type] || TOAST_ICONS.success;
 };
 

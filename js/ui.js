@@ -61,9 +61,11 @@ export const syncComposerChips = () => {
         dom.webSearchChip.disabled = !caps.webSearch;
         dom.webSearchChip.classList.toggle('chip-active', active);
         dom.webSearchChip.setAttribute('aria-pressed', String(active));
-        dom.webSearchChip.title = caps.webSearch
+        // 2.3.5 (owner request): styled tooltips — the native title bubble read
+        // as broken next to the app's own tooltip system.
+        dom.webSearchChip.setAttribute('data-tooltip', caps.webSearch
             ? 'Search the web for current information before answering'
-            : 'Web search is not available for this provider';
+            : 'Web search is not available for this provider');
     }
 
     if (dom.thinkingChip) {
@@ -72,11 +74,11 @@ export const syncComposerChips = () => {
         dom.thinkingChip.disabled = !caps.thinking;
         dom.thinkingChip.classList.toggle('chip-active', active);
         dom.thinkingChip.setAttribute('aria-pressed', String(active));
-        dom.thinkingChip.title = caps.thinking
+        dom.thinkingChip.setAttribute('data-tooltip', caps.thinking
             ? 'Extended thinking on/off (higher quality, slower and more tokens when on)'
             : caps.alwaysThinks
                 ? 'This model always reasons — nothing to toggle'
-                : 'Select a thinking-capable model (e.g. Gemini 3.8 Flash) to enable';
+                : 'Select a thinking-capable model (e.g. Gemini 3.8 Flash) to enable');
     }
 };
 

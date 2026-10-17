@@ -216,7 +216,7 @@ export const renderChatList = (searchTerm = '') => {
     filteredChats.sort((a, b) => b.id - a.id).forEach(chat => {
         const chatItemContainer = document.createElement('div');
         chatItemContainer.className = `relative chat-list-item group ${String(chat.id) === String(state.activeChatId) ? 'active' : ''}`;
-        chatItemContainer.innerHTML = `<div class="flex items-center justify-between w-full rounded-xl ${String(chat.id) === String(state.activeChatId) ? '' : 'text-body hover:bg-card/70'}"><a href="#" class="flex-1 px-3 py-2.5 text-sm truncate" data-chat-id="${chat.id}"><span class="chat-name-span"></span></a><input type="text" class="chat-rename-input hidden flex-1 mx-2 p-1 text-sm bg-surface dark:bg-card rounded" value=""><button class="chat-options-btn p-2 mr-1 rounded-lg hover:bg-card transition-colors" aria-label="Chat options"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" /></svg></button></div><div class="absolute right-0 top-full mt-1 w-36 bg-canvas dark:bg-card border border-hairline rounded-xl shadow-lift z-10 hidden chat-options-menu overflow-hidden"><button class="rename-chat-btn w-full text-left px-3 py-2 text-sm hover:bg-card">Rename</button><button class="export-chat-btn w-full text-left px-3 py-2 text-sm hover:bg-card">Export JSON</button><button class="export-md-btn w-full text-left px-3 py-2 text-sm hover:bg-card">Export Markdown</button><button class="delete-chat-btn w-full text-left px-3 py-2 text-sm text-danger hover:bg-card">Delete</button></div>`;
+        chatItemContainer.innerHTML = `<div class="flex items-center justify-between w-full rounded-xl ${String(chat.id) === String(state.activeChatId) ? '' : 'text-body hover:bg-card/70'}"><a href="#" class="flex-1 px-3 py-2.5 text-sm truncate" data-chat-id="${chat.id}"><span class="chat-name-span"></span></a><input type="text" class="chat-rename-input hidden flex-1 mx-2 p-1 text-sm bg-surface dark:bg-card rounded" value=""><button class="chat-options-btn p-2 mr-1 rounded-lg hover:bg-card transition-colors" aria-label="Chat options" data-tooltip="Chat options"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" /></svg></button></div><div class="absolute right-0 top-full mt-1 w-36 bg-canvas dark:bg-card border border-hairline rounded-xl shadow-lift z-10 hidden chat-options-menu overflow-hidden"><button class="rename-chat-btn w-full text-left px-3 py-2 text-sm hover:bg-card">Rename</button><button class="export-chat-btn w-full text-left px-3 py-2 text-sm hover:bg-card">Export JSON</button><button class="export-md-btn w-full text-left px-3 py-2 text-sm hover:bg-card">Export Markdown</button><button class="delete-chat-btn w-full text-left px-3 py-2 text-sm text-danger hover:bg-card">Delete</button></div>`;
         const nameSpan = chatItemContainer.querySelector('.chat-name-span');
         const renameInput = chatItemContainer.querySelector('.chat-rename-input');
         nameSpan.textContent = chat.name;
@@ -288,7 +288,7 @@ export const createNewChat = async () => {
             name: "New Chat",
             model: Object.keys(MODEL_CONFIG)[0],
             systemPrompt: "You are an AI assistant powered by ABot, a multi-model chat platform. Your goal is to be helpful, accurate, and concise. When asked about yourself, you can mention you are running on the ABot application.",
-            messages: [{ role: "assistant", content: "Hello! How can I assist you today?", model: Object.keys(MODEL_CONFIG)[0] }]
+            messages: []
         };
 
         await state.db.collection('users').doc(currentUser.uid).collection('chats').doc(newChatId).set(newChatData);
@@ -311,7 +311,7 @@ export const createNewChat = async () => {
 // the composer, send again). Error cards deeper in the history must stay
 // text-only — regenerate pops everything above the prompt, so retrying a
 // stale error would silently drop every message sent after it.
-const RETRY_BTN_HTML = `<button class="retry-btn mt-3 inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-btn border border-danger/40 text-danger hover:bg-danger/10 transition-colors" aria-label="Retry" title="Retry this message"><svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>Retry</button>`;
+const RETRY_BTN_HTML = `<button class="retry-btn mt-3 inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-btn border border-danger/40 text-danger hover:bg-danger/10 transition-colors" aria-label="Retry" data-tooltip="Retry this message"><svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>Retry</button>`;
 
 export const appendMessage = (message, isHistory = false, options = {}) => {
     const { role, content: text, model: messageModel } = message;
@@ -368,9 +368,9 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
     // Chats themselves are still deletable from the sidebar. 2.2.8: the
     // per-message regenerate icon was removed (owner request) — Retry on the
     // error card is the only regenerate affordance.) ---
-                    const copyBtnHtml = `<button class="copy-message-btn p-1.5 rounded-md text-muted hover:text-ink transition-colors" title="Copy" aria-label="Copy message"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" /></svg></button>`;
+                    const copyBtnHtml = `<button class="copy-message-btn p-1.5 rounded-md text-muted hover:text-ink transition-colors" data-tooltip="Copy" aria-label="Copy message"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" /></svg></button>`;
 
-    const speakBtnHtml = `<button class="speak-btn p-1.5 rounded-md transition-colors hover:text-coral text-muted" aria-label="Read aloud" aria-pressed="false" title="Read aloud"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M13 4.5c0-1.104-.806-2.03-1.886-2.03H11L9.66 5.33A2.5 2.5 0 017.5 6.5H5A2.5 2.5 0 002.5 9v6A2.5 2.5 0 005 17.5h2.5a2.5 2.5 0 012.16 1.17l1.34 2.83h.114C12.194 21.5 13 20.574 13 19.47v-14.97z"/><path d="M16.5 8.5a.75.75 0 011.06 0 5 5 0 010 7 .75.75 0 11-1.06-1.06 3.5 3.5 0 000-4.88.75.75 0 010-1.06z"/><path d="M19.09 5.5a.75.75 0 011.06 0 9 9 0 010 13 .75.75 0 11-1.06-1.06 7.5 7.5 0 000-10.88.75.75 0 010-1.06z"/></svg></button>`;
+    const speakBtnHtml = `<button class="speak-btn p-1.5 rounded-md transition-colors hover:text-coral text-muted" aria-label="Read aloud" aria-pressed="false" data-tooltip="Read aloud"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M13 4.5c0-1.104-.806-2.03-1.886-2.03H11L9.66 5.33A2.5 2.5 0 017.5 6.5H5A2.5 2.5 0 002.5 9v6A2.5 2.5 0 005 17.5h2.5a2.5 2.5 0 012.16 1.17l1.34 2.83h.114C12.194 21.5 13 20.574 13 19.47v-14.97z"/><path d="M16.5 8.5a.75.75 0 011.06 0 5 5 0 010 7 .75.75 0 11-1.06-1.06 3.5 3.5 0 000-4.88.75.75 0 010-1.06z"/><path d="M19.09 5.5a.75.75 0 011.06 0 9 9 0 010 13 .75.75 0 11-1.06-1.06 7.5 7.5 0 000-10.88.75.75 0 010-1.06z"/></svg></button>`;
 
     // AI rows: copy + read aloud, parked top-right on the meta line.
     const aiActionsHtml = (!isUser) ? copyBtnHtml + speakBtnHtml : '';
@@ -378,7 +378,7 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
     let actionButtonsHtml = '';
     if (typeof options.index === 'number') {
         actionButtonsHtml = `
-                            ${isUser ? `<button class="edit-msg-btn p-1.5 text-muted hover:text-coral transition-colors" title="Edit" aria-label="Edit message"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button>` : ''}`;
+                            ${isUser ? `<button class="edit-msg-btn p-1.5 text-muted hover:text-coral transition-colors" data-tooltip="Edit" aria-label="Edit message"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button>` : ''}`;
     }
 
     const messageEl = document.createElement('div');
@@ -952,13 +952,18 @@ export const sendMessage = async () => {
 
 // v1.0.6 (owner request): the new-chat screen centers the composer and offers
 // ready-made prompts UNDER it. `chat-empty` on <body> switches the layout (CSS),
-// and the cards live outside the scroll area so they land below the composer
-// instead of above it. Hover motion is gated in CSS — touch never gets it.
+// and the pills live outside the scroll area so they land below the composer
+// instead of above it. 2.3.5 (owner request): the old two-line cards became a
+// single-line pill row; still click-to-fill only — zero extra AI calls.
 const SUGGESTIONS = [
-    { title: 'Explain something', sub: 'Break down a hard concept in simple words', prompt: 'Explain how large language models work, in simple terms.' },
-    { title: 'Help me write', sub: 'Draft a polished email or message', prompt: 'Help me write a short, friendly follow-up email to a client.' },
-    { title: 'Debug my code', sub: 'Paste code and get a fix', prompt: 'I will paste some code — help me find and fix the bug.' },
-    { title: 'Brainstorm ideas', sub: 'Get creative options fast', prompt: 'Brainstorm 10 names for a warm, minimal AI chat app.' },
+    { label: 'Explain a concept', prompt: 'Explain how large language models work, in simple terms.' },
+    { label: 'Brainstorm ideas', prompt: 'Brainstorm 10 names for a warm, minimal AI chat app.' },
+    { label: 'Help me write', prompt: 'Help me write a short, friendly follow-up email to a client.' },
+    { label: 'Debug my code', prompt: 'I will paste some code — help me find and fix the bug.' },
+    { label: 'Plan a trip', prompt: 'Plan a relaxed 5-day city trip for me, with a light daily schedule.' },
+    { label: 'Check my reasoning', prompt: 'I will share an argument — check my reasoning and point out weak spots.' },
+    { label: 'Summarize a text', prompt: 'I will paste a long text — summarize it into a few clear bullet points.' },
+    { label: 'Translate something', prompt: 'Help me translate a short message into clear, natural English.' },
 ];
 
 const setEmptyMode = (isEmpty) => {
@@ -977,16 +982,13 @@ const setEmptyMode = (isEmpty) => {
     if (!dom.emptySuggestions) return;
 
     dom.emptySuggestions.innerHTML = `
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+        <div class="flex flex-wrap justify-center gap-2">
             ${SUGGESTIONS.map(sg => `
-                <button class="suggestion-card suggestion-enter text-left p-4 rounded-2xl bg-raised border border-hairline shadow-soft transition-[box-shadow,transform,border-color] duration-base ease-out active:scale-[0.99]" data-prompt="${sg.prompt.replace(/"/g, '&quot;')}">
-                    <span class="block text-sm font-medium text-ink">${sg.title}</span>
-                    <span class="block text-xs text-muted mt-1 leading-relaxed">${sg.sub}</span>
-                </button>`).join('')}
+                <button type="button" class="suggestion-pill suggestion-enter inline-flex items-center whitespace-nowrap px-3.5 py-1.5 rounded-full border border-hairline bg-raised text-xs font-medium text-body cursor-pointer transition-[box-shadow,transform,border-color,color] duration-base ease-out active:scale-[0.98] hover:text-ink" data-prompt="${sg.prompt.replace(/"/g, '&quot;')}">${sg.label}</button>`).join('')}
         </div>`;
     dom.emptySuggestions.classList.remove('hidden');
-    dom.emptySuggestions.querySelectorAll('.suggestion-card').forEach(card => {
-        card.addEventListener('click', () => { dom.messageInput.value = card.dataset.prompt; dom.messageInput.focus(); });
+    dom.emptySuggestions.querySelectorAll('.suggestion-pill').forEach(pill => {
+        pill.addEventListener('click', () => { dom.messageInput.value = pill.dataset.prompt; dom.messageInput.focus(); });
     });
 };
 
@@ -1052,6 +1054,11 @@ export const renderActiveChat = () => {
         }
     }
     dom.chatHistory.innerHTML = '';
+    if (chat.messages && chat.messages.length === 1
+        && chat.messages[0].role === 'assistant'
+        && chat.messages[0].content === 'Hello! How can I assist you today?') {
+        chat.messages = [];
+    }
     if (!chat.messages || chat.messages.length === 0) {
         renderEmptyState();
     } else {
