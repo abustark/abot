@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.3.7`** (current head is `2.3.6` — see below)
+> - **`main` → `2.3.8`** (current head is `2.3.7` — see below)
 > - **`arena/01a03fe9-abot` → mirrors `main`** (no version of its own: `git push origin main:arena/01a03fe9-abot --force`;
 >   both branches stay identical)
 
@@ -25,6 +25,16 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.3.7 - New Chat reuses an untouched chat (no duplicate empty-chat pile-up)
+- **Date**: 2026-10-17
+- **Owner request**: opening a new chat while already sitting on an empty one — or clicking New Chat repeatedly — must not be able to create a series of empty "New Chat" rows.
+- **Changes**:
+  - `js/chat.js`: `createNewChat` now guards before creating — (a) if the **active chat is untouched** (no messages, or a pre-2.3.5 chat holding only the seeded greeting) the click just closes the mobile drawer and stays put; (b) if **any** untouched chat exists, the **newest** one is switched to instead of creating another; only when none exists does it create + persist a new chat. New shared helpers `LEGACY_GREETING` / `isEmptyChat` — `renderActiveChat`'s lone-greeting cleanup now uses them too.
+  - Applies to every New Chat entry point for free (sidebar button, header button, Alt+N, palette, delete-last-chat recovery) since they all funnel through `createNewChat`.
+  - `index.html` + `service-worker.js`: cache-bust `?v=p24` → `?v=p25`, `abot-cache-v50` → `abot-cache-v51`.
+  - `tools/interaction-test.js`: new regression block — repeated New Chat on an untouched chat adds no row; the newest untouched chat is reused when one exists elsewhere.
+- **Note**: no CSS changes — `dist/output.css` untouched this batch.
 
 ### 2.3.6 - sidebar collapse root-cause fix, tooltip idle-delay + edge-aware positions, landing spacing
 - **Date**: 2026-10-17

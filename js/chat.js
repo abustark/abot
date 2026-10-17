@@ -271,12 +271,30 @@ export const switchChat = (chatId) => {
     closeSidebar();
 };
 
+// 2.3.7 (owner request): a chat counts as "untouched" while it has no messages —
+// a pre-2.3.5 chat still holding only the seeded greeting counts too (see the
+// legacy cleanup in renderActiveChat).
+const LEGACY_GREETING = 'Hello! How can I assist you today?';
+const isEmptyChat = (chat) => !chat || !chat.messages || chat.messages.length === 0
+    || (chat.messages.length === 1 && chat.messages[0].role === 'assistant'
+        && chat.messages[0].content === LEGACY_GREETING);
+
 export const createNewChat = async () => {
     const currentUser = state.auth.currentUser;
     if (!currentUser) {
         console.error("Cannot create new chat: No user is signed in.");
         return;
     }
+
+    // 2.3.7 (owner request): tapping New Chat repeatedly (or while an untouched
+    // chat already exists) must never pile up empty "New Chat" rows — stay on
+    // the untouched chat you are on; otherwise reuse the newest untouched one.
+    const activeChat = state.activeChatId ? state.chats[state.activeChatId] : null;
+    if (activeChat && isEmptyChat(activeChat)) { closeSidebar(); return; }
+    const untouched = Object.values(state.chats)
+        .filter((c) => isEmptyChat(c))
+        .sort((a, b) => Number(b.id) - Number(a.id))[0];
+    if (untouched) { switchChat(untouched.id); return; }
 
     dom.newChatBtn.disabled = true;
     dom.newChatSpinner.classList.remove('hidden');
@@ -1054,9 +1072,7 @@ export const renderActiveChat = () => {
         }
     }
     dom.chatHistory.innerHTML = '';
-    if (chat.messages && chat.messages.length === 1
-        && chat.messages[0].role === 'assistant'
-        && chat.messages[0].content === 'Hello! How can I assist you today?') {
+    if (chat.messages && chat.messages.length === 1 && isEmptyChat(chat)) {
         chat.messages = [];
     }
     if (!chat.messages || chat.messages.length === 0) {

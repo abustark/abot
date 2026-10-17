@@ -357,6 +357,39 @@ function stubChain(label) {
         await sleep(30);
         check('normal layout returns once messages exist', !window.document.body.classList.contains('chat-empty'));
     }
+    // --- 2.3.7: New Chat never piles up empty chats -----------------------------
+    {
+        const chatMod = await import('file://' + path.join(esmDir, 'chat.js'));
+        const { state } = await import('file://' + path.join(esmDir, 'state.js'));
+        const priorChats = state.chats;
+        const priorActive = state.activeChatId;
+        const mkChat = (id, messages) => ({ id, name: 'New Chat', model: 'gemini-2.5-flash', messages });
+
+        // On an untouched chat: the click must not add a row, and stays here.
+        state.chats = { '1001': mkChat('1001', []) };
+        state.activeChatId = '1001';
+        await chatMod.createNewChat();
+        await sleep(30);
+        check('New Chat on an untouched chat adds no new row',
+            Object.keys(state.chats).length === 1 && state.activeChatId === '1001');
+
+        // With another untouched chat around: the newest one is reused, not recreated.
+        state.chats = {
+            '1001': mkChat('1001', []),
+            '1002': mkChat('1002', [{ role: 'user', content: 'hi', ts: Date.now() }]),
+            '1003': mkChat('1003', []),
+        };
+        state.activeChatId = '1002';
+        await chatMod.createNewChat();
+        await sleep(30);
+        check('New Chat reuses the newest untouched chat',
+            Object.keys(state.chats).length === 3 && state.activeChatId === '1003');
+
+        state.chats = priorChats;
+        state.activeChatId = priorActive;
+        chatMod.renderActiveChat();
+        await sleep(20);
+    }
     // --- v1.0.6: model panel opens/closes with no timer race -------------------
     {
         click($('modelSelectorBtn'));
