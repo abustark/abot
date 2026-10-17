@@ -33,7 +33,8 @@ ABot is a **vanilla-JS, multi-model AI chat app** (no framework):
    - Format: `<version> - <short description>` (e.g., `2.0.2 - auth page ui changed`). Keep it short and clear, avoid overly long commit titles.
    - Every commit must also be logged in `COMMIT-HISTORY.md` with its version and what it did.
 3. **Arena Synchronization (`arena/01a03fe9-abot`)**:
-   - After updating `main`, merge `main` into `arena/01a03fe9-abot` so the integration branch stays synced with `main`.
+   - After updating `main`, mirror it onto arena with a plain force-push (no merge commits):
+     `git push origin main:arena/01a03fe9-abot --force`. Both branches stay **identical** (`main` is the single source of truth).
    - **`docs/updates.md`**: Exists **only on the `arena` branch** (never commit to `main`). It is updated only after major updates (not for every small commit) and documents the contrast between the old workflow and the updated workflow.
 4. **Secrets**: Never commit secrets (`.env`, `service-account-key.json` are gitignored — keep them that way).
 

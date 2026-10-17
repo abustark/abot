@@ -6,15 +6,15 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.3.2`** (current head is `2.3.1` — see below)
-> - **`arena/01a03fe9-abot` → its own sequence** (syncs are **unversioned** merge commits:
->   `merge main <version> into arena/01a03fe9-abot`; arena's own feature commits use arena's numbers)
+> - **`main` → `2.3.3`** (current head is `2.3.2` — see below)
+> - **`arena/01a03fe9-abot` → mirrors `main`** (no version of its own: `git push origin main:arena/01a03fe9-abot --force`;
+>   both branches stay identical)
 
 > **⚠️ Branch-version independence (read before comparing branches):** `main` and
 > `arena/01a03fe9-abot` keep **separate, independent version numbers and commit names**. The same number
 > on both branches does **NOT** mean the same work — e.g. `main`'s `2.0.10` and arena's `2.0.10` were two
-> completely different commits by different agents. Sync direction is one-way (`main` → arena) and the
-> sync is done with an **arena-named merge commit**, never by fast-forwarding main's commits into arena.
+> completely different commits by different agents. Sync direction is one-way (`main` → arena) and it is now a
+> **plain force-push mirror** (`git push origin main:arena/01a03fe9-abot --force`) — arena no longer keeps commits of its own.
 > **Always identify/compare commits by their hash, never by version number alone.**
 
 > **🧾 History note (why the numbering above looks odd):** commits `2.0.11`–`2.0.26` (arena) and
@@ -25,6 +25,14 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.3.2 - arena sync policy: mirror main (no merge commits)
+- **Date**: 2026-10-17
+- **Why**: owner directive — `arena/01a03fe9-abot` is no longer synced by merging `main`; it is force-pushed as a straight mirror of `main`, so the two branches are always identical.
+- **Changes**:
+  - `AGENTS.md` §1 item 3 + `docs/AGENTS.md` §1 item 3: arena sync rewritten to `git push origin main:arena/01a03fe9-abot --force` (the `merge main <version> into arena/...` flow is retired).
+  - `COMMIT-HISTORY.md`: `📌 Next version` arena line + branch-independence note updated to the mirror policy.
+  - Arena branch force-pushed to `main` (its 2 merge-marker commits `4b206f3`, `7a56463` are dropped — their content is already in `main`).
 
 ### 2.3.1 - rename commit log to COMMIT-HISTORY.md (universal name)
 - **Date**: 2026-10-17
