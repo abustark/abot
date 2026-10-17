@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.3.8`** (current head is `2.3.7` — see below)
+> - **`main` → `2.3.9`** (current head is `2.3.8` — see below)
 > - **`arena/01a03fe9-abot` → mirrors `main`** (no version of its own: `git push origin main:arena/01a03fe9-abot --force`;
 >   both branches stay identical)
 
@@ -25,6 +25,15 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.3.8 - New Chat guard shows an info toast on repeat clicks
+- **Date**: 2026-10-17
+- **Owner request**: clicking the New Chat button/icon again must give a popup notification explaining what happened.
+- **Changes**:
+  - `js/chat.js`: both guard paths in `createNewChat` now toast — staying on the untouched active chat → *"You already have a new chat open."*; switching to an existing untouched chat → *"Switched to your existing new chat."* — both via the muted `info` toast style (2.3.5). The real creation path stays silent.
+  - `index.html` + `service-worker.js`: cache-bust `?v=p25` → `?v=p26`, `abot-cache-v51` → `abot-cache-v52`.
+  - `tools/interaction-test.js`: regression block extended — both guard paths assert their info toast text.
+- **Note**: no CSS changes — `dist/output.css` untouched this batch.
 
 ### 2.3.7 - New Chat reuses an untouched chat (no duplicate empty-chat pile-up)
 - **Date**: 2026-10-17

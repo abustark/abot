@@ -290,11 +290,21 @@ export const createNewChat = async () => {
     // chat already exists) must never pile up empty "New Chat" rows — stay on
     // the untouched chat you are on; otherwise reuse the newest untouched one.
     const activeChat = state.activeChatId ? state.chats[state.activeChatId] : null;
-    if (activeChat && isEmptyChat(activeChat)) { closeSidebar(); return; }
+    if (activeChat && isEmptyChat(activeChat)) {
+        closeSidebar();
+        // 2.3.8 (owner request): make the no-op visible — an info toast explains
+        // why nothing new was created.
+        showToast('You already have a new chat open.', 'info');
+        return;
+    }
     const untouched = Object.values(state.chats)
         .filter((c) => isEmptyChat(c))
         .sort((a, b) => Number(b.id) - Number(a.id))[0];
-    if (untouched) { switchChat(untouched.id); return; }
+    if (untouched) {
+        switchChat(untouched.id);
+        showToast('Switched to your existing new chat.', 'info');
+        return;
+    }
 
     dom.newChatBtn.disabled = true;
     dom.newChatSpinner.classList.remove('hidden');

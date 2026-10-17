@@ -372,6 +372,8 @@ function stubChain(label) {
         await sleep(30);
         check('New Chat on an untouched chat adds no new row',
             Object.keys(state.chats).length === 1 && state.activeChatId === '1001');
+        check('repeat New Chat notifies via info toast',
+            [...window.document.querySelectorAll('.abot-toast .toast-msg')].some(n => n.textContent.includes('already have a new chat')));
 
         // With another untouched chat around: the newest one is reused, not recreated.
         state.chats = {
@@ -384,6 +386,8 @@ function stubChain(label) {
         await sleep(30);
         check('New Chat reuses the newest untouched chat',
             Object.keys(state.chats).length === 3 && state.activeChatId === '1003');
+        check('reuse path notifies via info toast',
+            [...window.document.querySelectorAll('.abot-toast .toast-msg')].some(n => n.textContent.includes('Switched to your existing new chat')));
 
         state.chats = priorChats;
         state.activeChatId = priorActive;

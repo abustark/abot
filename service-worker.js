@@ -3,7 +3,7 @@
  * Provides offline caching for local assets only
  */
 
-const CACHE_NAME = 'abot-cache-v51'; // 2.3.7: New Chat reuses an empty chat (no duplicate pile-up)
+const CACHE_NAME = 'abot-cache-v52'; // 2.3.8: New Chat guard shows an info toast on repeat clicks
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -11,7 +11,7 @@ const STATIC_ASSETS = [
     '/favicon-32-light.png',
     '/favicon-32-dark.png',
     '/logo.png',
-    '/dist/output.css?v=p25',
+    '/dist/output.css?v=p26',
     '/js/app.js',
     '/js/config.js',
     '/js/dom.js',
