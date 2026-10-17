@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.2.9`** (current head is `2.2.8` — see below)
+> - **`main` → `2.2.10`** (current head is `2.2.9` — see below)
 > - **`arena/01a03fe9-abot` → its own sequence** (syncs are **unversioned** merge commits:
 >   `merge main <version> into arena/01a03fe9-abot`; arena's own feature commits use arena's numbers)
 
@@ -25,6 +25,10 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.2.9 - remove dead isSearchOpen helper
+- **Date**: 2026-10-17
+- **Why**: the 2.2.8 overflow-menu removal deleted the only caller of `isSearchOpen` (the header search toggle); the leftover const tripped `no-unused-vars` in the pre-commit lint run. Deleted so the lint output stays at the two pre-existing `identityKey` warnings.
 
 ### 2.2.8 - mobile/desktop polish pass: composer, header, sidebar cleanup
 - **Date**: 2026-10-17

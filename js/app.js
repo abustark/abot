@@ -458,7 +458,6 @@ function initApp() {
         searchBackdrop?.classList.add('hidden');
         if (dom.searchResults) dom.searchResults.innerHTML = '';
     };
-    const isSearchOpen = () => !dom.searchPanel.classList.contains('hidden');
     // 2.2.8: the header search toggle was removed with the overflow menu —
     // search is now opened from the sidebar quick actions / palette only, and
     // the in-panel close button below is the single explicit dismiss.
