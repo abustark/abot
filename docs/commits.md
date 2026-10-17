@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.2.8`** (current head is `2.2.7` — see below)
+> - **`main` → `2.2.9`** (current head is `2.2.8` — see below)
 > - **`arena/01a03fe9-abot` → its own sequence** (syncs are **unversioned** merge commits:
 >   `merge main <version> into arena/01a03fe9-abot`; arena's own feature commits use arena's numbers)
 
@@ -25,6 +25,20 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.2.8 - mobile/desktop polish pass: composer, header, sidebar cleanup
+- **Date**: 2026-10-17
+- **Owner request** (mobile walk-through list): copy whitespace, "Show more" collapse, per-message regenerate icon, dotted typing loader, model-panel columns, new-chat icon, sidebar duplicate current-chat block, prompt-library borders, header "⋯" menu, composer action-row overlap.
+- **Changes**:
+  - `js/chat.js`: copy trims trailing per-line spaces + squeezes 3+ blank lines (was the raw template `textContent`); "Show more" collapse removed (`maybeCollapse` + all call sites) — long replies scroll naturally; per-message regenerate icon removed (error-card Retry remains the regenerate path); typing indicator is now a mini dotted-"A" (same 18 dots + baked delays as the splash wordmark; `.typing-indicator` wrapper class kept for the removal selectors); title-gen animation retargeted to `#headerChatTitle`; `renderActiveChat` no longer writes the removed sidebar title.
+  - `index.html`: header "⋯" overflow menu removed entirely — header now carries the sidebar toggle + New chat only; New chat icon is the compose (pencil-square) icon; sidebar's duplicate current-chat block removed (rename lives in each chat row's options menu); sidebar quick actions (Search/Prompts) now visible on desktop too (`md:hidden` removed — the parity answer); composer chips are icon-only on phones (globe / brain) with labels from md up + `aria-label`s — fixes the action-row overlap; model panel gets `md:columns-2 md:w-[26rem]`; asset bust `?v=p20` -> `?v=p21`.
+  - `js/app.js`: overflow wiring, theme icon sync, header search-toggle listener and sidebar rename listeners removed; `#diag` rewired (account switch, sidebar search, `sidebarPromptBtn`, tap-test probes `headerNewChatBtn`); model groups wrapped in `break-inside-avoid` blocks for the two-column panel; build id `2026-10-17.1` -> `2026-10-17.2`.
+  - `js/palette.js`: "Toggle theme" now flips `#sidebarThemeSwitch` (the header button it used to click is gone).
+  - `js/dom.js`: registry pruned (themeToggle/sunIcon/moonIcon/searchToggleBtn/promptBtn/chatTitle/chatTitleInput/renameChatBtn).
+  - `js/ui.js`: prompt-library chips get per-item borders (active = coral border + fill).
+  - `src/input.css`: dotted-A typing CSS (replaces the bounce dots); `#headerOverflowMenu` P3 block, `.theme-icon` B6 block, `.msg-collapsible` block and `.regen-btn:active` removed; shared P5/P7 rules kept.
+  - `tools/`: interaction-test + cycle-test rewired to the surviving controls (overflow/icons/rename suites replaced with removal guards); `ui-recon.py` id list updated.
+- **Note**: gates intentionally NOT run (owner directive) — `npm run build:css` and gate passes deferred to owner; `dist/output.css` is stale until then.
 
 ### 2.2.7 - screenshot policy: agent-reference only
 - **Date**: 2026-10-17

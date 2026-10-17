@@ -90,7 +90,9 @@ export const renderPromptLibrary = () => {
         const isActive = currentPrompt === p.prompt;
 
         button.textContent = p.title;
-                        button.className = `px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${isActive ? 'bg-coral text-white shadow-sm' : 'bg-card text-body hover:bg-hairline'}`;
+                        // 2.2.8: borders per item (owner request) — the chips sat
+                        // bg-on-bg, so the grid read as one undifferentiated block.
+                        button.className = `px-3 py-1.5 text-xs font-medium rounded-full border transition-colors ${isActive ? 'bg-coral text-white border-coral shadow-sm' : 'bg-card text-body border-hairline hover:bg-hairline'}`;
 
         button.addEventListener('click', (e) => {
             e.preventDefault(); // Prevent form submission if it's inside a form

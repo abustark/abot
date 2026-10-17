@@ -3,7 +3,7 @@
  * Provides offline caching for local assets only
  */
 
-const CACHE_NAME = 'abot-cache-v47'; // 2.2.6: header/composer revamp — model selector moved into composer, jump FAB, header chat title
+const CACHE_NAME = 'abot-cache-v48'; // 2.2.8: mobile/desktop polish — overflow menu removed, composer chips icon-only on phones, dotted-A loader
 const STATIC_ASSETS = [
     '/',
     '/index.html',

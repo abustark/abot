@@ -370,21 +370,23 @@
 .bot-bubble { border-radius: 18px 18px 18px 6px; }
 .chat-bubble .prose p { margin: 0; }
 
-/* Typing indicator */
-.typing-indicator span {
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background-color: currentColor;
-    animation: bounce 1.4s infinite;
+/* Typing indicator (2.2.8) — mini dotted-"A": the app-loader wordmark's A
+   (18 dots, same coords + baked per-dot delays) pulsing in a loop while the
+   reply streams. viewBox crops the 24x36 glyph with 4px breathing room. */
+.typing-indicator { color: rgb(var(--c-coral)); }
+.typing-a { width: 15px; height: 21px; overflow: visible; }
+.typing-a circle {
+    fill: currentColor;
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: typingDotPulse 1.45s ease-in-out infinite;
 }
-.typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
-.typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
-.typing-indicator span:nth-child(3) { animation-delay: 0.16s; }
-@keyframes bounce {
-    0%, 80%, 100% { transform: scale(0); }
-    40% { transform: scale(1.0); }
+@keyframes typingDotPulse {
+    0%, 62%, 100% { opacity: 0.25; transform: scale(0.72); }
+    30% { opacity: 1; transform: scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .typing-a circle { animation: none; opacity: 1; transform: none; }
 }
 
 .sidebar { transition: transform 0.3s var(--ease-drawer), margin-left 0.3s var(--ease-drawer); }
@@ -493,23 +495,6 @@ pre:focus-within .copy-code-btn { opacity: 1; }
     border-top-right-radius: 0 !important;
 }
 
-/* Phase 3: long-message collapse */
-.msg-collapsible.collapsed {
-    max-height: 20rem;
-    overflow: hidden;
-    position: relative;
-}
-.msg-collapsible.collapsed::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 4.5rem;
-    background: linear-gradient(to bottom, rgb(var(--c-canvas) / 0), rgb(var(--c-canvas)));
-    pointer-events: none;
-}
-
 /* Search match jump highlight */
 .search-highlight {
     outline: 2px solid rgb(var(--c-coral));
@@ -558,9 +543,7 @@ mark {
 /* v1.0.6: every icon-only control acknowledges the press (design rule: no
    silent buttons). Immediate, no transition — press feedback should feel
    instant, not eased. */
-#themeToggle:active,
 #sidebarToggle:active,
-#searchToggleBtn:active,
 #profileMenuBtn:active,
 #voiceBtn:active,
 #sidebarSearchBtn:active,
@@ -568,11 +551,7 @@ mark {
 .chat-options-btn:active,
 .copy-message-btn:active,
 .speak-btn:active,
-.regen-btn:active,
 .edit-msg-btn:active { transform: scale(0.94); }
-
-/* Typing indicator dots follow the accent token (was template gray/currentColor) */
-.typing-indicator span { background-color: rgb(var(--c-coral)); }
 
 /* ---------------------------------------------------------------------------
    v1.0.5 — A3: long-thread render cost
@@ -829,16 +808,10 @@ h1, h2, h3, .prose h1, .prose h2, .prose h3 { text-wrap: balance; }
     [data-tooltip]::after { transition: none; }
 }
 
-/* --- v2.0.7: header overflow menu + mobile search sheet + slimmer bar ------- */
+/* --- v2.0.7: mobile search sheet + slimmer bar; 2.2.8: header overflow menu
+   removed (owner request) — only the slimmer bar survives from this block. --- */
 /* Slimmer header height (was h-14). Padding stays on the header utilities. */
 #appHeader { min-height: 3rem; }
-
-/* Overflow "⋯" menu: quick fade+rise, origin top-right. Tokens only. */
-#headerOverflowMenu {
-    transform-origin: top right;
-    transition: opacity 140ms var(--ease-out), transform 140ms var(--ease-out);
-}
-#headerOverflowMenu.hidden { display: none; }
 
 /* Mobile search sheet: the panel is a fixed top bar above every other layer
    (composer z-10, jump pill z-20), with a backdrop below it. Desktop keeps the
@@ -1005,19 +978,8 @@ body.chat-empty #jumpToLatest { display: none; }
     .model-panel { transition: none; }
 }
 
-/* --- B6: theme icon cross-fade + rotate. The pair used to swap via `hidden`
-   (display:none), which cannot animate — so make both icons overlap and fade. */
-.theme-icon {
-    position: absolute;
-    inset: 0;
-    margin: auto;
-    transition: opacity 200ms var(--ease-out), transform 200ms var(--ease-out);
-}
-.theme-icon.is-off { opacity: 0; transform: rotate(-75deg) scale(0.6); }
-@media (prefers-reduced-motion: reduce) {
-    .theme-icon { transition: opacity 120ms linear; }
-    .theme-icon.is-off { transform: none; }
-}
+/* 2.2.8: the B6 .theme-icon cross-fade block was removed with the header
+   sun/moon pair (overflow-menu removal). */
 
 /* --- B7: a toast is dragged horizontally, so let the browser keep vertical
    scroll gestures for itself instead of cancelling the drag. */
@@ -1101,39 +1063,22 @@ html.dark .logo-mark { filter: brightness(0) invert(1); }
     .dotmark circle { animation: none; opacity: 1; transform: none; }
 }
 
-/* --- P3: header overflow menu — real surface + states --------------------
-   The rows sat on the same surface as the menu (bg-card on bg-card), so hover
-   and active were invisible on the dark theme. Give the menu a raised surface
-   and the rows genuine hover/press/focus feedback. */
-#headerOverflowMenu { background-color: rgb(var(--c-raised)); }
-html.dark #headerOverflowMenu { background-color: rgb(var(--c-card)); }
-#headerOverflowMenu .menu-row:hover { background-color: rgb(var(--c-hairline) / 0.45); }
-#headerOverflowMenu .menu-row:active { background-color: rgb(var(--c-hairline) / 0.7); }
-#headerOverflowMenu .menu-row:focus-visible {
-    background-color: rgb(var(--c-hairline) / 0.45);
-    outline: 2px solid rgb(var(--c-coral) / 0.45);
-    outline-offset: -2px;
-}
+/* 2.2.8: P3's #headerOverflowMenu surface/states block was removed with the
+   overflow menu itself (owner request). */
 
 /* --- P5: micro-interactions (press + focus) ------------------------------
    Pointer-only press feedback; keyboard users get a ring instead. */
 #appHeader button:focus-visible,
-#searchPanel button:focus-visible,
-#headerOverflowMenu .menu-row:focus-visible {
+#searchPanel button:focus-visible {
     outline: 2px solid rgb(var(--c-coral) / 0.45);
     outline-offset: 2px;
 }
-#headerOverflowMenu .menu-row:focus-visible { outline-offset: -2px; }
 @media (hover: hover) and (pointer: fine) {
-    #headerOverflowBtn,
-    #headerNewChatBtn,
-    #headerOverflowMenu .menu-row {
+    #headerNewChatBtn {
         transition: transform 140ms var(--ease-out), background-color 140ms var(--ease-out),
             color 140ms var(--ease-out);
     }
-    #headerOverflowBtn:active,
     #headerNewChatBtn:active { transform: scale(0.94); }
-    #headerOverflowMenu .menu-row:active { transform: scale(0.985); }
 }
 
 /* --- P7: mobile ergonomics -----------------------------------------------
@@ -1141,7 +1086,6 @@ html.dark #headerOverflowMenu { background-color: rgb(var(--c-card)); }
    visual rhythm), and momentum scrolling in the thread. */
 @media (hover: none) {
     #appHeader button { min-width: 40px; min-height: 40px; }
-    #headerOverflowMenu .menu-row { min-height: 44px; }
     #searchCloseBtn { min-width: 44px; min-height: 44px; justify-content: center; }
 }
 #chatHistoryContainer { -webkit-overflow-scrolling: touch; }

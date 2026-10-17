@@ -23,7 +23,6 @@ import { initPalette } from './palette.js';
 import { initMessageActions } from './chat.js';
 import { linkGuestToGoogle } from './auth.js';
 import { openPromptModal } from './ui.js';
-import { renameChat } from './chat.js';
 import { renderActiveChat } from './chat.js';
 import { renderChatList } from './chat.js';
 import { saveSystemPrompt } from './ui.js';
@@ -75,20 +74,15 @@ function initApp() {
     // Head script applies the initial class (stored choice > system pref);
     // here we only keep the icon pair in sync and persist explicit choices.
     const syncThemeIcons = () => {
+        // 2.2.8: the header sun/moon icon pair was removed together with the
+        // overflow menu — the account-menu switch is now the only UI that
+        // mirrors the theme, so keep it (and nothing else) in sync.
         const dark = document.documentElement.classList.contains('dark');
-        // B6 (v1.0.6): cross-fade + rotate instead of `hidden` — display:none
-        // can't animate, so the swap used to be a hard jump. `.is-off` only
-        // fades/scales (the icon stays in the layout, out of the a11y tree via
-        // the button's own label).
-        dom.sunIcon.classList.toggle('is-off', !dark);
-        dom.moonIcon.classList.toggle('is-off', dark);
-        // v1.0.7: the account-menu switch is a real checkbox, so its knob slides
-        // off :checked in CSS — mirror the state onto it and nothing else.
         if (dom.sidebarThemeSwitch) dom.sidebarThemeSwitch.checked = dark;
     };
     syncThemeIcons();
-    // One owner of "set the theme", taking an explicit value so the header button
-    // and the menu switch can never drift apart.
+    // One owner of "set the theme", taking an explicit value so every entry
+    // point (account-menu switch, command palette) can never drift apart.
     const applyTheme = (dark) => {
         document.documentElement.classList.toggle('dark', dark);
         localStorage.setItem('darkMode', String(dark));
@@ -106,9 +100,6 @@ function initApp() {
             applyTheme(dark);
         }
     };
-    dom.themeToggle.addEventListener('click', () => {
-        setTheme(!document.documentElement.classList.contains('dark'));
-    });
     dom.sidebarThemeSwitch?.addEventListener('change', () => {
         setTheme(dom.sidebarThemeSwitch.checked);
     });
@@ -257,7 +248,8 @@ function initApp() {
         dom.modelSelectorPanel.innerHTML = ''; // Clear previous options
         const currentChatModel = state.activeChatId ? state.chats[state.activeChatId].model : null;
 
-        // Provider-grouped menu (single column, like ChatGPT/Claude pickers).
+        // Provider-grouped menu (single column on phones, two CSS columns from
+        // md up — 2.2.8 owner request for better model visibility).
         const groups = new Map();
         Object.keys(MODEL_CONFIG).forEach(key => {
             const provider = getProviderColor(key).label;
@@ -266,10 +258,15 @@ function initApp() {
         });
 
         groups.forEach((keys, providerLabel) => {
+            // Each provider is one unbreakable block so the two-column flow
+            // never splits a heading away from its options.
+            const groupEl = document.createElement('div');
+            groupEl.className = 'break-inside-avoid';
+
             const heading = document.createElement('div');
             heading.className = 'px-3 pt-3 pb-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-muted';
             heading.textContent = providerLabel;
-            dom.modelSelectorPanel.appendChild(heading);
+            groupEl.appendChild(heading);
 
             keys.forEach(key => {
                 const model = MODEL_CONFIG[key];
@@ -306,8 +303,10 @@ function initApp() {
                         closeModelPanel();
                     }
                 });
-                dom.modelSelectorPanel.appendChild(optionEl);
+                groupEl.appendChild(optionEl);
             });
+
+            dom.modelSelectorPanel.appendChild(groupEl);
         });
     };
 
@@ -460,9 +459,9 @@ function initApp() {
         if (dom.searchResults) dom.searchResults.innerHTML = '';
     };
     const isSearchOpen = () => !dom.searchPanel.classList.contains('hidden');
-    dom.searchToggleBtn?.addEventListener('click', () => {
-        if (isSearchOpen()) closeSearch(); else openSearch();
-    });
+    // 2.2.8: the header search toggle was removed with the overflow menu —
+    // search is now opened from the sidebar quick actions / palette only, and
+    // the in-panel close button below is the single explicit dismiss.
     // v1.0.4: search had no way out once opened — on mobile it is entered from
     // the drawer, so the header toggle was never reachable to dismiss it.
     dom.searchCloseBtn?.addEventListener('click', closeSearch);
@@ -523,28 +522,8 @@ function initApp() {
     // New chat (Header)
     document.getElementById('headerNewChatBtn')?.addEventListener('click', createNewChatWrapper);
 
-    // v2.0.7: header overflow menu (search/prompt/theme collapsed into one "⋯").
-    const overflowBtn = document.getElementById('headerOverflowBtn');
-    const overflowMenu = document.getElementById('headerOverflowMenu');
-    const closeOverflow = () => {
-        overflowMenu?.classList.add('hidden');
-        overflowBtn?.setAttribute('aria-expanded', 'false');
-    };
-    overflowBtn?.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const open = overflowMenu?.classList.toggle('hidden') === false;
-        overflowBtn.setAttribute('aria-expanded', String(open));
-    });
-    // Close the overflow when picking an item or tapping anywhere outside it.
-    overflowMenu?.addEventListener('click', (e) => {
-        if (e.target.closest('.menu-row')) closeOverflow();
-    });
-    document.addEventListener('click', (e) => {
-        if (!overflowMenu || overflowMenu.classList.contains('hidden')) return;
-        if (!overflowMenu.contains(e.target) && e.target !== overflowBtn && !overflowBtn.contains(e.target)) {
-            closeOverflow();
-        }
-    });
+    // 2.2.8: the header "⋯" overflow menu was removed (owner request) — the
+    // header now carries exactly two controls: sidebar toggle + new chat.
 
     dom.modelSelectorPanel.addEventListener('keydown', handleModelSelectorNavigation);
     // Tab must not escape the open model panel (a11y: keep focus in the menu)
@@ -731,10 +710,6 @@ function initApp() {
                 closePromptModal();
                 return;
             }
-            if (overflowMenu && !overflowMenu.classList.contains('hidden')) {
-                closeOverflow();
-                return;
-            }
             if (!dom.searchPanel.classList.contains('hidden')) {
                 closeSearch();
                 return;
@@ -755,46 +730,10 @@ function initApp() {
 
 
 
-    // --- Inline Chat Title Rename Listeners ---
-    const switchToTitleView = () => {
-        dom.chatTitle.classList.remove('hidden');
-        dom.renameChatBtn.classList.remove('hidden');
-        dom.chatTitleInput.classList.add('hidden');
-    };
-
-    const saveTitleEdit = () => {
-        const newName = dom.chatTitleInput.value.trim();
-        if (state.activeChatId && newName && state.chats[state.activeChatId] && newName !== state.chats[state.activeChatId].name) {
-            renameChat(state.activeChatId, newName);
-        }
-        switchToTitleView();
-    };
-
-    dom.renameChatBtn.addEventListener('click', () => {
-        if (!state.activeChatId) return;
-        dom.chatTitle.classList.add('hidden');
-        dom.renameChatBtn.classList.add('hidden');
-        dom.chatTitleInput.classList.remove('hidden');
-        dom.chatTitleInput.focus();
-        dom.chatTitleInput.select();
-    });
-
-    dom.chatTitleInput.addEventListener('blur', saveTitleEdit);
-    dom.chatTitleInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            saveTitleEdit();
-        } else if (e.key === 'Escape') {
-            if (state.activeChatId && state.chats[state.activeChatId]) {
-                dom.chatTitleInput.value = state.chats[state.activeChatId].name;
-            }
-            switchToTitleView();
-        }
-    });
-
+    // 2.2.8: the sidebar's inline title-rename block was removed (owner
+    // request) — renaming lives in each chat row's options menu (renderChatList).
 
     // --- Modal & Import/Export Listeners ---
-    dom.promptBtn.addEventListener('click', openPromptModal);
     dom.promptOverlay.addEventListener('click', closePromptModal);
     dom.promptCancelBtn.addEventListener('click', closePromptModal);
     dom.promptSaveBtn.addEventListener('click', saveSystemPrompt);
@@ -943,7 +882,7 @@ function initApp() {
 
 // Phase 6.5: client-state reset + build identity
 // Visit <site>/#reset to wipe SW/caches/storage and reload (recovery tool).
-window.ABOT_BUILD = '2026-10-17.1';
+window.ABOT_BUILD = '2026-10-17.2';
 console.log(`[ABot] build ${window.ABOT_BUILD}`);
 if (location.hash === '#reset') {
     (async () => {
@@ -1044,11 +983,14 @@ async function runDiagnostics() {
 
     try {
         const before = document.documentElement.classList.contains('dark');
-        click(dom.themeToggle);
+        const sw = dom.sidebarThemeSwitch;
+        sw.checked = !before;
+        sw.dispatchEvent(new Event('change', { bubbles: true }));
         await sleep(60);
         const after = document.documentElement.classList.contains('dark');
-        add('theme toggle', before !== after, `${before}->${after}`);
-        click(dom.themeToggle);
+        add('theme toggle (account switch)', before !== after, `${before}->${after}`);
+        sw.checked = before;
+        sw.dispatchEvent(new Event('change', { bubbles: true }));
     } catch (e) { add('theme toggle', false, e.message); }
 
     try {
@@ -1079,13 +1021,13 @@ async function runDiagnostics() {
         if (pm) click(dom.profileMenuBtn);
     } catch (e) { add('account menu opens', false, e.message); }
     try {
-        click(dom.searchToggleBtn); await sleep(60);
+        click(dom.sidebarSearchBtn); await sleep(60);
         const sp = dom.searchPanel && !dom.searchPanel.classList.contains('hidden');
-        add('search panel opens', !!sp);
-        if (sp) click(dom.searchToggleBtn);
+        add('search panel opens (sidebar quick action)', !!sp);
+        if (sp) click(dom.searchCloseBtn);
     } catch (e) { add('search panel opens', false, e.message); }
 
-    ['signoutBtn', 'promptBtn'].forEach((k) => {
+    ['signoutBtn', 'sidebarPromptBtn'].forEach((k) => {
         const el = dom[k];
         add(`${k} present`, !!el);
     });
@@ -1093,7 +1035,7 @@ async function runDiagnostics() {
 
     // REAL hit-test: what would a physical tap on each control actually hit?
     results.push('--- real tap hit-test (elementFromPoint) ---');
-    ['themeToggle', 'modelSelectorBtn', 'sidebarToggle', 'sendBtn'].forEach((k) => {
+    ['headerNewChatBtn', 'modelSelectorBtn', 'sidebarToggle', 'sendBtn'].forEach((k) => {
         const el = dom[k];
         if (!el) { add(`tap ${k}`, false, 'missing'); return; }
         const r = el.getBoundingClientRect();

@@ -38,7 +38,9 @@ const buildCommands = () => {
         ...chatCommands,
         { label: 'Open prompt library', hint: 'Action', keywords: 'prompt library system instructions preset', run: () => openPromptModal() },
         { label: 'Search messages', hint: 'Action', keywords: 'search find messages', run: () => { dom.searchPanel.classList.remove('hidden'); dom.messageSearchInput?.focus(); } },
-        { label: 'Toggle theme', hint: 'Action', keywords: 'theme dark light mode toggle', run: () => dom.themeToggle.click() },
+        // 2.2.8: the header theme button was removed with the overflow menu —
+        // flip the account-menu switch (the one remaining theme control).
+        { label: 'Toggle theme', hint: 'Action', keywords: 'theme dark light mode toggle', run: () => { const sw = dom.sidebarThemeSwitch; if (!sw) return; sw.checked = !document.documentElement.classList.contains('dark'); sw.dispatchEvent(new Event('change', { bubbles: true })); } },
         { label: 'Toggle sidebar', hint: 'Action', keywords: 'sidebar toggle history', run: () => dom.sidebarToggle.click() },
         { label: 'Toggle timestamps', hint: 'Action', keywords: 'timestamps time show hide', run: () => { dom.timestampsToggle.checked = !dom.timestampsToggle.checked; dom.timestampsToggle.dispatchEvent(new Event('change', { bubbles: true })); } },
         // E3: keyboard parity with the composer chips (B3/B4) + jump pill (E1).

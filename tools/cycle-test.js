@@ -106,13 +106,19 @@ function stubChain(label) {
     check('sidebar toggles exactly once per click (2nd login)', beforeOpen !== midOpen && restoredOpen,
         beforeOpen === midOpen ? 'NO-OP (duplicate listeners!)' : (restoredOpen ? '' : 'did not restore'));
 
-    // theme single-toggle after re-login
+    // theme single-toggle after re-login (2.2.8: the account-menu switch is the
+    // only control; one change dispatch must flip the theme exactly once)
     const htmlEl = window.document.documentElement;
     const d1 = htmlEl.classList.contains('dark');
-    click($('themeToggle'));
+    const sw = $('sidebarThemeSwitch');
+    sw.checked = !d1;
+    sw.dispatchEvent(new window.Event('change', { bubbles: true }));
     await sleep(50);
     const d2 = htmlEl.classList.contains('dark');
-    check('theme toggles exactly once per click (2nd login)', d1 !== d2, `double-fire would return to ${d1}`);
+    check('theme toggles exactly once per interaction (2nd login)', d1 !== d2, `one dispatch must flip once (d1=${d1}, d2=${d2})`);
+    sw.checked = d1;
+    sw.dispatchEvent(new window.Event('change', { bubbles: true }));
+    await sleep(50);
 
     // --- double-send guard (v2.0.15): two rapid sendBtn clicks -> ONE user message ---
     {

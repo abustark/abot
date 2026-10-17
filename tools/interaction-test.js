@@ -93,10 +93,13 @@ function stubChain(label) {
         if (open) click($('modelSelectorBtn')); // toggle closed via the button itself
         await sleep(300);
     }
-    // theme
+    // theme (2.2.8: the header toggle was removed with the overflow menu — the
+    // account-menu switch is now the only theme control; flip it directly)
     {
         const before = window.document.documentElement.classList.contains('dark');
-        click($('themeToggle'));
+        const sw = $('sidebarThemeSwitch');
+        sw.checked = !before;
+        sw.dispatchEvent(new window.Event('change', { bubbles: true }));
         await sleep(50);
         const after = window.document.documentElement.classList.contains('dark');
         check('theme toggle', before !== after, `${before}->${after}`);
@@ -180,14 +183,14 @@ function stubChain(label) {
         const box = $('messageInput') && $('messageInput').parentElement;
         check('chips sit inside the composer box', !!box && box.contains($('webSearchChip')) && box.contains($('sendBtn')));
         check('stop control hidden at rest', $('stopBtn').classList.contains('stop-hidden'));
-        check('chat title moved to the sidebar', !!$('sidebarCurrentChat') && $('sidebarCurrentChat').contains($('chatTitle')));
+        // 2.2.8: the sidebar's duplicate current-chat block was removed — the
+        // header title is the single display, rename lives in each row menu.
+        check('sidebar no longer duplicates the current chat',
+            !$('sidebarCurrentChat') && !$('chatTitle') && !$('chatTitleInput') && !$('renameChatBtn'));
     }
-    // search
+    // search (2.2.8: the header toggle was removed — search is opened from the
+    // sidebar quick actions / palette only; the in-panel X is the dismiss)
     {
-        click($('searchToggleBtn'));
-        await sleep(50);
-        check('search panel opens', $('searchPanel') && !$('searchPanel').classList.contains('hidden'));
-        // v1.0.3 C1: the drawer re-homes search for mobile — click must open the same panel.
         click($('sidebarSearchBtn'));
         await sleep(50);
         check('sidebar search button opens search panel', $('searchPanel') && !$('searchPanel').classList.contains('hidden'));
@@ -197,35 +200,28 @@ function stubChain(label) {
         check('search close button dismisses the panel', $('searchPanel').classList.contains('hidden'));
         // v2.0.7: backdrop is part of the sheet — opens with it, dismisses on tap.
         check('search backdrop hidden after close', $('searchBackdrop').classList.contains('hidden'));
-        click($('searchToggleBtn'));
+        click($('sidebarSearchBtn'));
         await sleep(50);
         check('search reopen shows backdrop', !$('searchBackdrop').classList.contains('hidden'));
         click($('searchBackdrop'));
         await sleep(50);
         check('backdrop tap closes search', $('searchPanel').classList.contains('hidden') && $('searchBackdrop').classList.contains('hidden'));
     }
-    // header overflow menu (v2.0.7): opens, closes on outside tap, hosts the moved controls.
+    // header (2.2.8): the "⋯" overflow menu was removed (owner request) — the
+    // header carries the sidebar toggle + new chat only; theme/search/prompts
+    // are reached from the account menu, sidebar quick actions and palette.
     {
-        click($('headerOverflowBtn'));
-        await sleep(50);
-        check('header overflow menu opens', $('headerOverflowMenu') && !$('headerOverflowMenu').classList.contains('hidden'));
-        check('overflow hosts search control', $('headerOverflowMenu').contains($('searchToggleBtn')));
-        check('overflow hosts theme control', $('headerOverflowMenu').contains($('themeToggle')));
-        check('overflow hosts prompt control', $('headerOverflowMenu').contains($('promptBtn')));
-        // theme still flips from inside the menu (IDs preserved).
-        const before = window.document.documentElement.classList.contains('dark');
-        click($('themeToggle'));
-        await sleep(50);
-        check('theme toggles from overflow menu', window.document.documentElement.classList.contains('dark') !== before);
-        check('menu closes after picking a row', $('headerOverflowMenu').classList.contains('hidden'));
-        click($('themeToggle')); // restore theme (menu now closed; element still dispatchable in jsdom)
-        // button re-opens and toggles closed
-        click($('headerOverflowBtn'));
-        await sleep(50);
-        check('overflow re-opens from button', !$('headerOverflowMenu').classList.contains('hidden'));
-        click($('headerOverflowBtn'));
-        await sleep(50);
-        check('header overflow menu closes', $('headerOverflowMenu').classList.contains('hidden'));
+        check('header overflow menu removed', !$('headerOverflowBtn') && !$('headerOverflowMenu'));
+        check('removed header controls are gone',
+            !$('themeToggle') && !$('searchToggleBtn') && !$('promptBtn') && !$('sunIcon') && !$('moonIcon'));
+        check('new chat is the only header control',
+            !!$('headerNewChatBtn') && $('appHeader').contains($('headerNewChatBtn'))
+            && $('appHeader').querySelectorAll('button').length === 2);
+        check('sidebar quick actions visible on desktop too',
+            !!$('sidebarQuickActions') && !$('sidebarQuickActions').classList.contains('md:hidden'));
+        check('composer chips carry aria-labels',
+            $('webSearchChip') && $('webSearchChip').getAttribute('aria-label') === 'Web search'
+            && $('thinkingChip') && $('thinkingChip').getAttribute('aria-label') === 'Think');
     }
     // composer chips (v1.0.3 B3/B4): gated per model, toggle on/off.
     {
@@ -358,24 +354,21 @@ function stubChain(label) {
             dock.contains(selectorBtn) && dock.contains(selectorPanel) && !header.contains(selectorBtn),
             'composer-hosted + header-free');
         const headerTitle = $('headerChatTitle');
+        // 2.2.8: compare against the active chat's real name — the sidebar
+        // duplicate title it used to mirror is gone.
+        const { state: tState } = await import('file://' + path.join(esmDir, 'state.js'));
+        const tActive = tState.activeChatId ? tState.chats[tState.activeChatId] : null;
         check('header shows the active chat title',
             !!headerTitle && header.contains(headerTitle)
-            && headerTitle.textContent === $('chatTitle').textContent,
+            && !!tActive && headerTitle.textContent === tActive.name,
             JSON.stringify(headerTitle ? headerTitle.textContent : null));
         check('jump button is icon-only (no text)',
             ($('jumpToLatest').textContent || '').trim() === '',
             'aria-label carries the meaning');
     }
-    // --- v1.0.6: theme icons cross-fade (.is-off) instead of display swap -----
+    // --- 2.2.8: the B6 sun/moon icon pair was removed with the overflow menu ---
     {
-        const before = $('sunIcon').classList.contains('is-off');
-        check('theme icons use the animatable is-off state', !$('sunIcon').classList.contains('hidden')
-            && !$('moonIcon').classList.contains('hidden'));
-        click($('themeToggle'));
-        await sleep(50);
-        check('theme toggle swaps the icon pair', $('sunIcon').classList.contains('is-off') !== before);
-        click($('themeToggle'));
-        await sleep(50);
+        check('theme icon pair removed', !$('sunIcon') && !$('moonIcon'));
     }
     // --- v1.0.6: brand mark is theme-aware (black in light, white in dark) -----
     {

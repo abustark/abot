@@ -27,9 +27,6 @@ export const dom = {
     errorMessage: document.getElementById('error-message'),
     userAvatar: document.getElementById('userAvatar'),
     userEmailDisplay: document.getElementById('userEmailDisplay'),
-    themeToggle: document.getElementById('themeToggle'),
-    sunIcon: document.getElementById('sunIcon'),
-    moonIcon: document.getElementById('moonIcon'),
     messageInput: document.getElementById('messageInput'),
     sendBtn: document.getElementById('sendBtn'),
     stopBtn: document.getElementById('stopBtn'),
@@ -45,11 +42,7 @@ export const dom = {
     modelSelectorBtn: document.getElementById('modelSelectorBtn'),
     modelSelectorLabel: document.getElementById('modelSelectorLabel'),
     modelSelectorPanel: document.getElementById('modelSelectorPanel'),
-    chatTitle: document.getElementById('chatTitle'),
     headerChatTitle: document.getElementById('headerChatTitle'),
-    chatTitleInput: document.getElementById('chatTitleInput'),
-    renameChatBtn: document.getElementById('renameChatBtn'),
-    promptBtn: document.getElementById('promptBtn'),
     promptModal: document.getElementById('promptModal'),
     promptOverlay: document.getElementById('promptOverlay'),
     promptPanel: document.getElementById('promptPanel'),
@@ -82,7 +75,6 @@ dom.commandPaletteOverlay = document.getElementById('commandPaletteOverlay');
 dom.commandPalettePanel = document.getElementById('commandPalettePanel');
 dom.commandPaletteInput = document.getElementById('commandPaletteInput');
 dom.commandPaletteList = document.getElementById('commandPaletteList');
-dom.searchToggleBtn = document.getElementById('searchToggleBtn');
 dom.searchPanel = document.getElementById('searchPanel');
 dom.messageSearchInput = document.getElementById('messageSearchInput');
 dom.searchResults = document.getElementById('searchResults');

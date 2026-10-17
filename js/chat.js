@@ -342,7 +342,19 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
                                 ? `<div class="text-sm leading-6 text-danger" role="alert">⚠️ ${text.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`
                                 : `<span id="${uniqueId}">${renderSafeMarkdown(text)}</span>`;
         } else {
-            let indicatorHtml = '<div class="typing-indicator"><span></span><span></span><span></span></div>';
+            // 2.2.8: the three bouncing dots became a mini dotted-"A" — the same
+            // 18 dots as the app-loader wordmark, pulsing in a loop while the
+            // reply streams. Same circle coords/delays as the splash dotmark
+            // (index.html), so the wait state is on-brand; viewBox crops to "A".
+            let indicatorHtml = '<div class="typing-indicator" role="status" aria-label="ABot is typing"><svg class="typing-a" viewBox="-4 -4 32 44" aria-hidden="true">'
+                + '<circle cx="0" cy="36" r="2.3" style="animation-delay:0ms"/><circle cx="24" cy="36" r="2.3" style="animation-delay:32ms"/>'
+                + '<circle cx="0" cy="30" r="2.3" style="animation-delay:22ms"/><circle cx="24" cy="30" r="2.3" style="animation-delay:54ms"/>'
+                + '<circle cx="0" cy="24" r="2.3" style="animation-delay:44ms"/><circle cx="24" cy="24" r="2.3" style="animation-delay:76ms"/>'
+                + '<circle cx="0" cy="18" r="2.3" style="animation-delay:66ms"/><circle cx="6" cy="18" r="2.3" style="animation-delay:74ms"/><circle cx="12" cy="18" r="2.3" style="animation-delay:82ms"/><circle cx="18" cy="18" r="2.3" style="animation-delay:90ms"/><circle cx="24" cy="18" r="2.3" style="animation-delay:98ms"/>'
+                + '<circle cx="0" cy="12" r="2.3" style="animation-delay:88ms"/><circle cx="24" cy="12" r="2.3" style="animation-delay:120ms"/>'
+                + '<circle cx="0" cy="6" r="2.3" style="animation-delay:110ms"/><circle cx="24" cy="6" r="2.3" style="animation-delay:142ms"/>'
+                + '<circle cx="6" cy="0" r="2.3" style="animation-delay:140ms"/><circle cx="12" cy="0" r="2.3" style="animation-delay:148ms"/><circle cx="18" cy="0" r="2.3" style="animation-delay:156ms"/>'
+                + '</svg></div>';
             if (options.isGoogle) {
                                 indicatorHtml += `<p class="fade-in-polite text-xs text-muted mt-2 italic">Please wait, fetching the full response from Gemini…</p>`;
             }
@@ -351,19 +363,17 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
     }
 
     // --- Action Buttons (v1.0.3/v1.0.6: owner spec — AI rows carry copy · read
-    // aloud · regenerate; user rows carry copy · edit. Nothing is deletable at
-    // message level any more, so there is no destructive affordance to mis-tap
-    // on mobile. Chats themselves are still deletable from the sidebar.) ---
+    // aloud; user rows carry copy · edit. Nothing is deletable at message level
+    // any more, so there is no destructive affordance to mis-tap on mobile.
+    // Chats themselves are still deletable from the sidebar. 2.2.8: the
+    // per-message regenerate icon was removed (owner request) — Retry on the
+    // error card is the only regenerate affordance.) ---
                     const copyBtnHtml = `<button class="copy-message-btn p-1.5 rounded-md text-muted hover:text-ink transition-colors" title="Copy" aria-label="Copy message"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" /></svg></button>`;
 
     const speakBtnHtml = `<button class="speak-btn p-1.5 rounded-md transition-colors hover:text-coral text-muted" aria-label="Read aloud" aria-pressed="false" title="Read aloud"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M13 4.5c0-1.104-.806-2.03-1.886-2.03H11L9.66 5.33A2.5 2.5 0 017.5 6.5H5A2.5 2.5 0 002.5 9v6A2.5 2.5 0 005 17.5h2.5a2.5 2.5 0 012.16 1.17l1.34 2.83h.114C12.194 21.5 13 20.574 13 19.47v-14.97z"/><path d="M16.5 8.5a.75.75 0 011.06 0 5 5 0 010 7 .75.75 0 11-1.06-1.06 3.5 3.5 0 000-4.88.75.75 0 010-1.06z"/><path d="M19.09 5.5a.75.75 0 011.06 0 9 9 0 010 13 .75.75 0 11-1.06-1.06 7.5 7.5 0 000-10.88.75.75 0 010-1.06z"/></svg></button>`;
 
-    const regenBtnHtml = (!isUser && typeof options.index === 'number')
-        ? `<button class="regen-btn p-1.5 rounded-md transition-colors hover:text-coral text-muted" aria-label="Regenerate response" title="Regenerate response"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" /></svg></button>`
-        : '';
-
-    // AI rows: copy + read aloud + regenerate, parked top-right on the meta line.
-    const aiActionsHtml = (!isUser) ? copyBtnHtml + speakBtnHtml + regenBtnHtml : '';
+    // AI rows: copy + read aloud, parked top-right on the meta line.
+    const aiActionsHtml = (!isUser) ? copyBtnHtml + speakBtnHtml : '';
 
     let actionButtonsHtml = '';
     if (typeof options.index === 'number') {
@@ -406,7 +416,7 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
                                     </div>
                                 </div>
                                 <div class="w-full overflow-hidden">
-                                    <div class="prose dark:prose-invert max-w-none text-body text-[15px] leading-7 msg-collapsible">
+                                    <div class="prose dark:prose-invert max-w-none text-body text-[15px] leading-7">
                                         ${messageContent}
                                     </div>
                                 </div>
@@ -430,7 +440,6 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
                 speakBtn.setAttribute('aria-pressed', 'true');
             }
         });
-        messageEl.querySelector('.regen-btn')?.addEventListener('click', (e) => { e.stopPropagation(); regenerateLastResponse(); });
         messageEl.querySelector('.retry-btn')?.addEventListener('click', (e) => { e.stopPropagation(); regenerateLastResponse(); });
     }
 
@@ -438,7 +447,11 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
     if (copyBtn) {
         copyBtn.addEventListener('click', () => {
             const proseContent = messageEl.querySelector('.prose'); // Simpler selection
-            const textToCopy = proseContent ? proseContent.textContent : '';
+            // 2.2.8: textContent of the template HTML carried indentation and
+            // blank-line padding — copies had leading/trailing whitespace.
+            // Strip trailing per-line spaces and squeeze 3+ blank lines to one.
+            const raw = proseContent ? proseContent.textContent : '';
+            const textToCopy = raw.replace(/[ \t]+$/gm, '').replace(/\n{3,}/g, '\n\n').trim();
             navigator.clipboard.writeText(textToCopy).then(() => showToast("Copied!")).catch(() => showToast("Failed to copy", "error"));
         });
     }
@@ -465,32 +478,13 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
         });
     }
 
-    if (!isUser && isHistory) maybeCollapse(messageEl);
+    // 2.2.8: the "Show more" collapse for long replies was removed (owner
+    // request) — long answers scroll naturally.
 };
 
 // ---------------------------------------------------------------------------
-// Phase 3: message meta (reactions / pins), collapse, search
+// Phase 3: message meta (reactions / pins), search
 // ---------------------------------------------------------------------------
-const COLLAPSE_THRESHOLD = 320; // px
-
-function maybeCollapse(messageEl) {
-    const target = messageEl.querySelector('.msg-collapsible');
-    if (!target || target.dataset.collapsedChecked) return;
-    target.dataset.collapsedChecked = '1';
-    if (target.scrollHeight <= COLLAPSE_THRESHOLD) return;
-    target.classList.add('collapsed');
-    const btn = document.createElement('button');
-    btn.className = 'collapse-toggle text-sm text-coral hover:underline mt-1';
-    btn.textContent = 'Show more';
-    btn.setAttribute('aria-expanded', 'false');
-    btn.addEventListener('click', () => {
-        const collapsed = target.classList.toggle('collapsed');
-        btn.textContent = collapsed ? 'Show more' : 'Show less';
-        btn.setAttribute('aria-expanded', String(!collapsed));
-    });
-    target.after(btn);
-}
-
 const _persistMessageMeta = async (chatId) => {
     try {
         const uid = state.auth.currentUser.uid;
@@ -631,15 +625,15 @@ export const sendMessage = async () => {
     const isFirstUserMessage = currentChat.name === "New Chat" && currentChat.messages.filter(m => m.role === 'user').length === 1;
 
     if (isFirstUserMessage) {
-        dom.chatTitle.textContent = "Generating Title.";
+        // 2.2.8: the sidebar title block was removed — the header title is the
+        // only place this animation shows now.
         if (dom.headerChatTitle) dom.headerChatTitle.textContent = "Generating Title.";
         let dotCount = 1;
         // Start the animation and store its ID
         state.titleAnimationInterval = setInterval(() => {
             dotCount = (dotCount % 3) + 1; // Cycle dotCount between 1, 2, 3
-            if (dom.chatTitle.textContent.startsWith("Generating")) { // Only animate if not already renamed
-                dom.chatTitle.textContent = "Generating Title" + ".".repeat(dotCount);
-                if (dom.headerChatTitle) dom.headerChatTitle.textContent = dom.chatTitle.textContent;
+            if (dom.headerChatTitle && dom.headerChatTitle.textContent.startsWith("Generating")) { // Only animate if not already renamed
+                dom.headerChatTitle.textContent = "Generating Title" + ".".repeat(dotCount);
             }
         }, 500); // Update the text every half-second
     }
@@ -800,11 +794,7 @@ export const sendMessage = async () => {
                                         if (streamDone || !streamFlushNeeded) return;
                                         streamFlushNeeded = false;
                                         const contentHolder = latestBotMessageSpan.querySelector('.content-span');
-                                        if (contentHolder) {
-                                            contentHolder.innerHTML = renderSafeMarkdown(fullReply);
-                                            const __mc = contentHolder.closest('.message-container');
-                                            if (__mc) maybeCollapse(__mc);
-                                        }
+                                        if (contentHolder) contentHolder.innerHTML = renderSafeMarkdown(fullReply);
                                         window.__abotFollowBottom?.();
                                     }, 100);
                                 }
@@ -1009,9 +999,7 @@ const renderEmptyState = () => {
 export const renderActiveChat = () => {
     if (!state.activeChatId || !state.chats[state.activeChatId]) {
         renderEmptyState();
-        dom.chatTitle.textContent = "No Chat Selected";
         if (dom.headerChatTitle) dom.headerChatTitle.textContent = 'ABot';
-        dom.chatTitleInput.value = "";
         dom.modelSelectorLabel.textContent = 'Select Model';
         return;
     }
@@ -1037,9 +1025,7 @@ export const renderActiveChat = () => {
         chat.messages.forEach((msg, index) => appendMessage(msg, true, { index }));
     }
     // Update header elements
-    dom.chatTitle.textContent = chat.name;
     if (dom.headerChatTitle) dom.headerChatTitle.textContent = chat.name;
-    dom.chatTitleInput.value = chat.name;
     dom.modelSelectorLabel.textContent = MODEL_CONFIG[chat.model]?.name || 'Select Model';
     applyModelColorTheme(chat.model);
     syncComposerChips();

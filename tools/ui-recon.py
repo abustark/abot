@@ -11,7 +11,7 @@ def shot(page, name):
 
 def measure_header(page, label):
     boxes = page.evaluate("""() => {
-        const ids = ['sidebarToggle','chatTitle','renameChatBtn','headerNewChatBtn','modelSelectorBtn','searchToggleBtn','promptBtn','themeToggle'];
+        const ids = ['sidebarToggle','headerChatTitle','headerNewChatBtn','modelSelectorBtn','webSearchChip','thinkingChip','sendBtn'];
         const out = [];
         for (const id of ids) {
             const el = document.getElementById(id);
