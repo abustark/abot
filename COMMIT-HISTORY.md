@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.3.1`** (current head is `2.3.0` — see below)
+> - **`main` → `2.3.2`** (current head is `2.3.1` — see below)
 > - **`arena/01a03fe9-abot` → its own sequence** (syncs are **unversioned** merge commits:
 >   `merge main <version> into arena/01a03fe9-abot`; arena's own feature commits use arena's numbers)
 
@@ -25,6 +25,14 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.3.1 - rename commit log to COMMIT-HISTORY.md (universal name)
+- **Date**: 2026-10-17
+- **Why**: owner directive — one recognizable commit-history file name in every repo, always at the repo root (`COMMIT-HISTORY.md`), so the log is found instantly when opening a project.
+- **Changes**:
+  - `docs/commits.md` → **`COMMIT-HISTORY.md`** via `git mv`; all references updated (`AGENTS.md` ×3, `docs/AGENTS.md` ×2, `README.md`, `PROJECT-INFO.md`).
+  - Cross-repo same batch (each repo's own sequence): `project_bmw` → `COMMIT-HISTORY.md` (`2.0.21`); HOUSE (`2.0.10`); `price-trail`, `linkly`, `cover_letter_gen` begin versioned commits at `2.0.0` with `COMMIT-HISTORY.md` created (owner picks: name = `COMMIT-HISTORY.md`, start = `2.0.0`).
+  - `docs/updates.md` (arena-only) intentionally untouched.
 
 ### 2.3.0 - sync one-version-per-response rule into docs/AGENTS.md duplicate
 - **Date**: 2026-10-17

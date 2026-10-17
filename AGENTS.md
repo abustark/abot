@@ -34,8 +34,8 @@ ABot is a **vanilla-JS, multi-model AI chat app** (no framework):
    - **Branch independence (strict):** `main` and `arena/01a03fe9-abot` each keep their **own** version
      numbers and commit names. The same number on the two branches is NOT the same work — always compare
      **hashes**, never numbers. Never give a `main` commit a number from arena's sequence (or vice versa).
-   - **Keep the `📌 Next version` line at the top of `docs/commits.md` current** so no session has to guess.
-   - Every commit must also be logged in `docs/commits.md` with its version and what it did.
+   - **Keep the `📌 Next version` line at the top of `COMMIT-HISTORY.md` current** so no session has to guess.
+   - Every commit must also be logged in `COMMIT-HISTORY.md` with its version and what it did.
 3. **Arena Synchronization (`arena/01a03fe9-abot`)**:
    - After updating `main`, sync arena with an **arena-named merge commit**:
      `git switch arena/01a03fe9-abot && git merge --no-ff main -m "merge main <version> into arena/01a03fe9-abot"`.
@@ -133,4 +133,4 @@ keep `artifacts/` from accumulating new captures.
 
 ---
 
-*Prepared 2026-08-30 · Updated 2026-10-17 · Commit log: `docs/commits.md`*
+*Prepared 2026-08-30 · Updated 2026-10-17 · Commit log: `COMMIT-HISTORY.md`*

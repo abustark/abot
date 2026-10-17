@@ -31,7 +31,7 @@ ABot is a **vanilla-JS, multi-model AI chat app** (no framework):
      fix is needed in the same batch, fold it into the same version's commit(s) — never burn a
      second number. Only a genuinely new owner request (a new response turn) advances the number.
    - Format: `<version> - <short description>` (e.g., `2.0.2 - auth page ui changed`). Keep it short and clear, avoid overly long commit titles.
-   - Every commit must also be logged in `docs/commits.md` with its version and what it did.
+   - Every commit must also be logged in `COMMIT-HISTORY.md` with its version and what it did.
 3. **Arena Synchronization (`arena/01a03fe9-abot`)**:
    - After updating `main`, merge `main` into `arena/01a03fe9-abot` so the integration branch stays synced with `main`.
    - **`docs/updates.md`**: Exists **only on the `arena` branch** (never commit to `main`). It is updated only after major updates (not for every small commit) and documents the contrast between the old workflow and the updated workflow.
@@ -88,4 +88,4 @@ For PHASE D: load `emil-design-eng` + `animate` + `taste-skill` before writing U
 
 ---
 
-*Prepared 2026-08-30 · Updated 2026-09-20 · Commit log: `docs/commits.md`*
+*Prepared 2026-08-30 · Updated 2026-09-20 · Commit log: `COMMIT-HISTORY.md`*

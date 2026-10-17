@@ -101,7 +101,7 @@
 - **Plus:** ESLint (`npm run lint`), acorn syntax check (`npm run check`), `tsc -p jsconfig.json` (`npm run typecheck`), Python header audit (`tools/test-security.py`), Playwright E2E (`tools/test-playwright.py`), visual regression (`npm run visual:local` + 10 `docs/audits/visual-*.png`).
 - **Parity proof:** `tools/verify-parity.js` — token parity 56/57 after de-monolithisation (1 deviation = documented innerHTML→DOM XSS fix); `index.html` 2555→813 lines, 8 ES modules.
 - **Pre-commit hook** (`.githooks/`, wired by `prepare`) runs syntax + lint.
-- **Bug registry:** `BUGS-AND-FIXES.md` (B-01→B-49+), `docs/commits.md` (312 lines, `x.y.10→x.y+1.0` version rule), audits `ui-baseline/ui-final/perf-pwa`, `SUGGESTIONS.md`, `AGENTS.md`.
+- **Bug registry:** `BUGS-AND-FIXES.md` (B-01→B-49+), `COMMIT-HISTORY.md` (312 lines, `x.y.10→x.y+1.0` version rule), audits `ui-baseline/ui-final/perf-pwa`, `SUGGESTIONS.md`, `AGENTS.md`.
 - **Screenshots pending:** `artifacts/` absent — README light/dark/mobile captures are owner browser-gated TODOs.
 
 ---

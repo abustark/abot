@@ -134,7 +134,7 @@ docs/                 # commit log, roadmap, rules docs
 
 ## Docs worth reading
 
-- [`docs/commits.md`](docs/commits.md) — full versioned commit history
+- [`COMMIT-HISTORY.md`](COMMIT-HISTORY.md) — full versioned commit history
 - [`BUGS-AND-FIXES.md`](BUGS-AND-FIXES.md) — bug registry: symptom → root cause → fix, 49 entries and counting
 - [`AGENTS.md`](AGENTS.md) — the operating brief (branch discipline, quality gates, hard rules)
 
