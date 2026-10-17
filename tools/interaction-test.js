@@ -348,6 +348,24 @@ function stubChain(label) {
         click($('modelSelectorBtn'));
         check('model panel re-toggle closes synchronously', $('modelSelectorPanel').classList.contains('hidden'));
     }
+    // --- 2.2.6 revamp: header + composer layout --------------------------------
+    {
+        const dock = $('composerDock');
+        const selectorBtn = $('modelSelectorBtn');
+        const selectorPanel = $('modelSelectorPanel');
+        const header = $('appHeader');
+        check('model selector moved into the composer box',
+            dock.contains(selectorBtn) && dock.contains(selectorPanel) && !header.contains(selectorBtn),
+            'composer-hosted + header-free');
+        const headerTitle = $('headerChatTitle');
+        check('header shows the active chat title',
+            !!headerTitle && header.contains(headerTitle)
+            && headerTitle.textContent === $('chatTitle').textContent,
+            JSON.stringify(headerTitle ? headerTitle.textContent : null));
+        check('jump button is icon-only (no text)',
+            ($('jumpToLatest').textContent || '').trim() === '',
+            'aria-label carries the meaning');
+    }
     // --- v1.0.6: theme icons cross-fade (.is-off) instead of display swap -----
     {
         const before = $('sunIcon').classList.contains('is-off');
@@ -362,8 +380,11 @@ function stubChain(label) {
     // --- v1.0.6: brand mark is theme-aware (black in light, white in dark) -----
     {
         const marks = [...window.document.querySelectorAll('img[src="/logo.png"]')];
+        // 2.2.6 revamp: the header logo was replaced by the chat title, so 2
+        // static placements remain (auth card + sidebar) plus the empty-state
+        // logo while the landing renders. The class invariant is the real check.
         check('every on-page logo carries the silhouette class',
-            marks.length >= 3 && marks.every(img => img.classList.contains('logo-mark')),
+            marks.length >= 2 && marks.every(img => img.classList.contains('logo-mark')),
             marks.length + ' placements');
         const themed = [...window.document.querySelectorAll('link[rel="icon"][media]')]
             .map(l => l.getAttribute('href'));

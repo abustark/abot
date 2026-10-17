@@ -46,6 +46,7 @@ export const dom = {
     modelSelectorLabel: document.getElementById('modelSelectorLabel'),
     modelSelectorPanel: document.getElementById('modelSelectorPanel'),
     chatTitle: document.getElementById('chatTitle'),
+    headerChatTitle: document.getElementById('headerChatTitle'),
     chatTitleInput: document.getElementById('chatTitleInput'),
     renameChatBtn: document.getElementById('renameChatBtn'),
     promptBtn: document.getElementById('promptBtn'),

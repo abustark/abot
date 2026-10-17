@@ -632,12 +632,14 @@ export const sendMessage = async () => {
 
     if (isFirstUserMessage) {
         dom.chatTitle.textContent = "Generating Title.";
+        if (dom.headerChatTitle) dom.headerChatTitle.textContent = "Generating Title.";
         let dotCount = 1;
         // Start the animation and store its ID
         state.titleAnimationInterval = setInterval(() => {
             dotCount = (dotCount % 3) + 1; // Cycle dotCount between 1, 2, 3
             if (dom.chatTitle.textContent.startsWith("Generating")) { // Only animate if not already renamed
                 dom.chatTitle.textContent = "Generating Title" + ".".repeat(dotCount);
+                if (dom.headerChatTitle) dom.headerChatTitle.textContent = dom.chatTitle.textContent;
             }
         }, 500); // Update the text every half-second
     }
@@ -1008,6 +1010,7 @@ export const renderActiveChat = () => {
     if (!state.activeChatId || !state.chats[state.activeChatId]) {
         renderEmptyState();
         dom.chatTitle.textContent = "No Chat Selected";
+        if (dom.headerChatTitle) dom.headerChatTitle.textContent = 'ABot';
         dom.chatTitleInput.value = "";
         dom.modelSelectorLabel.textContent = 'Select Model';
         return;
@@ -1035,6 +1038,7 @@ export const renderActiveChat = () => {
     }
     // Update header elements
     dom.chatTitle.textContent = chat.name;
+    if (dom.headerChatTitle) dom.headerChatTitle.textContent = chat.name;
     dom.chatTitleInput.value = chat.name;
     dom.modelSelectorLabel.textContent = MODEL_CONFIG[chat.model]?.name || 'Select Model';
     applyModelColorTheme(chat.model);

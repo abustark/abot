@@ -26,7 +26,7 @@
     <link rel="preload" href="/dist/fonts/geist-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/dist/fonts/geist-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/dist/fonts/source-serif-4-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link href="./dist/output.css?v=p19" rel="stylesheet">
+    <link href="./dist/output.css?v=p20" rel="stylesheet">
     <script src="/vendor/marked.min.js" defer></script>
     <!-- A1 (v1.0.5): highlight.js + its theme are lazy-loaded on the first code
          block (js/chat.js) — they were head-linked here, costing every visitor
@@ -496,28 +496,13 @@
                                 d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
                         </svg>
                     </button>
-                    <!-- v1.0.4 (owner request): the chat title + rename moved to the
-                         sidebar; the chat screen carries the brand mark instead. -->
-                    <div class="flex items-center gap-2 min-w-0">
-                        <img src="/logo.png" alt="" aria-hidden="true" class="logo-mark h-7 w-7 rounded-lg select-none"
-                            draggable="false">
-                        <span class="hidden sm:block text-[15px] font-semibold tracking-tight text-ink">ABot</span>
-                    </div>
+                    <!-- 2.2.6 revamp: the header carries the active chat's title
+                         (the editable rename still lives in the sidebar); the
+                         model selector moved into the composer (chat-app pattern). -->
+                    <span id="headerChatTitle"
+                        class="text-[15px] font-semibold tracking-tight text-ink truncate min-w-0">ABot</span>
                 </div>
                 <div class="flex items-center gap-1.5">
-                    <button id="modelSelectorBtn"
-                        class="flex items-center gap-2 bg-transparent border border-hairline/70 pl-2.5 pr-2 py-1 rounded-full text-[13px] font-normal text-body hover:border-coral/40 hover:text-ink focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-coral/40 dark:focus:ring-offset-canvas transition-[border-color,color] duration-fast ease-out">
-                        <span id="modelSelectorDot" class="w-2 h-2 rounded-full bg-coral"></span>
-                        <span id="modelSelectorLabel" class="font-medium whitespace-nowrap truncate max-w-[130px] md:max-w-none">Select Model</span>
-                        <svg class="w-3.5 h-3.5 text-muted" xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd"
-                                d="M10 3a.75.75 0 01.53.22l3.5 3.5a.75.75 0 01-1.06 1.06L10 4.81 6.53 8.28a.75.75 0 01-1.06-1.06l3.5-3.5A.75.75 0 0110 3zm-3.72 9.53a.75.75 0 011.06 0L10 15.19l3.47-3.47a.75.75 0 111.06 1.06l-4 4a.75.75 0 01-1.06 0l-4-4a.75.75 0 010-1.06z"
-                                clip-rule="evenodd" />
-                        </svg>
-                    </button>
-                    <div id="modelSelectorPanel"
-                        class="model-panel absolute top-full right-3 md:right-5 mt-2 w-80 max-w-[calc(100vw-1.5rem)] max-h-[60vh] overflow-y-auto bg-canvas dark:bg-card border border-hairline rounded-xl shadow-lift z-20 hidden origin-top-right scrollbar-custom"></div>
                     <button id="headerNewChatBtn" aria-label="New chat" data-tooltip="New chat (Alt+N)" data-tooltip-pos="bottom"
                         class="p-2 rounded-lg text-muted hover:text-ink hover:bg-card transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
@@ -621,6 +606,24 @@
                                  after the send button on wide screens. -->
                             <div class="flex items-center justify-between gap-2 pr-0.5">
                             <!-- voice input removed (owner request, v2.0.20) -->
+                            <!-- 2.2.6 revamp: model selector moved from the header into
+                                 the composer's action row (quiet pill, bottom-left); the
+                                 panel opens UPWARD from the pill. -->
+                            <div class="relative flex items-center flex-shrink-0">
+                                <button id="modelSelectorBtn"
+                                    class="flex items-center gap-1.5 bg-transparent border border-hairline/70 pl-2 pr-1.5 py-1 rounded-full text-[12px] font-normal text-body hover:border-coral/40 hover:text-ink focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-coral/40 dark:focus:ring-offset-canvas transition-[border-color,color] duration-fast ease-out">
+                                    <span id="modelSelectorDot" class="w-1.5 h-1.5 rounded-full bg-coral"></span>
+                                    <span id="modelSelectorLabel" class="font-medium whitespace-nowrap truncate max-w-[104px] md:max-w-[200px]">Select Model</span>
+                                    <svg class="w-3 h-3 text-muted" xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd"
+                                            d="M10 3a.75.75 0 01.53.22l3.5 3.5a.75.75 0 01-1.06 1.06L10 4.81 6.53 8.28a.75.75 0 01-1.06-1.06l3.5-3.5A.75.75 0 0110 3zm-3.72 9.53a.75.75 0 011.06 0L10 15.19l3.47-3.47a.75.75 0 111.06 1.06l-4 4a.75.75 0 01-1.06 0l-4-4a.75.75 0 010-1.06z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </button>
+                                <div id="modelSelectorPanel"
+                                    class="model-panel absolute bottom-full left-0 mb-2 w-80 max-w-[calc(100vw-1.5rem)] max-h-[55vh] overflow-y-auto bg-canvas dark:bg-card border border-hairline rounded-xl shadow-lift z-30 hidden origin-bottom-left scrollbar-custom"></div>
+                            </div>
                             <div class="relative flex items-center order-last flex-shrink-0" style="position:relative;">
                                 <button id="sendBtn" aria-label="Send message" data-tooltip="Send (Enter)" class="w-11 h-11 flex items-center justify-center rounded-full bg-coral text-white shadow-sm transition-transform hover:bg-coral-active active:scale-95">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
@@ -641,10 +644,11 @@
                                 </button>
                             </div>
                         <!-- B3/B4 chips ride INSIDE the composer box on the same
-                             row as the actions: order-first puts them left while
-                             mr-auto absorbs the slack, so voice/send sit flush
-                             against the right edge of the box. -->
-                        <div class="order-first mr-auto flex items-center gap-1.5 min-w-0 pl-1">
+                             row as the actions. 2.2.6: the model pill is the
+                             leftmost action; chips sit next to it (DOM order —
+                             no order-first), mr-auto absorbs the slack so send
+                             stays flush against the right edge of the box. -->
+                        <div class="mr-auto flex items-center gap-1.5 min-w-0">
                             <button id="webSearchChip" type="button" aria-pressed="false"
                                 title="Search the web for current information before answering"
                                 class="composer-chip">
@@ -671,10 +675,11 @@
                 </div>
                 <!-- v1.0.6: new-chat suggestions sit UNDER the composer (empty mode). -->
                 <div id="emptySuggestions" class="hidden w-full max-w-3xl mx-auto px-3 md:px-5 pb-4"></div>
+                <!-- 2.2.6 revamp: circular icon-only jump button (the show logic
+                     adds `flex` + `jump-enter`; base stays hidden, no flex). -->
                 <button id="jumpToLatest" aria-label="Jump to latest message"
-                    class="fixed bottom-28 right-5 z-20 hidden flex-col items-center gap-1 px-3 py-2.5 rounded-full bg-raised border border-hairline shadow-lift text-xs font-medium text-ink hover:border-coral/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-coral/40 transition-[border-color,box-shadow,transform] duration-base ease-out active:scale-95">
-                    <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3" /></svg>
-                    <span>Latest</span>
+                    class="fixed bottom-28 right-5 z-20 hidden items-center justify-center w-11 h-11 rounded-full bg-raised border border-hairline shadow-lift text-ink hover:border-coral/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-coral/40 transition-[border-color,box-shadow,transform] duration-base ease-out active:scale-95">
+                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3" /></svg>
                 </button>
 
             </main>
@@ -821,7 +826,7 @@
         <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js" defer></script>
         <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js" defer></script>
 
-        <script type="module" src="js/app.js?v=p19"></script>
+        <script type="module" src="js/app.js?v=p20"></script>
 
         <!--
       Tailwind CSS Purge-Safe-List:

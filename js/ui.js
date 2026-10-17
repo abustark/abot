@@ -39,13 +39,12 @@ export const toggleSidebar = () => setSidebar(!isSidebarOpen());
 export const closeSidebar = () => { if (!isDesktopViewport()) setSidebar(false); };
 
 export const applyModelColorTheme = (model) => {
-    // Provider-colored dot in the header pill (buttons stay coral — actions are
-    // brand, model identity lives in accents). The old duplicate indicator pill
-    // was removed in the revamp; only the selector dot is updated.
+    // Provider-colored dot in the composer's model pill (buttons stay coral —
+    // actions are brand, model identity lives in accents).
     const provider = getProviderColor(model);
 
     if (dom.modelSelectorDot) {
-        dom.modelSelectorDot.className = `w-2 h-2 rounded-full ${provider.dot} transition-colors`;
+        dom.modelSelectorDot.className = `w-1.5 h-1.5 rounded-full ${provider.dot} transition-colors`;
     }
 };
 

@@ -994,10 +994,12 @@ body.chat-empty #jumpToLatest { display: none; }
 }
 
 /* --- B5: model panel — enter-only, origin-aware, same pattern as the ⋮ menus
-   (@starting-style degrades to instant appearance on older browsers). */
+   (@starting-style degrades to instant appearance on older browsers).
+   2.2.6: the panel moved into the composer and now opens UPWARD, so the enter
+   offset flips to translateY(+6px) coming from the pill below it. */
 .model-panel { transition: opacity 160ms var(--ease-out), transform 160ms var(--ease-out); }
 @starting-style {
-    .model-panel { opacity: 0; transform: translateY(-6px) scale(0.97); }
+    .model-panel { opacity: 0; transform: translateY(6px) scale(0.97); }
 }
 @media (prefers-reduced-motion: reduce) {
     .model-panel { transition: none; }

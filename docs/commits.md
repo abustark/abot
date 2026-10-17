@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.2.6`** (current head is `2.2.5` — see below)
+> - **`main` → `2.2.7`** (current head is `2.2.6` — see below)
 > - **`arena/01a03fe9-abot` → its own sequence** (syncs are **unversioned** merge commits:
 >   `merge main <version> into arena/01a03fe9-abot`; arena's own feature commits use arena's numbers)
 
@@ -25,6 +25,22 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.2.6 - header + composer revamp (chat-app pattern)
+- **Date**: 2026-10-17
+- **Owner-requested**: minimal current-AI-chat revamp of header + composer + message actions per scope answers (model selector INTO the composer bottom-left; header = chat title + New chat icon + ⋯ menu; circular icon-only jump FAB; empty-state polish; sidebar untouched).
+- **Changes**:
+  - `index.html`: header brand mark + model pill removed; header now shows the active chat title (`#headerChatTitle`, quiet, truncate). `#modelSelectorBtn`/`#modelSelectorPanel` moved into the composer action row bottom-left (quiet pill, `w-1.5` provider dot); panel opens UPWARD (`bottom-full`, `origin-bottom-left`, `z-30`). `#jumpToLatest` is now a circular icon-only 44px FAB (aria-label carries meaning; `hidden`/`flex`/`jump-enter` contract untouched). Asset bust `?v=p19` → `?v=p20`.
+  - `js/chat.js`: header title mirrors the sidebar title in every path — `renderActiveChat` (chat name / "ABot" when none), title-gen dots animation (both updated per tick).
+  - `js/dom.js`: `headerChatTitle` registered.
+  - `js/ui.js`: selector dot `w-2` → `w-1.5` to match the quieter pill.
+  - `js/app.js`: build id `2026-09-21.4` → `2026-10-17.1`.
+  - `src/input.css`: `.model-panel` `@starting-style` enter offset flipped to `translateY(6px)` (panel now rises from the pill below it).
+  - `service-worker.js`: cache `abot-cache-v46` → `v47`.
+  - Tests: `tools/interaction-test.js` +3 checks (selector lives in composer + out of header; header mirrors chat title; jump button icon-only); `tools/visual-check.js` +3 real-browser checks (panel opens upward — panel top escapes above the dock top; stays inside viewport; Escape closes).
+  - `docs/commits.md`: this entry; `📌 Next version` → `main → 2.2.7`.
+- **Wiring kept intact**: `modelSelectorBtn`/`Panel` IDs + synchronous toggle + typeahead, `chatTitle` stays in sidebar, sidebar rename flow unchanged, `headerNewChatBtn` tooltip `Alt+N`.
+- **Gates (owner-approved run)**: lint 0 errors (2 pre-existing warnings), `check` clean, `build:css` rebuilt (the 7 new utilities confirmed present in `dist/output.css`), `test` all pass (security + smoke + interaction + cycle), visual 35/35 PASS (mobile 18 + desktop 17, incl. the 6 new panel checks). Logo-placement assertion updated `>=3` → `>=2` (header logo removed; `every-logo-marked` invariant kept). Screenshots archived to `artifacts/2.2.6-revamp-*.png`.
 
 ### 2.2.5 - fix short replies hidden behind composer on mobile
 - **Date**: 2026-10-17

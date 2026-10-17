@@ -130,6 +130,33 @@ async function runViewport(browser, { w, h, label, mobile }) {
     const flushRight = Math.abs((sendR.x + sendR.w) - (boxR.right - 8)) < 24;
     check(`[${label}] send button flush right (B-33)`, flushRight, `send right=${Math.round(sendR.x + sendR.w)} box right=${Math.round(boxR.right)}`);
 
+    // 2.2.6 revamp: the model panel lives in the composer and opens UPWARD,
+    // staying inside the viewport (real-browser geometry — jsdom can't prove it).
+    {
+        await page.click('#modelSelectorBtn');
+        await new Promise((r) => setTimeout(r, 260)); // 160ms enter transition settles
+        const mp = await page.evaluate(() => {
+            const panel = document.getElementById('modelSelectorPanel');
+            const dock = document.getElementById('composerDock');
+            const pr = panel.getBoundingClientRect();
+            const dr = dock.getBoundingClientRect();
+            return {
+                open: !panel.classList.contains('hidden'),
+                // opens upward: the panel's TOP edge escapes above the dock
+                // (its bottom edge sits just above the pill, inside the dock).
+                above: pr.top <= dr.top,
+                inViewport: pr.left >= -0.5 && pr.right <= window.innerWidth + 0.5 && pr.top >= -0.5,
+                top: pr.top, dockTop: dr.top,
+            };
+        });
+        check(`[${label}] model panel opens upward from composer`, mp.open && mp.above, `panel top=${Math.round(mp.top)} dock top=${Math.round(mp.dockTop)}`);
+        check(`[${label}] model panel stays inside viewport`, mp.open && mp.inViewport);
+        await page.keyboard.press('Escape');
+        await new Promise((r) => setTimeout(r, 80));
+        const panelClosed = await page.$eval('#modelSelectorPanel', (el) => el.classList.contains('hidden'));
+        check(`[${label}] model panel Escape-closes`, panelClosed);
+    }
+
     // B-36: bottom padding >= dock height (+headroom) on mobile
     const pad = await page.evaluate(() => {
         const c = document.getElementById('chatHistoryContainer');

@@ -1,17 +1,21 @@
 PASS  [mobile] app shell visible after mock login
 PASS  [mobile] mic button removed (B-33) — count=0
-PASS  [mobile] stop overlays send slot exactly (B-35) — send(312,753,41) stop(312,753,41)
+PASS  [mobile] stop overlays send slot exactly (B-35) — send(312,752,41) stop(312,752,41)
 PASS  [mobile] send button flush right (B-33) — send right=353 box right=364
-PASS  [mobile] scroll padding >= dock height (B-36) — pad=170 dock=134
+PASS  [mobile] model panel opens upward from composer — panel top=305 dock top=676
+PASS  [mobile] model panel stays inside viewport
+PASS  [mobile] model panel Escape-closes
+PASS  [mobile] scroll padding >= dock height (B-36) — pad=170 dock=136
 PASS  [mobile] no duplicate ids
 PASS  [mobile] error surfaces as visible card (B-20/B-34) — ⚠️ Connection error: currentUser.getIdToken is not a function
 PASS  [mobile] stop button re-hidden after stream ends
+PASS  [mobile] B-48: input blurred after send (keyboard dismisses) — active=sendBtn
 PASS  [mobile] mid-stream: container pinned to bottom (follow live) — distance=0px
 PASS  [mobile] LONG reply: pinned to bottom after stream — distance=0px
-PASS  [mobile] LONG reply: last content above composer top — lastBottom=501 dockTop=678
+PASS  [mobile] LONG reply: last content above composer top — lastBottom=581 dockTop=676
 PASS  [mobile] B-43: overflow-anchor:none live (CSS not stale) — overflow-anchor=none
 PASS  [mobile] B-42: dock is keyboard-aware (bottom:var(--kb-h)) — position=fixed bottom=0px
-PASS  [mobile] SHORT reply: fully visible above composer — lastBottom=675 dockTop=678
+PASS  [mobile] SHORT reply: fully visible above composer — lastBottom=612 dockTop=676
 --- console errors (mobile) ---
 Failed to load resource: net::ERR_FAILED
 Failed to load resource: net::ERR_FAILED
@@ -20,17 +24,21 @@ Failed to load resource: net::ERR_FAILED
 Error loading chats from Firestore: TypeError: chatsCollectionRef.orderBy is not a function
 PASS  [desktop] app shell visible after mock login
 PASS  [desktop] mic button removed (B-33) — count=0
-PASS  [desktop] stop overlays send slot exactly (B-35) — send(1083,719,41) stop(1083,719,41)
+PASS  [desktop] stop overlays send slot exactly (B-35) — send(1083,715,41) stop(1083,715,41)
 PASS  [desktop] send button flush right (B-33) — send right=1125 box right=1135
+PASS  [desktop] model panel opens upward from composer — panel top=275 dock top=640
+PASS  [desktop] model panel stays inside viewport
+PASS  [desktop] model panel Escape-closes
 PASS  [desktop] no duplicate ids
 PASS  [desktop] error surfaces as visible card (B-20/B-34) — ⚠️ Connection error: currentUser.getIdToken is not a function
 PASS  [desktop] stop button re-hidden after stream ends
+PASS  [desktop] B-48: input refocused after send (desktop typing) — active=messageInput
 PASS  [desktop] mid-stream: container pinned to bottom (follow live) — distance=0px
 PASS  [desktop] LONG reply: pinned to bottom after stream — distance=0px
-PASS  [desktop] LONG reply: last content above composer top — lastBottom=467 dockTop=644
+PASS  [desktop] LONG reply: last content above composer top — lastBottom=547 dockTop=640
 PASS  [desktop] B-43: overflow-anchor:none live (CSS not stale) — overflow-anchor=none
 PASS  [desktop] B-42: dock is keyboard-aware (bottom:var(--kb-h)) — position=static bottom=auto
-PASS  [desktop] SHORT reply: fully visible above composer — lastBottom=619 dockTop=644
+PASS  [desktop] SHORT reply: fully visible above composer — lastBottom=586 dockTop=640
 --- console errors (desktop) ---
 Failed to load resource: net::ERR_FAILED
 Failed to load resource: net::ERR_FAILED
