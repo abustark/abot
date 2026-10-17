@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.4.2`** (current head is `2.4.1` — see below)
+> - **`main` → `2.4.3`** (current head is `2.4.2` — see below)
 > - **`arena/01a03fe9-abot` → mirrors `main`** (no version of its own: `git push origin main:arena/01a03fe9-abot --force`;
 >   both branches stay identical)
 
@@ -25,6 +25,19 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.4.2 - sparkle field retuned to the original Sparkles demo parameters
+- **Date**: 2026-10-17
+- **Context**: after 2.4.1 the owner supplied the actual reference demo source ("SparklesPreviewColorful" from the 21st.dev / Aceternity Sparkles component); this commit aligns the field with its real values.
+- **`js/sparkles.js` retuned**:
+  - **density**: `particleDensity={100}` means 100 particles per 400×400 px in tsparticles → `count = w·h / 1600` (2.4.1 used 1 per 9000 px², i.e. ~5.6× sparser). Sanity cap 4000 for very large viewports; floor 40.
+  - **size**: exactly `minSize 0.6 / maxSize 1.4` (was 0.6–1.9).
+  - **twinkle**: `speed={0.5}` in the demo = slow linear fade → triangle wave 0.1→1→0.1 over a 5–7s full cycle, random phase per dot (was a 2.6–9s sine).
+  - **drift**: `move speed 0.1–1` reads as a slow wander → 2–10 px/s straight-line drift with edge wrap (2.4.1 dots were stationary; tsparticles "out" respawn ≈ wrap for dots).
+  - **click**: demo has onClick `push` (quantity 4) → clicking the auth screen now seeds 4 sparkles at the cursor (never past the 4000 cap).
+  - **render**: one flat dot per sparkle like tsparticles does (the halo pass was dropped — cheaper at the higher density and truer to the source).
+- **Cache-bust**: `?v=p30` → `?v=p31`, `abot-cache-v56` → `abot-cache-v57` (the new SW install refetches `/js/sparkles.js`).
+- **No CSS change** — `dist/output.css` untouched (no `build:css` needed).
 
 ### 2.4.1 - auth page gets a twinkling sparkle backdrop (replaces the blooms + grid)
 - **Date**: 2026-10-17

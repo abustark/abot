@@ -3,7 +3,7 @@
  * Provides offline caching for local assets only
  */
 
-const CACHE_NAME = 'abot-cache-v56'; // 2.4.1: auth sparkle canvas replaces the blooms + grid backdrop
+const CACHE_NAME = 'abot-cache-v57'; // 2.4.2: sparkle field retuned to the original Sparkles demo parameters
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -11,7 +11,7 @@ const STATIC_ASSETS = [
     '/favicon-32-light.png',
     '/favicon-32-dark.png',
     '/logo.png',
-    '/dist/output.css?v=p30',
+    '/dist/output.css?v=p31',
     '/js/app.js',
     '/js/config.js',
     '/js/dom.js',

@@ -1,8 +1,12 @@
 /**
  * ABot — sparkles.js
  * 2.4.1 (owner request): twinkling sparkle field behind the auth screen —
- * a vanilla canvas port of the 21st.dev / Aceternity "Sparkles" look
- * (tiny light-dots that fade in and out in place). No third-party scripts.
+ * a vanilla canvas port of the 21st.dev / Aceternity "Sparkles" look.
+ * 2.4.2: retuned to the real demo source the owner supplied
+ * ("SparklesPreviewColorful"): particleDensity 100 (per 400×400 px area),
+ * minSize 0.6 / maxSize 1.4, opacity 0.1–1 with the demo's slow twinkle
+ * (speed 0.5 → linear triangle fade), slow in-place drift (move 0.1–1)
+ * and click-to-push bursts (quantity 4). No third-party scripts.
  *
  * Rules it honours:
  *  - palette comes from the theme tokens (coral/amber/teal + provider
@@ -21,6 +25,12 @@ const PALETTE_VARS = [
     '--c-provider-groq',
     '--c-provider-nvidia'
 ];
+
+// Original tsparticles density box: `value` particles per 400×400 px.
+const DENSITY_AREA = 400 * 400;
+const DENSITY_VALUE = 100;   // demo: particleDensity={100}
+const MAX_SPARKLES = 4000;   // sanity cap for very large/4K viewports
+const PUSH_QUANTITY = 4;     // demo: interactivity push mode default
 
 const readPalette = () => {
     const cs = getComputedStyle(document.documentElement);
@@ -44,21 +54,28 @@ export const initSparkles = (canvas) => {
 
     let running = false;
     let rafId = 0;
+    let lastTs = 0;
     let width = 0;
     let height = 0;
     let field = [];
 
-    const buildField = () => {
-        const count = Math.round(Math.min(240, Math.max(70, (width * height) / 9000)));
-        field = Array.from({ length: count }, () => ({
-            x: Math.random() * width,
-            y: Math.random() * height,
-            r: 0.6 + Math.random() * 1.3,               // core radius (css px)
-            phase: Math.random() * Math.PI * 2,
-            speed: 0.7 + Math.random() * 1.6,           // rad/s → 2.6–9s twinkle
-            max: 0.28 + Math.random() * 0.62,           // peak alpha
+    const makeSparkle = (x, y) => {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 2 + Math.random() * 8; // px/s — the demo's move speed 0.1–1 reads as a slow wander
+        return {
+            x, y,
+            r: 0.6 + Math.random() * 0.8,     // demo: minSize 0.6 / maxSize 1.4
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            phase: Math.random(),             // per-dot offset (demo: sync:false)
+            period: 5 + Math.random() * 2,    // s per full 0.1→1→0.1 cycle (demo: speed 0.5)
             color: palette[(Math.random() * palette.length) | 0]
-        }));
+        };
+    };
+
+    const buildField = () => {
+        const count = Math.round(Math.min(MAX_SPARKLES, Math.max(40, DENSITY_VALUE * (width * height) / DENSITY_AREA)));
+        field = Array.from({ length: count }, () => makeSparkle(Math.random() * width, Math.random() * height));
     };
 
     const resize = () => {
@@ -72,27 +89,31 @@ export const initSparkles = (canvas) => {
         buildField();
     };
 
-    const paint = (t) => {
+    const paint = (t, dt) => {
         ctx.clearRect(0, 0, width, height);
         for (const s of field) {
-            const pulse = Math.sin(t * s.speed + s.phase); // -1..1
-            const alpha = s.max * (0.5 + 0.5 * pulse);
-            if (alpha < 0.02) continue;
-            const radius = s.r * (0.85 + 0.15 * pulse);
-            // soft halo + bright core — reads like a tiny star, no filters
-            ctx.beginPath();
-            ctx.fillStyle = `rgba(${s.color}, ${(alpha * 0.22).toFixed(3)})`;
-            ctx.arc(s.x, s.y, radius * 2.4, 0, Math.PI * 2);
-            ctx.fill();
+            if (dt > 0) {
+                s.x += s.vx * dt;
+                s.y += s.vy * dt;
+                // tsparticles outModes "out" respawns escapees — wrapping looks the same for dots
+                if (s.x < -4) s.x = width + 4; else if (s.x > width + 4) s.x = -4;
+                if (s.y < -4) s.y = height + 4; else if (s.y > height + 4) s.y = -4;
+            }
+            const cyc = (t / s.period + s.phase) % 1;
+            const tri = 1 - Math.abs(2 * cyc - 1); // linear up/down, like the engine's fade
+            const alpha = 0.1 + 0.9 * tri;         // demo: opacity min 0.1 / max 1
+            if (alpha < 0.03) continue;
             ctx.beginPath();
             ctx.fillStyle = `rgba(${s.color}, ${alpha.toFixed(3)})`;
-            ctx.arc(s.x, s.y, radius, 0, Math.PI * 2);
+            ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
             ctx.fill();
         }
     };
 
     const frame = (now) => {
-        paint(now / 1000);
+        const dt = lastTs ? Math.min(0.05, (now - lastTs) / 1000) : 0;
+        lastTs = now;
+        paint(now / 1000, dt);
         rafId = requestAnimationFrame(frame);
     };
 
@@ -107,6 +128,7 @@ export const initSparkles = (canvas) => {
         if (visibleNow && !reduceMq.matches) {
             if (!running) {
                 running = true;
+                lastTs = 0;
                 rafId = requestAnimationFrame(frame);
             }
             return;
@@ -115,8 +137,23 @@ export const initSparkles = (canvas) => {
             running = false;
             cancelAnimationFrame(rafId);
         }
-        if (visibleNow) paint(0); // reduced-motion: one calm still frame
+        if (visibleNow) paint(0, 0); // reduced-motion: one calm still frame
     };
+
+    // Demo interactivity: onClick push (quantity 4) — clicks anywhere on the
+    // auth screen (buttons included) seed a few fresh sparkles at the cursor.
+    if (section) {
+        section.addEventListener('click', (e) => {
+            if (reduceMq.matches || field.length >= MAX_SPARKLES) return;
+            const rect = canvas.getBoundingClientRect();
+            for (let i = 0; i < PUSH_QUANTITY; i++) {
+                field.push(makeSparkle(
+                    e.clientX - rect.left + (Math.random() * 24 - 12),
+                    e.clientY - rect.top + (Math.random() * 24 - 12)
+                ));
+            }
+        });
+    }
 
     window.addEventListener('resize', () => { resize(); apply(); });
     document.addEventListener('visibilitychange', apply);
