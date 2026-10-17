@@ -25,6 +25,11 @@ ABot is a **vanilla-JS, multi-model AI chat app** (no framework):
    - Every commit must follow this versioning structure:
      `2.0.1`, `2.0.2`, ..., `2.0.9`, `2.0.10` ➔ rolls over to `2.1.0`.
      Then `2.1.1`, ..., `2.1.10` ➔ rolls over to `2.2.0`, etc.
+   - **One version number per agent response / request batch** — not per issue, not per commit.
+     A single owner request (even if it fixes many issues) consumes exactly ONE version number.
+     Multiple commits inside one response are NOT allowed to each take a new number; if a follow-up
+     fix is needed in the same batch, fold it into the same version's commit(s) — never burn a
+     second number. Only a genuinely new owner request (a new response turn) advances the number.
    - Format: `<version> - <short description>` (e.g., `2.0.2 - auth page ui changed`). Keep it short and clear, avoid overly long commit titles.
    - Every commit must also be logged in `docs/commits.md` with its version and what it did.
 3. **Arena Synchronization (`arena/01a03fe9-abot`)**:
