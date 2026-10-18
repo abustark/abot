@@ -352,10 +352,22 @@ function stubChain(label) {
             !dock.getAttribute('style') || !dock.getAttribute('style').includes('bottom'));
 
         // ...and the normal layout returns as soon as the chat has messages.
-        if (activeChat && savedMessages) activeChat.messages = savedMessages;
+        // Probe with a guaranteed non-empty thread (the active chat is an
+        // untouched "New Chat" in this environment, so restoring savedMessages
+        // can legitimately restore an empty array and keep chat-empty on),
+        // then restore whatever the suite had.
+        if (activeChat) {
+            activeChat.messages = [
+                { role: 'user', content: 'layout probe', ts: Date.now() },
+                { role: 'assistant', content: 'ack', ts: Date.now() }
+            ];
+        }
         chatMod.renderActiveChat();
         await sleep(30);
         check('normal layout returns once messages exist', !window.document.body.classList.contains('chat-empty'));
+        if (activeChat) activeChat.messages = savedMessages || [];
+        chatMod.renderActiveChat();
+        await sleep(30);
     }
     // --- 2.3.7: New Chat never piles up empty chats -----------------------------
     {
@@ -457,8 +469,10 @@ function stubChain(label) {
     // --- v1.0.7: auth backdrop is CSS-only; the app ships no CDN scripts -------
     {
         const scene = $('auth-scene');
-        const blooms = scene ? scene.querySelectorAll('.auth-bloom') : [];
-        check('auth backdrop renders aurora layers', !!scene && blooms.length >= 3, blooms.length + ' blooms');
+        // 2.4.1: the CSS aurora blooms were replaced by the twinkling sparkle
+        // canvas — the backdrop contract is now "scene + canvas".
+        const sparklesCanvas = $('auth-sparkles');
+        check('auth backdrop renders the sparkle canvas', !!scene && !!sparklesCanvas, sparklesCanvas ? 'canvas present' : 'canvas missing');
         check('old vanta canvas is gone', !$('vanta-bg'));
         const cdnScripts = [...window.document.querySelectorAll('script[src]')]
             .map(s => s.getAttribute('src'))
@@ -475,10 +489,15 @@ function stubChain(label) {
     // toast stack (v2.0.9 roadmap #4): multiple toasts, close, promise states
     {
         const utils = await import('file://' + path.join(esmDir, 'utils.js'));
+        const stack = $('toast-stack');
+        // Deterministic start: earlier steps (e.g. the empty-chat search info
+        // toast) can still be alive — auto-dismiss is time-based — so clear
+        // whatever is on screen before asserting a stack of exactly 2.
+        stack.querySelectorAll('.abot-toast .toast-close').forEach((b) => b.dispatchEvent(new window.MouseEvent('click', { bubbles: true })));
+        await sleep(320);
         utils.showToast('first toast');
         utils.showToast('second toast');
         await sleep(60);
-        const stack = $('toast-stack');
         const count0 = stack.querySelectorAll('.abot-toast').length;
         check('toasts stack (2 visible)', count0 === 2, count0 + ' shown');
 

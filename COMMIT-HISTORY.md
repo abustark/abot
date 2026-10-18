@@ -6,8 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.4.5`** (current head is `2.4.4` — two commits share this number: the arena
->   AI checklist, then the mobile/desktop fix batch)
+> - **`main` → `2.4.6`** (current head is `2.4.5`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** (no version of its own: `git push origin main:arena/01a03fe9-abot --force`;
 >   both branches stay identical)
 
@@ -26,6 +25,16 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.4.5 - gate pass: interaction-test drift fixed (all suites green)
+- **Date**: 2026-10-18
+- **Why**: owner requested a full gate run for the 2.4.4 batch. `npm run test` surfaced 4 failures — all stale/flaky TEST expectations, not app bugs (app contracts verified in source: `chat.js` toggles `chat-empty` from the message count; the sparkle canvas replaced the aurora blooms in 2.4.1).
+- **`tools/interaction-test.js` fixes**:
+  1. "normal layout returns once messages exist" — the active chat is an untouched "New Chat" in this environment, so restoring `savedMessages` restored an EMPTY array and `chat-empty` legitimately stayed on. The check now probes with a guaranteed non-empty thread (2 messages), asserts, then restores the original state.
+  2. "auth backdrop renders aurora layers" — asserted `.auth-bloom` ≥ 3, but the blooms were removed in 2.4.1 (sparkles). Updated to the current contract: `#auth-scene` + `#auth-sparkles` canvas present.
+  3. "toasts stack (2 visible)" — a toast from the earlier empty-chat search step was still alive (time-based auto-dismiss), so 3 showed. The stack is now cleared deterministically before asserting exactly 2; the "toast close removes it" check follows cleanly.
+- **Full gate results**: `npm run lint` — 0 errors (2 known pre-existing warnings: unused `identityKey` in `api/chat.js` + `server.js`); `npm run check` — every JS file parses; `npm run build:css` — rebuilt, `git diff --exit-code -- dist/output.css` clean; `npm run test` — chat-security ✅ · jsdom smoke ✅ · interaction ✅ (102 checks) · auth cycle ✅.
+- **No app/runtime changes** — cache-bust stays at `?v=p33` / `abot-cache-v59`; `dist/output.css` untouched by this commit.
 
 ### 2.4.4 - arena AI checklist for the pending mobile/desktop fixes (part 1 of 2)
 - **Date**: 2026-10-18
