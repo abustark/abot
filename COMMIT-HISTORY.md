@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.4.11`** (current head is `2.4.10`)
+> - **`main` → `2.4.12`** (current head is `2.4.11`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** (no version of its own: `git push origin main:arena/01a03fe9-abot --force`;
 >   both branches stay identical)
 
@@ -25,6 +25,11 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.4.11 - removed stale docs/UI-COMPONENTS-ROADMAP.md (owner directive)
+- **Date**: 2026-10-18
+- **Why**: owner directive — the roadmap's component backlog is finished or parked (no standing work queue exists) and its remaining content duplicated root `AGENTS.md` (§4 skills list, §5 acceptance criteria). It was reference-only, so it was deleted; its one unique governance line (when the no-React decision may be revisited) moved into `AGENTS.md` §5 rule 1, and the `README.md` pointer was re-aimed there so no dangling reference remains.
+- **No runtime/app changes** — doc removal + reference fixes only; cache-bust stays `?v=p36` / `abot-cache-v62`.
 
 ### 2.4.10 - message actions hover/tap, ⋮ menu keyboard nav, sign-out fixes, docs cleanup
 - **Date**: 2026-10-18

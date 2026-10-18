@@ -79,7 +79,7 @@ flowchart LR
     UI -->|chat CRUD| FS
 ```
 
-**Why no framework?** Deliberate, documented decision — see [`docs/UI-COMPONENTS-ROADMAP.md`](docs/UI-COMPONENTS-ROADMAP.md) for the rationale and the conditions that would trigger a revisit.
+**Why no framework?** Deliberate, settled decision (owner, 2026-08-30) — [`AGENTS.md`](AGENTS.md) §5 rule 1 lists the conditions that would trigger a revisit.
 
 **Frontend modules** (`js/`, dependency order): `config.js` (model registry, colors, prompts) → `dom.js` → `state.js` → `utils.js` → `ui.js` → `auth.js` → `chat.js` → `app.js` (entry). Extracted verbatim from the original inline monolith with **token-level parity verification** (`tools/verify-parity.js`). Details: [`js/README.md`](js/README.md).
 

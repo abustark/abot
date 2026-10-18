@@ -116,7 +116,7 @@ For PHASE D: load `emil-design-eng` + `animate` + `taste-skill` before writing U
    (no `git log`/`diff`/`ls-remote` fishing, no fetching just to look). **Only the owner may say
    "run / verify / test / pass"** — and only then does the agent run those commands.
 
-1. **Do not rewrite the app shell or migrate frameworks.** Vanilla ES modules is a settled decision (`docs/UI-COMPONENTS-ROADMAP.md` documents why and its revisit-triggers).
+1. **Do not rewrite the app shell or migrate frameworks.** Vanilla ES modules is a settled decision (owner, 2026-08-30) — revisit only if ABot grows multiple complex views/routes, deeply nested shared state, or a team mandate.
 2. **Do not modify backend security hardening** (`api/chat.js`, `server.js`, `lib/chat-security.js`, `vercel.json`, `firestore.rules`) without owner sign-off.
 3. **Behavior changes need a failing test or a real-browser repro first.** No speculative refactors.
 4. **A11y is not optional:** every icon button has `aria-label`, focus-visible works, motion uses the `--ease-*` tokens at ≤300 ms, reduced-motion respected.
