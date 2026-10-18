@@ -6,7 +6,8 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.4.4`** (current head is `2.4.3` — see below)
+> - **`main` → `2.4.5`** (current head is `2.4.4` — two commits share this number: the arena
+>   AI checklist, then the mobile/desktop fix batch)
 > - **`arena/01a03fe9-abot` → mirrors `main`** (no version of its own: `git push origin main:arena/01a03fe9-abot --force`;
 >   both branches stay identical)
 
@@ -25,6 +26,12 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.4.4 - arena AI checklist for the pending mobile/desktop fixes (part 1 of 2)
+- **Date**: 2026-10-18
+- **Why**: owner directive — before the fix work starts, a spec/checklist must exist so any AI working on the `arena` branch can verify each reported fix (fixed vs still pending) and implement whatever is pending. Owner chose a dedicated file (`docs/ARENA-AI-CHECKLIST.md`); with the force-mirror setup it necessarily lives on both branches (accepted by owner).
+- **Content**: all 7 reported items (drawer quality/speed, model-list clipping, extra scrollbar, composer blink, outside-close popovers, desktop animation parity incl. reduced-motion guard removal, tooltip delay/placement, glassmorphism) each with: expected-after-fix contract, verification steps, PENDING status line (to be flipped to VERIFIED by the arena AI).
+- **Part 2/2** (fix batch) follows in the same version — see the next entry.
 
 ### 2.4.3 - starting loader: dot-matrix animation under the "abot" wordmark (Pace UI Dot Loader port)
 - **Date**: 2026-10-18
