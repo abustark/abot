@@ -1,28 +1,23 @@
 /* Self-hosted fonts — latin subsets, display=swap.
-   Geist (Vercel, SIL OFL) is the UI voice (400/500/600 — markup never asks for
-   a heavier weight). Inter was removed in v1.0.5: Geist always won the stack, so
-   its four faces were dead weight (~92 KB). Source Serif 4 stays the display
-   voice. System fonts carry the fallback. */
+   2.4.9: Plus Jakarta Sans (SIL OFL) is the UI voice — ONE variable file
+   covers weights 200–800 (400/500/600/700 asked for in markup), replacing
+   the three static Geist faces. Cabinet Grotesk (ITF Free Font License,
+   Fontshare) is the wordmark-only display face for the "abot" brand name.
+   Source Serif 4 stays the headline display voice. System fonts carry the
+   fallback. */
 @font-face {
-  font-family: 'Geist';
+  font-family: 'Plus Jakarta Sans';
   font-style: normal;
-  font-weight: 400;
+  font-weight: 200 800;
   font-display: swap;
-  src: url('/dist/fonts/geist-latin-400-normal.woff2') format('woff2');
+  src: url('/dist/fonts/plus-jakarta-sans-latin-wght-normal.woff2') format('woff2');
 }
 @font-face {
-  font-family: 'Geist';
+  font-family: 'Cabinet Grotesk';
   font-style: normal;
-  font-weight: 500;
+  font-weight: 700;
   font-display: swap;
-  src: url('/dist/fonts/geist-latin-500-normal.woff2') format('woff2');
-}
-@font-face {
-  font-family: 'Geist';
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url('/dist/fonts/geist-latin-600-normal.woff2') format('woff2');
+  src: url('/dist/fonts/cabinet-grotesk-latin-700-normal.woff2') format('woff2');
 }
 @font-face {
   font-family: 'JetBrains Mono';
@@ -135,7 +130,7 @@
   body {
     background-color: rgb(var(--c-canvas));
     color: rgb(var(--c-body));
-    font-family: 'Geist', ui-sans-serif, system-ui, sans-serif;
+    font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
 
@@ -170,10 +165,18 @@
 }
 
 @layer components {
-  /* Serif display voice (auth headline, empty state, wordmark) */
+  /* Serif display voice (auth headline, empty state) */
   .font-display {
     font-family: 'Source Serif 4', Georgia, serif;
     letter-spacing: -0.01em;
+  }
+
+  /* Wordmark voice — ONLY the "abot" brand name (sidebar brand row).
+     2.4.9: Cabinet Grotesk, self-hosted (see @font-face above). */
+  .font-wordmark {
+    font-family: 'Cabinet Grotesk', 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.02em;
   }
 
   /* Skeleton shimmer — surface-tinted, calm (3.5 wires these into loaders) */
@@ -505,6 +508,11 @@ mark {
     .edit-msg-btn,
     .copy-code-btn { opacity: 1 !important; }
 }
+
+/* 2.4.9: the static end-of-reply action row is always visible (owner spec) —
+   its buttons must never ride the hover-reveal rules above. */
+.msg-actions-end .copy-message-btn,
+.msg-actions-end .speak-btn { opacity: 1; }
 
 /* v1.0.6: every icon-only control acknowledges the press (design rule: no
    silent buttons). Immediate, no transition — press feedback should feel
@@ -1134,7 +1142,8 @@ html.dark .logo-mark { filter: brightness(0) invert(1); }
    Comfortable tap targets on touch devices only (desktop keeps the tighter
    visual rhythm), and momentum scrolling in the thread. */
 @media (hover: none) {
-    #appHeader button { min-width: 40px; min-height: 40px; }
+    /* 2.4.9 (ui-audit G01): was 40px — WCAG 2.5.5 wants 44 on touch. */
+    #appHeader button { min-width: 44px; min-height: 44px; }
     #searchCloseBtn { min-width: 44px; min-height: 44px; justify-content: center; }
 }
 #chatHistoryContainer { -webkit-overflow-scrolling: touch; }

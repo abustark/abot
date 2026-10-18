@@ -39,5 +39,6 @@ temp/
 __pycache__/
 *.pyc
 
-# Local-only visual audit screenshots (never pushed)
-docs/audits/visual-*.png
+# Local-only audit captures (never pushed)
+docs/audits/*.png
+docs/audits/ui-audit-results.txt

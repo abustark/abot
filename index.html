@@ -12,7 +12,7 @@
         content="ABot is a secure, multi-model AI chat hub that allows you to interact with top AI models like Gemini, Llama, and more, with a focus on performance and user experience.">
     <meta name="keywords" content="AI, Chatbot, Full-Stack, JavaScript, NodeJS, Firebase, Portfolio, Gemini, Llama">
     <title>ABot | Multi-Model Assistant</title>
-    <meta name="google-site-verification" content="dTytwbvR6YbeqaBn4RV_AP4V4BCCG15QXX4HKNgQJbw" />
+    <meta name="google-site-verification" content="dTytwbvR6YbeqaBn4RV_AP4V4BCCG15QXX4HKNgQJbw">
     <!-- Theme-aware tab icon: the same mark as a black silhouette on light tabs
          and a white one on dark tabs (a favicon cannot be CSS-filtered). The
          plain link is the fallback for browsers that ignore `media`. -->
@@ -22,11 +22,9 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#181715">
-    <link rel="preload" href="/dist/fonts/geist-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="/dist/fonts/geist-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="/dist/fonts/geist-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/dist/fonts/plus-jakarta-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/dist/fonts/source-serif-4-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link href="./dist/output.css?v=p34" rel="stylesheet">
+    <link href="./dist/output.css?v=p35" rel="stylesheet">
     <script src="/vendor/marked.min.js" defer></script>
     <!-- A1 (v1.0.5): highlight.js + its theme are lazy-loaded on the first code
          block (js/chat.js) — they were head-linked here, costing every visitor
@@ -196,7 +194,7 @@
             </div>
 
             <div class="space-y-4">
-                <button id="google-signin-btn"
+                <button type="button" id="google-signin-btn"
                     class="w-full flex items-center justify-center py-3 px-4 bg-canvas dark:bg-card border border-hairline rounded-lg shadow-sm hover:bg-card transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-coral/40">
                     <svg class="w-5 h-5 mr-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
                         <path fill="#FFC107"
@@ -309,7 +307,7 @@
                 </div>
             </div>
             <div class="text-center mt-8">
-                <button id="guest-signin-btn"
+                <button type="button" id="guest-signin-btn"
                     class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full border border-hairline text-sm font-medium text-body hover:text-coral hover:border-coral/50 hover:bg-coral-soft/50 focus:outline-none focus:ring-2 focus:ring-coral/40 transition-colors">Continue
                     as Guest</button>
             </div>
@@ -342,10 +340,10 @@
                 <div class="flex items-center justify-between px-1 pt-1">
                     <div class="flex items-center gap-2.5">
                         <img src="/logo.png" alt="ABot logo" class="logo-mark h-7 w-7 rounded-md select-none" draggable="false">
-                        <span class="text-[15px] font-semibold tracking-tight text-ink">ABot</span>
+                        <span class="font-wordmark text-[15px] text-ink">ABot</span>
                     </div>
-                    <button id="sidebarCloseBtn" aria-label="Close sidebar" data-tooltip="Close sidebar" data-tooltip-pos="bottom"
-                        class="p-2 rounded-lg text-muted hover:text-ink hover:bg-card transition-colors md:hidden">
+                    <button type="button" id="sidebarCloseBtn" aria-label="Close sidebar" data-tooltip="Close sidebar" data-tooltip-pos="bottom"
+                        class="p-2 rounded-lg text-muted hover:text-ink hover:bg-card transition-colors md:hidden inline-flex items-center justify-center min-w-[44px] min-h-[44px]">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
@@ -353,15 +351,15 @@
                         </svg>
                     </button>
                 </div>
-                <button id="newChatBtn"
-                    class="relative w-full text-white bg-coral hover:bg-coral-active active:bg-coral-active active:scale-[0.98] py-2.5 rounded-xl font-medium flex items-center justify-center transition-colors duration-fast ease-out">
+                <button type="button" id="newChatBtn"
+                    class="relative w-full min-h-[44px] text-white bg-coral hover:bg-coral-active active:bg-coral-active active:scale-[0.98] py-2.5 rounded-xl font-medium flex items-center justify-center transition-colors duration-fast ease-out">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
                         stroke-width="1.6" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round"
                             d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
                     </svg>
                     New Chat
-                    <div id="new-chat-spinner" class="absolute right-3 top-1/2 -translate-y-1/2 hidden">
+                    <span id="new-chat-spinner" class="absolute right-3 top-1/2 -translate-y-1/2 hidden">
                         <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
                             viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
@@ -370,7 +368,7 @@
                                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
                             </path>
                         </svg>
-                    </div>
+                    </span>
                 </button>
                 <!-- 2.3.4: command-palette hint moved here from under the composer
                      (owner request). Desktop-only — there is no Ctrl on touch. -->
@@ -391,7 +389,7 @@
                 <div id="sidebarQuickActions" class="flex gap-2">
                     <!-- 2.3.4: message search moved to the header (left of New chat);
                          Prompts is the only quick action left here. -->
-                    <button id="sidebarPromptBtn" aria-label="Open prompt library"
+                    <button type="button" id="sidebarPromptBtn" aria-label="Open prompt library"
                         class="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs text-muted hover:text-ink bg-card/60 hover:bg-card transition-colors">
                         <svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 2a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2H4zm3 2a1 1 0 00-1 1v1a1 1 0 002 0V5a1 1 0 00-1-1zm4 0a1 1 0 00-1 1v1a1 1 0 002 0V5a1 1 0 00-1-1zm4 0a1 1 0 00-1 1v1a1 1 0 002 0V5a1 1 0 00-1-1zM7 8a1 1 0 00-1 1v1a1 1 0 002 0v-1a1 1 0 00-1-1zm4 0a1 1 0 00-1 1v1a1 1 0 002 0v-1a1 1 0 00-1-1zm4 0a1 1 0 00-1 1v1a1 1 0 002 0v-1a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
                         Prompts
@@ -407,7 +405,7 @@
                      button; Sign out sits last, in red. -->
                 <div id="profileMenu" role="menu" aria-label="Account and settings"
                     class="menu-panel hidden absolute bottom-full left-3 right-3 mb-2 z-30 rounded-2xl bg-canvas dark:bg-card border border-hairline shadow-lift overflow-hidden">
-                    <button id="importChatBtn" role="menuitem" class="menu-row">
+                    <button type="button" id="importChatBtn" role="menuitem" class="menu-row">
                         <span class="menu-label">
                             <svg class="menu-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
@@ -447,7 +445,7 @@
                         <span class="switch" aria-hidden="true"></span>
                     </label>
                     <div class="h-px bg-hairline/70 mx-3"></div>
-                    <button id="signoutBtn" role="menuitem" class="menu-row menu-row-danger">
+                    <button type="button" id="signoutBtn" role="menuitem" class="menu-row menu-row-danger">
                         <span class="menu-label">
                             <svg class="menu-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
@@ -460,14 +458,14 @@
                 <button id="profileMenuBtn" type="button" aria-haspopup="menu" aria-expanded="false"
                     aria-controls="profileMenu" data-tooltip="Account &amp; settings"
                     class="w-full flex items-center gap-3 rounded-xl px-2 py-2 text-left hover:bg-card/60 transition-colors">
-                    <div id="userAvatar"
+                    <span id="userAvatar"
                         class="w-8 h-8 rounded-full bg-coral-soft text-coral flex items-center justify-center text-[11px] font-semibold flex-shrink-0 select-none"
-                        aria-hidden="true">AB</div>
-                    <div class="min-w-0 flex-1">
+                        aria-hidden="true">AB</span>
+                    <span class="min-w-0 flex-1">
                         <span id="userEmailDisplay"
                             class="block font-medium text-sm text-ink truncate">user@example.com</span>
                         <span id="userPlanHint" class="block text-xs text-muted truncate">Account &amp; settings</span>
-                    </div>
+                    </span>
                     <svg class="w-4 h-4 text-muted flex-shrink-0" xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                         <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
@@ -486,8 +484,8 @@
                 style="display:grid;grid-template-columns:1fr auto 1fr;align-items:center;"
                 class="relative z-10 gap-2 h-12 px-3 md:px-4 bg-canvas/80 dark:bg-canvas/80 backdrop-blur-md border-b border-hairline/60 transition-[border-color,background-color] duration-base ease-out">
                 <div class="flex items-center min-w-0">
-                    <button id="sidebarToggle" aria-label="Toggle sidebar" data-tooltip="History" data-tooltip-pos="bottom"
-                        class="mr-1 md:mr-3 text-muted hover:text-ink transition-colors p-2 rounded-lg hover:bg-card">
+                    <button type="button" id="sidebarToggle" aria-label="Toggle sidebar" data-tooltip="History" data-tooltip-pos="bottom"
+                        class="mr-1 md:mr-3 text-muted hover:text-ink transition-colors p-2 rounded-lg hover:bg-card inline-flex items-center justify-center min-w-[44px] min-h-[44px]">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
@@ -506,15 +504,15 @@
                     class="logo-mark h-6 w-6 rounded-md select-none opacity-0 transition-opacity duration-200 ease-out pointer-events-none hidden md:block">
                 <div style="justify-self:end;grid-column:3;" class="flex items-center gap-1.5">
                     <!-- 2.3.4: message search moved here from the sidebar quick actions. -->
-                    <button id="headerSearchBtn" aria-label="Search in messages" data-tooltip="Search messages" data-tooltip-pos="bottom-right"
-                        class="p-2 rounded-lg text-muted hover:text-ink hover:bg-card transition-colors">
+                    <button type="button" id="headerSearchBtn" aria-label="Search in messages" data-tooltip="Search messages" data-tooltip-pos="bottom-right"
+                        class="p-2 rounded-lg text-muted hover:text-ink hover:bg-card transition-colors inline-flex items-center justify-center min-w-[44px] min-h-[44px]">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                             stroke-width="1.6" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="m21 21-4.35-4.35M17 10.5a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0z" />
                         </svg>
                     </button>
-                    <button id="headerNewChatBtn" aria-label="New chat" data-tooltip="New chat (Alt+N)" data-tooltip-pos="bottom-right"
+                    <button type="button" id="headerNewChatBtn" aria-label="New chat" data-tooltip="New chat (Alt+N)" data-tooltip-pos="bottom-right"
                         class="p-2 rounded-lg text-muted hover:text-ink hover:bg-card transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                             stroke-width="1.6" stroke="currentColor" aria-hidden="true">
@@ -536,7 +534,7 @@
                             aria-label="Search messages"
                             class="flex-1 min-w-0 bg-surface dark:bg-card border border-hairline text-body placeholder:text-muted text-sm rounded-btn px-3 py-2 focus:ring-coral/40 focus:border-coral focus:outline-none">
                         <!-- v1.0.4: search had no way out once opened — explicit close + Esc. -->
-                        <button id="searchCloseBtn" aria-label="Close search" data-tooltip="Close search" data-tooltip-pos="bottom"
+                        <button type="button" id="searchCloseBtn" aria-label="Close search" data-tooltip="Close search" data-tooltip-pos="bottom"
                             class="p-2.5 rounded-lg text-muted hover:text-ink hover:bg-card transition-colors flex-shrink-0">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                                 stroke="currentColor" aria-hidden="true">
@@ -549,7 +547,7 @@
                 </div>
 
                 <div id="chatHistoryContainer" class="relative flex-1 overflow-y-auto overscroll-contain p-3 pb-44 md:pb-6 md:p-6 scrollbar-custom">
-                    <div id="chatHistory" class="max-w-3xl mx-auto space-y-6" aria-live="polite" aria-label="Chat messages"></div>
+                    <div id="chatHistory" class="max-w-3xl mx-auto space-y-6" role="log" aria-live="polite" aria-label="Chat messages"></div>
 
                 </div>
 
@@ -579,8 +577,8 @@
                                  the composer's action row (quiet pill, bottom-left); the
                                  panel opens UPWARD from the pill. -->
                             <div class="relative flex items-center flex-shrink-0">
-                                <button id="modelSelectorBtn" data-tooltip="Choose model"
-                                    class="flex items-center gap-1.5 bg-transparent border border-hairline/70 pl-2 pr-1.5 py-1 rounded-full text-[12px] font-normal text-body hover:border-coral/40 hover:text-ink focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-coral/40 dark:focus:ring-offset-canvas transition-[border-color,color] duration-fast ease-out">
+                                <button type="button" id="modelSelectorBtn" data-tooltip="Choose model"
+                                    class="flex items-center gap-1.5 min-h-[44px] bg-transparent border border-hairline/70 pl-2 pr-1.5 py-1 rounded-full text-[12px] font-normal text-body hover:border-coral/40 hover:text-ink focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-coral/40 dark:focus:ring-offset-canvas transition-[border-color,color] duration-fast ease-out">
                                     <span id="modelSelectorDot" class="w-1.5 h-1.5 rounded-full bg-coral"></span>
                                     <span id="modelSelectorLabel" class="font-medium whitespace-nowrap truncate max-w-[104px] md:max-w-[200px]">Select Model</span>
                                     <svg class="w-3 h-3 text-muted" xmlns="http://www.w3.org/2000/svg"
@@ -594,7 +592,7 @@
                                     class="model-panel fixed top-0 left-0 grid grid-cols-2 gap-x-2 w-[calc(100vw-2rem)] max-w-[26rem] overflow-y-auto bg-canvas dark:bg-card border border-hairline rounded-xl shadow-lift z-30 hidden scrollbar-custom"></div>
                             </div>
                             <div class="relative flex items-center order-last flex-shrink-0" style="position:relative;">
-                                <button id="sendBtn" aria-label="Send message" data-tooltip="Send (Enter)" class="w-11 h-11 flex items-center justify-center rounded-full bg-coral text-white shadow-sm transition-transform hover:bg-coral-active active:scale-95">
+                                <button type="button" id="sendBtn" aria-label="Send message" data-tooltip="Send (Enter)" class="w-[44px] h-[44px] flex items-center justify-center rounded-full bg-coral text-white shadow-sm transition-transform hover:bg-coral-active active:scale-95">
                                     <!-- 2.3.5 (owner request): one clean centred arrow — the old
                                          underline bar read as a stray square under the glyph. -->
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
@@ -604,9 +602,9 @@
                                             clip-rule="evenodd" />
                                     </svg>
                                 </button>
-                                <button id="stopBtn" aria-label="Stop generating" data-tooltip="Stop"
+                                <button type="button" id="stopBtn" aria-label="Stop generating" data-tooltip="Stop"
                                     style="position:absolute;inset:0;background:rgb(var(--c-danger));"
-                                    class="stop-hidden absolute inset-0 w-11 h-11 flex items-center justify-center rounded-full text-white bg-danger hover:bg-danger/90 transition-opacity duration-150">
+                                    class="stop-hidden absolute inset-0 w-[44px] h-[44px] flex items-center justify-center rounded-full text-white bg-danger hover:bg-danger/90 transition-opacity duration-150">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
                                         fill="currentColor" aria-hidden="true">
                                         <!-- 2.3.5 (owner request): softer rounded square, optically
@@ -655,7 +653,7 @@
                 </div>
                 <!-- 2.2.6 revamp: circular icon-only jump button (the show logic
                      adds `flex` + `jump-enter`; base stays hidden, no flex). -->
-                <button id="jumpToLatest" aria-label="Jump to latest message" data-tooltip="Jump to latest" data-tooltip-pos="right"
+                <button type="button" id="jumpToLatest" aria-label="Jump to latest message" data-tooltip="Jump to latest" data-tooltip-pos="right"
                     class="fixed bottom-28 right-5 z-20 hidden items-center justify-center w-11 h-11 rounded-full bg-raised border border-hairline shadow-lift text-ink hover:border-coral/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-coral/40 transition-[border-color,box-shadow,transform] duration-base ease-out active:scale-95">
                     <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3" /></svg>
                 </button>
@@ -671,6 +669,8 @@
                 <input type="text" id="commandPaletteInput" placeholder="Type a command or search chats…"
                     aria-label="Search commands" autocomplete="off" spellcheck="false"
                     class="w-full bg-transparent px-5 py-4 text-[15px] text-body placeholder:text-muted border-b border-hairline focus:outline-none">
+                <!-- Custom command-palette combobox (role=listbox + dynamic role=option rows), not a select. -->
+                <!-- [html-validate-disable-next prefer-native-element] -->
                 <div id="commandPaletteList" class="max-h-80 overflow-y-auto scrollbar-custom p-2 space-y-0.5" role="listbox" aria-label="Commands"></div>
                 <div class="flex items-center gap-3 px-4 py-2.5 border-t border-hairline text-[11px] text-muted">
                     <span><kbd class="palette-kbd">↑</kbd> <kbd class="palette-kbd">↓</kbd> navigate</span>
@@ -701,9 +701,9 @@
                     class="w-full h-40 p-2 border rounded-md bg-surface dark:bg-card border-hairline focus:ring-2 focus:ring-coral/40 focus:border-coral focus:outline-none"
                     placeholder="e.g., You are a sarcastic pirate…"></textarea>
                 <div class="mt-4 flex justify-end space-x-2">
-                    <button id="promptCancelBtn"
+                    <button type="button" id="promptCancelBtn"
                         class="px-4 py-2 rounded-md bg-card text-ink hover:bg-hairline">Cancel</button>
-                    <button id="promptSaveBtn"
+                    <button type="button" id="promptSaveBtn"
                         class="px-4 py-2 rounded-md bg-coral hover:bg-coral-active text-white">Save</button>
                 </div>
             </div>
@@ -793,15 +793,15 @@
         </div>
 
         <!-- Toast stack (v2.0.9): multiple toasts, newest on top -->
-        <div id="toast-stack" role="region" aria-live="polite" aria-label="Notifications"
-            class="fixed top-5 right-5 z-[70] flex flex-col items-end gap-2 w-full max-w-xs pointer-events-none"></div>
+        <section id="toast-stack" aria-live="polite" aria-label="Notifications"
+            class="fixed top-5 right-5 z-[70] flex flex-col items-end gap-2 w-full max-w-xs pointer-events-none"></section>
 
 
         <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js" defer></script>
         <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js" defer></script>
         <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js" defer></script>
 
-        <script type="module" src="js/app.js?v=p34"></script>
+        <script type="module" src="js/app.js?v=p35"></script>
 
         <!--
       Tailwind CSS Purge-Safe-List:
@@ -832,6 +832,8 @@
       dark:border-slate-600
       dark:text-gray-300
     -->
+</div>
+
 </body>
 
 </html>

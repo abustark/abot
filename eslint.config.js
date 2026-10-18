@@ -84,9 +84,9 @@ module.exports = [
 
     // Tools that embed browser-context code inside puppeteer page.evaluate()
     // callbacks: those callbacks execute in the page, not in Node, so both
-    // global sets are legitimate for these two files.
+    // global sets are legitimate for these files.
     {
-        files: ['tools/visual-check.js', 'tools/interaction-test.js'],
+        files: ['tools/visual-check.js', 'tools/interaction-test.js', 'tools/ui-audit.js'],
         languageOptions: {
             ecmaVersion: 2022,
             sourceType: 'commonjs',

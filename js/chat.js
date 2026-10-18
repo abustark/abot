@@ -368,6 +368,81 @@ export const createNewChat = async () => {
 // stale error would silently drop every message sent after it.
 const RETRY_BTN_HTML = `<button class="retry-btn mt-3 inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-btn border border-danger/40 text-danger hover:bg-danger/10 transition-colors" aria-label="Retry" data-tooltip="Retry this message"><svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>Retry</button>`;
 
+// 2.4.9 (owner spec): the per-message action buttons, hoisted to module
+// scope so the static end-of-reply row reuses the exact same markup.
+const COPY_BTN_HTML = `<button class="copy-message-btn p-1.5 rounded-md text-muted hover:text-ink transition-colors" data-tooltip="Copy" aria-label="Copy message"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" /></svg></button>`;
+
+const SPEAK_BTN_HTML = `<button class="speak-btn p-1.5 rounded-md transition-colors hover:text-coral text-muted" aria-label="Read aloud" aria-pressed="false" data-tooltip="Read aloud"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M13 4.5c0-1.104-.806-2.03-1.886-2.03H11L9.66 5.33A2.5 2.5 0 017.5 6.5H5A2.5 2.5 0 002.5 9v6A2.5 2.5 0 005 17.5h2.5a2.5 2.5 0 012.16 1.17l1.34 2.83h.114C12.194 21.5 13 20.574 13 19.47v-14.97z"/><path d="M16.5 8.5a.75.75 0 011.06 0 5 5 0 010 7 .75.75 0 11-1.06-1.06 3.5 3.5 0 000-4.88.75.75 0 010-1.06z"/><path d="M19.09 5.5a.75.75 0 011.06 0 9 9 0 010 13 .75.75 0 11-1.06-1.06 7.5 7.5 0 000-10.88.75.75 0 010-1.06z"/></svg></button>`;
+
+// 2.4.9 (owner spec): the static end-of-reply row — copy · read aloud, no
+// hover needed, shown only once a reply has finished (stream end, stop, or
+// already-persisted history).
+const END_ACTIONS_HTML = `<div class="msg-actions-end flex items-center gap-0.5 mt-2">${COPY_BTN_HTML}${SPEAK_BTN_HTML}</div>`;
+
+// 2.4.9: bind the action buttons of one message container. Idempotent —
+// buttons already wired are skipped, so it can run again when the static end
+// row is appended after streaming. Copy works without an index; speak, edit
+// and retry need the message's position in state.
+const wireMessageActions = (container, msgIndex) => {
+    const hasIndex = typeof msgIndex === 'number';
+    container.querySelectorAll('.copy-message-btn').forEach((btn) => {
+        if (btn.dataset.wired) return;
+        btn.dataset.wired = '1';
+        btn.addEventListener('click', () => {
+            const proseContent = container.querySelector('.prose');
+            // 2.2.8: textContent of the template HTML carried indentation and
+            // blank-line padding — copies had leading/trailing whitespace.
+            // Strip trailing per-line spaces and squeeze 3+ blank lines to one.
+            const raw = proseContent ? proseContent.textContent : '';
+            const textToCopy = raw.replace(/[ \t]+$/gm, '').replace(/\n{3,}/g, '\n\n').trim();
+            navigator.clipboard.writeText(textToCopy).then(() => { showToast("Copied!"); flashCopiedState(btn); }).catch(() => showToast("Failed to copy", "error"));
+        });
+    });
+    if (!hasIndex) return;
+    const speakBtns = container.querySelectorAll('.speak-btn');
+    speakBtns.forEach((btn) => {
+        if (btn.dataset.wired) return;
+        btn.dataset.wired = '1';
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const msg = state.chats[state.activeChatId]?.messages[msgIndex];
+            if (!msg) return;
+            if (isSpeaking()) {
+                stopSpeaking();
+                speakBtns.forEach((b) => b.setAttribute('aria-pressed', 'false'));
+            } else {
+                speakText(msg.content, { onend: () => speakBtns.forEach((b) => b.setAttribute('aria-pressed', 'false')) });
+                speakBtns.forEach((b) => b.setAttribute('aria-pressed', 'true'));
+            }
+        });
+    });
+    container.querySelectorAll('.edit-msg-btn').forEach((btn) => {
+        if (btn.dataset.wired) return;
+        btn.dataset.wired = '1';
+        btn.addEventListener('click', (e) => { e.stopPropagation(); window.editMessage(state.activeChatId, msgIndex); });
+    });
+    container.querySelectorAll('.retry-btn').forEach((btn) => {
+        if (btn.dataset.wired) return;
+        btn.dataset.wired = '1';
+        btn.addEventListener('click', (e) => { e.stopPropagation(); regenerateLastResponse(); });
+    });
+};
+
+// 2.4.9: append the static end-of-reply row under a reply that just finished
+// streaming (normal end or stop). History rows are built with the row already
+// in place, so this guards against doubles.
+const attachEndActionRow = (spanEl, msgIndex) => {
+    const container = spanEl?.closest('.message-container');
+    if (!container || container.querySelector('.msg-actions-end') || !container.querySelector('.prose')) return;
+    const holder = document.createElement('div');
+    holder.innerHTML = END_ACTIONS_HTML;
+    const row = holder.firstElementChild;
+    const proseWrap = container.querySelector('.w-full.overflow-hidden');
+    if (proseWrap) proseWrap.insertAdjacentElement('afterend', row);
+    else container.appendChild(row);
+    wireMessageActions(container, msgIndex);
+};
+
 export const appendMessage = (message, isHistory = false, options = {}) => {
     const { role, content: text, model: messageModel } = message;
     const isUser = role === 'user';
@@ -417,23 +492,25 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
         }
     }
 
-    // --- Action Buttons (v1.0.3/v1.0.6: owner spec — AI rows carry copy · read
-    // aloud; user rows carry copy · edit. Nothing is deletable at message level
-    // any more, so there is no destructive affordance to mis-tap on mobile.
-    // Chats themselves are still deletable from the sidebar. 2.2.8: the
-    // per-message regenerate icon was removed (owner request) — Retry on the
-    // error card is the only regenerate affordance.) ---
-                    const copyBtnHtml = `<button class="copy-message-btn p-1.5 rounded-md text-muted hover:text-ink transition-colors" data-tooltip="Copy" aria-label="Copy message"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" /></svg></button>`;
-
-    const speakBtnHtml = `<button class="speak-btn p-1.5 rounded-md transition-colors hover:text-coral text-muted" aria-label="Read aloud" aria-pressed="false" data-tooltip="Read aloud"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M13 4.5c0-1.104-.806-2.03-1.886-2.03H11L9.66 5.33A2.5 2.5 0 017.5 6.5H5A2.5 2.5 0 002.5 9v6A2.5 2.5 0 005 17.5h2.5a2.5 2.5 0 012.16 1.17l1.34 2.83h.114C12.194 21.5 13 20.574 13 19.47v-14.97z"/><path d="M16.5 8.5a.75.75 0 011.06 0 5 5 0 010 7 .75.75 0 11-1.06-1.06 3.5 3.5 0 000-4.88.75.75 0 010-1.06z"/><path d="M19.09 5.5a.75.75 0 011.06 0 9 9 0 010 13 .75.75 0 11-1.06-1.06 7.5 7.5 0 000-10.88.75.75 0 010-1.06z"/></svg></button>`;
+    // --- Action Buttons (2.4.9 owner spec: AI rows keep copy · read aloud on
+    // the hover meta line AND get a static end-of-reply row (copy · read
+    // aloud) once finished; user rows carry copy · read aloud · edit in the
+    // left pill. Nothing is deletable at message level, so there is no
+    // destructive affordance to mis-tap on mobile; chats are still deletable
+    // from the sidebar. 2.2.8: the per-message regenerate icon was removed
+    // (owner request) — Retry on the error card is the only regenerate
+    // affordance.) ---
 
     // AI rows: copy + read aloud, parked top-right on the meta line.
-    const aiActionsHtml = (!isUser) ? copyBtnHtml + speakBtnHtml : '';
+    const aiActionsHtml = (!isUser) ? COPY_BTN_HTML + SPEAK_BTN_HTML : '';
+    // Only finished AI replies (history, or a message with a known index) get
+    // the static end row — the streaming placeholder must not show it yet,
+    // and error cards keep Retry alone.
+    const showEndActions = !message.isError && (isHistory === true || typeof options.index === 'number');
 
-    let actionButtonsHtml = '';
-    if (typeof options.index === 'number') {
-        actionButtonsHtml = `
-                            ${isUser ? `<button class="edit-msg-btn p-1.5 text-muted hover:text-coral transition-colors" data-tooltip="Edit" aria-label="Edit message"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button>` : ''}`;
+    let userActionsHtml = '';
+    if (isUser && typeof options.index === 'number') {
+        userActionsHtml = `${SPEAK_BTN_HTML}<button class="edit-msg-btn p-1.5 text-muted hover:text-coral transition-colors" data-tooltip="Edit" aria-label="Edit message"><svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg></button>`;
     }
 
     const messageEl = document.createElement('div');
@@ -446,8 +523,8 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
         messageEl.innerHTML = `
                             <div class="message-container w-full flex justify-end mb-5 group relative">
                                 <div class="absolute right-full mr-2 top-2 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity flex items-center bg-canvas dark:bg-card rounded-lg shadow-sm border border-hairline px-1">
-                                    ${copyBtnHtml}
-                                    ${actionButtonsHtml}
+                                    ${COPY_BTN_HTML}
+                                    ${userActionsHtml}
                                 </div>
                                 <div class="max-w-[85%] md:max-w-[75%] user-bubble bg-coral-soft px-4 py-2.5 text-[15px] leading-relaxed text-ink shadow-soft">
                                    <div class="prose dark:prose-invert max-w-none whitespace-pre-wrap">${messageContent}</div>
@@ -465,7 +542,7 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
                                          <span class="text-white text-[8px] font-semibold">${modelConf.name.substring(0, 2).toUpperCase()}</span>
                                     </div>
                                     <span class="text-xs font-semibold ${providerColor.text}">${modelConf.name}</span>
-                                    ${showTs ? `<span class="text-[11px] text-muted/80 msg-timestamp">${formatRelativeTime(message.ts)}</span>` : ''}
+                                    ${showTs ? `<span class="text-[11px] text-muted msg-timestamp">${formatRelativeTime(message.ts)}</span>` : ''}
                                     <div class="ml-auto flex items-center gap-0.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
                                         ${aiActionsHtml}
                                     </div>
@@ -475,41 +552,13 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
                                         ${messageContent}
                                     </div>
                                 </div>
+                                ${showEndActions ? END_ACTIONS_HTML : ''}
                             </div>
                         `;
     }
 
     // Attach Event Listeners
-    if (typeof options.index === 'number') {
-        messageEl.querySelector('.edit-msg-btn')?.addEventListener('click', (e) => { e.stopPropagation(); window.editMessage(state.activeChatId, options.index); });
-        const speakBtn = messageEl.querySelector('.speak-btn');
-        speakBtn?.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const msg = state.chats[state.activeChatId]?.messages[options.index];
-            if (!msg) return;
-            if (isSpeaking()) {
-                stopSpeaking();
-                speakBtn.setAttribute('aria-pressed', 'false');
-            } else {
-                speakText(msg.content, { onend: () => speakBtn.setAttribute('aria-pressed', 'false') });
-                speakBtn.setAttribute('aria-pressed', 'true');
-            }
-        });
-        messageEl.querySelector('.retry-btn')?.addEventListener('click', (e) => { e.stopPropagation(); regenerateLastResponse(); });
-    }
-
-    const copyBtn = messageEl.querySelector('.copy-message-btn');
-    if (copyBtn) {
-        copyBtn.addEventListener('click', () => {
-            const proseContent = messageEl.querySelector('.prose'); // Simpler selection
-            // 2.2.8: textContent of the template HTML carried indentation and
-            // blank-line padding — copies had leading/trailing whitespace.
-            // Strip trailing per-line spaces and squeeze 3+ blank lines to one.
-            const raw = proseContent ? proseContent.textContent : '';
-            const textToCopy = raw.replace(/[ \t]+$/gm, '').replace(/\n{3,}/g, '\n\n').trim();
-            navigator.clipboard.writeText(textToCopy).then(() => { showToast("Copied!"); flashCopiedState(copyBtn); }).catch(() => showToast("Failed to copy", "error"));
-        });
-    }
+    wireMessageActions(messageEl, options.index);
 
     dom.chatHistory.appendChild(messageEl);
     window.__abotFollowBottom?.(); // v2.0.15: keep up if the user is parked at the bottom
@@ -882,6 +931,8 @@ export const sendMessage = async () => {
         });
 
         currentChat.messages.push({ role: 'assistant', content: fullReply, model: currentChat.model, ts: Date.now() });
+        // 2.4.9: reply finished — reveal the static end-of-reply action row.
+        attachEndActionRow(latestBotMessageSpan, currentChat.messages.length - 1);
         if (localStorage.getItem('abot-auto-tts') === 'true' && fullReply) {
             speakText(fullReply);
         }
@@ -893,6 +944,8 @@ export const sendMessage = async () => {
             const finalContent = fullReply || "";
             const stoppedMessage = finalContent + '\n\n*-- Generation stopped --*';
             currentChat.messages.push({ role: 'assistant', content: stoppedMessage, model: currentChat.model, ts: Date.now() });
+            // 2.4.9: a stopped generation is finished too — show the end row.
+            attachEndActionRow(latestBotMessageSpan, currentChat.messages.length - 1);
         } else {
             console.error("sendMessage stream error:", error);
             streamFailed = true;

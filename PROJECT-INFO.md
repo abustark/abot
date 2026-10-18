@@ -52,9 +52,9 @@
 | Markdown | marked (vendored) | `vendor/marked.min.js` 44 KB (+ npm `^18.0.11`) | Lazy/deferred rendering |
 | Highlight | highlight.js (vendored) | `vendor/highlight.min.js` 164 KB (+ npm `^11.12.0`) | Lazy on first code block |
 | 3D bg (optional) | Vanta.js + Three.js | Vanta pinned 0.5.24, Three r134, default OFF lazy | Ambient background toggle |
-| Fonts | Self-hosted woff2 | 8 files in `dist/fonts/` | Geist / JetBrains Mono / Source Serif 4 |
-| PWA | Hand-written service worker + manifest | `abot-cache-v60`, 24 precached assets | Installable, offline shell |
-| Testing | jsdom | ^30.0.1 | interaction/cycle/smoke suites |
+| Fonts | Self-hosted woff2 | 7 files in `dist/fonts/` (3 precached) | Plus Jakarta Sans / Cabinet Grotesk / JetBrains Mono / Source Serif 4 |
+| PWA | Hand-written service worker + manifest | `abot-cache-v61`, 23 precached assets | Installable, offline shell |
+| Testing | jsdom | ^30.0.1 | interaction/cycle/smoke suites + html-validate + ui-audit |
 | Syntax | acorn + acorn-walk | ^8.18.0 / ^8.3.5 | `npm run check` |
 | Bundling helper | esbuild | ^0.28.2 | Vendor builds |
 | Browser QA | puppeteer-core | ^25.11.0 | `visual-check.js`, Playwright E2E script |
@@ -98,7 +98,7 @@
 ## 5. Quality & testing
 
 - **`npm test` (4 suites, Node, no external runner):** `tests/chat-security.test.js` (113 lines — `:free` acceptance, traversal/model-pattern rejection, 40/8k caps, field stripping, options coercion, limiter + email-status), `tools/smoke-node.js` (logged-out/logged-in jsdom walk), `tools/interaction-test.js` (clicks every shell control, asserts visible effect), `tools/cycle-test.js` (mobile keyboard dismiss, single-fire listeners, 3-rapid-clicks→1-message).
-- **Plus:** ESLint (`npm run lint`), acorn syntax check (`npm run check`), `tsc -p jsconfig.json` (`npm run typecheck`), Python header audit (`tools/test-security.py`), Playwright E2E (`tools/test-playwright.py`), visual regression (`npm run visual:local` + 10 `docs/audits/visual-*.png`).
+- **Plus:** ESLint (`npm run lint`), acorn syntax check (`npm run check`), `tsc -p jsconfig.json` (`npm run typecheck`), HTML validity (`npm run test:html`), security-header + endpoint audit (`npm run test:security`), browser UI audit (`npm run ui:audit`), Playwright E2E (`tools/test-playwright.py`), visual regression (`npm run visual:local` + 10 `docs/audits/visual-*.png`).
 - **Parity proof:** `tools/verify-parity.js` — token parity 56/57 after de-monolithisation (1 deviation = documented innerHTML→DOM XSS fix); `index.html` 2555→813 lines, 8 ES modules.
 - **Pre-commit hook** (`.githooks/`, wired by `prepare`) runs syntax + lint.
 - **Bug registry:** `BUGS-AND-FIXES.md` (B-01→B-49+), `COMMIT-HISTORY.md` (312 lines, `x.y.10→x.y+1.0` version rule), audits `ui-baseline/ui-final/perf-pwa`, `SUGGESTIONS.md`, `AGENTS.md`.
@@ -111,7 +111,7 @@
 - **315** git-tracked files (0 in `node_modules`); **104** excluding skill packs (`.claude/agent/.agents` = 211 support files).
 - **~3,200 lines** across **9** `js/` ES modules (`app.js` 1047, `chat.js` 934, `auth.js` 418, `utils.js` 265, `config.js` 151, `ui.js` 134, `palette.js` 126, `dom.js` 107, `state.js` 24) + `server.js` 380 + `api/chat.js` 224 + `lib/chat-security.js` 185.
 - **20 configured models** × **4 providers**; **9 prompt presets**; **49+** bug-registry entries.
-- **4 test suites** in `npm test`; **10** visual baselines; **24** SW-precached assets; **8** self-hosted fonts.
+- **4 test suites** in `npm test`; **10** visual baselines; **23** SW-precached assets; **7** self-hosted fonts.
 - **10 security issues (S1–S10)** remediated in Phase 1 (2026-08-27); favicon 380 KB→1.2 KB in Phase 4.
 - **60s** serverless max duration with **55s** upstream abort; **30 req/15min** per-identity chat limit + **100 req/15min** IP general limit.
 

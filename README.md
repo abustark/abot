@@ -99,7 +99,7 @@ This is the part most portfolio projects skip.
   - `tools/interaction-test.js` — clicks **every shell control** in jsdom and asserts the visible effect
   - `tools/cycle-test.js` — behavior regressions (e.g. mobile keyboard dismissal after send)
   - `tools/smoke-node.js` — jsdom runtime walk of logged-out/logged-in init paths
-- **Plus**: ESLint (`npm run lint`), acorn syntax check of every JS file (`npm run check`), TypeScript checking via JSDoc (`npm run typecheck`), Python security-header audit (`tools/test-security.py`), Playwright E2E (`tools/test-playwright.py`), visual regression (`npm run visual:local`)
+- **Plus**: ESLint (`npm run lint`), acorn syntax check of every JS file (`npm run check`), TypeScript checking via JSDoc (`npm run typecheck`), HTML validity (`npm run test:html`, html-validate), Python security-header + endpoint audit (`npm run test:security`, needs local server), real-browser UI audit with 11 hard-fail groups (`npm run ui:audit`, needs local server), Playwright E2E (`tools/test-playwright.py`), visual regression (`npm run visual:local`)
 - **Pre-commit hook** runs syntax + lint on every commit (`.githooks/`, wired by `npm ci`)
 
 ---

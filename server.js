@@ -87,6 +87,13 @@ app.use(helmet({
     crossOriginEmbedderPolicy: false, // Required for some CDN resources
 }));
 
+// 2.4.9: mirror vercel.json's Permissions-Policy so local + prod match.
+// (helmet v8 removed the permissionsPolicy middleware; set it explicitly.)
+app.use((req, res, next) => {
+    res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+    next();
+});
+
 // Security: rate limiting
 // General: 100 requests / 15 min per IP — chat: enforced per-identity below (shared lib)
 const generalLimiter = rateLimit({

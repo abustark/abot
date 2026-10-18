@@ -78,12 +78,16 @@ ABot is a **vanilla-JS, multi-model AI chat app** (no framework):
 npm ci                      # first time
 npm run lint                # eslint — 0 errors (warnings ≤ 30 acceptable)
 npm run check               # acorn syntax check of every JS file
+npm run typecheck           # tsc -p jsconfig.json (check-only) — 0 errors
 npm run build:css           # rebuild Tailwind after any CSS/config/markup class change
 git diff --exit-code -- dist/output.css   # stale CSS = fail; commit the rebuild
 npm run test                # security tests + jsdom smoke + interaction test
+npm run test:html           # html-validate on index.html — hard fail
+npm run test:security       # python tools/test-security.py — headers + endpoint auth (needs `node server.js` on :3000)
+npm run ui:audit            # tools/ui-audit.js — 11 hard-fail groups, desktop + mobile (needs `node server.js` on :3000)
 ```
 
-`tools/interaction-test.js` clicks every shell control in jsdom and asserts the visible effect — if you broke a toggle, this is where it shows. Add a case there for every new interactive element you build.
+`tools/interaction-test.js` clicks every shell control in jsdom and asserts the visible effect — if you broke a toggle, this is where it shows. Add a case there for every new interactive element you build. `tools/ui-audit.js` is the real-browser counterpart (sizes, contrast, stacking, fonts, overflow); keep both green.
 
 > **Note:** the pre-commit hook still runs `npm run check` + `npm run lint` automatically on every
 > commit (repo mechanism, not agent choice). If the owner ever wants even that removed, say so

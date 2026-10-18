@@ -26,10 +26,14 @@ function stubChain(label) {
     const authCallbacks = [];
     const authObj = new Proxy({}, {
         get(t, prop) {
+            if (prop in t) return t[prop];
             if (prop === 'onAuthStateChanged') return (cb) => { authCallbacks.push(cb); return () => {}; };
             if (prop === 'then') return undefined;
             return stubChain('auth.' + String(prop));
         },
+        // allows tests to override specific props (e.g. currentUser) while
+        // every other property keeps returning the generic stub.
+        set(t, prop, val) { t[prop] = val; return true; },
     });
     window.firebase = { initializeApp: () => ({}), auth: () => authObj, firestore: () => stubChain('fs') };
     window.marked = { parse: (s) => String(s) };
@@ -633,6 +637,97 @@ function stubChain(label) {
         delete state.chats['8888'];
         state.activeChatId = prevActive;
         renderActiveChat();
+        await sleep(30);
+    }
+
+    // --- 2.4.9: message action rows (owner spec — user copy · read aloud · edit;
+    // AI hover row + static end row; end row only after the reply finishes) ---
+    {
+        const { state } = await import('file://' + path.join(esmDir, 'state.js'));
+        const chatMod = await import('file://' + path.join(esmDir, 'chat.js'));
+        const prevActive = state.activeChatId;
+        const model = 'groq/openai/gpt-oss-120b';
+        const aiContainers = () => [...window.document.querySelectorAll('#chatHistory .message-container:not(.justify-end)')];
+
+        state.chats['7777'] = {
+            id: 7777, name: 'Actions Test', model,
+            messages: [
+                { role: 'user', content: 'ping', model, ts: Date.now() },
+                { role: 'assistant', content: 'pong', model, ts: Date.now() },
+            ],
+        };
+        state.activeChatId = '7777';
+        chatMod.renderActiveChat();
+        await sleep(30);
+
+        const userContainer = window.document.querySelector('#chatHistory .message-container.justify-end');
+        check('user row offers copy · read aloud · edit',
+            !!userContainer?.querySelector('.copy-message-btn') && !!userContainer?.querySelector('.speak-btn') && !!userContainer?.querySelector('.edit-msg-btn'));
+        check('user row has exactly three actions',
+            userContainer ? userContainer.querySelectorAll('button').length === 3 : false,
+            userContainer ? userContainer.querySelectorAll('button').length + ' buttons' : 'no row');
+
+        const aiContainer = aiContainers().pop();
+        const endRow = aiContainer?.querySelector('.msg-actions-end');
+        check('finished AI reply carries the static end row', !!endRow);
+        check('end row = copy + read aloud only (no edit)',
+            endRow ? !!endRow.querySelector('.copy-message-btn') && !!endRow.querySelector('.speak-btn') && !endRow.querySelector('.edit-msg-btn') : false);
+        check('AI hover row keeps its copy + read aloud pair',
+            aiContainer ? aiContainer.querySelectorAll('.copy-message-btn').length === 2 && aiContainer.querySelectorAll('.speak-btn').length === 2 : false);
+
+        // A mid-stream placeholder (no index, not history) must defer the row.
+        chatMod.appendMessage({ role: 'assistant', content: '', model, ts: Date.now() }, false, {});
+        check('streaming placeholder defers the end row', !aiContainers().pop()?.querySelector('.msg-actions-end'));
+        chatMod.renderActiveChat();
+        await sleep(30);
+
+        // Error cards keep Retry alone — no action pair under the alert.
+        state.chats['7777'].messages.push({ role: 'assistant', content: 'boom', model, isError: true, ts: Date.now() });
+        chatMod.renderActiveChat();
+        await sleep(30);
+        const errContainer = aiContainers().pop();
+        check('error card gets no end row', !!errContainer && !errContainer.querySelector('.msg-actions-end') && !!errContainer.querySelector('.retry-btn'));
+        state.chats['7777'].messages.pop();
+        chatMod.renderActiveChat();
+        await sleep(30);
+
+        // Full streamed round-trip: no row while streaming, row when done.
+        const enc = new TextEncoder();
+        const sse = (obj) => enc.encode(`data: ${JSON.stringify(obj)}\n\n`);
+        const realFetch = window.fetch;
+        const realGlobalFetch = global.fetch;
+        const realGetIdToken = fakeUser.getIdToken;
+        // sendMessage() reads state.auth.currentUser — swap in the stub user.
+        const prevCurrentUser = state.auth.currentUser;
+        state.auth.currentUser = fakeUser;
+        fakeUser.getIdToken = async () => 'test-token';
+        const fakeFetch = async () => {
+            const parts = [
+                sse({ choices: [{ delta: { content: 'Hello ' } }] }),
+                sse({ choices: [{ delta: { content: 'world' } }] }),
+                enc.encode('data: [DONE]\n\n'),
+            ];
+            let i = 0;
+            return { ok: true, body: { getReader: () => ({ read: async () => (i < parts.length ? { done: false, value: parts[i++] } : { done: true, value: undefined }) }) } };
+        };
+        // chat.js calls bare fetch() — in this harness that resolves to Node's
+        // global fetch, not window.fetch, so both need the stub.
+        window.fetch = fakeFetch;
+        global.fetch = fakeFetch;
+        $('messageInput').value = 'stream probe';
+        await chatMod.sendMessage();
+        await sleep(80);
+        const streamed = aiContainers().pop();
+        check('streamed reply renders + gains the end row once finished',
+            !!streamed?.querySelector('.msg-actions-end') && streamed?.querySelector('.prose')?.textContent.includes('Hello world'));
+        window.fetch = realFetch;
+        global.fetch = realGlobalFetch;
+        state.auth.currentUser = prevCurrentUser;
+        if (realGetIdToken === undefined) delete fakeUser.getIdToken; else fakeUser.getIdToken = realGetIdToken;
+
+        delete state.chats['7777'];
+        state.activeChatId = prevActive;
+        chatMod.renderActiveChat();
         await sleep(30);
     }
 

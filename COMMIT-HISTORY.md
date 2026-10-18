@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.4.9`** (current head is `2.4.8`)
+> - **`main` → `2.4.10`** (current head is `2.4.9`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** (no version of its own: `git push origin main:arena/01a03fe9-abot --force`;
 >   both branches stay identical)
 
@@ -25,6 +25,17 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.4.9 - type refresh, message actions, hard-fail audit gates
+- **Date**: 2026-10-18
+- **Why**: owner batch — (a) refresh the UI type, (b) owner-locked message-action rows, (c) add the approved hard-fail verification gates (real-browser UI audit, security-header check, HTML validity) that the growing app needs.
+- **UI type refresh**: body/UI face moves **Geist → Plus Jakarta Sans** (self-hosted variable woff2, weights 200–800); **Cabinet Grotesk 700** added as the sidebar wordmark face (`.font-wordmark`, sidebar brand span only); JetBrains Mono (code) and Source Serif 4 (display) unchanged. `dist/fonts/` 8→7 files (3 Geist files out, PJS + Cabinet Grotesk in); the head preload now covers PJS + Source Serif 4. Cache: `?v=p34`→`p35`, `CACHE_NAME` v60→v61 (23 precached assets), build id `2026-10-18.2`.
+- **Message actions**: user messages now offer copy + read-aloud + edit; AI replies keep the hover pair and gain a **static end row** (copy + read aloud, always visible) that appears only once the reply finishes (including on user abort); error cards keep Retry alone. New `wireMessageActions()` / `attachEndActionRow()` in `js/chat.js`; `.msg-actions-end` opacity override in `src/input.css`. Timestamp text darkened (`text-muted/80` → `text-muted`) to clear the contrast floor.
+- **`npm run ui:audit`** (new `tools/ui-audit.js`): real-browser, desktop 1366×768 + mobile 412×915, **11 hard-fail groups** (G01 tap targets, G02 tooltips, G03 token colors/no inline hex, G04 layout integrity, G05 stacking, G06 overflow, G07 contrast, G08 motion ≤300 ms, G09 fonts, G10 spacing scale, G11 message actions). Needs `node server.js` on :3000; screenshots + log in `docs/audits/` (gitignored). Also fixed a real G01 finding it exposed: helmet/`#appHeader` touch rule capped header buttons at 40px → 44px (WCAG 2.5.5), plus px-literal sizes on shell controls (`min-w-[44px]`, `w-[44px]`, model pill `min-h-[44px]`).
+- **`npm run test:security`**: `tools/test-security.py` upgraded — real exit codes, offline/429 = hard fail, WARN removed (all findings fail), new HSTS / Referrer-Policy / Permissions-Policy checks, stale model id in the probe payload fixed. `server.js` now also sends `Permissions-Policy` (helmet v8 removed that middleware — explicit header mirroring `vercel.json`) so local + prod match.
+- **`npm run test:html`**: `html-validate` added (`config: .htmlvalidate.js`, recommended preset; `no-inline-style` off — JS-driven dynamic state, inline hex is independently hard-failed by ui-audit G03). `index.html` fixes: **unclosed `#app-container` div** (everything after it floated inside it — real structural defect), self-closing `<meta>`, `type="button"` on 17 shell buttons, divs inside buttons → spans, `aria-label` misuse on `#chatHistory` → `role="log"`, toast stack div → `<section>`, command-palette listbox exemption.
+- **Gates/docs**: `typecheck`, `test:html`, `test:security`, `ui:audit` wired into `AGENTS.md` §3; README + PROJECT-INFO font/tooling/asset-count truth pass; `tools/interaction-test.js` gained the 2.4.9 message-action block incl. a full fake-SSE stream round-trip (auth mock proxy now honors explicit property overrides).
+- **Verified this batch**: ui-audit 127/127 PASS (desktop + mobile), test-security 8/8, html-validate clean, `tsc` 0 errors, smoke + interaction + cycle suites green.
 
 ### 2.4.8 - removed docs/ARENA-AI-CHECKLIST.md (owner directive)
 - **Date**: 2026-10-18

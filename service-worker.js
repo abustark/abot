@@ -3,7 +3,7 @@
  * Provides offline caching for local assets only
  */
 
-const CACHE_NAME = 'abot-cache-v60'; // 2.4.6: hygiene sweep, motion polish, defect fixes
+const CACHE_NAME = 'abot-cache-v61'; // 2.4.9: type refresh (Plus Jakarta Sans + Cabinet Grotesk), message-action rows, new audit tooling
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -11,7 +11,7 @@ const STATIC_ASSETS = [
     '/favicon-32-light.png',
     '/favicon-32-dark.png',
     '/logo.png',
-    '/dist/output.css?v=p34',
+    '/dist/output.css?v=p35',
     '/js/app.js',
     '/js/config.js',
     '/js/dom.js',
@@ -27,9 +27,8 @@ const STATIC_ASSETS = [
     // A1/A2 (v1.0.5): atom-one-dark.css is injected with the lazy highlight.js
     // load, and the Inter faces are gone — neither belongs in the precache.
     '/manifest.json',
-    '/dist/fonts/geist-latin-400-normal.woff2',
-    '/dist/fonts/geist-latin-500-normal.woff2',
-    '/dist/fonts/geist-latin-600-normal.woff2',
+    '/dist/fonts/plus-jakarta-sans-latin-wght-normal.woff2',
+    '/dist/fonts/cabinet-grotesk-latin-700-normal.woff2',
     '/dist/fonts/source-serif-4-latin-400-normal.woff2'
 ];
 
