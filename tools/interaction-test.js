@@ -534,6 +534,34 @@ function stubChain(label) {
         window.document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
         await sleep(280);
         check('Escape closes dialog', modal.classList.contains('hidden'));
+
+        // 2.4.10 (owner report): the sign-out dialog's confirm button used to be
+        // clone-replaced with a {once:true} handler per open — that detached the
+        // chat-delete handler (bound once at init) and left later Enter presses
+        // dead. Regression: re-open + cancel the sign-out dialog, then the
+        // shared confirm must still run DELETE — via Enter on the focused button.
+        const { state } = await import('file://' + path.join(esmDir, 'state.js'));
+        const { deleteChat } = await import('file://' + path.join(esmDir, 'chat.js'));
+        click($('signoutBtn'));
+        await sleep(60);
+        check('signout confirm marked as signout action', $('deleteConfirmBtn').dataset.action === 'signout');
+        window.document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+        await sleep(280);
+
+        const prevProbeUser = state.auth.currentUser;
+        state.auth.currentUser = { uid: 'regression-probe' };
+        state.chats['7776'] = { id: 7776, name: 'Regression probe', model: 'groq/openai/gpt-oss-120b', messages: [] };
+        deleteChat('7776');
+        await sleep(60);
+        check('delete dialog marked as delete action', $('deleteConfirmBtn').dataset.action === 'delete');
+        check('delete dialog reopened after the signout cancel', !modal.classList.contains('hidden'));
+        $('deleteConfirmBtn').focus();
+        $('deleteConfirmBtn').dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+        await sleep(320);
+        check('Enter on focused confirm activates (dialog closes)', modal.classList.contains('hidden'));
+        check('delete confirm does NOT sign out (cross-wire regression)', state.isAppInitialized !== false);
+        state.auth.currentUser = prevProbeUser;
+        delete state.chats['7776'];
     }
     // model panel typeahead (v2.0.9 roadmap #5)
     {
@@ -577,6 +605,19 @@ function stubChain(label) {
         check('chat row options menu opens', !!window.document.querySelector('.chat-options-menu:not(.hidden)'));
         window.document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
         check('Escape closes chat row options menu', !window.document.querySelector('.chat-options-menu:not(.hidden)'));
+
+        // 2.4.10 (owner request): ⋮ menu arrow-key navigation.
+        rowOptionsBtn?.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }));
+        check('ArrowDown opens the ⋮ menu', !!window.document.querySelector('.chat-options-menu:not(.hidden)'));
+        check('first item focused (Rename)', window.document.activeElement?.textContent === 'Rename', window.document.activeElement?.textContent);
+        window.document.activeElement?.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }));
+        check('ArrowDown moves focus to Export JSON', window.document.activeElement?.textContent === 'Export JSON', window.document.activeElement?.textContent);
+        window.document.activeElement?.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true, cancelable: true }));
+        check('ArrowUp moves focus back to Rename', window.document.activeElement?.textContent === 'Rename', window.document.activeElement?.textContent);
+        window.document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+        check('Escape closes the menu and restores focus to the ⋮ trigger',
+            !window.document.querySelector('.chat-options-menu:not(.hidden)') && window.document.activeElement === rowOptionsBtn);
+        check('trigger reports collapsed state', rowOptionsBtn?.getAttribute('aria-expanded') === 'false');
 
         deleteChat('9999');
         const deleteBody = $('deleteModalBody');
@@ -666,6 +707,22 @@ function stubChain(label) {
         check('user row has exactly three actions',
             userContainer ? userContainer.querySelectorAll('button').length === 3 : false,
             userContainer ? userContainer.querySelectorAll('button').length + ' buttons' : 'no row');
+
+        // 2.4.10 (owner request): on touch, a tap on the user bubble reveals
+        // the actions; a second tap — or a tap outside — dismisses them.
+        const realMatchMediaTap = window.matchMedia;
+        window.matchMedia = (q) => ({ matches: String(q).includes('hover: none'), media: String(q), addEventListener() {}, addListener() {}, removeEventListener() {}, removeListener() {} });
+        const bubbleEl = userContainer?.querySelector('.user-bubble');
+        if (bubbleEl) {
+            click(bubbleEl);
+            check('tap on the user bubble reveals the actions', !!userContainer?.classList.contains('actions-open'));
+            click(bubbleEl);
+            check('second tap hides them again', !userContainer?.classList.contains('actions-open'));
+            click(bubbleEl);
+            click(window.document.body);
+            check('tapping outside dismisses the revealed actions', !userContainer?.classList.contains('actions-open'));
+        }
+        window.matchMedia = realMatchMediaTap || ((q) => ({ matches: false, media: String(q), addEventListener() {}, addListener() {}, removeEventListener() {}, removeListener() {} }));
 
         const aiContainer = aiContainers().pop();
         const endRow = aiContainer?.querySelector('.msg-actions-end');

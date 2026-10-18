@@ -77,7 +77,10 @@ function stubChain(label) {
     await sleep(60);
     const modal = $('deleteModal');
     check('signout confirm modal opens', modal && !modal.classList.contains('hidden'));
-    click(window.document.getElementById('deleteConfirmBtn'));
+    // 2.4.10: Enter on the focused confirm button must sign out (owner report).
+    const confirmBtn = $('deleteConfirmBtn');
+    confirmBtn.focus();
+    confirmBtn.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
     await sleep(400);
     check('modal closed after signout confirm', modal.classList.contains('hidden'), modal.className.includes('hidden') ? '' : 'STILL VISIBLE');
     check('auth section shown', $('auth-section').style.display === 'flex');

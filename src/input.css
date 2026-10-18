@@ -80,6 +80,7 @@
     --c-ok: 93 184 114;        /* #5db872 */
     --c-warn: 212 160 23;      /* #d4a017 */
     --c-danger: 198 69 69;     /* #c64545 */
+    --c-danger-strong: 217 45 32; /* #d92d20 — destructive row text (sign out) */
     --c-teal: 93 184 166;      /* #5db8a6 */
     --c-amber: 232 165 90;     /* #e8a55a */
     --c-code-bg: 31 30 27;     /* #1f1e1b — code blocks stay dark in both themes */
@@ -114,6 +115,7 @@
     --c-ok: 93 184 114;
     --c-warn: 212 160 23;
     --c-danger: 198 69 69;
+    --c-danger-strong: 255 99 105; /* #ff6369 — bright enough on dark panels */
     --c-teal: 93 184 166;
     --c-amber: 232 165 90;
     --c-provider-google: 125 190 235;    /* lightened for dark contrast */
@@ -514,6 +516,24 @@ mark {
 .msg-actions-end .copy-message-btn,
 .msg-actions-end .speak-btn { opacity: 1; }
 
+/* 2.4.10: user-row actions pill. Pointer devices: a reserved slot left of the
+   bubble — hover/focus reveals it in place, so the icons are never clipped and
+   nothing shifts. Touch devices: the pill sits under the bubble and tapping
+   the bubble toggles it (.actions-open is set by chat.js). */
+.user-actions-pill {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease-out;
+}
+.message-container:hover .user-actions-pill,
+.message-container:focus-within .user-actions-pill,
+.message-container.actions-open .user-actions-pill { opacity: 1; pointer-events: auto; }
+@media (hover: none) {
+    .message-container:hover .user-actions-pill { opacity: 0; pointer-events: none; }
+    .message-container:focus-within .user-actions-pill,
+    .message-container.actions-open .user-actions-pill { opacity: 1; pointer-events: auto; }
+}
+
 /* v1.0.6: every icon-only control acknowledges the press (design rule: no
    silent buttons). Immediate, no transition — press feedback should feel
    instant, not eased. */
@@ -686,15 +706,16 @@ mark {
     color: rgb(var(--c-muted));
 }
 .menu-row:hover .menu-icon { color: rgb(var(--c-ink)); }
-/* Sign out is the only destructive row — red label, red icon, red-tinted hover. */
+/* Sign out is the only destructive row — bold, bright red label + icon
+   (owner report: the old #c64545 read dim on the frosted panel, esp. dark). */
 .menu-row-danger,
-.menu-row-danger .menu-icon { color: rgb(var(--c-danger)); }
+.menu-row-danger .menu-icon { color: rgb(var(--c-danger-strong)); font-weight: 600; }
 @media (hover: hover) and (pointer: fine) {
     .menu-row-danger:hover {
-        background-color: rgb(var(--c-danger) / 0.08);
-        color: rgb(var(--c-danger));
+        background-color: rgb(var(--c-danger-strong) / 0.08);
+        color: rgb(var(--c-danger-strong));
     }
-    .menu-row-danger:hover .menu-icon { color: rgb(var(--c-danger)); }
+    .menu-row-danger:hover .menu-icon { color: rgb(var(--c-danger-strong)); }
 }
 
 /* C2 (v1.0.5): the visual pill stays slim but the tap target must clear 44px.

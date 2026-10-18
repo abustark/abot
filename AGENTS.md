@@ -127,6 +127,8 @@ For PHASE D: load `emil-design-eng` + `animate` + `taste-skill` before writing U
    in **one line** in the report; do not fix it unless told.
 8. **Unsure or facing a side-decision → give the owner options, don't guess.** Offer 2–4 short
    choices and wait. Never re-decide the same thing repeatedly or debate it internally.
+9. **Finish the owner's asked task first; report side-findings afterward** — never derail mid-task.
+   (Owner directive, 2026-10-18.)
 
 ---
 

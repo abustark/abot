@@ -399,7 +399,10 @@ function initApp() {
 
         // Also, ensure the smaller chat options menus are closed.
         if (!e.target.closest('.chat-list-item')) {
-            document.querySelectorAll('.chat-options-menu').forEach(m => m.classList.add('hidden'));
+            document.querySelectorAll('.chat-options-menu').forEach((m) => {
+                m.classList.add('hidden');
+                m.closest('.chat-list-item')?.querySelector('.chat-options-btn')?.setAttribute('aria-expanded', 'false');
+            });
         }
     });
 
@@ -424,7 +427,10 @@ function initApp() {
         }
         const inChatRow = target && typeof target.closest === 'function' && target.closest('.chat-list-item');
         if (!inChatRow) {
-            document.querySelectorAll('.chat-options-menu').forEach(m => m.classList.add('hidden'));
+            document.querySelectorAll('.chat-options-menu').forEach((m) => {
+                m.classList.add('hidden');
+                m.closest('.chat-list-item')?.querySelector('.chat-options-btn')?.setAttribute('aria-expanded', 'false');
+            });
         }
     }, true);
 
@@ -835,7 +841,9 @@ function initApp() {
             // 2.4.6: chat-row ⋮ menus were only outside-click closable.
             const openChatOptionsMenu = document.querySelector('.chat-options-menu:not(.hidden)');
             if (openChatOptionsMenu) {
-                openChatOptionsMenu.closest('.chat-list-item')?.querySelector('.chat-options-btn')?.focus();
+                const trigger = openChatOptionsMenu.closest('.chat-list-item')?.querySelector('.chat-options-btn');
+                trigger?.setAttribute('aria-expanded', 'false');
+                trigger?.focus();
                 openChatOptionsMenu.classList.add('hidden');
                 return;
             }
@@ -923,6 +931,11 @@ function initApp() {
         setTimeout(() => dom.deleteModal.classList.add('hidden'), 200);
     };
 
+    // 2.4.10 (owner report): the old version cloned the confirm button and
+    // bound a {once:true} handler per open — that detached the Delete-chat
+    // handler (bound once at init) and left later Enter presses dead. The node
+    // is now never replaced; the single init listener dispatches on
+    // dataset.action, and Enter on the focused confirm is handled explicitly.
     const handleSignOutRequest = () => {
         // 1. Configure Modal Text
         dom.deleteModal.querySelector('#modal-title').textContent = "Confirm Sign Out";
@@ -933,17 +946,10 @@ function initApp() {
         confirmBtn.textContent = "Sign Out";
         confirmBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
         confirmBtn.classList.add('bg-coral', 'hover:bg-coral-active');
+        confirmBtn.dataset.action = 'signout';
+        delete confirmBtn.dataset.chatId;
 
-        // 3. Set Action
-        const newBtn = confirmBtn.cloneNode(true);
-        confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
-        dom.deleteConfirmBtn = newBtn;
-        newBtn.addEventListener('click', () => {
-            signOutUser();
-            closeDeleteModal();
-        }, { once: true });
-
-        // 4. Show Modal
+        // 3. Show Modal
         dom.deleteModal.classList.remove('hidden');
         setTimeout(() => {
             dom.deletePanel.style.opacity = '1';
@@ -1007,7 +1013,23 @@ function initApp() {
     };
     dom.deleteCancelBtn.addEventListener('click', closeDeleteModal);
     dom.deleteOverlay.addEventListener('click', closeDeleteModal);
-    dom.deleteConfirmBtn.addEventListener('click', handleDeleteConfirm);
+    // One stable confirm handler for both dialog modes (2.4.10): Delete-chat
+    // and Sign-out share the button — dataset.action decides what runs.
+    dom.deleteConfirmBtn.addEventListener('click', (e) => {
+        if (dom.deleteConfirmBtn.dataset.action === 'signout') {
+            signOutUser();
+            closeDeleteModal();
+            return;
+        }
+        handleDeleteConfirm(e);
+    });
+    // Enter on the focused confirm button activates it deterministically
+    // (prevents a dead keyboard path on the dialog's primary action).
+    dom.deletePanel.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter' || document.activeElement !== dom.deleteConfirmBtn) return;
+        e.preventDefault();
+        dom.deleteConfirmBtn.click();
+    });
 
     // --- Guest Limit Modal Listeners ---
     dom.guestLimitOverlay.addEventListener('click', closeGuestLimitModal);
@@ -1016,13 +1038,23 @@ function initApp() {
 
     // --- Final Listeners ---
     dom.signoutBtn.addEventListener('click', handleSignOutRequest);
+    // 2.4.10 (owner report "Enter does nothing"): Enter/Space on the focused
+    // Sign out row opens the dialog explicitly, so activation never depends on
+    // the browser's native button activation surviving the menu teardown.
+    dom.signoutBtn.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        if (!dom.deleteModal.classList.contains('hidden')) return;
+        e.preventDefault();
+        closeProfileMenu();
+        handleSignOutRequest();
+    });
 
     state.isAppInitialized = true;
 }
 
 // Phase 6.5: client-state reset + build identity
 // Visit <site>/#reset to wipe SW/caches/storage and reload (recovery tool).
-window.ABOT_BUILD = '2026-10-18.2';
+window.ABOT_BUILD = '2026-10-18.3';
 console.log(`[ABot] build ${window.ABOT_BUILD}`);
 if (location.hash === '#reset') {
     (async () => {

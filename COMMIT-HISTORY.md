@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.4.10`** (current head is `2.4.9`)
+> - **`main` → `2.4.11`** (current head is `2.4.10`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** (no version of its own: `git push origin main:arena/01a03fe9-abot --force`;
 >   both branches stay identical)
 
@@ -25,6 +25,16 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.4.10 - message actions hover/tap, ⋮ menu keyboard nav, sign-out fixes, docs cleanup
+- **Date**: 2026-10-18
+- **Why**: owner report — (a) hovering a user message showed no copy/audio icons (the pill anchored `right-full` against the full-width row → misplaced on desktop, clipped on touch) and mobile had no way to reveal them; (b) sidebar wordmark too small; (c) Sign out row dim; (d) chat ⋮ menu had no keyboard navigation; (e) Enter on the focused Sign Out confirm did nothing.
+- **User message actions**: rebuilt the row — the bubble sits in a `relative` holder; the pill is a **reserved slot left of the bubble on pointer devices** (hover/focus reveals it in place — never clipped, no layout shift) and **under the bubble on touch** (tap the bubble toggles `.actions-open`; tap outside dismisses). `.user-actions-pill` CSS in `src/input.css`, wiring in `js/chat.js`; more air below user rows (`mb-5` → `mb-9`) before the AI reply.
+- **⋮ menu keyboard nav**: `role="menu"`/`menuitem` + `aria-haspopup`/`aria-expanded` on the trigger; ArrowDown/ArrowUp open from the trigger and cycle focus with wrap-around; Tab closes; Escape restores focus (aria state kept in sync on every close path). New interaction tests cover open-from-arrow, cycling, Escape refocus.
+- **Sign-out dialog (real bug fixed)**: old code cloned the confirm button and bound a `{once:true}` handler per open — that detached the Delete-chat listener (bound once at init) and left later Enter presses dead. The node is never replaced now: one stable listener dispatches on `dataset.action` ('signout' → sign out; else delete), Enter on the focused confirm activates deterministically, and Enter/Space on the sidebar Sign out row opens the dialog explicitly. Regression-covered in `tools/interaction-test.js`; the Enter path is now exercised by `tools/cycle-test.js`.
+- **Sidebar polish**: wordmark `text-[15px]` → `text-lg`; Sign out row bold + new `--c-danger-strong` token (light `#d92d20`, dark `#ff6369`).
+- **Docs**: deleted the stale `docs/AGENTS.md` (old 4-command gate list contradicting root §3); added the owner directive to root `AGENTS.md` §5 (rule 9).
+- **Cache**: `?v=p35` → `p36`, `abot-cache-v61` → `v62`, build id `2026-10-18.3`.
 
 ### 2.4.9 - type refresh, message actions, hard-fail audit gates
 - **Date**: 2026-10-18

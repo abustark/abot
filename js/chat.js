@@ -215,6 +215,7 @@ export const deleteChat = (chatId) => {
     confirmBtn.textContent = "Delete";
     confirmBtn.classList.remove('bg-indigo-600', 'hover:bg-indigo-700', 'bg-coral', 'hover:bg-coral-active');
     confirmBtn.classList.add('bg-red-600', 'hover:bg-red-700');
+    confirmBtn.dataset.action = 'delete';
     confirmBtn.dataset.chatId = chatId;
 
     // 3. Show Modal
@@ -243,7 +244,7 @@ export const renderChatList = (searchTerm = '') => {
         renderedChatIds.add(chatKey);
         const chatItemContainer = document.createElement('div');
         chatItemContainer.className = `relative chat-list-item group ${String(chat.id) === String(state.activeChatId) ? 'active' : ''}${isNewRow ? ' chat-item-enter' : ''}`;
-        chatItemContainer.innerHTML = `<div class="flex items-center justify-between w-full rounded-xl ${String(chat.id) === String(state.activeChatId) ? '' : 'text-body hover:bg-card/70'}"><a href="#" class="flex-1 px-3 py-2.5 text-sm truncate" data-chat-id="${chat.id}"><span class="chat-name-span"></span></a><input type="text" class="chat-rename-input hidden flex-1 mx-2 p-1 text-sm bg-surface dark:bg-card rounded" value=""><button class="chat-options-btn p-2 mr-1 rounded-lg hover:bg-card transition-colors" aria-label="Chat options" data-tooltip="Chat options" data-tooltip-pos="side-right"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" /></svg></button></div><div class="absolute right-0 top-full mt-1 w-36 bg-canvas dark:bg-card border border-hairline rounded-xl shadow-lift z-10 hidden chat-options-menu overflow-hidden"><button class="rename-chat-btn w-full text-left px-3 py-2 text-sm hover:bg-card">Rename</button><button class="export-chat-btn w-full text-left px-3 py-2 text-sm hover:bg-card">Export JSON</button><button class="export-md-btn w-full text-left px-3 py-2 text-sm hover:bg-card">Export Markdown</button><button class="delete-chat-btn w-full text-left px-3 py-2 text-sm text-danger hover:bg-card">Delete</button></div>`;
+        chatItemContainer.innerHTML = `<div class="flex items-center justify-between w-full rounded-xl ${String(chat.id) === String(state.activeChatId) ? '' : 'text-body hover:bg-card/70'}"><a href="#" class="flex-1 px-3 py-2.5 text-sm truncate" data-chat-id="${chat.id}"><span class="chat-name-span"></span></a><input type="text" class="chat-rename-input hidden flex-1 mx-2 p-1 text-sm bg-surface dark:bg-card rounded" value=""><button type="button" class="chat-options-btn p-2 mr-1 rounded-lg hover:bg-card transition-colors" aria-label="Chat options" aria-haspopup="menu" aria-expanded="false" data-tooltip="Chat options" data-tooltip-pos="side-right"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" /></svg></button></div><div role="menu" aria-label="Chat options" class="absolute right-0 top-full mt-1 w-36 bg-canvas dark:bg-card border border-hairline rounded-xl shadow-lift z-10 hidden chat-options-menu overflow-hidden"><button type="button" role="menuitem" class="rename-chat-btn w-full text-left px-3 py-2 text-sm hover:bg-card">Rename</button><button type="button" role="menuitem" class="export-chat-btn w-full text-left px-3 py-2 text-sm hover:bg-card">Export JSON</button><button type="button" role="menuitem" class="export-md-btn w-full text-left px-3 py-2 text-sm hover:bg-card">Export Markdown</button><button type="button" role="menuitem" class="delete-chat-btn w-full text-left px-3 py-2 text-sm text-danger hover:bg-card">Delete</button></div>`;
         const nameSpan = chatItemContainer.querySelector('.chat-name-span');
         const renameInput = chatItemContainer.querySelector('.chat-rename-input');
         nameSpan.textContent = chat.name;
@@ -252,11 +253,51 @@ export const renderChatList = (searchTerm = '') => {
         renameInput.addEventListener('keydown', e => { if (e.key === 'Enter') { saveRename(); renameInput.blur(); } else if (e.key === 'Escape') { renameInput.blur(); } });
         renameInput.addEventListener('blur', () => { nameSpan.classList.remove('hidden'); renameInput.classList.add('hidden'); renderChatList(dom.searchChats.value); });
         chatItemContainer.querySelector('a').addEventListener('click', e => { e.preventDefault(); switchChat(chat.id); });
-        chatItemContainer.querySelector('.chat-options-btn').addEventListener('click', e => { e.stopPropagation(); const menu = chatItemContainer.querySelector('.chat-options-menu'); document.querySelectorAll('.chat-options-menu').forEach(m => m !== menu && m.classList.add('hidden')); menu.classList.toggle('hidden'); });
-        chatItemContainer.querySelector('.rename-chat-btn').addEventListener('click', e => { e.stopPropagation(); nameSpan.classList.add('hidden'); renameInput.classList.remove('hidden'); renameInput.focus(); renameInput.select(); chatItemContainer.querySelector('.chat-options-menu').classList.add('hidden'); });
-        chatItemContainer.querySelector('.export-chat-btn').addEventListener('click', e => { e.stopPropagation(); exportChat(chat.id); chatItemContainer.querySelector('.chat-options-menu').classList.add('hidden'); });
-        chatItemContainer.querySelector('.export-md-btn').addEventListener('click', e => { e.stopPropagation(); exportChatMarkdown(chat.id); chatItemContainer.querySelector('.chat-options-menu').classList.add('hidden'); });
-        chatItemContainer.querySelector('.delete-chat-btn').addEventListener('click', e => { e.stopPropagation(); deleteChat(chat.id); });
+        // 2.4.10 (owner report): the chat ⋮ menu is fully keyboard-navigable —
+        // ArrowDown/ArrowUp open it from the trigger and cycle focus inside
+        // (wrap-around); Enter/Space activate the focused item natively; Tab
+        // closes; Escape closes via the global handler in app.js.
+        const optionsBtn = chatItemContainer.querySelector('.chat-options-btn');
+        const optionsMenu = chatItemContainer.querySelector('.chat-options-menu');
+        const optionsItems = [...optionsMenu.querySelectorAll('button')];
+        const setOptionsMenuOpen = (open) => {
+            optionsMenu.classList.toggle('hidden', !open);
+            optionsBtn.setAttribute('aria-expanded', String(open));
+        };
+        const closeOtherOptionsMenus = () => {
+            document.querySelectorAll('.chat-options-menu').forEach((m) => {
+                if (m === optionsMenu) return;
+                m.classList.add('hidden');
+                m.closest('.chat-list-item')?.querySelector('.chat-options-btn')?.setAttribute('aria-expanded', 'false');
+            });
+        };
+        optionsBtn.addEventListener('click', e => {
+            e.stopPropagation();
+            closeOtherOptionsMenus();
+            setOptionsMenuOpen(optionsMenu.classList.contains('hidden'));
+        });
+        optionsBtn.addEventListener('keydown', e => {
+            if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+            e.preventDefault();
+            e.stopPropagation();
+            closeOtherOptionsMenus();
+            setOptionsMenuOpen(true);
+            (e.key === 'ArrowDown' ? optionsItems[0] : optionsItems[optionsItems.length - 1]).focus();
+        });
+        optionsMenu.addEventListener('keydown', e => {
+            if (e.key === 'Tab') { setOptionsMenuOpen(false); return; }
+            if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+            e.preventDefault();
+            const i = optionsItems.indexOf(document.activeElement);
+            const next = e.key === 'ArrowDown'
+                ? (i + 1 + optionsItems.length) % optionsItems.length
+                : (i - 1 + optionsItems.length) % optionsItems.length;
+            optionsItems[next].focus();
+        });
+        chatItemContainer.querySelector('.rename-chat-btn').addEventListener('click', e => { e.stopPropagation(); nameSpan.classList.add('hidden'); renameInput.classList.remove('hidden'); renameInput.focus(); renameInput.select(); setOptionsMenuOpen(false); });
+        chatItemContainer.querySelector('.export-chat-btn').addEventListener('click', e => { e.stopPropagation(); exportChat(chat.id); setOptionsMenuOpen(false); });
+        chatItemContainer.querySelector('.export-md-btn').addEventListener('click', e => { e.stopPropagation(); exportChatMarkdown(chat.id); setOptionsMenuOpen(false); });
+        chatItemContainer.querySelector('.delete-chat-btn').addEventListener('click', e => { e.stopPropagation(); setOptionsMenuOpen(false); deleteChat(chat.id); });
         dom.chatList.appendChild(chatItemContainer);
     });
 };
@@ -383,6 +424,14 @@ const END_ACTIONS_HTML = `<div class="msg-actions-end flex items-center gap-0.5 
 // buttons already wired are skipped, so it can run again when the static end
 // row is appended after streaming. Copy works without an index; speak, edit
 // and retry need the message's position in state.
+// 2.4.10: one document-level closer for tap-revealed user action pills —
+// tapping anything outside the bubble/pill dismisses the open row.
+document.addEventListener('click', (e) => {
+    if (e.target && typeof e.target.closest === 'function'
+        && (e.target.closest('.user-bubble') || e.target.closest('.user-actions-pill'))) return;
+    document.querySelectorAll('.message-container.actions-open').forEach((m) => m.classList.remove('actions-open'));
+});
+
 const wireMessageActions = (container, msgIndex) => {
     const hasIndex = typeof msgIndex === 'number';
     container.querySelectorAll('.copy-message-btn').forEach((btn) => {
@@ -521,13 +570,15 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
     if (isUser) {
         // --- USER MESSAGE: right-aligned soft-coral bubble (Gemini pattern) ---
         messageEl.innerHTML = `
-                            <div class="message-container w-full flex justify-end mb-5 group relative">
-                                <div class="absolute right-full mr-2 top-2 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity flex items-center bg-canvas dark:bg-card rounded-lg shadow-sm border border-hairline px-1">
-                                    ${COPY_BTN_HTML}
-                                    ${userActionsHtml}
-                                </div>
-                                <div class="max-w-[85%] md:max-w-[75%] user-bubble bg-coral-soft px-4 py-2.5 text-[15px] leading-relaxed text-ink shadow-soft">
-                                   <div class="prose dark:prose-invert max-w-none whitespace-pre-wrap">${messageContent}</div>
+                            <div class="message-container w-full flex justify-end mb-9 group">
+                                <div class="relative flex flex-col items-end max-w-[85%] md:max-w-[75%] md:flex-row md:items-start">
+                                    <div class="user-actions-pill absolute right-0 top-full mt-1 md:static md:mr-2 md:mt-1.5 flex items-center bg-canvas dark:bg-card rounded-lg shadow-sm border border-hairline px-1">
+                                        ${COPY_BTN_HTML}
+                                        ${userActionsHtml}
+                                    </div>
+                                    <div class="min-w-0 max-w-full user-bubble bg-coral-soft px-4 py-2.5 text-[15px] leading-relaxed text-ink shadow-soft">
+                                       <div class="prose dark:prose-invert max-w-none whitespace-pre-wrap">${messageContent}</div>
+                                    </div>
                                 </div>
                             </div>
                         `;
@@ -559,6 +610,19 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
 
     // Attach Event Listeners
     wireMessageActions(messageEl, options.index);
+
+    // 2.4.10 (owner request): on touch devices a tap on the user bubble
+    // reveals its action pill (desktop keeps hover — the matchMedia gate
+    // leaves pointer-device text selection untouched).
+    if (isUser) {
+        const rowEl = messageEl.querySelector('.message-container');
+        messageEl.querySelector('.user-bubble')?.addEventListener('click', () => {
+            if (!window.matchMedia || !window.matchMedia('(hover: none)').matches) return;
+            const willOpen = !rowEl.classList.contains('actions-open');
+            document.querySelectorAll('.message-container.actions-open').forEach((m) => m.classList.remove('actions-open'));
+            if (willOpen) rowEl.classList.add('actions-open');
+        });
+    }
 
     dom.chatHistory.appendChild(messageEl);
     window.__abotFollowBottom?.(); // v2.0.15: keep up if the user is parked at the bottom
