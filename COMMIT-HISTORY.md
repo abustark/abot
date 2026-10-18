@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.4.8`** (current head is `2.4.7`)
+> - **`main` → `2.4.9`** (current head is `2.4.8`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** (no version of its own: `git push origin main:arena/01a03fe9-abot --force`;
 >   both branches stay identical)
 
@@ -25,6 +25,11 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.4.8 - removed docs/ARENA-AI-CHECKLIST.md (owner directive)
+- **Date**: 2026-10-18
+- **Why**: owner directive — the arena verification checklist (added in 2.4.4) is no longer needed; the one item still open for a live repro (item 3, composer blink) was already confirmed visually and flipped to VERIFIED in 2.4.7.
+- **No runtime/app changes** — doc removal only; cache-bust stays `?v=p34` / `abot-cache-v60`.
 
 ### 2.4.7 - docs: js/README module table completed + blink fix verified
 - **Date**: 2026-10-18
