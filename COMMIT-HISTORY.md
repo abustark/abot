@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.4.14`** (current head is `2.4.13`)
+> - **`main` → `2.4.15`** (current head is `2.4.14`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** (no version of its own: `git push origin main:arena/01a03fe9-abot --force`;
 >   both branches stay identical)
 
@@ -25,6 +25,15 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.4.14 - tooltip speed, ⋮ tooltip placement, glass bubbles + sidebar overlay
+- **Date**: 2026-10-19
+- **Why**: owner report — (a) hover tooltips took ~5s to appear; (b) the ⋮ "Chat options" tooltip went hidden behind the sidebar border; (c) wanted a glass/water-drop blur on the bubbles and a lighter sidebar overlay.
+- **Tooltip delay**: `transition-delay: 2500ms` → `500ms` (industrial standard ~400-500 ms).
+- **⋮ tooltip**: `data-tooltip-pos="side-right"` → `"bottom-right"` — stays inside the sidebar, no longer clipped by the chatList overflow.
+- **Glass bubbles**: `.user-bubble` and `.bot-bubble` now have semi-transparent fills + `backdrop-filter: blur(6px) saturate(1.5)` + hairline borders — frosted-glass water-drop look. `.bot-bubble` gained `padding: 8px 14px` to read as a proper bubble.
+- **Sidebar overlay**: tint reduced (`ink/0.25` → `ink/0.12`), blur pushed `14px` → `20px` — background colour stays the same, just frosted.
+- **Cache**: CSS rebuilt.
 
 ### 2.4.13 - chat ⋮ menu focus ring clipped by overflow-hidden
 - **Date**: 2026-10-19

@@ -300,10 +300,24 @@
     #composerDock { box-shadow: 0 -8px 24px -16px rgb(var(--c-ink) / 0.18); }
 }
 
-/* Chat bubbles */
+/* Chat bubbles — 2.4.14 glass/water-drop: semi-transparent fill + backdrop
+   blur so the bubbles read as frosted glass laid over the canvas. */
 .chat-bubble { max-width: 85%; transition: transform 0.2s var(--ease-out), opacity 0.3s var(--ease-out); }
-.user-bubble { border-radius: 18px 18px 6px 18px; }
-.bot-bubble { border-radius: 18px 18px 18px 6px; }
+.user-bubble {
+    border-radius: 18px 18px 6px 18px;
+    background-color: rgb(var(--c-coral-soft) / 0.55);
+    -webkit-backdrop-filter: blur(6px) saturate(1.5);
+    backdrop-filter: blur(6px) saturate(1.5);
+    border: 1px solid rgb(var(--c-coral) / 0.14);
+}
+.bot-bubble {
+    border-radius: 18px 18px 18px 6px;
+    background-color: rgb(var(--c-canvas) / 0.5);
+    -webkit-backdrop-filter: blur(6px) saturate(1.5);
+    backdrop-filter: blur(6px) saturate(1.5);
+    border: 1px solid rgb(var(--c-hairline) / 0.45);
+    padding: 8px 14px;
+}
 .chat-bubble .prose p { margin: 0; }
 
 /* Typing indicator (2.2.8) — mini dotted-"A": the app-loader wordmark's A
@@ -353,10 +367,12 @@
 
 /* 2.4.4 (owner request): the mobile scrim used to be an opaque ink wash — the
    chat behind it now stays visible through a frosted, tinted blur. */
+/* 2.4.14 (owner request): keep the background colour identical but push the
+   blur further so the drawer reads as frosted glass over the same canvas. */
 #sidebarOverlay {
-    background-color: rgb(var(--c-ink) / 0.25);
-    -webkit-backdrop-filter: blur(14px) saturate(1.4);
-    backdrop-filter: blur(14px) saturate(1.4);
+    background-color: rgb(var(--c-ink) / 0.12);
+    -webkit-backdrop-filter: blur(20px) saturate(1.5);
+    backdrop-filter: blur(20px) saturate(1.5);
 }
 
 /* Desktop collapse: at md+ the drawer becomes a static flex column, so the
@@ -792,7 +808,7 @@ h1, h2, h3, .prose h1, .prose h2, .prose h3 { text-wrap: balance; }
    appears (the old "instant sweep" repeat case is gone). Keyboard focus is
    never delayed, and leaving the trigger hides the bubble at once (the
    reverse transition carries no delay). */
-[data-tooltip]:hover::after { transition-delay: 2500ms; }
+[data-tooltip]:hover::after { transition-delay: 500ms; }
 /* 2.4.6 (motion): warm tooltips — once a tooltip has actually appeared, the
    next one within 1s skips the rest (app.js sets the attribute). */
 [data-tooltip][data-tooltip-warm]:hover::after { transition-delay: 0ms; }
