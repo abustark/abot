@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.4.13`** (current head is `2.4.12`)
+> - **`main` → `2.4.14`** (current head is `2.4.13`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** (no version of its own: `git push origin main:arena/01a03fe9-abot --force`;
 >   both branches stay identical)
 
@@ -25,6 +25,13 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.4.13 - chat ⋮ menu focus ring clipped by overflow-hidden
+- **Date**: 2026-10-19
+- **Why**: owner report — the ⋮ dropdown menu's border didn't fully wrap the options when navigating with keyboard.
+- **Root cause**: the menu items are plain `<button>` elements inheriting the global `:focus-visible` outline (2px coral, `outline-offset: 2px`). The menu's `overflow-hidden` (needed to clip items to the `rounded-xl` corners) clips the outline at the first and last item — the focus ring appears incomplete.
+- **Fix**: `.chat-options-menu button:focus-visible` now uses `outline-offset: -2px` (inset outline), matching the existing `.menu-row:focus-visible` pattern in the account menu. The focus ring is fully visible on every item.
+- **Cache**: CSS rebuilt (`dist/output.css` updated).
 
 ### 2.4.12 - boot hardening (stuck splash), mobile tap-to-reveal fix, truthful read-aloud state
 - **Date**: 2026-10-18

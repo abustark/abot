@@ -501,6 +501,15 @@ mark {
     .chat-list-item .chat-options-btn { opacity: 1; }
 }
 
+/* 2.4.13 (owner report: "not fully bordering the options"): the chat ⋮ menu
+   items inherit the global :focus-visible outline (2px offset), which the
+   menu's overflow-hidden clips at the first/last item. Use an inset outline
+   so the focus ring is fully visible on every item, matching .menu-row. */
+.chat-options-menu button:focus-visible {
+    outline: 2px solid rgb(var(--c-coral) / 0.6);
+    outline-offset: -2px;
+}
+
 /* Message actions (copy etc.): keyboard-focus + touch reveal.
    The default is still hover-reveal via group-hover utilities in markup. */
 .message-container:focus-within .copy-message-btn,
