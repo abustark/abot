@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.4.15`** (current head is `2.4.14`)
+> - **`main` → `2.4.16`** (current head is `2.4.15`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** (no version of its own: `git push origin main:arena/01a03fe9-abot --force`;
 >   both branches stay identical)
 
@@ -25,6 +25,14 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.4.15 - error cards no-copy, stuck stop-button fix, larger stop square
+- **Date**: 2026-10-19
+- **Why**: owner report — (a) AI error cards ("the AI provider returned an error…") exposed copy/read-aloud controls but are no-copy text; (b) on a connection error ("Failed to fetch") the composer's send button stayed in stop mode until a page refresh; (c) the white square inside the red stop button was too small.
+- **Error cards no-copy**: the hover copy·read-aloud pair is no longer rendered on `isError` cards (`js/chat.js`); the streaming error morph path also strips the placeholder's leftover pair. History-rendered error cards are covered by the same condition. Interaction test gained the "error card offers no copy·speak" check.
+- **Stuck stop button (root cause fixed)**: the `finally` block awaited the Firestore `update()` BEFORE resetting the UI — on a broken connection the save hangs for minutes and `stopBtn`/chips/model-selector never reset. Reordered: composer UI resets first, then the save, then the titleGeneration fetch. Same fix applied to the `!currentUser` early-return (which previously left the stop button up forever).
+- **Stop square**: SVG rect 7/20 → 9/20 units (optically centered) in `#stopBtn`.
+- **Cache**: `?v=p36/p37` → `p38` (CSS link + app.js), `abot-cache-v63` → `v64`, build id `2026-10-19.1`. NOTE: 2.4.13/2.4.14 shipped without cache bumps, so this bump also delivers those CSS changes and the 2.4.14 `chat.js` glass-bubble edit to installed clients.
 
 ### 2.4.14 - tooltip speed, ⋮ tooltip placement, glass bubbles + sidebar overlay
 - **Date**: 2026-10-19

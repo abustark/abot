@@ -759,6 +759,8 @@ function stubChain(label) {
         await sleep(30);
         const errContainer = aiContainers().pop();
         check('error card gets no end row', !!errContainer && !errContainer.querySelector('.msg-actions-end') && !!errContainer.querySelector('.retry-btn'));
+        // 2.4.15 (owner report): error cards are no-copy text.
+        check('error card offers no copy · speak', !!errContainer && !errContainer.querySelector('.copy-message-btn') && !errContainer.querySelector('.speak-btn'));
         state.chats['7777'].messages.pop();
         chatMod.renderActiveChat();
         await sleep(30);

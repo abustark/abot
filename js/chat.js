@@ -572,8 +572,9 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
     // (owner request) — Retry on the error card is the only regenerate
     // affordance.) ---
 
-    // AI rows: copy + read aloud, parked top-right on the meta line.
-    const aiActionsHtml = (!isUser) ? COPY_BTN_HTML + SPEAK_BTN_HTML : '';
+    // 2.4.15 (owner report): error cards are no-copy text — the Retry
+    // affordance is all they get; copy · read aloud apply to real replies only.
+    const aiActionsHtml = (!isUser && !message.isError) ? COPY_BTN_HTML + SPEAK_BTN_HTML : '';
     // Only finished AI replies (history, or a message with a known index) get
     // the static end row — the streaming placeholder must not show it yet,
     // and error cards keep Retry alone.
@@ -877,6 +878,11 @@ export const sendMessage = async () => {
 
     const currentUser = state.auth.currentUser;
     if (!currentUser) {
+        // 2.4.15: this early return used to leave the stop button up forever
+        // (isStreaming never reset — same stuck-stop-mode bug class).
+        dom.stopBtn.classList.add('stop-hidden');
+        state.isStreaming = false;
+        state.abortController = null;
         latestBotMessageSpan.innerHTML = "<strong>Authentication Error:</strong> You are not signed in.";
         return;
     }
@@ -952,6 +958,9 @@ export const sendMessage = async () => {
                         // 2.2.4 (audit): these morphed-in cards bypass the
                         // index-based wiring inside appendMessage — attach here.
                         latestBotMessageSpan.querySelector('.retry-btn')?.addEventListener('click', (e) => { e.stopPropagation(); regenerateLastResponse(); });
+                        // 2.4.15: strip the placeholder's copy · speak pair — the
+                        // error card morphs in and offers no copy affordance.
+                        latestBotMessageSpan.closest('.message-container')?.querySelectorAll('.copy-message-btn, .speak-btn').forEach((btn) => btn.remove());
                     } else {
                         dom.chatHistory.querySelector('.typing-indicator')?.closest('.message-container')?.remove();
                         const now = currentChat.messages.length;
@@ -1053,29 +1062,10 @@ export const sendMessage = async () => {
         }
     }
     finally {
-        // --- THIS IS THE FINAL, CORRECT VERSION ---
-
-        // 1. Save the final state of the chat to Firestore.
-        // v2.1.4 audit fix (BUG-1): if the user DELETED this chat mid-stream,
-        // skip the save — update() on the missing doc silently re-created a
-        // zombie chat containing the streamed reply.
-        const chatStillExists = !!state.chats[state.activeChatId];
-        if (!chatStillExists) {
-            console.log('[ABot] chat deleted mid-stream — skipping final save');
-        }
-        try {
-        if (chatStillExists) {
-            const chatDocRef = state.db.collection('users').doc(activeUser.uid).collection('chats').doc(state.activeChatId);
-            await chatDocRef.update({
-                messages: currentChat.messages,
-                name: currentChat.name
-            });
-        }
-        } catch (dbError) {
-            console.error("Error saving final chat state to Firestore:", dbError);
-        }
-
-        // 2. Reset the UI buttons + per-message composer chips.
+        // --- 2.4.15: reset the composer UI FIRST. The Firestore save below can
+        // hang for minutes on a broken connection ("Failed to fetch") — the
+        // stop button, chips and model selector must never wait for it (owner
+        // report: the send button stayed in stop mode until a page refresh).
         dom.stopBtn.classList.add('stop-hidden');
         state.isStreaming = false;
         // Stream over: the E1 pill must never outlive the reply (no scroll
@@ -1094,6 +1084,26 @@ export const sendMessage = async () => {
         window.__abotFollowBottom?.();
         dom.modelSelectorBtn.disabled = false;
         dom.modelSelectorBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+
+        // 2. Save the final state of the chat to Firestore.
+        // v2.1.4 audit fix (BUG-1): if the user DELETED this chat mid-stream,
+        // skip the save — update() on the missing doc silently re-created a
+        // zombie chat containing the streamed reply.
+        const chatStillExists = !!state.chats[state.activeChatId];
+        if (!chatStillExists) {
+            console.log('[ABot] chat deleted mid-stream — skipping final save');
+        }
+        try {
+        if (chatStillExists) {
+            const chatDocRef = state.db.collection('users').doc(activeUser.uid).collection('chats').doc(state.activeChatId);
+            await chatDocRef.update({
+                messages: currentChat.messages,
+                name: currentChat.name
+            });
+        }
+        } catch (dbError) {
+            console.error("Error saving final chat state to Firestore:", dbError);
+        }
 
         // 3. Generate the title if it was the first message.
         // v2.0.13: not after a failed stream — a failed first message keeps

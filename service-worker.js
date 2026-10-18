@@ -3,7 +3,7 @@
  * Provides offline caching for local assets only
  */
 
-const CACHE_NAME = 'abot-cache-v63'; // 2.4.12: splash watchdog + boot hardening, speak button truthful state, mobile tap-to-reveal fix
+const CACHE_NAME = 'abot-cache-v64'; // 2.4.15: error cards no-copy, stop-button reset fix, larger stop square; also ships 2.4.13/14 CSS + modules
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -11,7 +11,7 @@ const STATIC_ASSETS = [
     '/favicon-32-light.png',
     '/favicon-32-dark.png',
     '/logo.png',
-    '/dist/output.css?v=p36',
+    '/dist/output.css?v=p38',
     '/js/app.js',
     '/js/config.js',
     '/js/dom.js',
