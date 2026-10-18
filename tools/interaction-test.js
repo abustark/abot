@@ -724,6 +724,21 @@ function stubChain(label) {
         }
         window.matchMedia = realMatchMediaTap || ((q) => ({ matches: false, media: String(q), addEventListener() {}, addListener() {}, removeEventListener() {}, removeListener() {} }));
 
+        // 2.4.12 (owner report: speak button showed "playing" but stayed silent):
+        // without Web Speech the button must refuse politely — info toast, no
+        // pressed state, no throw.
+        const speakBtnEl = userContainer?.querySelector('.speak-btn');
+        if (speakBtnEl) {
+            const realSpeechSynthesis = window.speechSynthesis;
+            window.speechSynthesis = undefined;
+            click(speakBtnEl);
+            await sleep(30);
+            check('speak without Web Speech shows an info toast and never lies about playing',
+                speakBtnEl.getAttribute('aria-pressed') !== 'true'
+                && [...window.document.querySelectorAll('.abot-toast .toast-msg')].some((n) => n.textContent.includes('not supported')));
+            window.speechSynthesis = realSpeechSynthesis;
+        }
+
         const aiContainer = aiContainers().pop();
         const endRow = aiContainer?.querySelector('.msg-actions-end');
         check('finished AI reply carries the static end row', !!endRow);

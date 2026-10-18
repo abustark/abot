@@ -164,6 +164,41 @@ export const installDraftLeaveGuard = () => {
 // Phase 6: text-to-speech (Web Speech API — client-side, zero API cost)
 // ---------------------------------------------------------------------------
 let ttsSpeaking = false;
+// 2.4.12 (owner report: "no voice + can't stop"): every speak gets a
+// generation id. cancel()/stop sync-fire the OLD utterance's onend, which used
+// to clear the "speaking" flag AFTER the new utterance started — the toggle
+// then re-spoke instead of stopping. Stale callbacks are now ignored.
+let ttsGeneration = 0;
+
+export const isSpeaking = () => ttsSpeaking
+    || (typeof speechSynthesis !== 'undefined' && speechSynthesis.speaking);
+
+export const stopSpeaking = () => {
+    ttsGeneration++; // invalidate pending onend/onerror from the cancelled utterance
+    if (typeof speechSynthesis !== 'undefined') speechSynthesis.cancel();
+    ttsSpeaking = false;
+};
+
+export const speakText = (raw, { onstart, onend } = {}) => {
+    if (typeof speechSynthesis === 'undefined') return;
+    const gen = ++ttsGeneration;
+    speechSynthesis.cancel();
+    const text = stripForSpeech(raw);
+    if (!text) return;
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.rate = 1;
+    utter.lang = document.documentElement.lang || 'en';
+    const voices = speechSynthesis.getVoices();
+    const preferred = voices.find((v) => /en[-_]US/i.test(v.lang) && /google/i.test(v.name))
+        || voices.find((v) => /^en/i.test(v.lang));
+    if (preferred) utter.voice = preferred;
+    ttsSpeaking = true;
+    const settle = () => { if (gen !== ttsGeneration) return; ttsSpeaking = false; if (onend) onend(); };
+    utter.onstart = () => { if (gen === ttsGeneration && onstart) onstart(); };
+    utter.onend = settle;
+    utter.onerror = settle;
+    speechSynthesis.speak(utter);
+};
 
 // Reduce markdown to speakable prose: drop code blocks, keep code snippets'
 // inner text out (reading code aloud is noise), unwrap links/emphasis.
@@ -179,31 +214,6 @@ export const stripForSpeech = (raw) => {
     t = t.replace(/^\s*[-*+]\s+/gm, '');
     t = t.replace(/\|/g, ' ');
     return t.replace(/\n{2,}/g, '. ').replace(/\s+/g, ' ').trim();
-};
-
-export const isSpeaking = () => ttsSpeaking;
-
-export const stopSpeaking = () => {
-    if (typeof speechSynthesis !== 'undefined') speechSynthesis.cancel();
-    ttsSpeaking = false;
-};
-
-export const speakText = (raw, { onend } = {}) => {
-    if (typeof speechSynthesis === 'undefined') return;
-    speechSynthesis.cancel();
-    const text = stripForSpeech(raw);
-    if (!text) return;
-    const utter = new SpeechSynthesisUtterance(text);
-    utter.rate = 1;
-    utter.lang = document.documentElement.lang || 'en';
-    const voices = speechSynthesis.getVoices();
-    const preferred = voices.find((v) => /en[-_]US/i.test(v.lang) && /google/i.test(v.name))
-        || voices.find((v) => /^en/i.test(v.lang));
-    if (preferred) utter.voice = preferred;
-    ttsSpeaking = true;
-    utter.onend = () => { ttsSpeaking = false; if (onend) onend(); };
-    utter.onerror = () => { ttsSpeaking = false; if (onend) onend(); };
-    speechSynthesis.speak(utter);
 };
 
 // ---------------------------------------------------------------------------

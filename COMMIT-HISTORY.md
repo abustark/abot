@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.4.12`** (current head is `2.4.11`)
+> - **`main` → `2.4.13`** (current head is `2.4.12`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** (no version of its own: `git push origin main:arena/01a03fe9-abot --force`;
 >   both branches stay identical)
 
@@ -25,6 +25,15 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.4.12 - boot hardening (stuck splash), mobile tap-to-reveal fix, truthful read-aloud state
+- **Date**: 2026-10-18
+- **Why**: owner report — (a) on PC the site sat on the loading splash and never opened (mobile fine); (b) on mobile, tapping a user bubble no longer revealed the copy/read-aloud/edit pill; (c) the read-aloud button voiced nothing, could not be stopped by tapping it again, and only a copy tap "reset" its pressed icon.
+- **Stuck splash (PC)**: `onAuthStateChanged` awaited `enterApp()` (whose Firestore chat load can hang forever behind an adblocker/captive portal) before `hideAppLoader()`, and any init throw could skip it entirely — the splash then stayed up forever. Fixes: (a) the Firestore chat read is capped with a 10s timeout (`js/chat.js`); (b) `enterApp()` is wrapped so `hideAppLoader()` always runs (`js/auth.js`); (c) every `main()` boot step is isolated so `initAuth()` always registers (`js/app.js`); (d) a 10s boot watchdog force-hides the splash as a last resort, logged to `window.__abotErrors` (`js/auth.js`). Recovery tip: open `/#reset` once on an affected device to wipe a stale SW/cache.
+- **Mobile tap-to-reveal**: the tap gate was evaluated once at attach time and only trusted `(hover: none)` — some mobile browsers misreport it. The capability check now runs per tap and also honors `navigator.maxTouchPoints`; pointer-only devices keep pure hover (text selection untouched).
+- **Read-aloud truthfulness**: `aria-pressed` used to be set before speech actually started, and a cancelled utterance's async `onend` could clear the "speaking" flag under the new utterance — the second tap then re-spoke instead of stopping. Now: pressed turns on only on `utter.onstart`; every utterance carries a generation id so stale `onend`/`onerror` callbacks are ignored; `isSpeaking()` also consults `speechSynthesis.speaking`; devices without Web Speech get an info toast instead of a fake pressed state.
+- **Tests**: `tools/interaction-test.js` gained the no-Web-Speech case (info toast, never pressed).
+- **Cache**: `?v=p36` → `p37` (app.js), `abot-cache-v62` → `v63`, build id `2026-10-18.4`. CSS unchanged (`dist/output.css?v=p36` stays).
 
 ### 2.4.11 - removed stale docs/UI-COMPONENTS-ROADMAP.md (owner directive)
 - **Date**: 2026-10-18

@@ -72,7 +72,18 @@ const flashCopiedState = (btn, size = 'w-4 h-4') => {
 export const loadUserChatsFromFirestore = async (userId) => {
     const chatsCollectionRef = state.db.collection('users').doc(userId).collection('chats');
     try {
-        const snapshot = await chatsCollectionRef.orderBy('id', 'desc').get();
+        // 2.4.12 (owner report: PC stuck at splash): a blocked/unreachable
+        // Firestore (adblocker filtering *.googleapis.com, captive portal)
+        // leaves get() pending forever — enterApp never settles and the splash
+        // never lifts. Cap the read so the app always reaches a usable state.
+        let loadTimer;
+        const timeoutPromise = new Promise((_, reject) => {
+            loadTimer = setTimeout(() => reject(new Error('Firestore load timed out')), 10000);
+        });
+        const snapshot = await Promise.race([
+            chatsCollectionRef.orderBy('id', 'desc').get(),
+            timeoutPromise,
+        ]).finally(() => clearTimeout(loadTimer));
         if (snapshot.empty) {
             console.log("No chats found for user, creating a new one.");
             return false; // Signal that we need to create a new chat
@@ -456,12 +467,23 @@ const wireMessageActions = (container, msgIndex) => {
             e.stopPropagation();
             const msg = state.chats[state.activeChatId]?.messages[msgIndex];
             if (!msg) return;
+            if (typeof speechSynthesis === 'undefined') {
+                // 2.4.12: never pretend to play on devices without Web Speech.
+                showToast('Read aloud is not supported on this device.', 'info');
+                return;
+            }
             if (isSpeaking()) {
                 stopSpeaking();
                 speakBtns.forEach((b) => b.setAttribute('aria-pressed', 'false'));
             } else {
-                speakText(msg.content, { onend: () => speakBtns.forEach((b) => b.setAttribute('aria-pressed', 'false')) });
-                speakBtns.forEach((b) => b.setAttribute('aria-pressed', 'true'));
+                // 2.4.12 (owner report: "no voice + can't stop"): the pressed
+                // state now turns on only when speech ACTUALLY starts (onstart),
+                // so a silent failure can never leave the icon stuck "on"; and
+                // isSpeaking() consults the engine state, so the next tap always
+                // stops whatever is really playing.
+                const markOff = () => speakBtns.forEach((b) => b.setAttribute('aria-pressed', 'false'));
+                const markOn = () => speakBtns.forEach((b) => b.setAttribute('aria-pressed', 'true'));
+                speakText(msg.content, { onstart: markOn, onend: markOff });
             }
         });
     });
@@ -617,7 +639,17 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
     if (isUser) {
         const rowEl = messageEl.querySelector('.message-container');
         messageEl.querySelector('.user-bubble')?.addEventListener('click', () => {
-            if (!window.matchMedia || !window.matchMedia('(hover: none)').matches) return;
+            // 2.4.12 (owner report: tap-to-reveal not working on mobile): the
+            // old gate was evaluated once at attach time and only trusted
+            // `(hover: none)` — some mobile browsers misreport it. Re-check per
+            // tap and also honor actual touch capability; pointer-only devices
+            // keep pure hover behavior.
+            let touchCapable = false;
+            try {
+                touchCapable = (window.matchMedia && window.matchMedia('(hover: none)').matches)
+                    || (navigator.maxTouchPoints || 0) > 0;
+            } catch { touchCapable = false; }
+            if (!touchCapable) return;
             const willOpen = !rowEl.classList.contains('actions-open');
             document.querySelectorAll('.message-container.actions-open').forEach((m) => m.classList.remove('actions-open'));
             if (willOpen) rowEl.classList.add('actions-open');

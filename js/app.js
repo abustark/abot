@@ -1054,7 +1054,7 @@ function initApp() {
 
 // Phase 6.5: client-state reset + build identity
 // Visit <site>/#reset to wipe SW/caches/storage and reload (recovery tool).
-window.ABOT_BUILD = '2026-10-18.3';
+window.ABOT_BUILD = '2026-10-18.4';
 console.log(`[ABot] build ${window.ABOT_BUILD}`);
 if (location.hash === '#reset') {
     (async () => {
@@ -1103,14 +1103,29 @@ window.addEventListener('unhandledrejection', (e) => {
 });
 
 function main() {
-    registerServiceWorker();
-    initFirebase();            // was statements #3-6
-    initDomExtras();           // was statements #33 and #59
-    initSparkles(dom.authSparkles); // 2.4.1: auth backdrop starfield
-    initDotLoader(dom.loaderDots); // 2.4.3: starting-site dot-matrix loader
-    initMessageActions();      // was statements #43-44
-    registerInitApp(initApp);  // auth's onAuthStateChanged needs initApp
-    initAuth();                // was statements #52,54-58,60-65
+    // 2.4.12 (owner report: "site stuck at loading on PC"): isolate every boot
+    // step so one failure can never prevent initAuth() — and with it the
+    // splash teardown — from running.
+    /** @type {[string, () => void][]} */
+    const steps = [
+        ['registerServiceWorker', registerServiceWorker],
+        ['initFirebase', initFirebase],
+        ['initDomExtras', initDomExtras],
+        ['initSparkles', () => initSparkles(dom.authSparkles)], // 2.4.1: auth backdrop starfield
+        ['initDotLoader', () => initDotLoader(dom.loaderDots)], // 2.4.3: starting-site dot-matrix loader
+        ['initMessageActions', initMessageActions], // was statements #43-44
+        ['registerInitApp', () => registerInitApp(initApp)], // auth's onAuthStateChanged needs initApp
+        ['initAuth', initAuth], // was statements #52,54-58,60-65
+    ];
+    for (const [name, fn] of steps) {
+        try {
+            fn();
+        } catch (stepError) {
+            console.error(`[ABot] init step failed: ${name}`, stepError);
+            window.__abotErrors = window.__abotErrors || [];
+            window.__abotErrors.push(`init ${name}: ` + (stepError.stack || stepError.message));
+        }
+    }
     // footer year (the old duplicate in-app footer was removed in the revamp)
     const yearEl = document.getElementById('footer-year');
     if (yearEl) yearEl.textContent = new Date().getFullYear();

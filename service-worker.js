@@ -3,7 +3,7 @@
  * Provides offline caching for local assets only
  */
 
-const CACHE_NAME = 'abot-cache-v62'; // 2.4.10: user action pill hover/tap, ⋮ menu keyboard nav, sign-out dialog fixes
+const CACHE_NAME = 'abot-cache-v63'; // 2.4.12: splash watchdog + boot hardening, speak button truthful state, mobile tap-to-reveal fix
 const STATIC_ASSETS = [
     '/',
     '/index.html',

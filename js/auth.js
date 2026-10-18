@@ -326,7 +326,12 @@ document.querySelectorAll('[data-toggle-password]').forEach(btn => {
     if (badge) badge.textContent = `build ${window.ABOT_BUILD || '?'}`;
 }
 
+// 2.4.12: armed in initAuth; cleared by hideAppLoader. Forces the splash off
+// if boot hangs (blocked Firestore, stalled CDN) so the app never bricks.
+let loaderWatchdog = null;
+
 const hideAppLoader = () => {
+    clearTimeout(loaderWatchdog);
     if (!dom.appLoader) return;
     // Remove from the hit-test path IMMEDIATELY — the element is fixed inset-0
     // z-50, so a transparent-but-present loader was swallowing every real tap
@@ -435,7 +440,15 @@ state.auth.onAuthStateChanged(async (user) => {
             return;
         }
 
-        await enterApp(user);
+        try {
+            await enterApp(user);
+        } catch (enterError) {
+            // 2.4.12 (owner report: PC stuck at splash): an init throw here used
+            // to skip hideAppLoader() below and leave the splash up forever.
+            console.error('[ABot] enterApp failed:', enterError);
+            window.__abotErrors = window.__abotErrors || [];
+            window.__abotErrors.push('enterApp: ' + (enterError.stack || enterError.message));
+        }
     } else {
         // --- USER IS LOGGED OUT ---
         // v2.0.8: wrap the whole teardown so a single failure can never leave
@@ -479,6 +492,19 @@ state.auth.onAuthStateChanged(async (user) => {
 
     hideAppLoader();
 });
+
+    // 2.4.12 (owner report: "site stuck at loading on PC"): last-resort
+    // watchdog — if a hung network call (e.g. Firestore blocked by an
+    // adblocker/captive portal) leaves the splash up, force it off so the app
+    // is never bricked. Cleared the moment hideAppLoader runs normally.
+    clearTimeout(loaderWatchdog);
+    loaderWatchdog = setTimeout(() => {
+        if (!dom.appLoader || dom.appLoader.style.display === 'none') return;
+        console.warn('[ABot] boot watchdog: splash still visible after 10s — forcing it off');
+        window.__abotErrors = window.__abotErrors || [];
+        window.__abotErrors.push('boot watchdog: splash force-hidden after timeout');
+        hideAppLoader();
+    }, 10000);
 }
 
 // --- Phase 2 infra (new; no behavior change) ---
