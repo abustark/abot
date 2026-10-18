@@ -26,7 +26,7 @@
     <link rel="preload" href="/dist/fonts/geist-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/dist/fonts/geist-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/dist/fonts/source-serif-4-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link href="./dist/output.css?v=p33" rel="stylesheet">
+    <link href="./dist/output.css?v=p34" rel="stylesheet">
     <script src="/vendor/marked.min.js" defer></script>
     <!-- A1 (v1.0.5): highlight.js + its theme are lazy-loaded on the first code
          block (js/chat.js) — they were head-linked here, costing every visitor
@@ -63,6 +63,10 @@
             if (stored === 'true' || (stored === null && prefersDark)) {
                 document.documentElement.classList.add('dark');
             }
+            // 2.4.6: match the browser-chrome tint to the active theme (the
+            // meta used to hardcode the dark canvas).
+            document.querySelector('meta[name="theme-color"]').content =
+                document.documentElement.classList.contains('dark') ? '#181715' : '#faf9f5';
         })();
     </script>
 
@@ -90,7 +94,7 @@
         <!-- App loader -->
     <div id="app-loader"
         class="fixed inset-0 z-50 flex items-center justify-center bg-canvas transition-opacity duration-300 ease-in-out"
-        role="status" aria-label="Loading ABot" aria-hidden="true">
+        aria-hidden="true">
         <!-- v2.0.9: Nothing-style dot-matrix wordmark. Each dot rises
              bottom-left -> top, letters sweep A -> b -> o -> t. Static SVG +
              pure CSS animation: no font download, no FOUC.
@@ -656,7 +660,6 @@
                     <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3" /></svg>
                 </button>
 
-            </main>
         </div>
         <div id="sidebarOverlay" class="fixed inset-0 z-10 hidden md:hidden"></div>
 
@@ -711,8 +714,7 @@
 
         <!-- Guest User Limit Modal -->
         <div id="guestLimitModal" role="dialog" aria-modal="true" aria-labelledby="guest-modal-title"
-            class="fixed inset-0 z-30 flex items-center justify-center bg-ink/60 hidden"
-            aria-labelledby="guest-modal-title" role="dialog" aria-modal="true">
+            class="fixed inset-0 z-30 flex items-center justify-center bg-ink/60 hidden">
             <div id="guestLimitOverlay" class="absolute inset-0"></div>
             <div id="guestLimitPanel"
                 class="modal-transition relative z-10 w-full max-w-md p-6 mx-4 bg-canvas dark:bg-card rounded-2xl shadow-lift border border-hairline"
@@ -766,8 +768,7 @@
 
         <!-- NEW Code to Add -->
         <!-- Delete Confirmation Modal -->
-        <div id="deleteModal" role="dialog" aria-modal="true" aria-labelledby="modal-title" class="fixed inset-0 z-30 flex items-center justify-center bg-ink/60 hidden"
-            aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div id="deleteModal" role="dialog" aria-modal="true" aria-labelledby="modal-title" class="fixed inset-0 z-30 flex items-center justify-center bg-ink/60 hidden">
             <div id="deleteOverlay" class="absolute inset-0"></div>
             <div id="deletePanel"
                 class="modal-transition relative z-10 w-full max-w-md p-6 mx-4 bg-canvas dark:bg-card rounded-2xl shadow-lift border border-hairline"
@@ -800,7 +801,7 @@
         <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js" defer></script>
         <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js" defer></script>
 
-        <script type="module" src="js/app.js?v=p33"></script>
+        <script type="module" src="js/app.js?v=p34"></script>
 
         <!--
       Tailwind CSS Purge-Safe-List:

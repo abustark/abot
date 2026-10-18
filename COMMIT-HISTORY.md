@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.4.6`** (current head is `2.4.5`)
+> - **`main` → `2.4.7`** (current head is `2.4.6`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** (no version of its own: `git push origin main:arena/01a03fe9-abot --force`;
 >   both branches stay identical)
 
@@ -25,6 +25,17 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.4.6 - hygiene sweep + motion polish + guideline-audit defect fixes
+- **Date**: 2026-10-18
+- **Why**: owner-approved batch from the skills-driven proposal (emil-design-eng + find-animation-opportunities + web-design-guidelines): remove dead code left by earlier feature removals, make the docs match reality, ship 5 small motion items, and fix the defects the full guideline audit surfaced (owner chose "defects in 2.4.6"; the a11y + perf findings stay queued for later batches).
+- **Dead code (leftovers of earlier removals)**: `startVoiceRecognition` + `alert()` + `state.recognition` (voice-input remnants), `COLOR_MAP`/`generateColorClasses` (superseded by `PROVIDER_COLORS`/`getProviderColor`), `_persistMessageMeta` (reactions/pins leftover), `.voice-pulse` CSS + `#voiceBtn:active` style. Stale comments corrected (utils.js header, chat.js "copy/speak/regen" and "reaction toggles", config.js stray Firestore comment).
+- **Guideline-audit defect fixes**: command palette built chat labels via `innerHTML` — a stored-XSS vector for user/imported/AI-named chats → now DOM/textContent; palette "Search messages" uses the same gate as `openSearch()` (empty-chat toast + backdrop reveal); `.abot-toast` scroll-guard reattached (selector was still `#toast-notification`, dead since toasts became class-based); duplicate dialog attrs removed (`#guestLimitModal`, `#deleteModal`); stray `</main>` removed (no `<main>` opener existed); loader `role="status"` + `aria-hidden` contradiction resolved (aria-hidden kept — it's a paint-blocker, not live content); `theme-color` meta now follows the active theme (head pre-paint block + `syncThemeIcons`); chat-row ⋮ menus Escape-close with focus return to the trigger (was outside-click only).
+- **Motion (5)**: new chat rows enter once (180ms rise, `.chat-item-enter` — only genuinely new ids via `renderedChatIds`, no replay on re-render); deleting a chat collapses the row 160ms before the list re-renders (`collapseChatRow`, WAAPI with jsdom-safe fallback); copy buttons morph to an inline check for ~1.2s (`flashCopiedState` — message copy + both code-copy sites); model options get `active:scale-[0.98]` press feedback; tooltips warm — once a tooltip has appeared, the next one within 1s skips the 2500ms rest (`data-tooltip-warm`, JS + CSS).
+- **Docs truth pass**: README (36→20 models; dropped auto-collapse, reactions/pins, current-chat-chip claims), PROJECT-INFO (20 models, SW v60 + 24 precached assets, v2.4.6 head; reactions/pins/voice-input claims removed), js/README rows (config.js + utils.js exports).
+- **Tests**: new interaction case — chat-row options menu opens and Escape closes it (M2 block, reuses the existing XSS-test chat row).
+- **Cache-bust**: `?v=p33` → `?v=p34`, `abot-cache-v59` → `abot-cache-v60`; `ABOT_BUILD` → `2026-10-18.1`.
+- **dist/output.css**: rebuilt via `npm run build:css` and committed (new `chat-item-enter` keyframes, `active:scale-[0.98]`, `transition-[background-color,transform]`).
 
 ### 2.4.5 - gate pass: interaction-test drift fixed (all suites green)
 - **Date**: 2026-10-18

@@ -18,12 +18,12 @@
 | Live site | https://abot-eta.vercel.app/ |
 | Source | https://github.com/abustark/abot |
 | License | ISC |
-| Status | Actively maintained (2026, v2.1.4, Phases 0–4 complete, Phase 5 browser verification owner-gated) |
+| Status | Actively maintained (2026, v2.4.6, Phases 0–4 complete, Phase 5 browser verification owner-gated) |
 
 **One-liners (pick by context):**
 - *10 words:* Multi-model AI chat hub with streaming, search, hardened proxy.
-- *25 words:* ABot is a vanilla-JS chat hub routing to 24 configured models across Google Gemini, Groq, NVIDIA NIM and OpenRouter free tier with SSE streaming and Firestore chat storage.
-- *Elevator pitch:* ABot is one calm place to talk to 24 models from 4 free-tier providers. Pick a model, stream answers with markdown and syntax highlighting, search chats, react/pin messages, use voice and TTS, export/import, and manage everything from a command palette — behind a hardened serverless proxy with rate limits, email-verified auth and strict security headers, wrapped in a Claude-style dark/light PWA.
+- *25 words:* ABot is a vanilla-JS chat hub routing to 20 configured models across Google Gemini, Groq, NVIDIA NIM and OpenRouter free tier with SSE streaming and Firestore chat storage.
+- *Elevator pitch:* ABot is one calm place to talk to 20 models from 4 free-tier providers. Pick a model, stream answers with markdown and syntax highlighting, search chats, use TTS, export/import, and manage everything from a command palette — behind a hardened serverless proxy with rate limits, email-verified auth and strict security headers, wrapped in a Claude-style dark/light PWA.
 
 ---
 
@@ -53,7 +53,7 @@
 | Highlight | highlight.js (vendored) | `vendor/highlight.min.js` 164 KB (+ npm `^11.12.0`) | Lazy on first code block |
 | 3D bg (optional) | Vanta.js + Three.js | Vanta pinned 0.5.24, Three r134, default OFF lazy | Ambient background toggle |
 | Fonts | Self-hosted woff2 | 8 files in `dist/fonts/` | Geist / JetBrains Mono / Source Serif 4 |
-| PWA | Hand-written service worker + manifest | `abot-cache-v45`, 16 precached assets | Installable, offline shell |
+| PWA | Hand-written service worker + manifest | `abot-cache-v60`, 24 precached assets | Installable, offline shell |
 | Testing | jsdom | ^30.0.1 | interaction/cycle/smoke suites |
 | Syntax | acorn + acorn-walk | ^8.18.0 / ^8.3.5 | `npm run check` |
 | Bundling helper | esbuild | ^0.28.2 | Vendor builds |
@@ -61,7 +61,7 @@
 | Types | TypeScript (check-only) | ^5.9.3 | `tsc -p jsconfig.json` (`allowJs`, `checkJs:false`) |
 | Lint | ESLint | ^9.39.5 + `@eslint/js` + `globals` | `npm run lint`, pre-commit hook |
 | Hosting (prod) | Vercel Serverless | `api/chat.js`, `maxDuration 60` | Production deployment |
-| VCS | Git / GitHub | main branch | v2.1.4, 2026-09-24 head |
+| VCS | Git / GitHub | main branch | v2.4.6, 2026-10-18 head |
 
 ---
 
@@ -78,19 +78,19 @@
 
 ## 4. Feature inventory (technical depth for bullet generation)
 
-1. **24 configured models** (`js/config.js MODEL_CONFIG`; README describes 36-model vision) — default `groq/openai/gpt-oss-120b`, Gemini 2.5 Pro/Flash, Qwen 3.x, MiniMax M2.7, Nemotron/Glimmer/Kimi/GLM/Gemma variants, plus `:free` tier + `openrouter/free` Auto failover router.
-2. **SSE streaming** — `text/event-stream` passthrough with 100 ms throttled rendering (no mobile freeze), stop-generation via `AbortController`, live follow-scroll + jump-to-latest pill, auto-collapse long messages, error cards with one-click retry.
+1. **20 configured models** (`js/config.js MODEL_CONFIG`) — default `groq/openai/gpt-oss-120b`, Gemini 3.x Flash/Lite, Kimi K3, GLM 5.x, Qwen 3.8, Nemotron 3.x, Gemma 4, plus `:free` tier + `openrouter/free` Auto failover router.
+2. **SSE streaming** — `text/event-stream` passthrough with 100 ms throttled rendering (no mobile freeze), stop-generation via `AbortController`, live follow-scroll + jump-to-latest pill, error cards with one-click retry.
 3. **Markdown + code** — vendored `marked` + lazy `highlight.js` (`atom-one-dark`), `renderSafeMarkdown` with `sanitizeHtml` XSS guard.
-4. **Chat management** — new / inline-rename / delete-with-confirm, sidebar + header search with jump-and-highlight, current-chat chip, draft leave-guard.
-5. **Reactions + pins + timestamps** — persisted to Firestore (1 write/action), collapse-long-messages, per-chat message search.
-6. **Voice + TTS** — Web Speech recognition input, per-message speak/stop + auto-read toggle (`abot-auto-tts`), `stripForSpeech` cleanup.
+4. **Chat management** — new / inline-rename / delete-with-confirm, sidebar + header search with jump-and-highlight, draft leave-guard.
+5. **Timestamps + message search** — per-message timestamp toggle, per-chat search with jump-and-highlight.
+6. **TTS** — per-message speak/stop + auto-read toggle (`abot-auto-tts`), `stripForSpeech` cleanup.
 7. **Export/import** — JSON + Markdown export, JSON import with `{name,messages,model,systemPrompt}` validation.
 8. **Prompt library** — 9 presets (Standard, Code Helper, Sarcastic Pirate, Creative Writer, Email Assistant, Technical Writer, ELI5, Brainstorm Partner, Game Master) per chat.
 9. **Auth trio** — email/password (signup/login/forgot + verification gate blocking unverified `password` provider → 403), Google GIS, anonymous guest (5-message limit + upgrade modal, `linkGuestToGoogle` merge path).
 10. **Command palette + shortcuts** — `Ctrl+K` palette (export/new/switch/prompt actions), `Alt+N` new chat, `Alt+/` search focus, Enter/Shift+Enter send, Esc handling, model-panel typeahead.
 11. **Claude-style theming** — dark/light + system pre-paint (no flash), View-Transition crossfade, warm-neutral tokens, serif-display pairing, per-provider identity colours, per-chat model theming.
-12. **PWA** — `manifest` (standalone, `#181715`), SW `v45` precaching 16 assets (same-origin GET only, skips `/api/`), safe-area insets, mobile keyboard dock.
-13. **Chrome details** — toast stack with swipe-dismiss, skeleton shimmer, tooltips, Vanta toggle (default OFF, coral/charcoal retune), reduced-motion support.
+12. **PWA** — `manifest` (standalone, `#181715`), SW `v60` precaching 24 assets (same-origin GET only, skips `/api/`), safe-area insets, mobile keyboard dock.
+13. **Chrome details** — toast stack with swipe-dismiss, skeleton shimmer, tooltips, Vanta toggle (default OFF, coral/charcoal retune).
 14. **Security headers** — `nosniff`, `DENY`, `Referrer-Policy`, `Permissions-Policy`, HSTS, `no-store` on `/api/*`, immutable fonts/vendor, hourly JS/CSS.
 
 ---
@@ -110,8 +110,8 @@
 
 - **315** git-tracked files (0 in `node_modules`); **104** excluding skill packs (`.claude/agent/.agents` = 211 support files).
 - **~3,200 lines** across **9** `js/` ES modules (`app.js` 1047, `chat.js` 934, `auth.js` 418, `utils.js` 265, `config.js` 151, `ui.js` 134, `palette.js` 126, `dom.js` 107, `state.js` 24) + `server.js` 380 + `api/chat.js` 224 + `lib/chat-security.js` 185.
-- **24 configured models** × **4 providers**; **9 prompt presets**; **49+** bug-registry entries.
-- **4 test suites** in `npm test`; **10** visual baselines; **16** SW-precached assets; **8** self-hosted fonts.
+- **20 configured models** × **4 providers**; **9 prompt presets**; **49+** bug-registry entries.
+- **4 test suites** in `npm test`; **10** visual baselines; **24** SW-precached assets; **8** self-hosted fonts.
 - **10 security issues (S1–S10)** remediated in Phase 1 (2026-08-27); favicon 380 KB→1.2 KB in Phase 4.
 - **60s** serverless max duration with **55s** upstream abort; **30 req/15min** per-identity chat limit + **100 req/15min** IP general limit.
 
@@ -121,7 +121,7 @@
 
 - Fail-closed authorization — unverified-email 403, ownerless/foreign chat denial, header-only Bearer auth.
 - Allowlist-everything — static paths, provider prefixes, model charset, `connect-src` origins, Firestore matches.
-- Atomic, single-write mutations — reactions/pins as one Firestore write per action.
+- Atomic, single-write mutations — one Firestore write per user action (send, rename, model switch).
 - Behaviour-freeze refactors — parity-verified de-monolithisation before any visual change.
 - Stream-safe proxying — chunk passthrough with timeout + null-body guards, truncated server-only logs, generic client envelopes.
 - Degradation by design — in-memory limiter with documented per-warm-instance limit + Tier-2 Firestore-counter recommendation; Vanta lazy + default-off.
@@ -132,21 +132,21 @@
 
 ## 8. ATS / keyword tags
 
-AI chat, multi-model routing, LLM integration, prompt engineering, Google Gemini, Groq, NVIDIA NIM, OpenRouter, server-sent events, SSE streaming, markdown rendering, syntax highlighting, Firebase Authentication, Google OAuth, Firestore, NoSQL, per-user isolation, rate limiting, Content-Security-Policy, security headers, PWA, service worker, Web Speech API, TTS, vanilla JavaScript, ES modules, Tailwind CSS, responsive design, dark mode, accessibility (WCAG-minded), command palette, automated testing, jsdom, ESLint, TypeScript checking, Vercel serverless, Express, Git/GitHub.
+AI chat, multi-model routing, LLM integration, prompt engineering, Google Gemini, Groq, NVIDIA NIM, OpenRouter, server-sent events, SSE streaming, markdown rendering, syntax highlighting, Firebase Authentication, Google OAuth, Firestore, NoSQL, per-user isolation, rate limiting, Content-Security-Policy, security headers, PWA, service worker, TTS, vanilla JavaScript, ES modules, Tailwind CSS, responsive design, dark mode, accessibility (WCAG-minded), command palette, automated testing, jsdom, ESLint, TypeScript checking, Vercel serverless, Express, Git/GitHub.
 
 ---
 
 ## 9. Ready-made examples (regenerate freely — facts only)
 
 **Resume bullets:**
-- Built a multi-model AI chat hub (vanilla ES modules, Tailwind, no framework) routing 24 models across Google Gemini, Groq, NVIDIA NIM and OpenRouter free tier with SSE streaming and throttled rendering.
+- Built a multi-model AI chat hub (vanilla ES modules, Tailwind, no framework) routing 20 models across Google Gemini, Groq, NVIDIA NIM and OpenRouter free tier with SSE streaming and throttled rendering.
 - Designed a hardened proxy (`api/chat.js` + `server.js` sharing `lib/chat-security.js`) with Firebase JWT verification, email-verified gate, per-uid/hashed-IP rate limits, 40/8k/200k caps, 55s abort and generic error envelopes — keys never reach the browser.
-- Implemented chat depth (Firestore per-user CRUD, search, reactions/pins, TTS + voice input, JSON/Markdown export/import, 9-preset prompt library, `Ctrl+K` palette, guest 5-message mode) in a Claude-style dark/light PWA (SW v45, 16 precached assets).
+- Implemented chat depth (Firestore per-user CRUD, search, TTS, JSON/Markdown export/import, 9-preset prompt library, `Ctrl+K` palette, guest 5-message mode) in a Claude-style dark/light PWA (SW v60, 24 precached assets).
 - Closed 10 security findings (open static root, missing limiter, CORS combo, query-token auth, URL key, token-burn caps, error leakage, client-only guest cap, hung lambdas, inline CSP) with allowlist static, header-only auth and strict CSP.
 - Verified with 4 Node suites (security contract, jsdom smoke, full-shell interaction, cycle regressions) plus ESLint, acorn syntax, `tsc` check, Playwright E2E and visual baselines; de-monolithised `index.html` 2555→813 lines with 56/57 token parity.
 
-**Resume project paragraph (3 lines):** Multi-model AI chat hub built with vanilla JS modules and Tailwind, proxying 24 models from 4 free-tier providers via a hardened Vercel/Express backend with Firebase Auth and Firestore. Features streaming with markdown/highlighting, search/reactions/pins, voice/TTS, export/import and a command palette in an installable dark/light PWA. Ships with strict CSP headers, per-user isolation, and 4 automated test suites covering security, smoke, interaction and cycles.
+**Resume project paragraph (3 lines):** Multi-model AI chat hub built with vanilla JS modules and Tailwind, proxying 20 models from 4 free-tier providers via a hardened Vercel/Express backend with Firebase Auth and Firestore. Features streaming with markdown/highlighting, search/TTS, export/import and a command palette in an installable dark/light PWA. Ships with strict CSP headers, per-user isolation, and 4 automated test suites covering security, smoke, interaction and cycles.
 
-**Portfolio card (title + ~30 words + stack):** ABot — one calm hub for 24 AI models with streaming chat, prompt presets, voice, and deep chat management. Hardened proxy, Google + guest auth, installable PWA. `Vanilla JS · Tailwind · Firebase · Vercel · 4 AI providers`
+**Portfolio card (title + ~30 words + stack):** ABot — one calm hub for 20 AI models with streaming chat, prompt presets, TTS, and deep chat management. Hardened proxy, Google + guest auth, installable PWA. `Vanilla JS · Tailwind · Firebase · Vercel · 4 AI providers`
 
-**Tone/length guide for the AI:** Frame impact as user capability + the hardest engineering problem solved (no business KPIs). Resume = 3–5 dense bullets or one 3-line paragraph, lead with verbs and numbers, keywords from §8; portfolio = friendly paragraph + feature list + stack chips, mention the 24-model routing, the hardened proxy, and the PWA; never claim 36 models as configured or committed screenshots — config holds 24, `artifacts/` is absent.
+**Tone/length guide for the AI:** Frame impact as user capability + the hardest engineering problem solved (no business KPIs). Resume = 3–5 dense bullets or one 3-line paragraph, lead with verbs and numbers, keywords from §8; portfolio = friendly paragraph + feature list + stack chips, mention the 20-model routing, the hardened proxy, and the PWA; never claim 36 models as configured or committed screenshots — config holds 20, `artifacts/` is absent.

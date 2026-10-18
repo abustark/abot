@@ -15,7 +15,6 @@ export const state = {
   guestSessionMessageCount: 0,
   isAppInitialized: false,
 
-  recognition: undefined,
   titleAnimationInterval: null,
   tokenClient: undefined,
   auth: null, // assigned by initFirebase()

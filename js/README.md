@@ -11,10 +11,10 @@ These are the **live application modules** (Phase 2 de-monolithization). They ar
 
 | File | Owns | Imports |
 |---|---|---|
-| `config.js` | `COLOR_MAP`, `MODEL_CONFIG`, `SYSTEM_PROMPTS`, `GUEST_MESSAGE_LIMIT`, `generateColorClasses` | — |
+| `config.js` | `PROVIDER_COLORS`, `getProviderColor`, `MODEL_CONFIG`, `GUEST_MESSAGE_LIMIT`, `modelCapabilities`, `SYSTEM_PROMPTS` | — |
 | `dom.js` | element registry `dom` + `initDomExtras()` | — |
 | `state.js` | shared mutable `state` (chats, activeChatId, abortController, auth/db handles, …) | — |
-| `utils.js` | `showToast`, `getTimestamp`, `startVoiceRecognition` | dom, state |
+| `utils.js` | `showToast`, `getTimestamp`, `formatRelativeTime`, `renderSafeMarkdown`, `sanitizeHtml`, `speakText`/`stopSpeaking`, `installDraftLeaveGuard` | dom, state |
 | `ui.js` | theme, sidebar, prompt modals, guest-limit modals, `applyModelColorTheme` | config, dom, state, utils |
 | `auth.js` | Firebase init, login/signup/guest/Google-GIS flows, `initAuth()` (`onAuthStateChanged` wiring) | config, dom, state, utils, ui, chat |
 | `chat.js` | chat CRUD, message rendering/streaming (`sendMessage`), import/export, `renderChatList`/`renderActiveChat` | config, dom, state, utils, ui |

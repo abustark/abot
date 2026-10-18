@@ -385,15 +385,16 @@
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* Voice input pulse */
-.voice-pulse { animation: voicePulse 2s infinite; }
-@keyframes voicePulse {
-    0%, 100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.12); opacity: 0.85; }
-}
-
 /* Active chat list item — warm card + coral inset (spec 2.2) */
 .chat-list-item.active { background-color: rgb(var(--c-card)); box-shadow: inset 2px 0 0 rgb(var(--c-coral)); }
+
+/* 2.4.6 (motion): a genuinely new chat row enters softly (renderChatList
+   adds the class only for chats it has never rendered before). */
+.chat-item-enter { animation: chatItemEnter 180ms var(--ease-out) both; }
+@keyframes chatItemEnter {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
 
 /* Modals */
 .modal-transition { transition: opacity 180ms var(--ease-out), transform 180ms var(--ease-out); }
@@ -510,7 +511,6 @@ mark {
    instant, not eased. */
 #sidebarToggle:active,
 #profileMenuBtn:active,
-#voiceBtn:active,
 #sidebarSearchBtn:active,
 #sidebarPromptBtn:active,
 .chat-options-btn:active,
@@ -755,6 +755,9 @@ h1, h2, h3, .prose h1, .prose h2, .prose h3 { text-wrap: balance; }
    never delayed, and leaving the trigger hides the bubble at once (the
    reverse transition carries no delay). */
 [data-tooltip]:hover::after { transition-delay: 2500ms; }
+/* 2.4.6 (motion): warm tooltips — once a tooltip has actually appeared, the
+   next one within 1s skips the rest (app.js sets the attribute). */
+[data-tooltip][data-tooltip-warm]:hover::after { transition-delay: 0ms; }
 /* Bottom-positioned variant for triggers in the TOP bar (header, sidebar
    brand). Default above-position would clip off the viewport top there. */
 [data-tooltip-pos="bottom"]::after {
@@ -1033,7 +1036,7 @@ body.chat-empty #jumpToLatest { display: none; }
 
 /* --- B7: a toast is dragged horizontally, so let the browser keep vertical
    scroll gestures for itself instead of cancelling the drag. */
-#toast-notification { touch-action: pan-y; }
+.abot-toast { touch-action: pan-y; }
 
 /* --- Brand mark (owner request 2026-09-19): the violet glyph renders as a flat
    silhouette — black on the light canvas, white on the dark one — so it stays

@@ -2,7 +2,7 @@
 
 > 📄 **[`PROJECT-INFO.md`](PROJECT-INFO.md)** — machine-readable project facts (stack + exact versions, architecture, metrics, keyword tags) designed so an AI can generate resume entries and portfolio project summaries from it alone.
 
-**One calm place to talk to 36 models from 4 providers** — Google Gemini, Groq, NVIDIA NIM, and OpenRouter's free tier — with streaming, markdown, and a warm, Claude-style design system. No framework, no build step for the app itself: vanilla ES modules all the way down.
+**One calm place to talk to 20 models from 4 providers** — Google Gemini, Groq, NVIDIA NIM, and OpenRouter's free tier — with streaming, markdown, and a warm, Claude-style design system. No framework, no build step for the app itself: vanilla ES modules all the way down.
 
 > **Live demo:** https://abot-eta.vercel.app/
 > **Repo:** https://github.com/abustark/abot
@@ -23,17 +23,17 @@
 ## Highlights
 
 **Multi-model core**
-- 36 models across **Google Gemini** (direct API), **Groq**, **NVIDIA NIM**, and **OpenRouter** free tier
+- 20 models across **Google Gemini** (direct API), **Groq**, **NVIDIA NIM**, and **OpenRouter** free tier
 - **OpenRouter Auto (Free)** — an auto-failover router that picks the best available free model
 - Per-provider identity colors, per-chat model theming, per-request **web-search** and **thinking** toggles with capability gating (chips auto-disable where the provider doesn't support them)
 
 **Chat experience**
-- SSE streaming with throttled rendering (~100 ms flushes — no UI-thread freeze on phones), stop-generation via `AbortController`, live follow-scroll with jump-to-latest pill, auto-collapse for long messages
+- SSE streaming with throttled rendering (~100 ms flushes — no UI-thread freeze on phones), stop-generation via `AbortController`, live follow-scroll with jump-to-latest pill
 - Full markdown with lazy-loaded syntax highlighting, error cards with one-click retry
-- Reactions, message pinning, optional timestamps, TTS (auto-read + per-message speak/stop), per-chat message search, draft leave-guard
+- Optional timestamps, TTS (auto-read + per-message speak/stop), per-chat message search, draft leave-guard
 
 **Chat management**
-- New / inline-rename / delete-with-confirm, export to JSON **and** Markdown, **import chat**, sidebar search, current-chat chip with quick rename
+- New / inline-rename / delete-with-confirm, export to JSON **and** Markdown, **import chat**, sidebar search
 - Prompt library with 9 system-prompt presets per chat
 
 **Auth & accounts**

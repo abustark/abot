@@ -4,8 +4,8 @@
  * Logic frozen; only imports/exports/state.* renames were applied.
  * Verify with: node tools/verify-parity.js
  *
- * Skills-audit additions: reduced-motion-safe toast transform, draft
- * leave-guard, stream-state flag, safe-area-inset helper.
+ * Skills-audit additions: transform-only toast swipe, draft leave-guard,
+ * stream-state flag.
  */
 
 import { dom } from './dom.js';
@@ -158,36 +158,6 @@ export const installDraftLeaveGuard = () => {
             e.returnValue = '';
         }
     });
-};
-
-export const startVoiceRecognition = () => {
-    if (!state.recognition) {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!SpeechRecognition) {
-            alert("Speech Recognition not supported in your browser.");
-            return;
-        }
-        state.recognition = new SpeechRecognition();
-        state.recognition.continuous = false;
-        state.recognition.lang = 'en-US';
-        state.recognition.interimResults = false;
-        state.recognition.maxAlternatives = 1;
-
-        state.recognition.onresult = (event) => {
-            const transcript = event.results[0][0].transcript;
-            dom.messageInput.value = dom.messageInput.value + transcript;
-            dom.messageInput.dispatchEvent(new Event('input'));
-        };
-        state.recognition.onend = () => {
-            dom.voiceBtn.classList.remove('voice-pulse', 'text-red-500');
-        };
-        state.recognition.onerror = (event) => {
-            console.error("Speech recognition error", event.error);
-            dom.voiceBtn.classList.remove('voice-pulse', 'text-red-500');
-        };
-    }
-    dom.voiceBtn.classList.add('voice-pulse', 'text-red-500');
-    state.recognition.start();
 };
 
 // ---------------------------------------------------------------------------

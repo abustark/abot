@@ -81,6 +81,10 @@ function initApp() {
         // mirrors the theme, so keep it (and nothing else) in sync.
         const dark = document.documentElement.classList.contains('dark');
         if (dom.sidebarThemeSwitch) dom.sidebarThemeSwitch.checked = dark;
+        // 2.4.6: keep the browser-chrome tint in step with the actual theme
+        // (the meta used to hardcode the dark canvas).
+        const meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.content = dark ? '#181715' : '#faf9f5';
     };
     syncThemeIcons();
     // One owner of "set the theme", taking an explicit value so every entry
@@ -322,7 +326,7 @@ function initApp() {
                 // 2.4.4 (owner request): on the frosted panel an opaque hover
                 // fill looks like a slab — the hover "selection box" is a
                 // translucent ink wash instead.
-                optionEl.className = `w-full flex items-center justify-between text-left px-3 py-2.5 rounded-lg text-sm transition-colors duration-150 ${isActive ? 'bg-coral-soft font-semibold text-ink' : 'hover:bg-ink/[0.06] dark:hover:bg-ink/[0.08]'}`;
+                optionEl.className = `w-full flex items-center justify-between text-left px-3 py-2.5 rounded-lg text-sm transition-[background-color,transform] duration-150 active:scale-[0.98] ${isActive ? 'bg-coral-soft font-semibold text-ink' : 'hover:bg-ink/[0.06] dark:hover:bg-ink/[0.08]'}`;
                 optionEl.dataset.modelKey = key;
 
                 let checkmarkSvg = '';
@@ -699,6 +703,38 @@ function initApp() {
     // a 2.5s rest-before-show delay plus edge-anchored position variants
     // replaced the old JS "instant sweep" helper (removed here; it was the
     // only consumer of [data-tooltip-instant]).
+    // 2.4.6 (motion): once a tooltip has actually appeared, the next tooltip
+    // within 1s opens instantly — repeat looks skip the rest; the first look
+    // keeps the full delay.
+    const TOOLTIP_DELAY_MS = 2500; // mirrors the CSS transition-delay
+    let tooltipWarmUntil = 0;
+    let tooltipShownFor = null;
+    let tooltipShowTimer = null;
+    const tooltipTargetOf = (e) => (e.target && typeof e.target.closest === 'function')
+        ? e.target.closest('[data-tooltip]') : null;
+    document.addEventListener('pointerover', (e) => {
+        const el = tooltipTargetOf(e);
+        if (!el || el === tooltipShownFor) return;
+        if (e.relatedTarget && el.contains(e.relatedTarget)) return; // inner moves
+        clearTimeout(tooltipShowTimer);
+        if (Date.now() < tooltipWarmUntil) {
+            el.setAttribute('data-tooltip-warm', '');
+            tooltipShownFor = el; // arrives instantly — counts as shown
+            return;
+        }
+        el.removeAttribute('data-tooltip-warm');
+        tooltipShowTimer = setTimeout(() => { tooltipShownFor = el; }, TOOLTIP_DELAY_MS);
+    });
+    document.addEventListener('pointerout', (e) => {
+        const el = tooltipTargetOf(e);
+        if (!el || (e.relatedTarget && el.contains(e.relatedTarget))) return;
+        if (tooltipShownFor === el) {
+            tooltipWarmUntil = Date.now() + 1000;
+            tooltipShownFor = null;
+        }
+        clearTimeout(tooltipShowTimer);
+        el.removeAttribute('data-tooltip-warm');
+    });
 
     // --- C5 (v1.0.6): swipe the mobile drawer closed -------------------------
     // Follows the finger 1:1 (transform only), then commits on either 35% of
@@ -794,6 +830,13 @@ function initApp() {
             }
             if (!dom.modelSelectorPanel.classList.contains('hidden')) {
                 dom.modelSelectorBtn.click();
+                return;
+            }
+            // 2.4.6: chat-row ⋮ menus were only outside-click closable.
+            const openChatOptionsMenu = document.querySelector('.chat-options-menu:not(.hidden)');
+            if (openChatOptionsMenu) {
+                openChatOptionsMenu.closest('.chat-list-item')?.querySelector('.chat-options-btn')?.focus();
+                openChatOptionsMenu.classList.add('hidden');
                 return;
             }
             if (!dom.sidebar.classList.contains('-translate-x-full') && window.innerWidth < 768) {
@@ -910,6 +953,25 @@ function initApp() {
     };
 
 
+    // 2.4.6 (motion): a deleted row collapses out (160ms) before the list
+    // re-renders — the destructive action keeps its cause→effect connection.
+    // No WAAPI (jsdom/old engines) → immediate re-render, same as before.
+    const collapseChatRow = (chatId, done) => {
+        let finished = false;
+        const finish = () => { if (!finished) { finished = true; done(); } };
+        const anchor = Array.from(dom.chatList.querySelectorAll('a[data-chat-id]'))
+            .find((a) => a.dataset.chatId === String(chatId));
+        const row = anchor?.closest('.chat-list-item');
+        if (!row || typeof row.animate !== 'function') { finish(); return; }
+        row.style.overflow = 'hidden';
+        const anim = row.animate(
+            [{ height: `${row.offsetHeight}px`, opacity: 1 }, { height: '0px', opacity: 0 }],
+            { duration: 160, easing: 'cubic-bezier(0.4, 0, 1, 1)' }
+        );
+        anim.onfinish = finish;
+        anim.oncancel = finish;
+    };
+
     const handleDeleteConfirm = async (e) => {
         const chatId = e.target.dataset.chatId;
         const currentUser = state.auth.currentUser;
@@ -934,7 +996,7 @@ function initApp() {
                     await createNewChat();
                 }
             } else {
-                renderChatList();
+                collapseChatRow(chatId, renderChatList);
             }
         } catch (error) {
             console.error("Error deleting chat from Firestore:", error);
@@ -960,7 +1022,7 @@ function initApp() {
 
 // Phase 6.5: client-state reset + build identity
 // Visit <site>/#reset to wipe SW/caches/storage and reload (recovery tool).
-window.ABOT_BUILD = '2026-10-17.2';
+window.ABOT_BUILD = '2026-10-18.1';
 console.log(`[ABot] build ${window.ABOT_BUILD}`);
 if (location.hash === '#reset') {
     (async () => {

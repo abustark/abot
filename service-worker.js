@@ -3,7 +3,7 @@
  * Provides offline caching for local assets only
  */
 
-const CACHE_NAME = 'abot-cache-v59'; // 2.4.4: glass surfaces, popover close-all, animation parity (guards removed)
+const CACHE_NAME = 'abot-cache-v60'; // 2.4.6: hygiene sweep, motion polish, defect fixes
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -11,7 +11,7 @@ const STATIC_ASSETS = [
     '/favicon-32-light.png',
     '/favicon-32-dark.png',
     '/logo.png',
-    '/dist/output.css?v=p33',
+    '/dist/output.css?v=p34',
     '/js/app.js',
     '/js/config.js',
     '/js/dom.js',

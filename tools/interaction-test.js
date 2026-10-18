@@ -567,6 +567,13 @@ function stubChain(label) {
         check('malicious chat name rendered as text in sidebar', !!span && span.textContent === maliciousName);
         check('no img tag injected into sidebar chat item', !span?.querySelector('img'));
 
+        // 2.4.6: chat-row ⋮ menu Escape-closes (was outside-click only).
+        const rowOptionsBtn = chatItem ? chatItem.closest('.chat-list-item').querySelector('.chat-options-btn') : null;
+        rowOptionsBtn?.click();
+        check('chat row options menu opens', !!window.document.querySelector('.chat-options-menu:not(.hidden)'));
+        window.document.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+        check('Escape closes chat row options menu', !window.document.querySelector('.chat-options-menu:not(.hidden)'));
+
         deleteChat('9999');
         const deleteBody = $('deleteModalBody');
         check('delete modal renders malicious chat name safely', !deleteBody?.querySelector('img') && deleteBody?.textContent.includes(maliciousName));

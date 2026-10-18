@@ -53,6 +53,22 @@ const highlightWhenReady = (block) => {
     });
 };
 
+// 2.4.6 (motion): copy feedback morphs the button itself to a check for ~1.2s
+// (inline, at the pointer) — the code-block button used to swap only its text
+// ("Copied!") and the message-copy button gave toast-only feedback.
+const copyCheckSvg = (size) => `<svg class="${size} text-ok" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.052-.143z" clip-rule="evenodd"/></svg>`;
+const copyRestoreHtml = new WeakMap();
+const copyFlashTimers = new WeakMap();
+const flashCopiedState = (btn, size = 'w-4 h-4') => {
+    if (!btn) return;
+    if (!copyRestoreHtml.has(btn)) copyRestoreHtml.set(btn, btn.innerHTML);
+    btn.innerHTML = copyCheckSvg(size);
+    clearTimeout(copyFlashTimers.get(btn));
+    copyFlashTimers.set(btn, setTimeout(() => {
+        btn.innerHTML = copyRestoreHtml.get(btn);
+    }, 1200));
+};
+
 export const loadUserChatsFromFirestore = async (userId) => {
     const chatsCollectionRef = state.db.collection('users').doc(userId).collection('chats');
     try {
@@ -210,12 +226,23 @@ export const deleteChat = (chatId) => {
     }, 10);
 };
 
+// 2.4.6 (motion): every render rebuilds the whole list, so a plain CSS
+// animation would replay for all rows — only chats never rendered before
+// get .chat-item-enter (a genuinely new row enters softly once).
+const renderedChatIds = new Set();
+let chatListPainted = false;
+
 export const renderChatList = (searchTerm = '') => {
     dom.chatList.innerHTML = '';
+    const isFirstPaint = !chatListPainted;
+    chatListPainted = true;
     const filteredChats = Object.values(state.chats).filter(chat => chat.name.toLowerCase().includes(searchTerm.toLowerCase()));
     filteredChats.sort((a, b) => b.id - a.id).forEach(chat => {
+        const chatKey = String(chat.id);
+        const isNewRow = !isFirstPaint && !renderedChatIds.has(chatKey);
+        renderedChatIds.add(chatKey);
         const chatItemContainer = document.createElement('div');
-        chatItemContainer.className = `relative chat-list-item group ${String(chat.id) === String(state.activeChatId) ? 'active' : ''}`;
+        chatItemContainer.className = `relative chat-list-item group ${String(chat.id) === String(state.activeChatId) ? 'active' : ''}${isNewRow ? ' chat-item-enter' : ''}`;
         chatItemContainer.innerHTML = `<div class="flex items-center justify-between w-full rounded-xl ${String(chat.id) === String(state.activeChatId) ? '' : 'text-body hover:bg-card/70'}"><a href="#" class="flex-1 px-3 py-2.5 text-sm truncate" data-chat-id="${chat.id}"><span class="chat-name-span"></span></a><input type="text" class="chat-rename-input hidden flex-1 mx-2 p-1 text-sm bg-surface dark:bg-card rounded" value=""><button class="chat-options-btn p-2 mr-1 rounded-lg hover:bg-card transition-colors" aria-label="Chat options" data-tooltip="Chat options" data-tooltip-pos="side-right"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" /></svg></button></div><div class="absolute right-0 top-full mt-1 w-36 bg-canvas dark:bg-card border border-hairline rounded-xl shadow-lift z-10 hidden chat-options-menu overflow-hidden"><button class="rename-chat-btn w-full text-left px-3 py-2 text-sm hover:bg-card">Rename</button><button class="export-chat-btn w-full text-left px-3 py-2 text-sm hover:bg-card">Export JSON</button><button class="export-md-btn w-full text-left px-3 py-2 text-sm hover:bg-card">Export Markdown</button><button class="delete-chat-btn w-full text-left px-3 py-2 text-sm text-danger hover:bg-card">Delete</button></div>`;
         const nameSpan = chatItemContainer.querySelector('.chat-name-span');
         const renameInput = chatItemContainer.querySelector('.chat-rename-input');
@@ -237,7 +264,7 @@ export const renderChatList = (searchTerm = '') => {
 export function initMessageActions() {
 // --- Message Action Helpers ---
 // v1.0.6 (owner request): per-message deletion was removed from the UI. Only
-// the copy + edit helpers remain for user rows; AI rows keep copy/speak/regen.
+// the copy + edit helpers remain for user rows; AI rows keep copy/speak.
 window.editMessage = (chatId, msgIndex) => {
     const chat = state.chats[chatId];
     const msg = chat?.messages[msgIndex];
@@ -480,7 +507,7 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
             // Strip trailing per-line spaces and squeeze 3+ blank lines to one.
             const raw = proseContent ? proseContent.textContent : '';
             const textToCopy = raw.replace(/[ \t]+$/gm, '').replace(/\n{3,}/g, '\n\n').trim();
-            navigator.clipboard.writeText(textToCopy).then(() => showToast("Copied!")).catch(() => showToast("Failed to copy", "error"));
+            navigator.clipboard.writeText(textToCopy).then(() => { showToast("Copied!"); flashCopiedState(copyBtn); }).catch(() => showToast("Failed to copy", "error"));
         });
     }
 
@@ -499,8 +526,7 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
             pre.classList.add('group'); // Enable hover
             copyCodeBtn.addEventListener('click', () => {
                 navigator.clipboard.writeText(block.textContent);
-                copyCodeBtn.textContent = 'Copied!';
-                setTimeout(() => copyCodeBtn.textContent = 'Copy', 2000);
+                flashCopiedState(copyCodeBtn, 'w-3.5 h-3.5');
             });
             pre.appendChild(copyCodeBtn);
         });
@@ -511,19 +537,8 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
 };
 
 // ---------------------------------------------------------------------------
-// Phase 3: message meta (reactions / pins), search
+// Phase 3: message search
 // ---------------------------------------------------------------------------
-const _persistMessageMeta = async (chatId) => {
-    try {
-        const uid = state.auth.currentUser.uid;
-        await state.db.collection('users').doc(uid).collection('chats').doc(chatId)
-            .update({ messages: state.chats[chatId].messages });
-    } catch {
-        console.error('Failed to save message meta');
-        showToast('Could not save', 'error');
-    }
-};
-
 export const performMessageSearch = (term) => {
     const results = [];
     if (!term || term.length < 2) return results;
@@ -860,10 +875,7 @@ export const sendMessage = async () => {
             copyBtn.className = 'copy-code-btn';
             copyBtn.textContent = 'Copy';
             copyBtn.addEventListener('click', () => {
-                navigator.clipboard.writeText(block.textContent).then(() => {
-                    copyBtn.textContent = 'Copied!';
-                    setTimeout(() => { copyBtn.textContent = 'Copy'; }, 2000);
-                });
+                navigator.clipboard.writeText(block.textContent).then(() => flashCopiedState(copyBtn, 'w-3.5 h-3.5'));
             });
             pre.appendChild(copyBtn);
             highlightWhenReady(block);
@@ -1095,7 +1107,7 @@ export const renderActiveChat = () => {
     dom.modelSelectorLabel.textContent = MODEL_CONFIG[chat.model]?.name || 'Select Model';
     applyModelColorTheme(chat.model);
     syncComposerChips();
-    // v2.0.18: re-renders (chat switch, model switch, reaction toggles) land
+    // v2.0.18: re-renders (chat switch, model switch, timestamp toggle) land
     // the view wherever the old scroll was — pin to the newest content when
     // the user is in follow mode so replies never sit behind the composer.
     if (typeof requestAnimationFrame === 'function') requestAnimationFrame(() => window.__abotFollowBottom?.()); else window.__abotFollowBottom?.();

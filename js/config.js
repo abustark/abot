@@ -4,46 +4,6 @@
  * Logic frozen; only imports/exports/state.* renames were applied.
  * Verify with: node tools/verify-parity.js
  */
-export const COLOR_MAP = {
-    // Google
-    gemini: { name: 'sky-500', isLight: false },
-    'gemini-pro': { name: 'blue-500', isLight: false },
-    // DeepSeek
-    'deepseek-v3': { name: 'blue-700', isLight: false },
-    'deepseek-r1': { name: 'teal-500', isLight: false },
-    // Qwen (Alibaba Cloud)
-    'qwen-32b': { name: 'purple-500', isLight: false },
-    'qwen-235b': { name: 'violet-500', isLight: false },
-    // Llama (Meta)
-    'llama-blue': { name: 'indigo-600', isLight: false },
-    // Mixtral (Mistral AI)
-    'mistral-orange': { name: 'orange-500', isLight: false },
-    // Claude (Anthropic)
-    'claude-mauve': { name: 'rose-800', isLight: false },
-    // Groq - THIS IS THE KEY CHANGE
-    'groq-yellow': { name: 'amber-400', isLight: true }, // Amber is a light background
-    // NVIDIA
-    'nvidia-green': { name: 'emerald-500', isLight: false },
-    // Default
-    'indigo-600': { name: 'indigo-600', isLight: false }
-};
-
-export const generateColorClasses = (_colorName) => {
-    // Phase 3: primary actions are always coral; the model identity lives in
-    // small accents (selector dot), not button colors. Bubbles are warm card.
-    return {
-                        bg: 'bg-coral',
-                        hoverBg: 'hover:bg-coral-active',
-                        text: 'text-coral',
-                        border: 'border-coral',
-                        userBubbleBg: 'bg-card',
-        userBubbleTextColorClass: 'text-ink',
-        userBubbleTimestampColorClass: 'text-muted'
-    };
-};
-
-// Initialize the Firestore database
-
 // --- Provider identity colors (owner spec: OpenRouter=amber, Groq=violet,
 // Gemini=blue, NVIDIA=green; OpenRouter-hosted models inherit amber).
 // Skills-audit Phase 2: raw Tailwind palette classes replaced with semantic

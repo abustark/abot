@@ -9,6 +9,7 @@ import { dom } from './dom.js';
 import { state } from './state.js';
 import { createNewChat, exportChat, exportChatMarkdown, switchChat } from './chat.js';
 import { openPromptModal } from './ui.js';
+import { showToast } from './utils.js';
 
 let isOpen = false;
 let commands = [];
@@ -37,7 +38,18 @@ const buildCommands = () => {
         { label: 'New chat', hint: 'Action', keywords: 'new chat create', run: () => createNewChat() },
         ...chatCommands,
         { label: 'Open prompt library', hint: 'Action', keywords: 'prompt library system instructions preset', run: () => openPromptModal() },
-        { label: 'Search messages', hint: 'Action', keywords: 'search find messages', run: () => { dom.searchPanel.classList.remove('hidden'); dom.messageSearchInput?.focus(); } },
+        // 2.4.6 (fix): same gate as openSearch() in app.js — the palette used
+        // to bypass the empty-chat check and the tap-outside backdrop.
+        { label: 'Search messages', hint: 'Action', keywords: 'search find messages', run: () => {
+            const chat = state.activeChatId ? state.chats[state.activeChatId] : null;
+            if (!chat || !chat.messages || chat.messages.length === 0) {
+                showToast('This chat has no messages to search yet.', 'info');
+                return;
+            }
+            dom.searchPanel.classList.remove('hidden');
+            document.getElementById('searchBackdrop')?.classList.remove('hidden');
+            dom.messageSearchInput?.focus();
+        } },
         // 2.2.8: the header theme button was removed with the overflow menu —
         // flip the account-menu switch (the one remaining theme control).
         { label: 'Toggle theme', hint: 'Action', keywords: 'theme dark light mode toggle', run: () => { const sw = dom.sidebarThemeSwitch; if (!sw) return; sw.checked = !document.documentElement.classList.contains('dark'); sw.dispatchEvent(new Event('change', { bubbles: true })); } },
@@ -63,7 +75,15 @@ const renderList = () => {
         btn.className = 'palette-item';
         btn.setAttribute('role', 'option');
         btn.setAttribute('aria-selected', String(i === activeIndex));
-        btn.innerHTML = `<span class="truncate">${cmd.label}</span><span class="palette-hint">${cmd.hint}</span>`;
+        // 2.4.6 (security): chat titles are user/import/AI-influenced — the
+        // label goes in as TEXT, never as innerHTML (stored-XSS vector).
+        const label = document.createElement('span');
+        label.className = 'truncate';
+        label.textContent = cmd.label;
+        const hint = document.createElement('span');
+        hint.className = 'palette-hint';
+        hint.textContent = cmd.hint;
+        btn.append(label, hint);
         btn.addEventListener('click', () => runCommand(cmd));
         btn.addEventListener('mousemove', () => setActive(i));
         dom.commandPaletteList.appendChild(btn);
