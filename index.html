@@ -26,7 +26,7 @@
     <link rel="preload" href="/dist/fonts/geist-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/dist/fonts/geist-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/dist/fonts/source-serif-4-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link href="./dist/output.css?v=p32" rel="stylesheet">
+    <link href="./dist/output.css?v=p33" rel="stylesheet">
     <script src="/vendor/marked.min.js" defer></script>
     <!-- A1 (v1.0.5): highlight.js + its theme are lazy-loaded on the first code
          block (js/chat.js) — they were head-linked here, costing every visitor
@@ -326,10 +326,10 @@
 
         <!-- Sidebar for Chat History -->
         <!-- 2.3.6: intentionally NO transition utilities on the aside — the
-             .sidebar rule in src/input.css owns the 420ms transform/margin-left
-             glide. The old `transition-transform duration-300 ease-drawer`
-             classes overrode that rule in the cascade, which is why the desktop
-             collapse snapped with no visible transition at all. -->
+             .sidebar rule in src/input.css owns the 480ms (2.4.4) transform/
+             margin-left glide. The old `transition-transform duration-300
+             ease-drawer` classes overrode that rule in the cascade, which is
+             why the desktop collapse snapped with no visible transition. -->
         <aside id="sidebar"
             class="w-72 flex-shrink-0 flex flex-col bg-surface md:bg-surface border-r border-hairline/70 transform -translate-x-full fixed md:static h-full z-20 sidebar md:translate-x-0">
 
@@ -587,7 +587,7 @@
                                     </svg>
                                 </button>
                                 <div id="modelSelectorPanel"
-                                    class="model-panel absolute bottom-full left-0 mb-2 w-80 md:w-[26rem] md:grid md:grid-cols-2 md:gap-x-2 max-w-[calc(100vw-1.5rem)] max-h-[55vh] overflow-y-auto bg-canvas dark:bg-card border border-hairline rounded-xl shadow-lift z-30 hidden origin-bottom-left scrollbar-custom"></div>
+                                    class="model-panel fixed top-0 left-0 grid grid-cols-2 gap-x-2 w-[calc(100vw-2rem)] max-w-[26rem] overflow-y-auto bg-canvas dark:bg-card border border-hairline rounded-xl shadow-lift z-30 hidden scrollbar-custom"></div>
                             </div>
                             <div class="relative flex items-center order-last flex-shrink-0" style="position:relative;">
                                 <button id="sendBtn" aria-label="Send message" data-tooltip="Send (Enter)" class="w-11 h-11 flex items-center justify-center rounded-full bg-coral text-white shadow-sm transition-transform hover:bg-coral-active active:scale-95">
@@ -658,7 +658,7 @@
 
             </main>
         </div>
-        <div id="sidebarOverlay" class="fixed inset-0 bg-ink/40 z-10 hidden md:hidden"></div>
+        <div id="sidebarOverlay" class="fixed inset-0 z-10 hidden md:hidden"></div>
 
         <!-- Command palette (Ctrl+K) — keyboard-first, roadmap #8 -->
         <div id="commandPalette" class="fixed inset-0 z-40 hidden" role="dialog" aria-modal="true" aria-label="Command palette">
@@ -800,7 +800,7 @@
         <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js" defer></script>
         <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js" defer></script>
 
-        <script type="module" src="js/app.js?v=p32"></script>
+        <script type="module" src="js/app.js?v=p33"></script>
 
         <!--
       Tailwind CSS Purge-Safe-List:

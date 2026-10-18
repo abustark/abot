@@ -401,15 +401,27 @@ function stubChain(label) {
         click($('modelSelectorBtn'));
         check('model panel re-toggle closes synchronously', $('modelSelectorPanel').classList.contains('hidden'));
     }
+    // --- 2.4.4: outside pointerdown closes the model panel (capture phase) -----
+    {
+        click($('modelSelectorBtn'));
+        check('panel open before pointerdown test', !$('modelSelectorPanel').classList.contains('hidden'));
+        window.document.body.dispatchEvent(new window.Event('pointerdown', { bubbles: true }));
+        check('outside pointerdown closes the model panel', $('modelSelectorPanel').classList.contains('hidden'));
+    }
     // --- 2.2.6 revamp: header + composer layout --------------------------------
     {
         const dock = $('composerDock');
         const selectorBtn = $('modelSelectorBtn');
         const selectorPanel = $('modelSelectorPanel');
         const header = $('appHeader');
-        check('model selector moved into the composer box',
-            dock.contains(selectorBtn) && dock.contains(selectorPanel) && !header.contains(selectorBtn),
-            'composer-hosted + header-free');
+        // 2.4.4: the PILL stays composer-hosted, but the panel now lives on
+        // <body> (fixed-positioned against the pill by app.js) so the landing
+        // dock's scroll container can never clip it or grow a phantom
+        // scrollbar; the old contract asserted dock.contains(panel).
+        check('model selector pill is composer-hosted, panel is body-level',
+            dock.contains(selectorBtn) && !header.contains(selectorBtn)
+            && window.document.body.contains(selectorPanel),
+            'composer pill + body-anchored panel');
         const headerTitle = $('headerChatTitle');
         // 2.2.8: compare against the active chat's real name — the sidebar
         // duplicate title it used to mirror is gone.

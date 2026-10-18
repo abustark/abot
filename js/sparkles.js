@@ -12,9 +12,10 @@
  *  - palette comes from the theme tokens (coral/amber/teal + provider
  *    accents) — no hardcoded hexes, so dark mode flips with the app;
  *  - decoration only: the canvas is pointer-inert + aria-hidden;
- *  - prefers-reduced-motion: one calm still frame, no rAF loop;
  *  - the loop runs only while #auth-section is actually on screen
- *    (MutationObserver on its inline display) and the tab is visible.
+ *    (MutationObserver on its inline display) and the tab is visible
+ *    (2.4.4: the reduced-motion still-frame branch was removed per owner
+ *    directive — every platform animates identically).
  */
 
 const PALETTE_VARS = [
@@ -47,7 +48,6 @@ export const initSparkles = (canvas) => {
     if (!ctx) return; // smoke tests / unsupported browsers: skip silently
 
     const section = canvas.closest('#auth-section') || canvas.parentElement;
-    const reduceMq = window.matchMedia('(prefers-reduced-motion: reduce)');
 
     let palette = readPalette();
     if (palette.length === 0) return;
@@ -125,7 +125,7 @@ export const initSparkles = (canvas) => {
 
     const apply = () => {
         const visibleNow = isAuthVisible() && !document.hidden;
-        if (visibleNow && !reduceMq.matches) {
+        if (visibleNow) {
             if (!running) {
                 running = true;
                 lastTs = 0;
@@ -137,14 +137,13 @@ export const initSparkles = (canvas) => {
             running = false;
             cancelAnimationFrame(rafId);
         }
-        if (visibleNow) paint(0, 0); // reduced-motion: one calm still frame
     };
 
     // Demo interactivity: onClick push (quantity 4) — clicks anywhere on the
     // auth screen (buttons included) seed a few fresh sparkles at the cursor.
     if (section) {
         section.addEventListener('click', (e) => {
-            if (reduceMq.matches || field.length >= MAX_SPARKLES) return;
+            if (field.length >= MAX_SPARKLES) return;
             const rect = canvas.getBoundingClientRect();
             for (let i = 0; i < PUSH_QUANTITY; i++) {
                 field.push(makeSparkle(
@@ -157,9 +156,6 @@ export const initSparkles = (canvas) => {
 
     window.addEventListener('resize', () => { resize(); apply(); });
     document.addEventListener('visibilitychange', apply);
-    if (typeof reduceMq.addEventListener === 'function') {
-        reduceMq.addEventListener('change', apply);
-    }
     // auth.js flips the section's inline display on sign-in/out — observe
     // that instead of threading start/stop calls through every auth flow.
     if (section && typeof MutationObserver === 'function') {

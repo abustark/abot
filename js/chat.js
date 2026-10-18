@@ -216,7 +216,7 @@ export const renderChatList = (searchTerm = '') => {
     filteredChats.sort((a, b) => b.id - a.id).forEach(chat => {
         const chatItemContainer = document.createElement('div');
         chatItemContainer.className = `relative chat-list-item group ${String(chat.id) === String(state.activeChatId) ? 'active' : ''}`;
-        chatItemContainer.innerHTML = `<div class="flex items-center justify-between w-full rounded-xl ${String(chat.id) === String(state.activeChatId) ? '' : 'text-body hover:bg-card/70'}"><a href="#" class="flex-1 px-3 py-2.5 text-sm truncate" data-chat-id="${chat.id}"><span class="chat-name-span"></span></a><input type="text" class="chat-rename-input hidden flex-1 mx-2 p-1 text-sm bg-surface dark:bg-card rounded" value=""><button class="chat-options-btn p-2 mr-1 rounded-lg hover:bg-card transition-colors" aria-label="Chat options" data-tooltip="Chat options" data-tooltip-pos="left"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" /></svg></button></div><div class="absolute right-0 top-full mt-1 w-36 bg-canvas dark:bg-card border border-hairline rounded-xl shadow-lift z-10 hidden chat-options-menu overflow-hidden"><button class="rename-chat-btn w-full text-left px-3 py-2 text-sm hover:bg-card">Rename</button><button class="export-chat-btn w-full text-left px-3 py-2 text-sm hover:bg-card">Export JSON</button><button class="export-md-btn w-full text-left px-3 py-2 text-sm hover:bg-card">Export Markdown</button><button class="delete-chat-btn w-full text-left px-3 py-2 text-sm text-danger hover:bg-card">Delete</button></div>`;
+        chatItemContainer.innerHTML = `<div class="flex items-center justify-between w-full rounded-xl ${String(chat.id) === String(state.activeChatId) ? '' : 'text-body hover:bg-card/70'}"><a href="#" class="flex-1 px-3 py-2.5 text-sm truncate" data-chat-id="${chat.id}"><span class="chat-name-span"></span></a><input type="text" class="chat-rename-input hidden flex-1 mx-2 p-1 text-sm bg-surface dark:bg-card rounded" value=""><button class="chat-options-btn p-2 mr-1 rounded-lg hover:bg-card transition-colors" aria-label="Chat options" data-tooltip="Chat options" data-tooltip-pos="side-right"><svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" /></svg></button></div><div class="absolute right-0 top-full mt-1 w-36 bg-canvas dark:bg-card border border-hairline rounded-xl shadow-lift z-10 hidden chat-options-menu overflow-hidden"><button class="rename-chat-btn w-full text-left px-3 py-2 text-sm hover:bg-card">Rename</button><button class="export-chat-btn w-full text-left px-3 py-2 text-sm hover:bg-card">Export JSON</button><button class="export-md-btn w-full text-left px-3 py-2 text-sm hover:bg-card">Export Markdown</button><button class="delete-chat-btn w-full text-left px-3 py-2 text-sm text-danger hover:bg-card">Delete</button></div>`;
         const nameSpan = chatItemContainer.querySelector('.chat-name-span');
         const renameInput = chatItemContainer.querySelector('.chat-rename-input');
         nameSpan.textContent = chat.name;
@@ -1023,12 +1023,11 @@ const setEmptyMode = (isEmpty) => {
 // 2.3.4 (owner request): first-send logo flight — the landing logo glides from
 // its spot above the composer into the header's centre mark. FLIP: measure both
 // rects, animate the header logo from the landing position back to rest
-// (transform-only, 300ms, --ease-drawer curve; skipped entirely for
-// reduced-motion / no-WAAPI browsers).
+// (transform-only, 300ms, --ease-drawer curve; skipped only on no-WAAPI
+// browsers — the reduced-motion skip was removed in 2.4.4, owner directive).
 const flyLogoToHeader = (fromRect) => {
     const logo = dom.headerLogo;
     if (!logo || !fromRect?.width) return;
-    if (typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     if (typeof logo.animate !== 'function') return;
     const to = logo.getBoundingClientRect();
     if (!to.width) return;

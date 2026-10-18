@@ -167,18 +167,6 @@
   .scrollbar-custom::-webkit-scrollbar-track {
     background: transparent;
   }
-
-  /* Calm-motion respect: kill all animation for users who ask for it */
-  @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
-      scroll-behavior: auto !important;
-    }
-  }
 }
 
 @layer components {
@@ -231,9 +219,9 @@
    sparkle field — a vanilla-canvas port of the 21st.dev / Aceternity
    "Sparkles" look (tiny light-dots fading in and out in place), which
    replaced the v1.0.7 CSS aurora (blooms + hairline grid) at the owner's
-   request. The canvas paints from the theme tokens (see js/sparkles.js),
-   pauses while the auth section is hidden, and honours prefers-reduced-motion
-   with a single still frame. The scene stays inert: pointer-events:none. */
+   request. The canvas paints from the theme tokens (see js/sparkles.js) and
+   pauses only while the auth section is hidden. The scene stays inert:
+   pointer-events:none. */
 .auth-scene {
     position: fixed;
     inset: 0;
@@ -328,9 +316,6 @@
     0%, 62%, 100% { opacity: 0.25; transform: scale(0.72); }
     30% { opacity: 1; transform: scale(1); }
 }
-@media (prefers-reduced-motion: reduce) {
-    .typing-a circle { animation: none; opacity: 1; transform: none; }
-}
 
 /* 2.3.5 (owner request): the 300ms drawer curve read as "flight speed" and
    jumped visually on the trailing edge — the snake-glide comes from a longer
@@ -341,16 +326,32 @@
    transition. Utilities removed from index.html; this rule is now the single
    owner of the sidebar motion on every regime.
    2.3.10 (owner request): duration raised to a deliberate 1.5s so the slide
-   is clearly visible. */
+   is clearly visible.
+   2.4.4 (owner report): 1.5s now reads as "too slow" on phones, and the
+   desktop collapse appeared to have NO motion — the 2.4.0 reduced-motion snap
+   was matching Windows' "animation effects off" preference. Duration is now a
+   single 480ms --ease-drawer glide, and every reduced-motion guard was
+   removed app-wide (owner directive: PC must animate exactly like mobile). */
 .sidebar {
-    transition: transform 1.5s cubic-bezier(0.4, 0, 0.2, 1),
-        margin-left 1.5s cubic-bezier(0.4, 0, 0.2, 1),
-        border-right-color 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 480ms cubic-bezier(0.32, 0.72, 0, 1),
+        margin-left 480ms cubic-bezier(0.32, 0.72, 0, 1),
+        border-right-color 480ms cubic-bezier(0.32, 0.72, 0, 1);
 }
 
-@media (prefers-reduced-motion: reduce) {
-    /* 2.4.0 (owner request): snap to the end state instead of the 1.5s slide. */
-    .sidebar { transition: none; }
+/* 2.4.4 (owner request): frosted rail — translucent surface token + backdrop
+   blur (the opaque fallback lives with the other glass fallbacks below). */
+.sidebar {
+    background-color: rgb(var(--c-surface) / 0.85);
+    -webkit-backdrop-filter: blur(24px) saturate(1.5);
+    backdrop-filter: blur(24px) saturate(1.5);
+}
+
+/* 2.4.4 (owner request): the mobile scrim used to be an opaque ink wash — the
+   chat behind it now stays visible through a frosted, tinted blur. */
+#sidebarOverlay {
+    background-color: rgb(var(--c-ink) / 0.25);
+    -webkit-backdrop-filter: blur(14px) saturate(1.4);
+    backdrop-filter: blur(14px) saturate(1.4);
 }
 
 /* Desktop collapse: at md+ the drawer becomes a static flex column, so the
@@ -536,7 +537,7 @@ mark {
 
 /* Composer toggle chips (Web search / Think): pill toggle-buttons under the
    input. Token-only colors, 150ms ease-out, coral tint when active, disabled
-   at 40% with not-allowed cursor. Per AGENTS.md: ≤300ms, reduced-motion safe. */
+   at 40% with not-allowed cursor. */
 .composer-chip {
     position: relative;
     display: inline-flex;
@@ -577,9 +578,6 @@ mark {
     .composer-chip { padding: 0.5rem 0.8rem; }
     .composer-chip svg { width: 1.125rem; height: 1.125rem; }
 }
-@media (prefers-reduced-motion: reduce) {
-    .composer-chip { transition: none; }
-}
 
 /* B2 morph — CRITICAL FIX (v1.0.4): `.stop-hidden` was referenced by markup and
    chat.js but never defined, so the stop control (absolute inset-0, opaque) sat
@@ -593,10 +591,6 @@ mark {
     transition: opacity 140ms var(--ease-out), visibility 0s linear 140ms;
 }
 #stopBtn:not(.stop-hidden) { transition: opacity 140ms var(--ease-out); }
-@media (prefers-reduced-motion: reduce) {
-    .stop-hidden,
-    #stopBtn:not(.stop-hidden) { transition: none; }
-}
 
 /* Settings switch track (theme row). Matches the peer-checked switches exactly
    (w-10 h-5, 1rem knob) but is driven by `data-on` so a button-based row can
@@ -629,15 +623,23 @@ mark {
 .peer:checked ~ .switch { background-color: rgb(var(--c-coral)); }
 .peer:checked ~ .switch::after { transform: translateX(1.25rem); }
 .peer:focus-visible ~ .switch { outline: 2px solid rgb(var(--c-coral) / 0.5); outline-offset: 2px; }
-@media (prefers-reduced-motion: reduce) {
-    .switch,
-    .switch::after { transition: none; }
-}
 
 /* --- Account menu (v1.0.7): opens above the account row in the sidebar. ----- */
 .menu-panel {
     transform-origin: bottom left;
     transition: opacity 150ms var(--ease-out), transform 150ms var(--ease-out);
+}
+/* 2.4.4 (owner request): "everything" glass — the account menu and the
+   per-chat ⋮ menu get the same frosted treatment as the rail/selector. */
+.menu-panel,
+.chat-options-menu {
+    background-color: rgb(var(--c-canvas) / 0.78);
+    -webkit-backdrop-filter: blur(16px) saturate(1.5);
+    backdrop-filter: blur(16px) saturate(1.5);
+}
+.dark .menu-panel,
+.dark .chat-options-menu {
+    background-color: rgb(var(--c-card) / 0.78);
 }
 @starting-style {
     .menu-panel { opacity: 0; transform: translateY(8px) scale(0.98); }
@@ -686,9 +688,6 @@ mark {
     }
     .menu-row-danger:hover .menu-icon { color: rgb(var(--c-danger)); }
 }
-@media (prefers-reduced-motion: reduce) {
-    .menu-panel { transition: none; }
-}
 
 /* C2 (v1.0.5): the visual pill stays slim but the tap target must clear 44px.
    A vertical-only ::before expansion avoids overlapping the neighbouring chip. */
@@ -715,9 +714,6 @@ mark {
     to { opacity: 1; transform: translateY(0); }
 }
 .jump-enter { animation: jumpEnter 180ms var(--ease-out) both; }
-@media (prefers-reduced-motion: reduce) {
-    .jump-enter { animation: none; }
-}
 
 /* Headings never orphan a single word (web-design-guidelines: typography) */
 h1, h2, h3, .prose h1, .prose h2, .prose h3 { text-wrap: balance; }
@@ -803,12 +799,22 @@ h1, h2, h3, .prose h1, .prose h2, .prose h3 { text-wrap: balance; }
 }
 [data-tooltip-pos="right"]:hover::after,
 [data-tooltip-pos="right"]:focus-visible::after { transform: translateY(0); }
-/* Hide tooltips on touch (no hover) and for reduced-motion users */
+/* 2.4.4 (owner report): row actions (the chat ⋮) sit at the end of a row whose
+   name must stay readable — the bubble now opens to the RIGHT of the trigger,
+   into the main pane, instead of over the chat name. */
+[data-tooltip-pos="side-right"]::after {
+    bottom: auto;
+    top: 50%;
+    left: calc(100% + 8px);
+    right: auto;
+    translate: 0 -50%;
+    transform: translateX(-2px);
+}
+[data-tooltip-pos="side-right"]:hover::after,
+[data-tooltip-pos="side-right"]:focus-visible::after { transform: translateX(0); }
+/* Hide tooltips on touch (no hover) devices. */
 @media (hover: none) {
     [data-tooltip]::after { display: none; }
-}
-@media (prefers-reduced-motion: reduce) {
-    [data-tooltip]::after { transition: none; }
 }
 
 /* --- v2.0.7: mobile search sheet + slimmer bar; 2.2.8: header overflow menu
@@ -831,9 +837,6 @@ h1, h2, h3, .prose h1, .prose h2, .prose h3 { text-wrap: balance; }
 }
 @keyframes searchFade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes searchDrop { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
-@media (prefers-reduced-motion: reduce) {
-    #searchBackdrop, #searchPanel { animation: none; }
-}
 
 /* Command palette (Ctrl+K): instant open (animate-skill rule for
    keyboard-first UI), quick fade-out, no width/height animation. */
@@ -879,7 +882,8 @@ h1, h2, h3, .prose h1, .prose h2, .prose h3 { text-wrap: balance; }
 /* ===========================================================================
    v1.0.6 — new-chat landing · motion polish (B2/B4–B7) · warm tooltips (C3)
    Motion rules: transform/opacity only, ≤300ms with the --ease-* tokens,
-   hover motion only on hover-capable pointers, reduced-motion honoured.
+   hover motion only on hover-capable pointers (2.4.4: reduced-motion guards
+   removed app-wide per owner directive — motion is identical everywhere).
 --------------------------------------------------------------------------- */
 
 /* The mobile-keyboard offset lives in CSS (not an inline style) so the
@@ -909,7 +913,13 @@ body.chat-empty #composerDock {
     max-height: 100dvh;
     overflow-y: auto;
     overscroll-behavior: contain;
+    /* 2.4.4 (owner report: "a rectangle blinks when I select/type"): growing
+       the textarea could tip this container over the viewport and make the
+       scrollbar chrome flash in, shifting the whole composer. Scrolling still
+       works — the bar itself is just never painted. */
+    scrollbar-width: none;
 }
+body.chat-empty #composerDock::-webkit-scrollbar { display: none; }
 body.chat-empty #jumpToLatest { display: none; }
 
 /* 2.3.5 (owner request): on desktop the landing composer centres on the PANE,
@@ -924,13 +934,12 @@ body.chat-empty #jumpToLatest { display: none; }
 }
 
 /* 2.3.9 (owner request): on the empty landing the composer floats mid-screen,
-   so the upward-opening model panel covered the greeting heading — it now
-   drops BELOW the pill while the landing is showing. */
-body.chat-empty #modelSelectorPanel {
-    bottom: auto;
-    top: calc(100% + 8px);
-    transform-origin: top left;
-}
+   so the upward-opening model panel covered the greeting heading — it opened
+   BELOW the pill while the landing is showing.
+   2.4.4 (owner report: models cut off + a phantom scrollbar): the CSS-side
+   placement above/below is obsolete — app.js now moves the panel to <body>
+   and positions it fixed against the pill (fits the whole list, never clipped,
+   never inside the dock's scroll container). */
 
 /* v2.2.2: inner scroll areas keep their own overscroll boundary — without it a
    scroll at the list edge chains to the page and rubber-bands / triggers
@@ -945,7 +954,7 @@ body.chat-empty #modelSelectorPanel {
 
 /* 2.3.5 (owner request): suggestion CARDS became single-line PILLS — a warm
    row that hugs the composer. Hover lift stays desktop-only (token shadow),
-   press always; reduced-motion is covered by the global kill switch. */
+   press always. */
 @media (hover: hover) and (pointer: fine) {
     .suggestion-pill:hover {
         transform: translateY(-1px);
@@ -987,20 +996,36 @@ body.chat-empty #modelSelectorPanel {
     70% { opacity: 0; transform: scale(1.18); }
     100% { opacity: 0; transform: scale(1.18); }
 }
-@media (prefers-reduced-motion: reduce) {
-    #stopBtn:not(.stop-hidden)::before { animation: none; opacity: 0.5; transform: none; }
-}
 
 /* --- B5: model panel — enter-only, origin-aware, same pattern as the ⋮ menus
    (@starting-style degrades to instant appearance on older browsers).
-   2.2.6: the panel moved into the composer and now opens UPWARD, so the enter
-   offset flips to translateY(+6px) coming from the pill below it. */
-.model-panel { transition: opacity 160ms var(--ease-out), transform 160ms var(--ease-out); }
+   2.4.4 (owner report): the panel no longer lives inside the composer dock —
+   app.js anchors it fixed to the pill (see positionModelPanel) — and it now
+   wears the same frost as the rail ("glass everything", owner request). */
+.model-panel {
+    transition: opacity 160ms var(--ease-out), transform 160ms var(--ease-out);
+    background-color: rgb(var(--c-canvas) / 0.72);
+    -webkit-backdrop-filter: blur(20px) saturate(1.6);
+    backdrop-filter: blur(20px) saturate(1.6);
+}
+.dark .model-panel {
+    background-color: rgb(var(--c-card) / 0.72);
+}
 @starting-style {
     .model-panel { opacity: 0; transform: translateY(6px) scale(0.97); }
 }
-@media (prefers-reduced-motion: reduce) {
-    .model-panel { transition: none; }
+
+/* Consolidated opaque fallback for every glass surface (browsers without
+   backdrop-filter would otherwise render washed-out translucent panels). */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .sidebar { background-color: rgb(var(--c-surface)); }
+    .model-panel { background-color: rgb(var(--c-canvas)); }
+    .menu-panel,
+    .chat-options-menu { background-color: rgb(var(--c-canvas)); }
+    .dark .model-panel,
+    .dark .menu-panel,
+    .dark .chat-options-menu { background-color: rgb(var(--c-card)); }
+    #sidebarOverlay { background-color: rgb(var(--c-ink) / 0.45); }
 }
 
 /* 2.2.8: the B6 .theme-icon cross-fade block was removed with the header
@@ -1082,10 +1107,6 @@ html.dark .logo-mark { filter: brightness(0) invert(1); }
 }
 @keyframes dotRise {
     to { opacity: 1; transform: translateY(0); }
-}
-@media (prefers-reduced-motion: reduce) {
-    /* No assembly sequence — just show the finished wordmark. */
-    .dotmark circle { animation: none; opacity: 1; transform: none; }
 }
 
 /* 2.2.8: P3's #headerOverflowMenu surface/states block was removed with the

@@ -3,7 +3,7 @@
  * Provides offline caching for local assets only
  */
 
-const CACHE_NAME = 'abot-cache-v58'; // 2.4.3: starting-site dot-matrix loader (Dot Loader port)
+const CACHE_NAME = 'abot-cache-v59'; // 2.4.4: glass surfaces, popover close-all, animation parity (guards removed)
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -11,7 +11,7 @@ const STATIC_ASSETS = [
     '/favicon-32-light.png',
     '/favicon-32-dark.png',
     '/logo.png',
-    '/dist/output.css?v=p32',
+    '/dist/output.css?v=p33',
     '/js/app.js',
     '/js/config.js',
     '/js/dom.js',

@@ -93,10 +93,9 @@ function initApp() {
     const setTheme = (dark) => {
         // B1 (v1.0.5): crossfade the theme flip where the View Transitions API
         // exists (progressive enhancement, ~0 cost); instant on browsers
-        // without it. Reduced-motion users always get the instant swap.
-        const reduceMotion = typeof window.matchMedia === 'function'
-            && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        if (!reduceMotion && typeof document.startViewTransition === 'function') {
+        // without it. 2.4.4: the reduced-motion branch was removed (owner
+        // directive) — the flip behaves identically on every OS setting.
+        if (typeof document.startViewTransition === 'function') {
             document.startViewTransition(() => applyTheme(dark));
         } else {
             applyTheme(dark);
@@ -169,6 +168,46 @@ function initApp() {
 
     // --- Model Selector Listeners ---
 
+    // 2.4.4 (owner report: models cut off + phantom scrollbar + panel covering
+    // things): the panel no longer lives inside the composer dock — that dock
+    // IS a scroll container on the landing, so the panel inflated its scroll
+    // height (extra scrollbar) and got clipped. It now lives directly on
+    // <body> and is positioned `fixed` against the pill: it opens on whichever
+    // side (below/above) fits the WHOLE list, capped to the space actually
+    // available, so no row is ever cut in half.
+    document.body.appendChild(dom.modelSelectorPanel);
+
+    const positionModelPanel = () => {
+        const panel = dom.modelSelectorPanel;
+        if (panel.classList.contains('hidden')) return;
+        const anchor = dom.modelSelectorBtn.getBoundingClientRect();
+        const GAP = 8;
+        const MARGIN = 12;
+
+        // Natural (unclamped) height first — measure, then constrain.
+        panel.style.maxHeight = 'none';
+        const needed = panel.scrollHeight;
+        const spaceBelow = window.innerHeight - anchor.bottom - GAP - MARGIN;
+        const spaceAbove = anchor.top - GAP - MARGIN;
+
+        let openUp;
+        if (needed <= spaceBelow) openUp = false;        // below preferred when it fits
+        else if (needed <= spaceAbove) openUp = true;    // else above
+        else openUp = spaceAbove >= spaceBelow;          // neither fits: larger side + scroll
+
+        const maxH = Math.max(120, Math.min(needed, openUp ? spaceAbove : spaceBelow));
+        panel.style.maxHeight = `${maxH}px`;
+
+        const width = panel.offsetWidth;
+        const left = Math.max(MARGIN, Math.min(anchor.left, window.innerWidth - MARGIN - width));
+        panel.style.left = `${left}px`;
+        panel.style.top = openUp
+            ? `${anchor.top - GAP - panel.offsetHeight}px`
+            : `${anchor.bottom + GAP}px`;
+        panel.style.bottom = 'auto';
+        panel.style.transformOrigin = openUp ? 'bottom left' : 'top left';
+    };
+
     // B5 (v1.0.6): enter-only, origin-aware motion via `@starting-style`
     // (see .model-panel in src/input.css). The old code wrote inline
     // opacity/transform and hid the panel 200ms later from five separate call
@@ -177,9 +216,10 @@ function initApp() {
     const openModelPanel = () => {
         renderModelSelectorOptions(); // re-render options every time it's opened
         dom.modelSelectorPanel.classList.remove('hidden');
+        positionModelPanel(); // must run after unhiding (display:none can't measure)
         const activeOrFirst = dom.modelSelectorPanel.querySelector('button[class*="bg-coral-soft"]')
             || dom.modelSelectorPanel.querySelector('button');
-        if (activeOrFirst) activeOrFirst.focus();
+        if (activeOrFirst) activeOrFirst.focus(); // focuses + scrolls the active row into view
     };
     const closeModelPanel = ({ restoreFocus = false } = {}) => {
         if (!dom.modelSelectorPanel.classList.contains('hidden')) {
@@ -279,7 +319,10 @@ function initApp() {
                 const providerColor = getProviderColor(key);
 
                 const optionEl = document.createElement('button');
-                optionEl.className = `w-full flex items-center justify-between text-left px-3 py-2.5 rounded-lg text-sm transition-colors duration-150 ${isActive ? 'bg-coral-soft font-semibold text-ink' : 'hover:bg-card'}`;
+                // 2.4.4 (owner request): on the frosted panel an opaque hover
+                // fill looks like a slab — the hover "selection box" is a
+                // translucent ink wash instead.
+                optionEl.className = `w-full flex items-center justify-between text-left px-3 py-2.5 rounded-lg text-sm transition-colors duration-150 ${isActive ? 'bg-coral-soft font-semibold text-ink' : 'hover:bg-ink/[0.06] dark:hover:bg-ink/[0.08]'}`;
                 optionEl.dataset.modelKey = key;
 
                 let checkmarkSvg = '';
@@ -355,6 +398,45 @@ function initApp() {
             document.querySelectorAll('.chat-options-menu').forEach(m => m.classList.add('hidden'));
         }
     });
+
+    // 2.4.4 (owner report: an open popover stayed open until refresh): the
+    // bubble-phase click above can be swallowed (a control calling
+    // stopPropagation, or the tap landing on the panel itself where it covers
+    // the suggestions). A capture-phase pointerdown closes every popover
+    // BEFORE any target handler runs — touch and mouse alike. The click
+    // handler stays for jsdom/tests and other edge cases.
+    const containsOrNull = (node, el) => !!node && !!el && node.contains(el);
+    document.addEventListener('pointerdown', (e) => {
+        const target = e.target;
+        if (!dom.modelSelectorPanel.classList.contains('hidden')
+            && !containsOrNull(dom.modelSelectorPanel, target)
+            && !containsOrNull(dom.modelSelectorBtn, target)) {
+            closeModelPanel();
+        }
+        if (dom.profileMenu && !dom.profileMenu.classList.contains('hidden')
+            && !containsOrNull(dom.profileMenu, target)
+            && !containsOrNull(dom.profileMenuBtn, target)) {
+            closeProfileMenu();
+        }
+        const inChatRow = target && typeof target.closest === 'function' && target.closest('.chat-list-item');
+        if (!inChatRow) {
+            document.querySelectorAll('.chat-options-menu').forEach(m => m.classList.add('hidden'));
+        }
+    }, true);
+
+    // Keep the panel glued to the pill while the viewport changes, and close
+    // it when any scroll container moves (a floating menu anchored to a pill
+    // must not drift over unrelated content).
+    const repositionModelPanel = () => {
+        if (!dom.modelSelectorPanel.classList.contains('hidden')) positionModelPanel();
+    };
+    window.addEventListener('resize', repositionModelPanel);
+    window.visualViewport?.addEventListener('resize', repositionModelPanel);
+    document.addEventListener('scroll', (e) => {
+        if (dom.modelSelectorPanel.classList.contains('hidden')) return;
+        if (dom.modelSelectorPanel.contains(e.target)) return; // the panel's own scrolling
+        closeModelPanel();
+    }, true);
 
     // --- Core Interaction Listeners ---
     // Wrapper to handle new chat logic reuse
