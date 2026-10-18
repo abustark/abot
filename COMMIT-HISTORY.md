@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.4.7`** (current head is `2.4.6`)
+> - **`main` → `2.4.8`** (current head is `2.4.7`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** (no version of its own: `git push origin main:arena/01a03fe9-abot --force`;
 >   both branches stay identical)
 
@@ -25,6 +25,13 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.4.7 - docs: js/README module table completed + blink fix verified
+- **Date**: 2026-10-18
+- **Why**: owner asked to complete the `js/README.md` module table (it was missing the modules added since the de-monolithization) and confirmed the composer "blinking rectangle" fix visually — the arena checklist item 3 flips to VERIFIED.
+- **`js/README.md`**: added rows for `sparkles.js` (`initSparkles` — auth-screen sparkle canvas, no imports), `dotloader.js` (`initDotLoader` — starting-loader dot matrix, no imports) and `palette.js` (`openPalette`/`closePalette`/`togglePalette`/`initPalette` — imports chat, dom, state, ui, utils), in dependency order before `app.js`.
+- **`docs/ARENA-AI-CHECKLIST.md`**: item 3 (composer blink / "two separate boxes") — status PENDING → `VERIFIED ✓` (owner-confirmed visually on device, 2026-10-18).
+- **No app/runtime changes** — docs only; cache-bust stays `?v=p34` / `abot-cache-v60`; no CSS rebuild needed.
 
 ### 2.4.6 - hygiene sweep + motion polish + guideline-audit defect fixes
 - **Date**: 2026-10-18

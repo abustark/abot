@@ -18,6 +18,9 @@ These are the **live application modules** (Phase 2 de-monolithization). They ar
 | `ui.js` | theme, sidebar, prompt modals, guest-limit modals, `applyModelColorTheme` | config, dom, state, utils |
 | `auth.js` | Firebase init, login/signup/guest/Google-GIS flows, `initAuth()` (`onAuthStateChanged` wiring) | config, dom, state, utils, ui, chat |
 | `chat.js` | chat CRUD, message rendering/streaming (`sendMessage`), import/export, `renderChatList`/`renderActiveChat` | config, dom, state, utils, ui |
+| `sparkles.js` | `initSparkles` (auth-screen sparkle canvas, theme-token colors) | — |
+| `dotloader.js` | `initDotLoader` (starting-loader dot-matrix, 7×7 frames at 100 ms) | — |
+| `palette.js` | `openPalette`/`closePalette`/`togglePalette` (`Ctrl+K`), `initPalette` | chat, dom, state, ui, utils |
 | `app.js` | entry: SW registration, init sequence (`main()`), `initApp()` listener wiring | all |
 
 `auth/db` live on `state` and are assigned by `initFirebase()` — the same point in the

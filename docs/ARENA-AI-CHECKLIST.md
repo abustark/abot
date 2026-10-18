@@ -86,7 +86,7 @@ Owner decisions locked for this batch:
   caret with the suggestion pills visible — nothing should blink or jump; the composer must
   read as a single surface. If a blink still reproduces, note the exact repro (state,
   hover, caret position) in the status line and fix per the repro.
-- **Status**: PENDING (fix lands in 2.4.4; verify then — this one needs a live repro check)
+- **Status**: VERIFIED ✓ — owner-confirmed visually on device, 2026-10-18 (`main`, mirrored to `arena`)
 
 ## 4. Popovers must close on outside click/tap — EVERYWHERE
 
