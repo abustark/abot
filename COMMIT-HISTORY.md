@@ -6,9 +6,10 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.4.16`** (current head is `2.4.15`)
-> - **`arena/01a03fe9-abot` → mirrors `main`** (no version of its own: `git push origin main:arena/01a03fe9-abot --force`;
->   both branches stay identical)
+> - **`main` → `2.4.17`** (current head is `2.4.16`)
+> - **`arena/01a03fe9-abot` → mirrors `main`** — but **run the §1b.1 check in `AGENTS.md` first**.
+>   Prefer the loss-proof fast-forward `git push origin main:arena/01a03fe9-abot`; use
+>   `--force` only when arena is confirmed not ahead (an Arena session may hold commits there).
 
 > **⚠️ Branch-version independence (read before comparing branches):** `main` and
 > `arena/01a03fe9-abot` keep **separate, independent version numbers and commit names**. The same number
@@ -25,6 +26,18 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.4.16 - AGENTS.md: SYNC SAFETY section (force-push protection for Arena sessions)
+- **Date**: 2026-10-19
+- **Why**: owner question — "if a new feature is developed in the Arena session (which can only push to `arena/01a03fe9-abot`), what happens when another agent merges/copies arena into main?" Answer: the existing §1 rule told agents to force-push `main:arena` after every main update **without checking whether arena was ahead** — that would silently destroy an Arena session's unpushed feature. Added a mandatory guard section.
+- **New `AGENTS.md` §1b "SYNC SAFETY"**:
+  - **§1b.1 pre-force-push check (mandatory)**: `git log --oneline origin/main..origin/arena/...` — empty = safe to mirror; any output = arena is AHEAD, do not force-push.
+  - **§1b.2 merge direction**: when arena leads, merge `origin/arena/...` INTO `main`, run gates, push main — never the reverse.
+  - **§1b.3 mirror command**: prefer the loss-proof fast-forward (`git push origin main:arena/...`, which *fails safely* if arena is ahead); `--force` only after §1b.1 returns empty.
+  - **§1b.4 Arena-session rule**: mirror arean → main via fast-forward (`arena/...:main`) at the end of every feature; on rejection, merge `origin/main` into arena and retry.
+  - **§1b.5 hard rules**: main is source of truth; never force-push main; never force-push `main:arena` unverified; if unsure, stop and ask the owner; any agent that finds arena ahead must report it.
+- **§1.3 (Arena Synchronization)** now opens with a ⚠️ cross-reference to §1b and documents the legitimate "arena leads" exception, so the mirror instruction can no longer be read in isolation.
+- No code changes. Gates unaffected (docs only).
 
 ### 2.4.15 - error cards no-copy, stuck stop-button fix, larger stop square
 - **Date**: 2026-10-19

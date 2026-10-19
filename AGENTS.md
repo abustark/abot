@@ -37,12 +37,106 @@ ABot is a **vanilla-JS, multi-model AI chat app** (no framework):
    - **Keep the `📌 Next version` line at the top of `COMMIT-HISTORY.md` current** so no session has to guess.
    - Every commit must also be logged in `COMMIT-HISTORY.md` with its version and what it did.
 3. **Arena Synchronization (`arena/01a03fe9-abot`)**:
-   - After updating `main`, **mirror it onto arena with a plain force-push (no merge commits)**:
+   - **⚠️ BEFORE ANY MIRROR, READ [§1b SYNC SAFETY](#1b-sync-safety--read-before-any-force-push-mandatory).**
+     An Arena.ai session works only on arena and may hold unpushed commits there;
+     force-pushing without the §1b.1 check destroys them.
+   - After updating `main` **and passing the §1b.1 check**, mirror onto arena. Prefer the
+     loss-proof fast-forward (`git push origin main:arena/01a03fe9-abot`); use
+     `--force` only when §1b.1 confirmed arena is not ahead:
      `git push origin main:arena/01a03fe9-abot --force`.
-     The two branches stay **identical** — `main` is the single source of truth and arena keeps no commits
-     of its own (the old `merge main <version> into arena/...` flow is retired).
+     The two branches stay **identical** — `main` is the single source of truth, and arena normally
+     keeps no commits of its own (the old `merge main <version> into arena/...` flow is retired).
+     **Exception:** while an Arena session holds unpushed commits, arena legitimately leads —
+     merge it into `main` first (§1b.2), then mirror.
    - **`docs/updates.md`**: Exists **only on the `arena` branch** (never commit to `main`). It is updated only after major updates (not for every small commit) and documents the contrast between the old workflow and the updated workflow.
 4. **Secrets**: Never commit secrets (`.env`, `service-account-key.json` are gitignored — keep them that way).
+
+---
+
+## 1b. SYNC SAFETY — read before ANY force-push (mandatory)
+
+> **The failure this prevents:** `main` is the source of truth and `arena/01a03fe9-abot`
+> is normally a plain mirror. But an **Arena.ai coding session** works *only* on
+> `arena/01a03fe9-abot` (its branch is fixed by the platform) and pushes its work
+> there. If any agent then force-pushes `main` over arena **without checking**,
+> that session's commits are destroyed — silently, with no reflog recovery on the
+> remote. This section makes that impossible.
+
+### 1b.1 The pre-force-push check (ALWAYS run first)
+
+```bash
+git fetch origin
+git log --oneline origin/main..origin/arena/01a03fe9-abot
+```
+
+- **Output is EMPTY** → arena has no commits of its own → mirroring is safe.
+- **Output lists ANY commits** → **arena is AHEAD. DO NOT force-push.** Merge first (1b.2).
+
+Never skip this check, even when you "just pushed main" yourself — another agent
+or the owner's Arena session may have committed to arena in between.
+
+### 1b.2 When arena is ahead — merge INTO main (never the reverse)
+
+```bash
+git checkout main
+git pull --ff-only origin main            # start from the current main
+git merge origin/arena/01a03fe9-abot      # bring arena's commits in
+# resolve conflicts, run the gates (see §3), commit the merge
+git push origin main
+```
+
+Only **then** may the mirror run (1b.3) — at that point the two branches converge
+again and the force-push has nothing to destroy.
+
+### 1b.3 The mirror command (and its safe alternative)
+
+Conventional mirror (allowed ONLY after 1b.1 shows arena is not ahead):
+
+```bash
+git push origin main:arena/01a03fe9-abot --force
+```
+
+**Preferred, loss-proof alternative** — a fast-forward push that *refuses* to run
+if main has moved behind arena's back:
+
+```bash
+git push origin main:arena/01a03fe9-abot
+```
+
+Why prefer it: a plain push **fails safely**. If arena is ahead, git rejects it with
+`non-fast-forward` instead of overwriting. A force-push never fails — it just deletes.
+Use `--force` only immediately after verifying 1b.1 came back empty.
+
+### 1b.4 Rules for Arena sessions (the other direction)
+
+An agent working inside an **Arena.ai session** is pinned to `arena/01a03fe9-abot`
+and should mirror its work **into main** at the end of every feature, so the two
+never diverge:
+
+```bash
+git fetch origin
+git push origin arena/01a03fe9-abot:main
+```
+
+This is a **fast-forward push, not a force-push** — if another agent committed to
+`main` meanwhile, it is rejected, and the arena session must merge `main` first:
+
+```bash
+git merge origin/main    # on the arena branch, resolve, commit
+# then retry the push above
+```
+
+### 1b.5 Hard rules (summary)
+
+1. `main` is the single source of truth for released work. Arena is a mirror **except**
+   while an Arena session holds unpushed commits there.
+2. **Never** force-push `main:arena` without running 1b.1 first.
+3. **Never** force-push `main` at all — it has no mirror to be restored from.
+4. Prefer the plain (fast-forward) push; `--force` is the exception, not the habit.
+5. If you are unsure whether arena is ahead, **stop and ask the owner.** A refused
+   push costs seconds; a destroyed feature costs a session.
+6. Any agent that finds arena ahead of main must report it in its response
+   ("arena was ahead by N commits; merged into main before mirroring").
 
 ---
 
