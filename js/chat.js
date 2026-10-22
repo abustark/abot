@@ -533,14 +533,14 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
         // (the "error looks like a second loading bubble" bug).
         // 2.2.4 (audit): only the LAST message may carry Retry (see the const above).
         const isTrailingError = typeof options.index === 'number' && options.index === currentChat.messages.length - 1;
-        messageContent = `<div class="text-sm leading-6 text-danger" role="alert">⚠️ ${text.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>${isTrailingError ? RETRY_BTN_HTML : ''}`;
+        messageContent = `<div class="text-sm leading-6 text-danger select-none" role="alert">⚠️ ${text.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>${isTrailingError ? RETRY_BTN_HTML : ''}`;
     } else if (isUser) {
         messageContent = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
     } else {
                         const uniqueId = `bot-msg-${Date.now()}`;
         if (isHistory) {
                             messageContent = message.isError
-                                ? `<div class="text-sm leading-6 text-danger" role="alert">⚠️ ${text.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`
+                                ? `<div class="text-sm leading-6 text-danger select-none" role="alert">⚠️ ${text.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`
                                 : `<span id="${uniqueId}">${renderSafeMarkdown(text)}</span>`;
         } else {
             // 2.2.8: the three bouncing dots became a mini dotted-"A" — the same
@@ -621,7 +621,7 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
                                         ${aiActionsHtml}
                                     </div>
                                 </div>
-                                <div class="w-full overflow-hidden bot-bubble">
+                                <div class="w-full">
                                     <div class="prose dark:prose-invert max-w-none text-body text-[15px] leading-7">
                                         ${messageContent}
                                     </div>
@@ -954,7 +954,7 @@ export const sendMessage = async () => {
                     const safeErr = errMsg.replace(/</g, '&lt;').replace(/>/g, '&gt;');
                     if (latestBotMessageSpan) {
                         latestBotMessageSpan.innerHTML =
-                            `<div class="text-sm leading-6 text-danger" role="alert">⚠️ ${safeErr}</div>${RETRY_BTN_HTML}`;
+                            `<div class="text-sm leading-6 text-danger select-none" role="alert">⚠️ ${safeErr}</div>${RETRY_BTN_HTML}`;
                         // 2.2.4 (audit): these morphed-in cards bypass the
                         // index-based wiring inside appendMessage — attach here.
                         latestBotMessageSpan.querySelector('.retry-btn')?.addEventListener('click', (e) => { e.stopPropagation(); regenerateLastResponse(); });

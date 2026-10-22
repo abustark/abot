@@ -37,16 +37,30 @@ import { switchChat } from './chat.js';
 function registerServiceWorker() {
 // Register Service Worker
 if ('serviceWorker' in navigator) {
+    // 2.4.16 (owner report: fixes still missing after a deploy): updateViaCache
+    // 'none' makes the browser notice a new worker, and skipWaiting +
+    // clients.claim swap it in immediately — but an open page keeps running
+    // the OLD modules until it reloads. Reload once when a new worker takes
+    // control of a page that already had one, so a shipped fix reaches the
+    // device on the next visit instead of "maybe".
+    const hadController = !!navigator.serviceWorker.controller;
+    let reloadingForUpdate = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!hadController || reloadingForUpdate) return;
+        reloadingForUpdate = true;
+        console.log('[App] New version active — reloading once.');
+        location.reload();
+    });
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('/service-worker.js', { updateViaCache: 'none' })
             .then(reg => {
                 console.log('[App] SW registered');
                 reg.onupdatefound = () => {
                     const installingWorker = reg.installing;
+                    if (!installingWorker) return;
                     installingWorker.onstatechange = () => {
                         if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                            console.log('[App] New content available; please refresh.');
-                            showToast('New update available! Please refresh.', 'success');
+                            console.log('[App] New version installed — it takes control and reloads this page.');
                         }
                     };
                 };
@@ -1054,7 +1068,7 @@ function initApp() {
 
 // Phase 6.5: client-state reset + build identity
 // Visit <site>/#reset to wipe SW/caches/storage and reload (recovery tool).
-window.ABOT_BUILD = '2026-10-19.1';
+window.ABOT_BUILD = '2026-10-19.2';
 console.log(`[ABot] build ${window.ABOT_BUILD}`);
 if (location.hash === '#reset') {
     (async () => {

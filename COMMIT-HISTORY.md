@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.4.17`** (current head is `2.4.16`)
+> - **`main` → `2.5.8`** (current head is `2.5.7`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** — but **run the §1b.1 check in `AGENTS.md` first**.
 >   Prefer the loss-proof fast-forward `git push origin main:arena/01a03fe9-abot`; use
 >   `--force` only when arena is confirmed not ahead (an Arena session may hold commits there).
@@ -38,6 +38,16 @@ This document tracks every commit made on `main` following the versioning schema
   - **§1b.5 hard rules**: main is source of truth; never force-push main; never force-push `main:arena` unverified; if unsure, stop and ask the owner; any agent that finds arena ahead must report it.
 - **§1.3 (Arena Synchronization)** now opens with a ⚠️ cross-reference to §1b and documents the legitimate "arena leads" exception, so the mirror instruction can no longer be read in isolation.
 - No code changes. Gates unaffected (docs only).
+
+### 2.5.7 - true liquid glass, AI reply back on canvas, no-copy errors, update delivery
+- **Date**: 2026-10-19 (relabelled 2026-10-22 by owner directive)
+- **Why**: owner report — the 2.4.14 glass read as "full transparent + a big blurred glow" instead of material; the AI reply had become a card; error cards still offered copy on the owner's device; tap-to-reveal still dead on mobile.
+- **Delivery root cause**: 2.4.13-2.4.15 changed `js/chat.js` (error cards, tap reveal) but `chat.js` is precached cache-first and **unversioned** — the service worker only refreshes its cache when `service-worker.js` itself changes, and the open page never reloaded on activation, so those fixes never executed on installed devices. `registerServiceWorker` now reloads the page once when a new worker takes control of an already-controlled page (`controllerchange`, guarded against loops). This permanently closes the "shipped but still broken" gap.
+- **AI reply**: `.bot-bubble` surface removed (class + CSS) — the reply types directly on the chat canvas again (owner request).
+- **Liquid glass (iOS 27 language, researched)**: all glass surfaces rebuilt from "transparent + glow" to tint-carrying material: mostly-opaque token fill under a two-stop white sheen, ONE bright specular top edge, dark bottom rim, hairline stroke, tight-contact + wide-lift shadows, modest blur + saturation/brightness lift. Applied to user bubble, sidebar rail, mobile scrim (radial ink wash, no milky glow), account/⋮ menus and the model panel, with dark-mode variants.
+- **Error cards no-copy**: error text is now `select-none` (native selection/copy blocked) in addition to 2.4.15's removal of the copy · read-aloud pair — Retry is the only affordance.
+- **Cache**: `?v=p38` → `p39`, `abot-cache-v64` → `v65`, build id `2026-10-19.2`.
+- **Version correction (owner directive)**: `2.4.10` was the last valid `2.4.x`; the 7 commits after it should have rolled to `2.5.0`. This tip commit was relabelled `2.4.17` → `2.5.7` (= the correct count); the intermediate commits `2.4.11`–`2.4.16` keep their original labels as history. Next version is `2.5.8`. Old tip preserved as tag `backup/pre-2.5.7`.
 
 ### 2.4.15 - error cards no-copy, stuck stop-button fix, larger stop square
 - **Date**: 2026-10-19
