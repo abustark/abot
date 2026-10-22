@@ -1068,7 +1068,7 @@ function initApp() {
 
 // Phase 6.5: client-state reset + build identity
 // Visit <site>/#reset to wipe SW/caches/storage and reload (recovery tool).
-window.ABOT_BUILD = '2026-10-22.1';
+window.ABOT_BUILD = '2026-10-22.2';
 console.log(`[ABot] build ${window.ABOT_BUILD}`);
 if (location.hash === '#reset') {
     (async () => {

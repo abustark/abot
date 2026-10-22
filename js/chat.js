@@ -429,10 +429,9 @@ const SPEAK_BTN_HTML = `<button class="speak-btn p-1.5 rounded-md transition-col
 // 2.4.9 (owner spec): the static end-of-reply row — copy · read aloud, no
 // hover needed, shown only once a reply has finished (stream end, stop, or
 // already-persisted history).
-// 2.5.9 (owner report): the end row's first button sits on the message box's
-// left edge, which content-visibility:auto clips — anchor its bubble inward.
-const END_COPY_BTN_HTML = COPY_BTN_HTML.replace('data-tooltip="Copy"', 'data-tooltip="Copy" data-tooltip-pos="above-left"');
-const END_ACTIONS_HTML = `<div class="msg-actions-end flex items-center gap-0.5 mt-2">${END_COPY_BTN_HTML}${SPEAK_BTN_HTML}</div>`;
+// 2.5.10 (owner request): tooltips stay centered — the clip is fixed with side
+// padding on the message area instead of moving the bubble.
+const END_ACTIONS_HTML = `<div class="msg-actions-end flex items-center gap-0.5 mt-2">${COPY_BTN_HTML}${SPEAK_BTN_HTML}</div>`;
 
 // 2.4.9: bind the action buttons of one message container. Idempotent —
 // buttons already wired are skipped, so it can run again when the static end

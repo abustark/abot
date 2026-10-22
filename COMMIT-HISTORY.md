@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.5.10`** (current head is `2.5.9`)
+> - **`main` → `2.5.11`** (current head is `2.5.10`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -27,6 +27,15 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.5.10 - centered tooltips + breathing room, seamless composer, glass rail
+- **Date**: 2026-10-22
+- **Why**: owner batch — (a) prefers the tooltip fix via more side space in the chat area instead of moving the bubble; (b) the border/band above the composer made the chat and the composer read as two separate rectangles; (c) the iOS liquid-glass effect from the user bubble / account menu should also cover the sidebar in both desktop and mobile; (d) a slight rounded corner cut on the collapsing side menu.
+- **(a) Tooltips**: reverted 2.5.9's inward-anchored bubble (`above-left` variant deleted, end row uses `COPY_BTN_HTML` again). `.message-container` now has `padding-left/right: 1.5rem`, so every centered tooltip's overhang stays inside the padding box — the paint clip from `content-visibility: auto` no longer trims it, and messages gain symmetric side breathing room.
+- **(b) Composer**: `#composerDock` is flat canvas (same as the chat), with no border-top, no top shadow and no backdrop band; markup dropped `bg-canvas/85 dark:bg-canvas/85 backdrop-blur-md`. The composer now sits directly on the chat surface with no seam.
+- **(c) Sidebar glass**: `.sidebar` wears the same liquid-glass recipe as `.menu-panel` / `.user-bubble` — white sheen gradient over a tint-carrying surface (82% light, 86% dark), `blur(18px) saturate(1.5) brightness(1.03)`, specular top inset, dark bottom rim, hairline edge (folded in from the old desktop-only rule).
+- **(d) Rounded cut**: `.sidebar` gets `border-radius: 0 14px 14px 0` — both the desktop rail and the mobile drawer show the slight rounded outer corners.
+- Cache: `?v=p41`, `abot-cache-v67`, build `2026-10-22.2`. Verified in real Chrome (desktop + mobile): centered "Copy" tooltip fully rendered with padding on both edges, no seam above the composer, glass + rounded rail in both viewports.
 
 ### 2.5.9 - end-row Copy tooltip no longer clipped
 - **Date**: 2026-10-22

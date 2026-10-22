@@ -282,23 +282,26 @@
 }
 
 /* Sidebar depth — the rail sits a half-step below the canvas so the two
-   regions read as layered, not one flat plane. Subtle inner edge light. */
-@media (min-width: 768px) {
-    #sidebar { box-shadow: inset -1px 0 0 rgb(var(--c-hairline) / 0.5); }
-}
+   regions read as layered, not one flat plane. Subtle inner edge light.
+   (2.5.10: the edge light moved into the .sidebar glass box-shadow so the
+   rounded corners stay crisp.) */
 
-/* Composer seam — soften the hard edge where the dock meets the message list */
+/* Composer seam — 2.5.10 (owner request): the dock reads as part of the chat
+   surface now. Same flat canvas as the message area, no hairline, no top
+   shadow and no frost band, so nothing draws a line between the replies and
+   the input. */
 #composerDock {
-    border-top: 1px solid transparent;
+    background: rgb(var(--c-canvas));
+    border-top: 0;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
     /* v2.0.26: ride above the mobile keyboard (matches #jumpToLatest). */
     bottom: var(--kb-h, 0px);
 }
 /* v2.0.26: stop Chrome's scroll anchoring from fighting the streaming
    auto-follow (it shifts scrollTop during innerHTML updates). */
 #chatHistoryContainer { overflow-anchor: none; }
-@media (min-width: 768px) {
-    #composerDock { box-shadow: 0 -8px 24px -16px rgb(var(--c-ink) / 0.18); }
-}
 
 /* Chat bubbles — 2.4.16 liquid glass (iOS 27 language): a mostly-opaque warm
    tint, ONE bright specular top edge, a dark bottom rim and a hairline stroke
@@ -379,18 +382,37 @@
 
 /* 2.4.4: frosted rail. 2.4.16 liquid glass: the tint now carries the surface
    (92% token + one top specular gradient) so text underneath cannot ghost
-   through, and the edge stays crisp instead of hazy. Opaque fallback below. */
+   through, and the edge stays crisp instead of hazy. 2.5.10 (owner request):
+   the rail now wears the same iOS liquid-glass recipe as the user bubble and
+   the account menu — tint-carrying fill, white sheen, specular top edge, dark
+   bottom rim — plus a slight rounded cut on its outer corners. Opaque
+   fallback below. */
 .sidebar {
+    border-radius: 0 14px 14px 0;
     background:
-        linear-gradient(180deg, rgb(255 255 255 / 0.12), rgb(255 255 255 / 0) 16%),
-        rgb(var(--c-surface) / 0.92);
-    -webkit-backdrop-filter: blur(18px) saturate(1.6) brightness(1.02);
-    backdrop-filter: blur(18px) saturate(1.6) brightness(1.02);
+        linear-gradient(180deg,
+            rgb(255 255 255 / 0.45) 0%,
+            rgb(255 255 255 / 0.16) 52%,
+            rgb(255 255 255 / 0.30) 100%),
+        rgb(var(--c-surface) / 0.82);
+    -webkit-backdrop-filter: blur(18px) saturate(1.5) brightness(1.03);
+    backdrop-filter: blur(18px) saturate(1.5) brightness(1.03);
+    box-shadow:
+        inset -1px 0 0 rgb(var(--c-hairline) / 0.6),
+        inset 0 1px 0 rgb(255 255 255 / 0.9),
+        inset 0 -1px 0 rgb(var(--c-ink) / 0.05);
 }
 .dark .sidebar {
     background:
-        linear-gradient(180deg, rgb(255 255 255 / 0.05), rgb(255 255 255 / 0) 16%),
-        rgb(var(--c-surface) / 0.90);
+        linear-gradient(180deg,
+            rgb(255 255 255 / 0.09) 0%,
+            rgb(255 255 255 / 0.03) 45%,
+            rgb(255 255 255 / 0.05) 100%),
+        rgb(var(--c-surface) / 0.86);
+    box-shadow:
+        inset -1px 0 0 rgb(255 255 255 / 0.08),
+        inset 0 1px 0 rgb(255 255 255 / 0.18),
+        inset 0 -1px 0 rgb(0 0 0 / 0.30);
 }
 
 /* 2.4.4: the mobile scrim keeps the chat visible through frost. 2.4.16: a
@@ -926,17 +948,15 @@ h1, h2, h3, .prose h1, .prose h2, .prose h3 { text-wrap: balance; }
 }
 [data-tooltip-pos="side-right"]:hover::after,
 [data-tooltip-pos="side-right"]:focus-visible::after { transform: translateX(0); }
-/* 2.5.9 (owner report: the end-row "Copy" tooltip clipped its C): messages use
-   content-visibility: auto (see A3 below), whose paint containment trims
-   anything painted left of the message box. The first end-row button sits
-   exactly on that edge, so its centered bubble lost its left padding and part
-   of the C. This variant anchors the bubble's LEFT edge to the trigger and
-   opens it inward, so the paint box never crosses the container edge. */
-[data-tooltip-pos="above-left"]::after {
-    left: 0;
-    right: auto;
-    translate: 0 0;
+/* 2.5.10 (owner preference): centered tooltips stay; the message area gains
+   horizontal breathing room on both sides. The inset also keeps every bubble's
+   overhang inside the padding box, so content-visibility:auto's paint clip no
+   longer trims edge tooltips (2.5.9 clipped the end-row "Copy"). */
+.message-container {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
 }
+
 /* Hide tooltips on touch (no hover) devices. */
 @media (hover: none) {
     [data-tooltip]::after { display: none; }
