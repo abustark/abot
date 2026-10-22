@@ -6,10 +6,11 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.5.8`** (current head is `2.5.7`)
-> - **`arena/01a03fe9-abot` → mirrors `main`** — but **run the §1b.1 check in `AGENTS.md` first**.
->   Prefer the loss-proof fast-forward `git push origin main:arena/01a03fe9-abot`; use
->   `--force` only when arena is confirmed not ahead (an Arena session may hold commits there).
+> - **`main` → `2.5.9`** (current head is `2.5.8`)
+> - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
+>   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
+>   into main first. No force-push unless the owner explicitly asks in chat
+>   (owner directive, 2026-10-22).
 
 > **⚠️ Branch-version independence (read before comparing branches):** `main` and
 > `arena/01a03fe9-abot` keep **separate, independent version numbers and commit names**. The same number
@@ -26,6 +27,12 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.5.8 - force-push removed from the workflow (owner directive)
+- **Date**: 2026-10-22
+- **Why**: owner directive — force-push should not be a standing option at all; it happens only when the owner explicitly asks for it in chat.
+- **AGENTS.md §1.3 / §1b**: mirrors are now **plain fast-forward pushes only** (`git push origin main:arena/01a03fe9-abot`); a rejection means arena is ahead → merge arena into `main` first. The documented `--force` mirror command and the "pre-force-push check" framing were removed; the pre-mirror fetch + `origin/main..origin/arena` check stays. Hard rule now: the only exception is an explicit owner request in chat — and even then a backup tag + `--force-with-lease`.
+- No code changes.
 
 ### 2.4.16 - AGENTS.md: SYNC SAFETY section (force-push protection for Arena sessions)
 - **Date**: 2026-10-19
