@@ -3,7 +3,7 @@
  * Provides offline caching for local assets only
  */
 
-const CACHE_NAME = 'abot-cache-v65'; // 2.4.16: real liquid-glass surfaces, AI reply back on the canvas, no-copy error cards, SW auto-reload delivery
+const CACHE_NAME = 'abot-cache-v66'; // 2.5.9: end-row Copy tooltip clipping fix
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -11,7 +11,7 @@ const STATIC_ASSETS = [
     '/favicon-32-light.png',
     '/favicon-32-dark.png',
     '/logo.png',
-    '/dist/output.css?v=p39',
+    '/dist/output.css?v=p40',
     '/js/app.js',
     '/js/config.js',
     '/js/dom.js',

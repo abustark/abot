@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.5.9`** (current head is `2.5.8`)
+> - **`main` → `2.5.10`** (current head is `2.5.9`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -15,8 +15,8 @@ This document tracks every commit made on `main` following the versioning schema
 > **⚠️ Branch-version independence (read before comparing branches):** `main` and
 > `arena/01a03fe9-abot` keep **separate, independent version numbers and commit names**. The same number
 > on both branches does **NOT** mean the same work — e.g. `main`'s `2.0.10` and arena's `2.0.10` were two
-> completely different commits by different agents. Sync direction is one-way (`main` → arena) and it is now a
-> **plain force-push mirror** (`git push origin main:arena/01a03fe9-abot --force`) — arena no longer keeps commits of its own.
+> completely different commits by different agents. Sync direction is one-way (`main` → arena) and it is a
+> **plain fast-forward mirror** (`git push origin main:arena/01a03fe9-abot`) — arena no longer keeps commits of its own.
 > **Always identify/compare commits by their hash, never by version number alone.**
 
 > **🧾 History note (why the numbering above looks odd):** commits `2.0.11`–`2.0.26` (arena) and
@@ -27,6 +27,14 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.5.9 - end-row Copy tooltip no longer clipped
+- **Date**: 2026-10-22
+- **Why**: owner report (screenshot) — the "Copy" tooltip above the static end-of-reply copy button had its **C cut off** at the left edge.
+- **Root cause**: `.message-container` uses `content-visibility: auto` for long-thread render cost, which implies paint containment and clips anything painted left of the message box. That first end-row button sits exactly on the box's left edge, so the centered tooltip (45px bubble on a 26px trigger → 9.4px left overhang) lost its left padding and part of the C.
+- **Fix**: new `[data-tooltip-pos="above-left"]` variant (`src/input.css`) anchors the bubble's left edge to the trigger and opens it inward; the end row's copy button uses it via `END_COPY_BTN_HTML` in `js/chat.js`. Other tooltips unchanged.
+- **Also**: corrected the stale COMMIT-HISTORY note that still described the arena mirror as a force-push (contradicted 2.5.8).
+- Cache: `?v=p40`, `abot-cache-v66`, build `2026-10-22.1`. Verified in real Chrome (DPR 2): tooltip box now 458–503 CSS, text starts 8px inside, both edges rounded.
 
 ### 2.5.8 - force-push removed from the workflow (owner directive)
 - **Date**: 2026-10-22

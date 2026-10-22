@@ -926,6 +926,17 @@ h1, h2, h3, .prose h1, .prose h2, .prose h3 { text-wrap: balance; }
 }
 [data-tooltip-pos="side-right"]:hover::after,
 [data-tooltip-pos="side-right"]:focus-visible::after { transform: translateX(0); }
+/* 2.5.9 (owner report: the end-row "Copy" tooltip clipped its C): messages use
+   content-visibility: auto (see A3 below), whose paint containment trims
+   anything painted left of the message box. The first end-row button sits
+   exactly on that edge, so its centered bubble lost its left padding and part
+   of the C. This variant anchors the bubble's LEFT edge to the trigger and
+   opens it inward, so the paint box never crosses the container edge. */
+[data-tooltip-pos="above-left"]::after {
+    left: 0;
+    right: auto;
+    translate: 0 0;
+}
 /* Hide tooltips on touch (no hover) devices. */
 @media (hover: none) {
     [data-tooltip]::after { display: none; }
