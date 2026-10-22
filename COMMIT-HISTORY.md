@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.5.12`** (current head is `2.5.11`)
+> - **`main` → `2.5.13`** (current head is `2.5.12`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -27,6 +27,16 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.5.12 - mobile user pill now paints, tighter mobile gutters, bubble-only hover, panel icon
+- **Date**: 2026-10-22
+- **Why**: owner report — tapping a user message on the phone still showed no copy/audio/edit icons; mobile messages sit too far in from the screen edges; on desktop the user icons appeared when hovering empty row space, not just the bubble; the three-line sidebar glyph should be a more modern icon.
+- **Root cause of the missing pill**: on touch the pill is positioned `top-full` BELOW the bubble, which lands outside `.message-container`'s box — `content-visibility: auto` clips paint there, so the pill had `opacity: 1` but was never painted (earlier checks only measured computed styles, not pixels).
+- **Fix**: user message containers carry `user-msg` and opt out of the render skip (`content-visibility: visible`); the pill paints under the bubble after a tap (verified by screenshot in mobile Chrome: copy · speak · edit visible).
+- **Mobile gutters**: the 1.5rem message padding added in 2.5.10 is now desktop-only — phones drop it (content sits ~11px from each edge; touch devices hide tooltips, so nothing needs the protection).
+- **Desktop hover scoping**: pill reveal keyed to `.user-row:hover` / `:focus-within` instead of the whole `.message-container` — hovering the empty space on the left of the bubble no longer pops the icons (verified: empty space = 0 opacity, bubble = 1).
+- **Icon**: header sidebar toggle is now a rounded panel glyph (frame + divider) instead of the three-line hamburger.
+- Cache: `?v=p43`, `abot-cache-v69`, build `2026-10-22.4`.
 
 ### 2.5.11 - swipe right to open the sidebar (mobile)
 - **Date**: 2026-10-22

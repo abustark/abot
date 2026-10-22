@@ -597,18 +597,20 @@ mark {
 /* 2.4.10: user-row actions pill. Pointer devices: a reserved slot left of the
    bubble — hover/focus reveals it in place, so the icons are never clipped and
    nothing shifts. Touch devices: the pill sits under the bubble and tapping
-   the bubble toggles it (.actions-open is set by chat.js). */
+   the bubble toggles it (.actions-open is set by chat.js).
+   2.5.12 (owner report): the reveal is scoped to the bubble row itself — the
+   empty space elsewhere in the message row no longer pops the icons. */
 .user-actions-pill {
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.2s ease-out;
 }
-.message-container:hover .user-actions-pill,
-.message-container:focus-within .user-actions-pill,
+.user-row:hover .user-actions-pill,
+.user-row:focus-within .user-actions-pill,
 .message-container.actions-open .user-actions-pill { opacity: 1; pointer-events: auto; }
 @media (hover: none) {
-    .message-container:hover .user-actions-pill { opacity: 0; pointer-events: none; }
-    .message-container:focus-within .user-actions-pill,
+    .user-row:hover .user-actions-pill { opacity: 0; pointer-events: none; }
+    .user-row:focus-within .user-actions-pill,
     .message-container.actions-open .user-actions-pill { opacity: 1; pointer-events: auto; }
 }
 
@@ -948,13 +950,27 @@ h1, h2, h3, .prose h1, .prose h2, .prose h3 { text-wrap: balance; }
 }
 [data-tooltip-pos="side-right"]:hover::after,
 [data-tooltip-pos="side-right"]:focus-visible::after { transform: translateX(0); }
+/* 2.5.12 (owner report: tap-to-reveal still invisible on phones): on touch the
+   user pill hangs BELOW the bubble, outside the message box — content-visibility
+   auto clips paint there, so the pill was styled visible but never painted.
+   User rows opt out of the render skip (they are short, the cost is nil). */
+.message-container.user-msg { content-visibility: visible; }
+
 /* 2.5.10 (owner preference): centered tooltips stay; the message area gains
    horizontal breathing room on both sides. The inset also keeps every bubble's
    overhang inside the padding box, so content-visibility:auto's paint clip no
-   longer trims edge tooltips (2.5.9 clipped the end-row "Copy"). */
+   longer trims edge tooltips (2.5.9 clipped the end-row "Copy").
+   2.5.12 (owner report): phones were wasting ~34px on each side — the inset is
+   now desktop-only (touch hides tooltips, so there is nothing to protect). */
 .message-container {
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
+    padding-left: 0;
+    padding-right: 0;
+}
+@media (min-width: 768px) {
+    .message-container {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
 }
 
 /* Hide tooltips on touch (no hover) devices. */

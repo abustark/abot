@@ -595,8 +595,8 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
     if (isUser) {
         // --- USER MESSAGE: right-aligned soft-coral bubble (Gemini pattern) ---
         messageEl.innerHTML = `
-                            <div class="message-container w-full flex justify-end mb-9 group">
-                                <div class="relative flex flex-col items-end max-w-[85%] md:max-w-[75%] md:flex-row md:items-start">
+                            <div class="message-container user-msg w-full flex justify-end mb-9 group">
+                                <div class="user-row relative flex flex-col items-end max-w-[85%] md:max-w-[75%] md:flex-row md:items-start">
                                     <div class="user-actions-pill absolute right-0 top-full mt-1 md:static md:mr-2 md:mt-1.5 flex items-center bg-canvas dark:bg-card rounded-lg shadow-sm border border-hairline px-1">
                                         ${COPY_BTN_HTML}
                                         ${userActionsHtml}
