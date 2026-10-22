@@ -12,7 +12,7 @@ import { closeGuestLimitModal } from './ui.js';
 import { closePromptModal } from './ui.js';
 import { closeSidebar } from './ui.js';
 import { syncComposerChips } from './ui.js';
-import { toggleSidebar } from './ui.js';
+import { isSidebarOpen, setSidebar, toggleSidebar } from './ui.js';
 import { createNewChat } from './chat.js';
 import { dom } from './dom.js';
 import { importChat } from './chat.js';
@@ -683,6 +683,38 @@ function initApp() {
     if (dom.sidebarCloseBtn) dom.sidebarCloseBtn.addEventListener('click', onSidebarToggleClick);
     dom.sidebarOverlay.addEventListener('click', closeSidebar);
 
+    // 2.5.11 (owner request): a rightward swipe on the chat surface opens the
+    // history drawer on phones. Scoped to the header/messages/landing, never
+    // inside the drawer, the composer, an input or an open panel; the motion
+    // must be clearly horizontal (and quick) so vertical scrolling and text
+    // selection never trigger it.
+    let swipeStart = null;
+    const isPhone = () => !(window.matchMedia && window.matchMedia('(min-width: 768px)').matches);
+    document.addEventListener('touchstart', (e) => {
+        swipeStart = null;
+        if (e.touches.length !== 1 || !isPhone() || isSidebarOpen()) return;
+        const target = e.target;
+        if (!target || typeof target.closest !== 'function') return;
+        if (!target.closest('#appHeader, #chatHistoryContainer, #emptyWelcome')) return;
+        if (target.closest('#composerDock, #modelSelectorPanel, .menu-panel, .chat-options-menu, input, textarea, pre, [contenteditable="true"]')) return;
+        const t = e.touches[0];
+        swipeStart = { x: t.clientX, y: t.clientY, at: Date.now() };
+    }, { passive: true });
+    document.addEventListener('touchend', (e) => {
+        if (!swipeStart) return;
+        const start = swipeStart;
+        swipeStart = null;
+        const t = e.changedTouches && e.changedTouches[0];
+        if (!t) return;
+        const dx = t.clientX - start.x;
+        const dy = t.clientY - start.y;
+        if (Date.now() - start.at > 800) return;
+        if (dx < 64 || Math.abs(dy) > dx * 0.6) return;
+        if (!isPhone() || isSidebarOpen()) return;
+        setSidebar(true);
+    }, { passive: true });
+    document.addEventListener('touchcancel', () => { swipeStart = null; }, { passive: true });
+
     // --- Quick actions: 2.3.4 — message search moved from the sidebar to the
     // header (left of New chat); the drawer keeps the prompt library. Actions
     // close the drawer on mobile first so the target UI isn't covered. ---
@@ -1068,7 +1100,7 @@ function initApp() {
 
 // Phase 6.5: client-state reset + build identity
 // Visit <site>/#reset to wipe SW/caches/storage and reload (recovery tool).
-window.ABOT_BUILD = '2026-10-22.2';
+window.ABOT_BUILD = '2026-10-22.3';
 console.log(`[ABot] build ${window.ABOT_BUILD}`);
 if (location.hash === '#reset') {
     (async () => {

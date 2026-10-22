@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.5.11`** (current head is `2.5.10`)
+> - **`main` → `2.5.12`** (current head is `2.5.11`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -27,6 +27,13 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.5.11 - swipe right to open the sidebar (mobile)
+- **Date**: 2026-10-22
+- **Why**: owner request — a rightward swipe on a phone should open/expand the history drawer.
+- **How**: touch listeners in `js/app.js` (mobile only): the gesture must start on the header, message area or landing, outside the drawer/composer/inputs/panels/code blocks, travel at least 64px rightward, stay clearly horizontal (`|dy| < dx * 0.6`) and finish within 800ms. On success it calls the existing `setSidebar(true)` state owner — same path as the hamburger, so overlay + body scroll-lock + `aria-expanded` stay in sync.
+- Swiping left/up/down and short drags are ignored (vertical scroll preserved).
+- Cache: `?v=p42`, `abot-cache-v68`, build `2026-10-22.3`. Verified in real mobile Chrome (touch via CDP): swipe opens drawer + overlay + scroll lock; vertical swipe and a 40px drag do nothing; the close button still works.
 
 ### 2.5.10 - centered tooltips + breathing room, seamless composer, glass rail
 - **Date**: 2026-10-22

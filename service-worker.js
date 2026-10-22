@@ -3,7 +3,7 @@
  * Provides offline caching for local assets only
  */
 
-const CACHE_NAME = 'abot-cache-v67'; // 2.5.9: end-row Copy tooltip clipping fix
+const CACHE_NAME = 'abot-cache-v68'; // 2.5.11: swipe-right opens the drawer, glass rail, seamless composer
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -11,7 +11,7 @@ const STATIC_ASSETS = [
     '/favicon-32-light.png',
     '/favicon-32-dark.png',
     '/logo.png',
-    '/dist/output.css?v=p41',
+    '/dist/output.css?v=p42',
     '/js/app.js',
     '/js/config.js',
     '/js/dom.js',
