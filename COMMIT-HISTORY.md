@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.6.3`** (current head is `2.6.2`)
+> - **`main` → `2.6.4`** (current head is `2.6.3`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -33,6 +33,16 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.6.3 - auth stage fits the viewport, rotating preview trio, footer restored
+- **Date**: 2026-10-24
+- **Why**: owner review of the 2.6.2 auth page — the footer wording had been rewritten, the card ran past the fold (guest button + model/provider stats needed scrolling), the guest button did not read as a button, and the vertical rhythm around the paragraph, the preview label and the reply rows looked uneven.
+- **Footer**: the 2.6.2 rewrite is reverted to the previous copy verbatim — *© 2026 Basith AbuSyed. All rights reserved.* / *This site is under active development. Check back occasionally for new features.* The build badge stays as its own small line above it (`#build-badge` is still where `auth.js` looks).
+- **Fits one screen**: the card is the tall column, so its vertical rhythm was tightened (padding 1.6rem, head 1.1rem, divider 0.95rem, form rows 14px, switch 0.9rem, error row 8px, card foot 0.85/0.7rem) and the footer margin dropped to 1rem. At 1366×768 the whole stage — copy, thread, stats, card, guest button — now sits above the fold; only the footer can fall below it.
+- **Guest button**: got a hairline border (coral on hover) and moved up ~20px via the tighter card foot, so it reads as a control instead of floating text.
+- **Uneven gaps (root cause)**: the desktop grid left the tall card's leftover height stretched across the copy and proof rows, which is why the paragraph → preview label gap and the label → thread gap did not match the 1.5rem row gap. `align-content: center` packs the rows; the gap is now literally 1.5rem. The reply rows were also reserving three lines each (`min-height: 3em`) for one line of text — that is what made their spacing look random. One line is reserved now, and the paragraph is balanced (`text-wrap: balance`, 42ch).
+- **Preview trio rotates** (`js/auth-preview.js`): every load shuffles the four providers, shows three of them, and picks a random model inside each — still read from `MODEL_CONFIG`, so no invented models. The provider reply line follows the provider (OpenRouter added). No API calls, no tokens: the replies are still scripted strings typed by a timer.
+- **Cache**: `abot-cache-v73`, asset query `?v=p47`.
 
 ### 2.6.2 - editorial auth page, self-playing thread, card depth
 - **Date**: 2026-10-24

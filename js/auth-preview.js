@@ -3,11 +3,12 @@
  * 2.6.2 (owner request): the auth page shows the product, not only a form.
  * Two jobs, both decoration:
  *
- *  1. Fill the preview thread with THREE REAL models — one each from Google,
- *     Groq and NVIDIA read straight out of MODEL_CONFIG — and play a short,
- *     silent exchange on a loop. Nothing is invented here: if a provider has
- *     no entry in MODEL_CONFIG, its row is dropped, so the preview can never
- *     advertise a model the app does not actually have.
+ *  1. Fill the preview thread with THREE REAL models read straight out of
+ *     MODEL_CONFIG — a different trio on every load (2.6.3). Each of the four
+ *     providers gets a slot, the slots are shuffled and three are shown, and
+ *     the model inside a slot is picked at random. Nothing is invented here: if
+ *     a provider has no entry in MODEL_CONFIG its slot is dropped, so the
+ *     preview can never advertise a model the app does not actually have.
  *
  *  2. Tilt the sign-in card toward the pointer (±2.2°) and slide its coral
  *     glare. Pointer-fine only, never while a field inside the card has focus,
@@ -20,11 +21,12 @@
 
 import { MODEL_CONFIG } from './config.js';
 
-const PROVIDER_SLOTS = [
-    { prefix: 'google/', dot: 'bg-provider-google', line: 'Found it — the guard runs before the token check.' },
-    { prefix: 'groq/', dot: 'bg-provider-groq', line: 'Same path, cheaper fix: bail out before the guard.' },
-    { prefix: 'nvidia/', dot: 'bg-provider-nvidia', line: 'Patched, plus a test that reproduces it.' }
-];
+const PROVIDER_META = {
+    google: { dot: 'bg-provider-google', line: 'Found it — the guard runs before the token check.' },
+    groq: { dot: 'bg-provider-groq', line: 'Same path, cheaper fix: bail out before the guard.' },
+    nvidia: { dot: 'bg-provider-nvidia', line: 'Patched, plus a test that reproduces it.' },
+    openrouter: { dot: 'bg-provider-openrouter', line: 'Reproduced on a free route, then fixed at the source.' }
+};
 
 const prefersReducedMotion = () => {
     try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch { return false; }
@@ -43,16 +45,40 @@ const providerOf = (id) => {
     return 'openrouter';
 };
 
+const shuffled = (list) => {
+    const out = list.slice();
+    for (let i = out.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [out[i], out[j]] = [out[j], out[i]];
+    }
+    return out;
+};
+
+const pickOne = (list) => list[Math.floor(Math.random() * list.length)];
+
 const initThread = () => {
     const host = document.getElementById('auth-preview-replies');
     const section = document.getElementById('auth-section');
     if (!host || !section) return;
 
-    const rows = [];
-    for (const slot of PROVIDER_SLOTS) {
-        const entry = Object.entries(MODEL_CONFIG).find(([id]) => id.startsWith(slot.prefix));
-        if (!entry) continue;
+    // 2.6.3: a different trio on every load. Every provider in MODEL_CONFIG gets
+    // a slot, the slots are shuffled and three are shown, and the model inside a
+    // slot is random — so refreshing the page shows another slice of the
+    // catalogue while still never naming a model that is not in the app.
+    const byProvider = new Map();
+    for (const [id, meta] of Object.entries(MODEL_CONFIG)) {
+        const key = providerOf(id);
+        if (!byProvider.has(key)) byProvider.set(key, []);
+        byProvider.get(key).push(meta.name);
+    }
 
+    const slots = shuffled(Object.keys(PROVIDER_META))
+        .filter((key) => byProvider.has(key))
+        .slice(0, 3)
+        .map((key) => ({ ...PROVIDER_META[key], model: pickOne(byProvider.get(key)) }));
+
+    const rows = [];
+    for (const slot of slots) {
         const row = document.createElement('div');
         row.className = 'auth-preview-reply';
 
@@ -64,7 +90,7 @@ const initThread = () => {
 
         const who = document.createElement('span');
         who.className = 'who';
-        who.textContent = entry[1].name;
+        who.textContent = slot.model;
 
         const body = document.createElement('span');
 

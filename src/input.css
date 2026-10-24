@@ -325,7 +325,12 @@
             "copy  card"
             "proof card";
         column-gap: 4.5rem;
-        row-gap: 1.75rem;
+        row-gap: 1.5rem;
+        /* 2.6.3: the card is taller than copy+proof, and a stretched row set
+           (the default) sprinkled that leftover height into both rows — which
+           read as random, uneven gaps around the paragraph and the preview.
+           Packing + centring the rows keeps the gap exactly 1.5rem. */
+        align-content: center;
         align-items: center;
     }
     .auth-card-wrap { align-self: center; }
@@ -351,7 +356,7 @@
 
 .auth-card {
     position: relative;
-    padding: 1.75rem;
+    padding: 1.5rem;
     background: rgb(var(--c-raised));
     border: 1px solid rgb(var(--c-hairline));
     border-radius: 1.5rem;
@@ -370,7 +375,7 @@
         0 10px 24px -18px rgb(var(--c-shadow) / 0.6);
 }
 @media (min-width: 640px) {
-    .auth-card { padding: 2rem; }
+    .auth-card { padding: 1.6rem; }
 }
 
 /* Pointer glare: a coral light that follows the cursor across the card. The
@@ -407,7 +412,7 @@
     display: flex;
     align-items: center;
     gap: 0.85rem;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.1rem;
 }
 
 /* --- Form atoms ----------------------------------------------------------- */
@@ -503,15 +508,17 @@
     width: 100%;
     min-height: 44px;
     border-radius: 12px;
+    border: 1px solid rgb(var(--c-hairline));
     background: transparent;
     color: rgb(var(--c-muted));
     font-size: 13px;
     font-weight: 500;
-    transition: color 160ms var(--ease-out), background-color 160ms var(--ease-out);
+    transition: color 160ms var(--ease-out), background-color 160ms var(--ease-out), border-color 160ms var(--ease-out);
 }
 .auth-ghost:hover {
     color: rgb(var(--c-ink));
-    background: rgb(var(--c-card) / 0.7);
+    background: rgb(var(--c-card) / 0.55);
+    border-color: rgb(var(--c-coral) / 0.4);
 }
 .auth-ghost:focus-visible {
     outline: 2px solid rgb(var(--c-coral) / 0.6);
@@ -556,7 +563,7 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    margin: 1.25rem 0;
+    margin: 0.95rem 0;
 }
 .auth-divider::before,
 .auth-divider::after {
@@ -573,15 +580,15 @@
 }
 
 .auth-switch {
-    margin-top: 1.25rem;
+    margin-top: 0.9rem;
     text-align: center;
     font-size: 13px;
     color: rgb(var(--c-muted));
 }
 
 .auth-card-foot {
-    margin-top: 1.25rem;
-    padding-top: 0.85rem;
+    margin-top: 0.85rem;
+    padding-top: 0.7rem;
     border-top: 1px solid rgb(var(--c-hairline) / 0.8);
 }
 
@@ -590,7 +597,7 @@
 .auth-proof { margin-top: 0; }
 
 .auth-preview {
-    max-width: 30rem;
+    max-width: 34rem;
 }
 .auth-preview-head {
     display: flex;
@@ -615,10 +622,10 @@
 }
 
 .auth-preview-body {
-    margin-top: 0.85rem;
+    margin-top: 0.7rem;
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 0.65rem;
 }
 .auth-preview-user { display: flex; justify-content: flex-end; }
 .auth-preview-bubble {
@@ -655,8 +662,10 @@
     border-radius: 9999px;
 }
 .auth-preview-reply-text {
-    /* Two reserved lines: typing can never reflow the page under the pointer. */
-    min-height: 3em;
+    /* One reserved line: every reply is short enough to fit one, so the typing
+       animation can never reflow the page — and rows keep an even rhythm
+       (a 3-line reserve here is what made the gaps look random). */
+    min-height: 1.5em;
     font-size: 12.5px;
     line-height: 1.5;
     color: rgb(var(--c-body));
@@ -670,7 +679,7 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    margin-top: 1.5rem;
+    margin-top: 1rem;
     font-size: 12px;
     color: rgb(var(--c-muted));
 }
@@ -688,7 +697,7 @@
 .auth-footer {
     position: relative;
     z-index: 1;
-    margin-top: 2.25rem;
+    margin-top: 1rem;
     text-align: center;
 }
 
