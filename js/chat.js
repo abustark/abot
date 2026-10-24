@@ -433,6 +433,13 @@ const SPEAK_BTN_HTML = `<button class="speak-btn p-1.5 rounded-md transition-col
 // padding on the message area instead of moving the bubble.
 const END_ACTIONS_HTML = `<div class="msg-actions-end flex items-center gap-0.5 mt-2">${COPY_BTN_HTML}${SPEAK_BTN_HTML}</div>`;
 
+// 2.6.0 (owner request): a short reply keeps copy · read-aloud only on its
+// model header line — repeating them under the reply put two identical rows on
+// screen at once (the header row is always visible on touch). Only replies long
+// enough to have scrolled their header out of the way get the static end row.
+const END_ACTIONS_MIN_CHARS = 240;
+const replyNeedsEndActions = (text) => String(text || '').trim().length >= END_ACTIONS_MIN_CHARS;
+
 // 2.4.9: bind the action buttons of one message container. Idempotent —
 // buttons already wired are skipped, so it can run again when the static end
 // row is appended after streaming. Copy works without an index; speak, edit
@@ -506,7 +513,9 @@ const wireMessageActions = (container, msgIndex) => {
 // in place, so this guards against doubles.
 const attachEndActionRow = (spanEl, msgIndex) => {
     const container = spanEl?.closest('.message-container');
-    if (!container || container.querySelector('.msg-actions-end') || !container.querySelector('.prose')) return;
+    if (!container || container.querySelector('.msg-actions-end')) return;
+    const prose = container.querySelector('.prose');
+    if (!prose || !replyNeedsEndActions(prose.textContent)) return;
     const holder = document.createElement('div');
     holder.innerHTML = END_ACTIONS_HTML;
     const row = holder.firstElementChild;
@@ -579,8 +588,10 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
     const aiActionsHtml = (!isUser && !message.isError) ? COPY_BTN_HTML + SPEAK_BTN_HTML : '';
     // Only finished AI replies (history, or a message with a known index) get
     // the static end row — the streaming placeholder must not show it yet,
-    // and error cards keep Retry alone.
-    const showEndActions = !message.isError && (isHistory === true || typeof options.index === 'number');
+    // error cards keep Retry alone, and short replies keep their single header
+    // row (2.6.0 dedupe).
+    const showEndActions = !message.isError && replyNeedsEndActions(text)
+        && (isHistory === true || typeof options.index === 'number');
 
     let userActionsHtml = '';
     if (isUser && typeof options.index === 'number') {
@@ -601,7 +612,7 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
                                         ${COPY_BTN_HTML}
                                         ${userActionsHtml}
                                     </div>
-                                    <div class="min-w-0 max-w-full user-bubble bg-coral-soft px-4 py-2.5 text-[15px] leading-relaxed text-ink shadow-soft">
+                                    <div class="min-w-0 max-w-full user-bubble bg-coral-soft px-4 py-2.5 text-[15px] leading-relaxed text-ink shadow-soft" tabindex="0">
                                        <div class="prose dark:prose-invert max-w-none whitespace-pre-wrap">${messageContent}</div>
                                     </div>
                                 </div>
@@ -636,26 +647,31 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
     // Attach Event Listeners
     wireMessageActions(messageEl, options.index);
 
-    // 2.4.10 (owner request): on touch devices a tap on the user bubble
-    // reveals its action pill (desktop keeps hover — the matchMedia gate
-    // leaves pointer-device text selection untouched).
+    // 2.4.10 (owner request): a tap on the user bubble reveals its action pill.
+    // 2.6.0 (owner report: the reveal still failed on a real Android phone
+    // after 2.5.12): stop trusting device-detection media queries entirely.
+    // The bubble is now focusable (tabindex), so the existing
+    // `.user-row:focus-within` CSS rule reveals the pill on ANY tap even if
+    // this handler never runs (stale bundle, swallowed click); the handler only
+    // keeps the tap-again-to-hide toggle and the explicit `actions-open` state
+    // the interaction test asserts. Pointer-device hover is unchanged.
     if (isUser) {
         const rowEl = messageEl.querySelector('.message-container');
-        messageEl.querySelector('.user-bubble')?.addEventListener('click', () => {
-            // 2.4.12 (owner report: tap-to-reveal not working on mobile): the
-            // old gate was evaluated once at attach time and only trusted
-            // `(hover: none)` — some mobile browsers misreport it. Re-check per
-            // tap and also honor actual touch capability; pointer-only devices
-            // keep pure hover behavior.
-            let touchCapable = false;
-            try {
-                touchCapable = (window.matchMedia && window.matchMedia('(hover: none)').matches)
-                    || (navigator.maxTouchPoints || 0) > 0;
-            } catch { touchCapable = false; }
-            if (!touchCapable) return;
+        const bubbleEl = messageEl.querySelector('.user-bubble');
+        bubbleEl?.addEventListener('click', () => {
             const willOpen = !rowEl.classList.contains('actions-open');
-            document.querySelectorAll('.message-container.actions-open').forEach((m) => m.classList.remove('actions-open'));
-            if (willOpen) rowEl.classList.add('actions-open');
+            document.querySelectorAll('.message-container.actions-open').forEach((m) => {
+                if (m === rowEl) return;
+                m.classList.remove('actions-open');
+                m.querySelector('.user-bubble')?.blur?.();
+            });
+            if (willOpen) {
+                rowEl.classList.add('actions-open');
+                bubbleEl.focus({ preventScroll: true });
+            } else {
+                rowEl.classList.remove('actions-open');
+                bubbleEl.blur();
+            }
         });
     }
 
