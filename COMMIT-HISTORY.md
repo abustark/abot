@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.6.7`** (current head is `2.6.6`)
+> - **`main` → `2.6.8`** (current head is `2.6.7`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -33,6 +33,16 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.6.7 - petrol & sand retint
+- **Date**: 2026-10-25
+- **Why**: owner judged 2.6.6 too monotone — with the accent set to ink there was no colour in the chrome at all. Owner re-picked option **A — Petrol & sand**: warm sand paper, deep petrol accent.
+- **Tokens** (`src/input.css`): canvas `#f8f7f3`, surface `#f3f1eb`, card `#edebe3`, raised `#fffefa`, hairline `#e3e0d6`, ink `#161a18`, body `#3f4643`, muted `#686d67` (4.9:1 on canvas — the first pick, `#6e736d`, landed at 4.52:1, too close to the AA line). Accent slot: `#0f5b54` (7.4:1 on canvas), hover `#0b443f`, soft `#dfe9e4`. Dark: canvas `#131715`, surface `#191e1c`, card `#202623`, raised `#262c29`, hairline `#333a37`, ink `#f2f4f1`, body `#dde2de`, muted `#9ba5a0`, accent lifted to `#4fb3a4` (hover `#6fc6b8`), soft `#1e2e2b`.
+- **Labels**: the `text-canvas` pairing from 2.6.6 still holds without a change — canvas is near-white in light on petrol (7.4:1) and near-black in dark on the lifted teal (~8:1).
+- **Auth field**: the two blooms are colour again — petrol at 13% top-right, warm sand (`--c-amber`) at 9% bottom-left; the card glare goes to 9% / 11% petrol. Sparkles are petrol + the four provider hues (ink dropped).
+- **Links**: `.auth-link` returns to an underline-on-hover treatment; the permanent underline existed only because the accent had become ink.
+- **Browser chrome**: `theme-color` (static meta, the inline head script and `syncThemeIcons`) and `manifest.json` are retinted to the new canvas values (`#131715` dark, `#f8f7f3` light). The four provider hues are untouched throughout.
+- `CACHE_NAME` → `abot-cache-v76`, asset query `?v=p51`; `dist/output.css` rebuilt and committed.
 
 ### 2.6.6 - graphite & spectrum retint, spectrum seam
 - **Date**: 2026-10-24

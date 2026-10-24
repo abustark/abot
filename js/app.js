@@ -99,7 +99,7 @@ function initApp() {
         // 2.4.6: keep the browser-chrome tint in step with the actual theme
         // (the meta used to hardcode the dark canvas).
         const meta = document.querySelector('meta[name="theme-color"]');
-        if (meta) meta.content = dark ? '#181715' : '#faf9f5';
+        if (meta) meta.content = dark ? '#131715' : '#f8f7f3';
     };
     syncThemeIcons();
     // One owner of "set the theme", taking an explicit value so every entry
@@ -996,10 +996,10 @@ function initApp() {
         const confirmBtn = dom.deleteConfirmBtn;
         confirmBtn.textContent = "Sign Out";
         confirmBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
-        // 2.6.6: the accent slot is graphite now — paper-white in dark mode — so the
-        // label has to be canvas, not white. The red utilities from the delete flow
-        // are stripped as well: leaving both backgrounds on the button made the
-        // winner depend on Tailwind's emit order.
+        // 2.6.7: the accent is light in dark mode, so the label has to be canvas,
+        // not white. The red utilities from the delete flow are stripped as well:
+        // leaving both backgrounds on the button made the winner depend on
+        // Tailwind's emit order.
         confirmBtn.classList.remove('bg-danger', 'hover:bg-danger/90', 'text-white');
         confirmBtn.classList.add('bg-coral', 'hover:bg-coral-active', 'text-canvas');
         confirmBtn.dataset.action = 'signout';

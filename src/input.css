@@ -60,26 +60,26 @@
 @tailwind utilities;
 
 /* ---------------------------------------------------------------------------
-   ABot design tokens — 2.6.6 "graphite & spectrum" (owner pick).
-   The chrome is neutral graphite; the ONLY colour on the page is the model set
-   itself — the four provider hues, used as dots and as a 2px seam.
+   ABot design tokens — 2.6.7 "petrol & sand" (owner pick).
+   Warm sand paper with a deep petrol accent: the chrome stays quiet, the colour
+   lands on actions, links and focus rings. Provider hues are untouched.
    RGB triplets so Tailwind opacity modifiers work: bg-ink/20 etc.
-   NOTE: `--c-coral*` is the historical name of the ACCENT slot. It is graphite
+   NOTE: `--c-coral*` is the historical name of the ACCENT slot. It is petrol
    now, not terracotta — every button/link/focus ring reads through it.
 --------------------------------------------------------------------------- */
 @layer base {
   :root {
-    --c-canvas: 250 250 247;   /* #fafaf7 */
-    --c-surface: 244 243 238;  /* #f4f3ee */
-    --c-card: 238 237 231;     /* #eeede7 */
-    --c-raised: 255 255 255;   /* #ffffff — light: panels lift toward white */
-    --c-hairline: 225 223 216; /* #e1dfd8 */
-    --c-ink: 23 24 26;         /* #17181a */
-    --c-body: 60 62 66;        /* #3c3e42 */
-    --c-muted: 107 109 114;    /* #6b6d72 */
-    --c-coral: 23 24 26;       /* #17181a — the accent IS the ink */
-    --c-coral-active: 11 12 14; /* #0b0c0e */
-    --c-coral-soft: 233 232 226; /* #e9e8e2 — neutral tint (was a terracotta wash) */
+    --c-canvas: 248 247 243;   /* #f8f7f3 */
+    --c-surface: 243 241 235;  /* #f3f1eb */
+    --c-card: 237 235 227;     /* #edebe3 */
+    --c-raised: 255 254 250;   /* #fffefa — light: panels lift toward white */
+    --c-hairline: 227 224 214; /* #e3e0d6 */
+    --c-ink: 22 26 24;         /* #161a18 */
+    --c-body: 63 70 67;        /* #3f4643 */
+    --c-muted: 104 109 103;    /* #686d67 */
+    --c-coral: 15 91 84;       /* #0f5b54 — petrol, ~7.4:1 on canvas */
+    --c-coral-active: 11 68 63; /* #0b443f */
+    --c-coral-soft: 223 233 228; /* #dfe9e4 — pale petrol wash */
     --c-ok: 93 184 114;        /* #5db872 */
     --c-warn: 212 160 23;      /* #d4a017 */
     --c-danger: 198 69 69;     /* #c64545 */
@@ -105,17 +105,17 @@
   }
 
   .dark {
-    --c-canvas: 19 20 22;      /* #131416 */
-    --c-surface: 26 28 31;     /* #1a1c1f */
-    --c-card: 33 35 39;        /* #212327 */
-    --c-raised: 38 41 45;      /* #26292d — dark: panels lift off the canvas */
-    --c-hairline: 52 56 61;    /* #34383d */
-    --c-ink: 244 244 241;      /* #f4f4f1 */
-    --c-body: 222 223 218;     /* #dedfda */
-    --c-muted: 158 161 166;    /* #9ea1a6 */
-    --c-coral: 242 241 236;    /* #f2f1ec — inverted: the accent is paper-white */
-    --c-coral-active: 215 214 207; /* #d7d6cf */
-    --c-coral-soft: 42 45 49;  /* #2a2d31 */
+    --c-canvas: 19 23 21;      /* #131715 */
+    --c-surface: 25 30 28;     /* #191e1c */
+    --c-card: 32 38 35;        /* #202623 */
+    --c-raised: 38 44 41;      /* #262c29 — dark: panels lift off the canvas */
+    --c-hairline: 51 58 55;    /* #333a37 */
+    --c-ink: 242 244 241;      /* #f2f4f1 */
+    --c-body: 221 226 222;     /* #dde2de */
+    --c-muted: 155 165 160;    /* #9ba5a0 */
+    --c-coral: 79 179 164;     /* #4fb3a4 — petrol lifted for dark contrast */
+    --c-coral-active: 111 198 184; /* #6fc6b8 */
+    --c-coral-soft: 30 46 43;  /* #1e2e2b */
     --c-ok: 93 184 114;
     --c-warn: 212 160 23;
     --c-danger: 198 69 69;
@@ -263,16 +263,16 @@
     border-radius: 50%;
     pointer-events: none;
 }
-.auth-bloom-ink {
+.auth-bloom-petrol {
     top: -34vmax;
     right: -22vmax;
-    background: radial-gradient(closest-side, rgb(var(--c-ink) / 0.055), transparent 72%);
+    background: radial-gradient(closest-side, rgb(var(--c-coral) / 0.13), transparent 72%);
     animation: auth-bloom-drift 52s var(--ease-in-out) infinite alternate;
 }
-.auth-bloom-ash {
+.auth-bloom-sand {
     bottom: -38vmax;
     left: -26vmax;
-    background: radial-gradient(closest-side, rgb(var(--c-ink) / 0.032), transparent 72%);
+    background: radial-gradient(closest-side, rgb(var(--c-amber) / 0.09), transparent 72%);
     animation: auth-bloom-drift 68s var(--ease-in-out) infinite alternate-reverse;
 }
 @keyframes auth-bloom-drift {
@@ -400,12 +400,12 @@
     height: 620px;
     margin: -310px 0 0 -310px;
     border-radius: 50%;
-    background: radial-gradient(closest-side, rgb(var(--c-coral) / 0.075), transparent 70%);
+    background: radial-gradient(closest-side, rgb(var(--c-coral) / 0.09), transparent 70%);
     transform: translate3d(50%, 25%, 0);
     transition: transform 180ms var(--ease-out);
 }
 .dark .auth-glare span {
-    background: radial-gradient(closest-side, rgb(var(--c-coral) / 0.09), transparent 70%);
+    background: radial-gradient(closest-side, rgb(var(--c-coral) / 0.11), transparent 70%);
 }
 @media (hover: hover) and (pointer: fine) {
     .auth-card-wrap:hover .auth-glare { opacity: 1; }
@@ -550,17 +550,14 @@
     color: rgb(var(--c-coral));
     font-weight: 500;
     border-radius: 4px;
-    /* 2.6.6: the accent is the ink now, so a link needs an underline to read as
-       one — the hairline-coloured rule brightens to full ink on hover/focus. */
-    text-decoration: underline;
-    text-decoration-thickness: 1px;
-    text-underline-offset: 3px;
-    text-decoration-color: rgb(var(--c-coral) / 0.35);
-    transition: color 150ms var(--ease-out), text-decoration-color 150ms var(--ease-out);
+    /* 2.6.6 gave links a permanent underline because the accent was ink and the
+       colour alone no longer marked them. 2.6.7 restores colour to the accent,
+       so the underline goes back to hover/focus only. */
+    transition: color 150ms var(--ease-out);
 }
 .auth-link:hover {
     color: rgb(var(--c-coral-active));
-    text-decoration-color: rgb(var(--c-coral));
+    text-decoration: underline;
     text-underline-offset: 2px;
 }
 .auth-link:focus-visible {

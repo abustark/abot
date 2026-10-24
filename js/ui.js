@@ -94,9 +94,8 @@ export const renderPromptLibrary = () => {
         button.textContent = p.title;
                         // 2.2.8: borders per item (owner request) — the chips sat
                         // bg-on-bg, so the grid read as one undifferentiated block.
-                        // 2.6.6: the accent slot is graphite now (paper-white in dark
-                        // mode), so the active chip's label is canvas — text-white
-                        // vanished against the inverted button.
+                        // 2.6.7: the accent is light in dark mode, so the active
+                        // chip's label is canvas — text-white vanished against it.
                         button.className = `px-3 py-1.5 text-xs font-medium rounded-full border transition-colors ${isActive ? 'bg-coral text-canvas border-coral shadow-sm' : 'bg-card text-body border-hairline hover:bg-hairline'}`;
 
         button.addEventListener('click', (e) => {
