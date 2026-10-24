@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.6.4`** (current head is `2.6.3`)
+> - **`main` → `2.6.5`** (current head is `2.6.4`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -33,6 +33,13 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.6.4 - preview always types, footer name, cache refresh
+- **Date**: 2026-10-24
+- **Why**: owner report — the preview showed fully-written replies instead of typing, the same three model names came back after a refresh, and the footer should read "ABu".
+- **Typing** (`js/auth-preview.js`): the 2.6.2 code had a `prefers-reduced-motion` branch that rendered the finished thread instead of typing it. On a machine whose OS reports reduced motion that reads as "the animation is gone", and type-on is the point of this preview — so the branch is gone and the loop always runs. It still stops dead when the auth section is hidden or the tab is backgrounded. Only the card tilt remains gated on reduced motion.
+- **Same trio after refresh**: not the sampler — the service worker serves `/js/*` cache-first, so the page was still running 2.6.2's `auth-preview.js`, which deterministically picked the *first* model of each prefix. `CACHE_NAME` → `abot-cache-v74` and asset query `?v=p48` so the new module and CSS are pulled in. (The sampler itself already picks 3 of the 4 providers at random and a random model inside each; nvidia alone has 15 entries.)
+- **Footer**: `© 2026 ABu. All rights reserved.` + the existing second line, unchanged.
 
 ### 2.6.3 - auth stage fits the viewport, rotating preview trio, footer restored
 - **Date**: 2026-10-24

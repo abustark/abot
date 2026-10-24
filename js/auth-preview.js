@@ -15,8 +15,8 @@
  *     and skipped entirely under prefers-reduced-motion.
  *
  * Honours the repo's motion rules: transform/opacity only, the app's --ease-out
- * token, one-shot entrance handled in CSS, and a static thread when reduced
- * motion is requested.
+ * token and a one-shot entrance handled in CSS. The type-on loop always runs
+ * (2.6.4: owner directive); only the tilt is skipped under reduced motion.
  */
 
 import { MODEL_CONFIG } from './config.js';
@@ -101,20 +101,16 @@ const initThread = () => {
     }
     if (!rows.length) return;
 
-    const showAll = () => rows.forEach((r) => {
-        r.row.classList.add('is-in');
-        r.body.textContent = r.line;
-    });
     const reset = () => rows.forEach((r) => {
         r.row.classList.remove('is-in');
         r.body.textContent = '';
     });
 
-    // Reduced motion: the finished thread, no typing, no loop.
-    if (prefersReducedMotion()) {
-        showAll();
-        return;
-    }
+    // 2.6.4 (owner directive): always type. The 2.6.2 code rendered the thread
+    // fully finished whenever the OS asked for reduced motion — on the owner's
+    // machine that read as "the animation is gone". Type-on IS the point of this
+    // preview, so it runs regardless; the loop still stops dead whenever the
+    // auth section is hidden or the tab is in the background.
 
     let token = 0;
     let running = false;
