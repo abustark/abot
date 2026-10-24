@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.5.13`** (current head is `2.5.12`)
+> - **`main` → `2.5.14`** (current head is `2.5.13`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -27,6 +27,15 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.5.13 - user pill reveals on focus, short replies get one action row, free-model roster refreshed
+- **Date**: 2026-10-24
+- **Why**: resumes the plan-mode request from 2026-10-23 that a crashed v1 session never answered — (a) tapping a user bubble on a real Android phone still showed no copy · speak · edit pill even after 2.5.12's clip fix; (b) short AI replies showed the header action icons *and* the static end-of-reply row at the same time; (c) the free model roster had drifted from the providers' live pages.
+- **(a) Mobile pill**: removed the `(hover: none)` / `maxTouchPoints` gate that failed twice on real devices. The bubble is now `tabindex="0"`, so the existing `.user-row:focus-within` CSS rule reveals the pill on any tap **without JavaScript** (a stale cached bundle can no longer hide it). The click handler only keeps the tap-again-to-hide toggle and the `actions-open` state the interaction test asserts; opening one row blurs any other.
+- **(b) Dedupe**: new `END_ACTIONS_MIN_CHARS = 240` + `replyNeedsEndActions()`. Replies shorter than 240 characters keep only the header row; longer replies still get the static end row (`appendMessage` and `attachEndActionRow` both honor it). Stream-end/stop paths are suppressed the same way.
+- **(c) Models** (checked 2026-10-24): **Google** — added `gemini-3.6-flash` (Free Tier row on ai.google.dev/pricing; 4 Argon and 3.1 Pro Preview are paid, so not added). **NVIDIA** — added the four new chat NIMs carrying a "Free Endpoint" badge: `deepseek-ai/deepseek-v4.1-flash`, `minimaxai/minimax-m3.1-flash`, `nvidia/nemotron-3.5-bolt-e4b`, `nvidia/nemotron-3.5-super-vl-120b-a12b`. **OpenRouter** — dropped `qwen/qwen3.8-27b:free` and `z-ai/glm-5.2:free` (no longer `:free`), added the 11 current free chat models (nemotron-3.5-super-vl, nemotron-3-super, nemotron-3-nano-omni, poolside laguna-xs, thinkingmachines inkling ×2, recursive flint, xingchen xing4.0, dots3-note, liquid lfm-2.5, cohere north-mini-code); `nemotron-3.5-content-safety:free` skipped (classifier, no tools). **Groq** — untouched per owner (its two gpt-oss models are still the free chat ones; Qwen3.8-27B on Groq is paid).
+- Cache: `?v=p44`, `abot-cache-v70`.
+- **Not verified**: no gates/builds were run in this session (owner directive 2026-09-21); `dist/output.css` needed no rebuild because no CSS file changed.
 
 ### 2.5.12 - mobile user pill now paints, tighter mobile gutters, bubble-only hover, panel icon
 - **Date**: 2026-10-22

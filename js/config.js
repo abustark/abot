@@ -25,6 +25,11 @@ export const PROVIDER_COLORS = {
     poolside:             { dot: 'bg-provider-openrouter', text: 'text-provider-openrouter', label: 'OpenRouter · Poolside' },
     cohere:               { dot: 'bg-provider-openrouter', text: 'text-provider-openrouter', label: 'OpenRouter · Cohere' },
     nousresearch:         { dot: 'bg-provider-openrouter', text: 'text-provider-openrouter', label: 'OpenRouter · Nous' },
+    // 2.5.13 free-roster refresh (OpenRouter /models, 2026-10-24)
+    recursive:            { dot: 'bg-provider-openrouter', text: 'text-provider-openrouter', label: 'OpenRouter · Recursive' },
+    'xingchen-agi':       { dot: 'bg-provider-openrouter', text: 'text-provider-openrouter', label: 'OpenRouter · XingChen' },
+    'dots-studio':        { dot: 'bg-provider-openrouter', text: 'text-provider-openrouter', label: 'OpenRouter · Dots Studio' },
+    liquid:               { dot: 'bg-provider-openrouter', text: 'text-provider-openrouter', label: 'OpenRouter · LiquidAI' },
 };
 
 export const getProviderColor = (model) => {
@@ -44,6 +49,9 @@ export const MODEL_CONFIG = {
     // (2.5-pro / 2.5-flash were retired upstream). ---
     'google/gemini-3.8-flash': { name: 'Gemini 3.8 Flash', color: 'gemini' },
     'google/gemini-3.5-flash-lite': { name: 'Gemini 3.5 Flash Lite', color: 'gemini-pro' },
+    // 2.5.13: ai.google.dev pricing (checked 2026-10-24) — 3.6 Flash still
+    // carries a Free Tier row; 4 Argon and 3.1 Pro Preview are paid-only.
+    'google/gemini-3.6-flash': { name: 'Gemini 3.6 Flash', color: 'gemini' },
 
     // --- OTHER GROQ (refreshed 2026-08-30 against console.groq.com/docs/models
     // + deprecations page. Groq shut down on 08/16/26: llama-3.1-8b-instant,
@@ -73,20 +81,38 @@ export const MODEL_CONFIG = {
     // free-endpoint roster.
     'nvidia/google/gemma-4-31b-it': { name: 'Gemma 4 31B', color: 'nvidia-green' },
     'nvidia/nvidia/nemotron-3-super-120b-a12b': { name: 'Nemotron 3 Super', color: 'nvidia-green' },
+    // 2.5.13 (build.nvidia.com — each carries a "Free Endpoint" badge,
+    // checked 2026-10-24). Parse/embed/rerank NIMs are not chat models.
+    'nvidia/deepseek-ai/deepseek-v4.1-flash': { name: 'DeepSeek V4.1 Flash', color: 'nvidia-green' },
+    'nvidia/minimaxai/minimax-m3.1-flash': { name: 'MiniMax M3.1 Flash', color: 'nvidia-green' },
+    'nvidia/nvidia/nemotron-3.5-bolt-e4b': { name: 'Nemotron 3.5 Bolt', color: 'nvidia-green' },
+    'nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b': { name: 'Nemotron 3.5 Super VL', color: 'nvidia-green' },
 
     // --- OPENROUTER (:free tier — refreshed 2026-08-30 against OpenRouter's
     // current roster; deepseek-chat-v3-0324:free (provider paywalled) and
     // dolphin-mistral-24b-venice (delisted) were REMOVED as deprecated.
     // The :free catalog rotates — re-check openrouter.ai/models quarterly.) ---
-    // --- OWNER'S AUTHORITATIVE FREE LIST (2026-08-30, supersedes prior
-    // refreshes — this is the set the owner confirmed working/valid) ---
+    // --- OWNER'S AUTHORITATIVE FREE LIST — re-checked against
+    // openrouter.ai/api/v1/models on 2026-10-24 (2.5.13). qwen3.8-27b:free and
+    // glm-5.2:free left the free tier and were dropped; the new roster is
+    // below. nemotron-3.5-content-safety:free is a classifier (no tools), so it
+    // is deliberately not offered as a chat model. ---
     'nvidia/nemotron-3-ultra-550b-a55b:free': { name: 'Nemotron 3 Ultra', color: 'openrouter-free' },
-    'poolside/laguna-s-2.1:free': { name: 'Poolside Laguna S 2.1', color: 'openrouter-free' },
+    'nvidia/nemotron-3-super-120b-a12b:free': { name: 'Nemotron 3 Super', color: 'openrouter-free' },
     'nvidia/nemotron-3.5-lightning:free': { name: 'Nemotron 3.5 Lightning', color: 'openrouter-free' },
-    'qwen/qwen3.8-27b:free': { name: 'Qwen 3.8 27B', color: 'openrouter-free' },
-    'z-ai/glm-5.2:free': { name: 'GLM 5.2', color: 'openrouter-free' }, // NOTE: free variant is 33K ctx (1M is paid)
+    'nvidia/nemotron-3.5-super-vl:free': { name: 'Nemotron 3.5 Super VL', color: 'openrouter-free' },
+    'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free': { name: 'Nemotron 3 Nano Omni', color: 'openrouter-free' },
+    'poolside/laguna-s-2.1:free': { name: 'Poolside Laguna S 2.1', color: 'openrouter-free' },
+    'poolside/laguna-xs-2.1:free': { name: 'Poolside Laguna XS 2.1', color: 'openrouter-free' },
     'google/gemma-4-26b-a4b-it:free': { name: 'Gemma 4 26B A4B', color: 'openrouter-free' }, // MoE variant
     'google/gemma-4-31b-it:free': { name: 'Gemma 4 31B', color: 'openrouter-free' },
+    'thinkingmachines/inkling:free': { name: 'Thinking Machines Inkling', color: 'openrouter-free' },
+    'thinkingmachines/inkling-small:free': { name: 'Thinking Machines Inkling Small', color: 'openrouter-free' },
+    'recursive/flint-v1.0:free': { name: 'Recursive Flint', color: 'openrouter-free' },
+    'xingchen-agi/xing4.0-29b-a4b:free': { name: 'XingChen Xing 4.0', color: 'openrouter-free' },
+    'dots-studio/dots-3-note-preview:free': { name: 'Dots3 Note Preview', color: 'openrouter-free' },
+    'liquid/lfm-2.5-2.6b:free': { name: 'Liquid LFM 2.5', color: 'openrouter-free' },
+    'cohere/north-mini-code:free': { name: 'Cohere North Mini Code', color: 'openrouter-free' },
     'openrouter/free': { name: 'OpenRouter Auto (Free)', color: 'openrouter-free' }, // auto-routes to the best available free model
 };
 
