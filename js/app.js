@@ -685,9 +685,13 @@ function initApp() {
     dom.sidebarOverlay.addEventListener('click', closeSidebar);
 
     // 2.5.11 (owner request): a rightward swipe on the chat surface opens the
-    // history drawer on phones. Scoped to the header/messages/landing, never
-    // inside the drawer, the composer, an input or an open panel; the motion
-    // must be clearly horizontal (and quick) so vertical scrolling and text
+    // history drawer on phones. 2.6.5 (owner report: "the swipe does nothing on
+    // the new-chat screen, it only works once there are messages"): the empty
+    // landing sets #chatHistoryContainer to display:none, so the old allow-list
+    // (header / history / welcome block) left the blank canvas around the centred
+    // composer unswipeable. The gate is now the whole app surface, with the
+    // drawer, the composer, open panels and anything typable carved out; the
+    // motion still has to be clearly horizontal so vertical scrolling and text
     // selection never trigger it.
     let swipeStart = null;
     const isPhone = () => !(window.matchMedia && window.matchMedia('(min-width: 768px)').matches);
@@ -696,7 +700,7 @@ function initApp() {
         if (e.touches.length !== 1 || !isPhone() || isSidebarOpen()) return;
         const target = e.target;
         if (!target || typeof target.closest !== 'function') return;
-        if (!target.closest('#appHeader, #chatHistoryContainer, #emptyWelcome')) return;
+        if (!target.closest('#app-container') || target.closest('#sidebar')) return;
         if (target.closest('#composerDock, #modelSelectorPanel, .menu-panel, .chat-options-menu, input, textarea, pre, [contenteditable="true"]')) return;
         const t = e.touches[0];
         swipeStart = { x: t.clientX, y: t.clientY, at: Date.now() };

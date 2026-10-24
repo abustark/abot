@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.6.5`** (current head is `2.6.4`)
+> - **`main` → `2.6.6`** (current head is `2.6.5`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -33,6 +33,13 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.6.5 - swipe opens history on the empty landing
+- **Date**: 2026-10-24
+- **Why**: owner report — on phones the rightward swipe opened the history drawer only after a chat had messages; on a fresh new-chat screen it did nothing.
+- **Cause**: `body.chat-empty #chatHistoryContainer { display: none }` (the landing centres the composer and hides the message area). The 2.5.11 swipe gate only accepted a touch that started inside `#appHeader`, `#chatHistoryContainer` or `#emptyWelcome`, and the third one sits inside `#composerDock`, which is excluded on purpose. On the landing the blank canvas around the centred composer belongs to the column wrapper — none of those ids — so every swipe was dropped before the distance check.
+- **Fix** (`js/app.js`): the gate is now the whole app surface (`#app-container`) with `#sidebar` carved out, keeping the existing exclusions (composer dock, model panel, menu panels, inputs, textarea, pre, contenteditable) and the 64px / 0.6-ratio horizontal test intact.
+- No CSS change. `app.js` query bumped to `?v=p49` so the module is fetched past the service-worker cache.
 
 ### 2.6.4 - preview always types, footer name, cache refresh
 - **Date**: 2026-10-24
