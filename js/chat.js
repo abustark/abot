@@ -224,8 +224,8 @@ export const deleteChat = (chatId) => {
     // 2. Configure Button
     const confirmBtn = dom.deleteConfirmBtn;
     confirmBtn.textContent = "Delete";
-    confirmBtn.classList.remove('bg-indigo-600', 'hover:bg-indigo-700', 'bg-coral', 'hover:bg-coral-active');
-    confirmBtn.classList.add('bg-red-600', 'hover:bg-red-700');
+    confirmBtn.classList.remove('bg-indigo-600', 'hover:bg-indigo-700', 'bg-coral', 'hover:bg-coral-active', 'text-canvas');
+    confirmBtn.classList.add('bg-red-600', 'hover:bg-red-700', 'text-white');
     confirmBtn.dataset.action = 'delete';
     confirmBtn.dataset.chatId = chatId;
 

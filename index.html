@@ -24,7 +24,7 @@
     <meta name="theme-color" content="#181715">
     <link rel="preload" href="/dist/fonts/plus-jakarta-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/dist/fonts/source-serif-4-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link href="./dist/output.css?v=p48" rel="stylesheet">
+    <link href="./dist/output.css?v=p50" rel="stylesheet">
     <script src="/vendor/marked.min.js" defer></script>
     <!-- A1 (v1.0.5): highlight.js + its theme are lazy-loaded on the first code
          block (js/chat.js) — they were head-linked here, costing every visitor
@@ -173,13 +173,13 @@
     <!-- This is the content, stacked on top of the backdrop. -->
     <section id="auth-section" class="relative z-10 flex flex-col items-center justify-center w-full min-h-screen p-4 sm:p-6 overflow-hidden"
         style="display: none;">
-        <!-- 2.4.1: twinkling sparkle field. 2.6.2: two very slow colour blooms
+        <!-- 2.4.1: twinkling sparkle field. 2.6.2: two very slow colour fields
              and a cached SVG grain tile give the field depth — radial gradients
-             and one noise image, no blur filter on a live element. Inert:
-             pointer-events:none all the way down. -->
+             and one noise image, no blur filter on a live element. 2.6.6: the
+             fields are graphite now, not coral/amber. Inert: pointer-events:none. -->
         <div id="auth-scene" class="auth-scene" aria-hidden="true">
-            <div class="auth-bloom auth-bloom-coral"></div>
-            <div class="auth-bloom auth-bloom-amber"></div>
+            <div class="auth-bloom auth-bloom-ink"></div>
+            <div class="auth-bloom auth-bloom-ash"></div>
             <canvas id="auth-sparkles" class="auth-sparkles"></canvas>
             <div class="auth-grain"></div>
         </div>
@@ -191,6 +191,7 @@
                 <h1 class="auth-rise auth-d2 font-display text-[2.55rem] leading-[1.04] tracking-[-0.02em] text-ink sm:text-[3.4rem] lg:text-[3.85rem] mt-6">
                     Many models.<br>One conversation.
                 </h1>
+                <span class="auth-rise auth-d3 auth-seam spectrum-seam" aria-hidden="true"></span>
                 <p class="auth-rise auth-d3 mt-5 max-w-[42ch] text-[15px] leading-relaxed text-body/85 text-balance">
                     Gemini, Groq, NVIDIA and OpenRouter in a single composer. Switch model mid-thread — the conversation stays exactly where it was.
                 </p>
@@ -381,7 +382,10 @@
                 <div class="flex items-center justify-between px-1 pt-1">
                     <div class="flex items-center gap-2.5">
                         <img src="/logo.png" alt="ABot logo" class="logo-mark h-7 w-7 rounded-md select-none" draggable="false">
-                        <span class="font-wordmark text-lg text-ink">ABot</span>
+                        <span class="flex flex-col gap-1">
+                            <span class="font-wordmark text-lg leading-none text-ink">ABot</span>
+                            <span class="spectrum-seam" aria-hidden="true"></span>
+                        </span>
                     </div>
                     <button type="button" id="sidebarCloseBtn" aria-label="Close sidebar" data-tooltip="Close sidebar" data-tooltip-pos="bottom"
                         class="p-2 rounded-lg text-muted hover:text-ink hover:bg-card transition-colors md:hidden inline-flex items-center justify-center min-w-[44px] min-h-[44px]">
@@ -393,7 +397,7 @@
                     </button>
                 </div>
                 <button type="button" id="newChatBtn"
-                    class="relative w-full min-h-[44px] text-white bg-coral hover:bg-coral-active active:bg-coral-active active:scale-[0.98] py-2.5 rounded-xl font-medium flex items-center justify-center transition-colors duration-fast ease-out">
+                    class="relative w-full min-h-[44px] text-canvas bg-coral hover:bg-coral-active active:bg-coral-active active:scale-[0.98] py-2.5 rounded-xl font-medium flex items-center justify-center transition-colors duration-fast ease-out">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24"
                         stroke-width="1.6" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round"
@@ -401,7 +405,7 @@
                     </svg>
                     New Chat
                     <span id="new-chat-spinner" class="absolute right-3 top-1/2 -translate-y-1/2 hidden">
-                        <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
+                        <svg class="animate-spin h-5 w-5 text-canvas" xmlns="http://www.w3.org/2000/svg" fill="none"
                             viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
                             </circle>
@@ -634,7 +638,7 @@
                                     class="model-panel fixed top-0 left-0 grid grid-cols-2 gap-x-2 w-[calc(100vw-2rem)] max-w-[26rem] overflow-y-auto bg-canvas dark:bg-card border border-hairline rounded-xl shadow-lift z-30 hidden scrollbar-custom"></div>
                             </div>
                             <div class="relative flex items-center order-last flex-shrink-0" style="position:relative;">
-                                <button type="button" id="sendBtn" aria-label="Send message" data-tooltip="Send (Enter)" class="w-[44px] h-[44px] flex items-center justify-center rounded-full bg-coral text-white shadow-sm transition-transform hover:bg-coral-active active:scale-95">
+                                <button type="button" id="sendBtn" aria-label="Send message" data-tooltip="Send (Enter)" class="w-[44px] h-[44px] flex items-center justify-center rounded-full bg-coral text-canvas shadow-sm transition-transform hover:bg-coral-active active:scale-95">
                                     <!-- 2.3.5 (owner request): one clean centred arrow — the old
                                          underline bar read as a stray square under the glyph. -->
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
@@ -747,7 +751,7 @@
                     <button type="button" id="promptCancelBtn"
                         class="px-4 py-2 rounded-md bg-card text-ink hover:bg-hairline">Cancel</button>
                     <button type="button" id="promptSaveBtn"
-                        class="px-4 py-2 rounded-md bg-coral hover:bg-coral-active text-white">Save</button>
+                        class="px-4 py-2 rounded-md bg-coral hover:bg-coral-active text-canvas">Save</button>
                 </div>
             </div>
         </div>
@@ -783,7 +787,7 @@
                 </div>
                 <div class="mt-5 sm:mt-6 space-y-3">
                     <button type="button" id="guestGoogleLinkBtn"
-                        class="w-full flex items-center justify-center py-3 px-4 bg-coral hover:bg-coral-active text-white font-medium rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-coral/40">
+                        class="w-full flex items-center justify-center py-3 px-4 bg-coral hover:bg-coral-active text-canvas font-medium rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-coral/40">
                         <svg class="w-5 h-5 mr-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
                             <path fill="#FFC107"
                                 d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z">
@@ -844,7 +848,7 @@
         <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js" defer></script>
         <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js" defer></script>
 
-        <script type="module" src="js/app.js?v=p49"></script>
+        <script type="module" src="js/app.js?v=p50"></script>
 
         <!--
       Tailwind CSS Purge-Safe-List:

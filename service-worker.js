@@ -3,7 +3,7 @@
  * Provides offline caching for local assets only
  */
 
-const CACHE_NAME = 'abot-cache-v74'; // 2.6.4: preview always types, footer name, fresh module cache
+const CACHE_NAME = 'abot-cache-v75'; // 2.6.6: graphite & spectrum retint, spectrum seam, neutral sparkles
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -11,7 +11,7 @@ const STATIC_ASSETS = [
     '/favicon-32-light.png',
     '/favicon-32-dark.png',
     '/logo.png',
-    '/dist/output.css?v=p48',
+    '/dist/output.css?v=p50',
     '/js/app.js',
     '/js/config.js',
     '/js/dom.js',

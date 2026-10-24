@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.6.6`** (current head is `2.6.5`)
+> - **`main` → `2.6.7`** (current head is `2.6.6`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -33,6 +33,16 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.6.6 - graphite & spectrum retint, spectrum seam
+- **Date**: 2026-10-24
+- **Why**: owner asked for a palette that stops reading as Claude. The warm tokens (`#faf9f5` canvas, `#cc785c` terracotta, Source Serif 4) were Claude's almost exactly. Owner picked option **B — Graphite & spectrum**: neutral graphite chrome, and the only colour on the page comes from the four model providers.
+- **Tokens** (`src/input.css`): canvas/surface/card/raised/hairline/ink/body/muted all retinted neutral (light `#fafaf7`…`#eeede7`, dark `#131416`…`#26292d`). The historical `--c-coral*` name is kept because every button, link and focus ring reads through it, but the slot is now the accent: ink `#17181a` in light (hover `#0b0c0e`), paper `#f2f1ec` in dark (hover `#d7d6cf`), soft tint `#e9e8e2` / `#2a2d31`. Provider hues untouched.
+- **Contrast fallout** (`index.html` buttons at 400/637/750/786, spinner at 408, `js/ui.js` active prompt chip): `text-white` on a near-white dark-mode button is invisible, so those labels are `text-canvas` now — canvas flips with the theme, so the pairing works in both. Sign-out confirm (`js/app.js`) also strips the red utilities it used to leave behind (two backgrounds on one button meant the winner depended on Tailwind's emit order) and restores `text-canvas`; the delete path in `js/chat.js` restores `bg-red-600` + `text-white` symmetrically.
+- **Spectrum seam**: new `.spectrum-seam` — a 2px rule that walks Google → Groq → NVIDIA → OpenRouter — under the sidebar wordmark and, at 72px, under the auth headline (`.auth-seam`). It is the one place the provider colours appear in the chrome.
+- **Auth field** (`js/sparkles.js`): palette is now ink + the four provider hues (was coral/amber/teal + three providers). The two slow blooms are graphite (`.auth-bloom-ink` / `.auth-bloom-ash`, 5.5% and 3.2% ink), and the card glare drops to 7.5% / 9% so the neutral page doesn't haze.
+- **Links**: with the accent at ink level, an unmarked link no longer distinguishes itself — `.auth-link` carries a 35%-ink underline that goes full ink on hover/focus.
+- `CACHE_NAME` → `abot-cache-v75`, asset query `?v=p50`; `dist/output.css` rebuilt and committed.
 
 ### 2.6.5 - swipe opens history on the empty landing
 - **Date**: 2026-10-24

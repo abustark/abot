@@ -996,7 +996,12 @@ function initApp() {
         const confirmBtn = dom.deleteConfirmBtn;
         confirmBtn.textContent = "Sign Out";
         confirmBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
-        confirmBtn.classList.add('bg-coral', 'hover:bg-coral-active');
+        // 2.6.6: the accent slot is graphite now — paper-white in dark mode — so the
+        // label has to be canvas, not white. The red utilities from the delete flow
+        // are stripped as well: leaving both backgrounds on the button made the
+        // winner depend on Tailwind's emit order.
+        confirmBtn.classList.remove('bg-danger', 'hover:bg-danger/90', 'text-white');
+        confirmBtn.classList.add('bg-coral', 'hover:bg-coral-active', 'text-canvas');
         confirmBtn.dataset.action = 'signout';
         delete confirmBtn.dataset.chatId;
 
