@@ -3,7 +3,7 @@
  * Provides offline caching for local assets only
  */
 
-const CACHE_NAME = 'abot-cache-v70'; // 2.6.0: focus-revealed user pill, short-reply dedupe, free-model refresh
+const CACHE_NAME = 'abot-cache-v71'; // 2.6.1: inline message editing, dead free endpoints removed
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -11,7 +11,7 @@ const STATIC_ASSETS = [
     '/favicon-32-light.png',
     '/favicon-32-dark.png',
     '/logo.png',
-    '/dist/output.css?v=p44',
+    '/dist/output.css?v=p45',
     '/js/app.js',
     '/js/config.js',
     '/js/dom.js',

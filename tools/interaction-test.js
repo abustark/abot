@@ -708,6 +708,21 @@ function stubChain(label) {
             userContainer ? userContainer.querySelectorAll('button').length === 3 : false,
             userContainer ? userContainer.querySelectorAll('button').length + ' buttons' : 'no row');
 
+        // 2.6.1 (owner request): edit happens inline inside the bubble — no
+        // browser prompt dialog. Escape cancels and restores the original text.
+        const editBtnEl = userContainer?.querySelector('.edit-msg-btn');
+        if (editBtnEl) {
+            click(editBtnEl);
+            const editTa = userContainer.querySelector('.user-edit-input');
+            check('edit opens an inline textarea in the bubble', !!editTa && editTa.value === 'ping');
+            if (editTa) {
+                editTa.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+                check('Escape cancels the inline edit',
+                    !userContainer.querySelector('.user-edit-wrap')
+                    && userContainer.querySelector('.prose')?.textContent === 'ping');
+            }
+        }
+
         // 2.4.10 (owner request): on touch, a tap on the user bubble reveals
         // the actions; a second tap — or a tap outside — dismisses them.
         const realMatchMediaTap = window.matchMedia;

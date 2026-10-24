@@ -93,15 +93,16 @@ export const MODEL_CONFIG = {
     // dolphin-mistral-24b-venice (delisted) were REMOVED as deprecated.
     // The :free catalog rotates — re-check openrouter.ai/models quarterly.) ---
     // --- OWNER'S AUTHORITATIVE FREE LIST — re-checked against
-    // openrouter.ai/api/v1/models on 2026-10-24 (2.6.0). qwen3.8-27b:free and
-    // glm-5.2:free left the free tier and were dropped; the new roster is
-    // below. nemotron-3.5-content-safety:free is a classifier (no tools), so it
-    // is deliberately not offered as a chat model. ---
+    // openrouter.ai/api/v1/models on 2026-10-24 (2.6.0/2.6.1). qwen3.8-27b:free
+    // and glm-5.2:free left the free tier and were dropped. 2.6.1 also dropped
+    // the endpoints whose 30-minute uptime was collapsing (nemotron-3-super-120b,
+    // nemotron-3-nano-omni, liquid-lfm-2.5) — free traffic is queued last, so a
+    // model with a live id but a dead endpoint only produces errors.
+    // nemotron-3.5-content-safety:free is a classifier (no tools), so it is
+    // deliberately not offered as a chat model. ---
     'nvidia/nemotron-3-ultra-550b-a55b:free': { name: 'Nemotron 3 Ultra', color: 'openrouter-free' },
-    'nvidia/nemotron-3-super-120b-a12b:free': { name: 'Nemotron 3 Super', color: 'openrouter-free' },
     'nvidia/nemotron-3.5-lightning:free': { name: 'Nemotron 3.5 Lightning', color: 'openrouter-free' },
     'nvidia/nemotron-3.5-super-vl:free': { name: 'Nemotron 3.5 Super VL', color: 'openrouter-free' },
-    'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free': { name: 'Nemotron 3 Nano Omni', color: 'openrouter-free' },
     'poolside/laguna-s-2.1:free': { name: 'Poolside Laguna S 2.1', color: 'openrouter-free' },
     'poolside/laguna-xs-2.1:free': { name: 'Poolside Laguna XS 2.1', color: 'openrouter-free' },
     'google/gemma-4-26b-a4b-it:free': { name: 'Gemma 4 26B A4B', color: 'openrouter-free' }, // MoE variant
@@ -111,7 +112,6 @@ export const MODEL_CONFIG = {
     'recursive/flint-v1.0:free': { name: 'Recursive Flint', color: 'openrouter-free' },
     'xingchen-agi/xing4.0-29b-a4b:free': { name: 'XingChen Xing 4.0', color: 'openrouter-free' },
     'dots-studio/dots-3-note-preview:free': { name: 'Dots3 Note Preview', color: 'openrouter-free' },
-    'liquid/lfm-2.5-2.6b:free': { name: 'Liquid LFM 2.5', color: 'openrouter-free' },
     'cohere/north-mini-code:free': { name: 'Cohere North Mini Code', color: 'openrouter-free' },
     'openrouter/free': { name: 'OpenRouter Auto (Free)', color: 'openrouter-free' }, // auto-routes to the best available free model
 };

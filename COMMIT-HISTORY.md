@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.6.1`** (current head is `2.6.0`)
+> - **`main` → `2.6.2`** (current head is `2.6.1`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -24,9 +24,24 @@ This document tracks every commit made on `main` following the versioning schema
 > instead of rolling to `2.1.0`. That drift is now corrected: the roll-over rule above is enforced from
 > **`2.1.0`** onward, and the `📌 Next version` line must be updated with each commit.
 
+> **🧾 Version correction (2026-10-24, owner-directed rewrite):** the two commits after `2.5.12` were again
+> written past the roll-over point (`2.5.13`, `2.5.14`). They were **rewritten and force-pushed** at the
+> owner's explicit request: old `ca72e00` (`2.5.13`) → **`2.6.0`**, old `222bc8b` (`2.5.14`) → **`2.6.1`**.
+> `2.5.11` and `2.5.12` keep their original labels as history. The pre-rewrite tip is preserved as tag
+> `backup/pre-2.6.0`. Next version is `2.6.2`.
+
 ---
 
 ## Commit History
+
+### 2.6.1 - inline message editing, dead OpenRouter free endpoints removed
+- **Date**: 2026-10-24
+- **Why**: owner report — (a) tapping the user-message edit icon opened a detached browser `prompt()` dialog instead of editing inside the bubble like mainstream chat apps; (b) several newly added OpenRouter `:free` models returned different errors.
+- **(a) Inline edit** (`js/chat.js`): `prompt()` is gone. The bubble swaps its `.prose` for a textarea in place, with **Save / Cancel** buttons. `Enter` saves, `Shift+Enter` adds a line, `Escape` cancels; the textarea auto-grows and the bubble width is frozen during editing so nothing jumps. Saving replaces the text in the bubble directly (no `renderActiveChat()`, so the scroll position is preserved); a failed Firestore write restores the old text in place. Taps inside the editor/pill no longer toggle the action pill.
+- **(b) Free-model audit** (`js/config.js`): every `:free` id in the registry was re-checked against `openrouter.ai/api/v1/models` **and** each endpoint's 30-minute uptime. Removed `nvidia/nemotron-3-super-120b-a12b:free` (0% uptime), `nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free` (0%) and `liquid/lfm-2.5-2.6b:free` (27%) — live ids with dead endpoints, which is exactly the "different errors" the owner saw. The remaining 13 free models all report 100% uptime; `nemotron-3.5-super-vl:free` stays at 90%.
+- **Not changed**: Groq (owner directive), and the free-tier caps are account-side (50 free requests/day without credits, 20/min; `404 data policy` when Privacy → training toggles are off) — not a model-name problem.
+- Tests: `tools/interaction-test.js` now opens the inline editor and cancels it with Escape.
+- Cache: `?v=p45`, `abot-cache-v71`.
 
 ### 2.6.0 - user pill reveals on focus, short replies get one action row, free-model roster refreshed
 - **Date**: 2026-10-24

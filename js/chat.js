@@ -317,28 +317,94 @@ export function initMessageActions() {
 // --- Message Action Helpers ---
 // v1.0.6 (owner request): per-message deletion was removed from the UI. Only
 // the copy + edit helpers remain for user rows; AI rows keep copy/speak.
-window.editMessage = (chatId, msgIndex) => {
+// 2.6.1 (owner request): edit happens INLINE inside the user bubble — the old
+// window.prompt() spawned a detached browser dialog, unlike every mainstream
+// chat app. The bubble becomes a textarea; Enter saves, Shift+Enter breaks the
+// line, Escape cancels. The saved text replaces the bubble in place, so the
+// scroll position never jumps.
+const finishInlineEdit = (container, bubble, text) => {
+    const editor = container?.querySelector('.user-edit-wrap');
+    if (!editor) return;
+    const prose = document.createElement('div');
+    prose.className = 'prose dark:prose-invert max-w-none whitespace-pre-wrap';
+    prose.textContent = text;
+    editor.replaceWith(prose);
+    if (bubble) bubble.style.width = '';
+    container.classList.remove('actions-open');
+};
+
+const startInlineEdit = (chatId, msgIndex, container) => {
     const chat = state.chats[chatId];
-    const msg = chat?.messages[msgIndex];
-    if (!msg) return;
+    const msg = chat?.messages?.[msgIndex];
+    const bubble = container?.querySelector('.user-bubble');
+    const prose = bubble?.querySelector('.prose');
+    if (!msg || !bubble || !prose || container.querySelector('.user-edit-wrap')) return;
 
-    // Simple prompt for now
-    const newContent = prompt("Edit your message:", msg.content);
-    if (newContent !== null && newContent.trim() !== "" && newContent !== msg.content) {
+    const original = msg.content;
+    const pill = container.querySelector('.user-actions-pill');
+    // Freeze the bubble width while editing — an empty textarea would otherwise
+    // collapse the bubble and make the row jump.
+    const width = bubble.getBoundingClientRect().width;
+    if (width > 0) bubble.style.width = `${Math.ceil(width)}px`;
+    pill?.classList.add('hidden');
+
+    const wrap = document.createElement('div');
+    wrap.className = 'user-edit-wrap w-full';
+    wrap.innerHTML = `
+        <textarea class="user-edit-input w-full bg-transparent border-0 p-0 outline-none resize-none text-[15px] leading-relaxed text-ink" rows="1" aria-label="Edit your message"></textarea>
+        <div class="flex items-center justify-end gap-2 mt-2">
+            <button type="button" class="user-edit-cancel text-xs font-medium px-2.5 py-1 rounded-btn text-muted hover:text-ink transition-colors">Cancel</button>
+            <button type="button" class="user-edit-save text-xs font-semibold px-3 py-1 rounded-btn bg-ink text-canvas hover:opacity-90 transition-opacity">Save</button>
+        </div>`;
+    const ta = wrap.querySelector('.user-edit-input');
+    ta.value = original;
+    prose.replaceWith(wrap);
+
+    const grow = () => {
+        ta.style.height = 'auto';
+        ta.style.height = `${ta.scrollHeight}px`;
+    };
+    grow();
+    ta.focus({ preventScroll: true });
+    ta.setSelectionRange(ta.value.length, ta.value.length);
+
+    const restorePill = () => pill?.classList.remove('hidden');
+    const cancel = () => { restorePill(); finishInlineEdit(container, bubble, original); };
+    const save = () => {
+        const value = ta.value.trim();
+        if (!value) {
+            showToast('Message cannot be empty.', 'info');
+            ta.focus();
+            return;
+        }
+        if (value === original) { cancel(); return; }
         const oldContent = msg.content;
-        msg.content = newContent;
-        // Optimistic update
-        if (state.activeChatId === chatId) renderActiveChat();
-
+        msg.content = value;
+        restorePill();
+        finishInlineEdit(container, bubble, value);
         state.db.collection('users').doc(state.auth.currentUser.uid).collection('chats').doc(chatId).update({ messages: chat.messages })
             .then(() => showToast("Message edited"))
             .catch(err => {
                 console.error(err);
-                msg.content = oldContent; // Revert
-                if (state.activeChatId === chatId) renderActiveChat();
+                msg.content = oldContent; // Revert in place, no re-render jump
+                const proseNow = bubble.querySelector('.prose');
+                if (proseNow) proseNow.textContent = oldContent;
                 showToast("Failed to edit", "error");
             });
-    }
+    };
+
+    ta.addEventListener('input', grow);
+    ta.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); save(); }
+        else if (e.key === 'Escape') { e.preventDefault(); cancel(); }
+    });
+    wrap.querySelector('.user-edit-save').addEventListener('click', save);
+    wrap.querySelector('.user-edit-cancel').addEventListener('click', cancel);
+};
+
+window.editMessage = (chatId, msgIndex, container) => {
+    if (!container) return;
+    startInlineEdit(chatId, msgIndex, container);
 };
 }
 
@@ -499,7 +565,7 @@ const wireMessageActions = (container, msgIndex) => {
     container.querySelectorAll('.edit-msg-btn').forEach((btn) => {
         if (btn.dataset.wired) return;
         btn.dataset.wired = '1';
-        btn.addEventListener('click', (e) => { e.stopPropagation(); window.editMessage(state.activeChatId, msgIndex); });
+        btn.addEventListener('click', (e) => { e.stopPropagation(); window.editMessage(state.activeChatId, msgIndex, container); });
     });
     container.querySelectorAll('.retry-btn').forEach((btn) => {
         if (btn.dataset.wired) return;
@@ -658,7 +724,10 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
     if (isUser) {
         const rowEl = messageEl.querySelector('.message-container');
         const bubbleEl = messageEl.querySelector('.user-bubble');
-        bubbleEl?.addEventListener('click', () => {
+        bubbleEl?.addEventListener('click', (e) => {
+            // Taps on the pill or inside the inline editor must not toggle the
+            // pill (the editor's Save/Cancel would otherwise reopen it).
+            if (e.target.closest?.('.user-edit-wrap, .user-actions-pill')) return;
             const willOpen = !rowEl.classList.contains('actions-open');
             document.querySelectorAll('.message-container.actions-open').forEach((m) => {
                 if (m === rowEl) return;
