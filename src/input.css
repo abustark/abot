@@ -84,6 +84,7 @@
     --c-teal: 93 184 166;      /* #5db8a6 */
     --c-amber: 232 165 90;     /* #e8a55a */
     --c-code-bg: 31 30 27;     /* #1f1e1b — code blocks stay dark in both themes */
+    --c-shadow: 20 20 19;      /* 2.6.2: cast-shadow ink (flips to true black on dark) */
 
     /* Provider identity accents (skills audit: was raw Tailwind palette
        sky-500/purple-500/emerald-500/yellow-400 — now token-owned so the
@@ -122,6 +123,7 @@
     --c-provider-groq: 190 150 235;
     --c-provider-nvidia: 118 196 152;
     --c-provider-openrouter: 232 176 92;
+    --c-shadow: 0 0 0;         /* 2.6.2: dark shadows are true black, not ink */
     color-scheme: dark;
   }
 
@@ -220,11 +222,17 @@
    Kept OUTSIDE @layer so Tailwind never purges them. Retuned to tokens.
 --------------------------------------------------------------------------- */
 
-/* Signature moment (v1.0.7 → 2.4.1): the auth backdrop is a twinkling
-   sparkle field — a vanilla-canvas port of the 21st.dev / Aceternity
-   "Sparkles" look (tiny light-dots fading in and out in place), which
-   replaced the v1.0.7 CSS aurora (blooms + hairline grid) at the owner's
-   request. The canvas paints from the theme tokens (see js/sparkles.js) and
+/* ---------------------------------------------------------------------------
+   2.6.2 — Auth page ("editorial stage", owner request).
+   Layering: a warm scene (sparkles + two slow colour blooms + a grain tile),
+   an editorial column that says what ABot is and shows a self-playing thread,
+   and ONE card on the right. Everything is token-driven; no hex values.
+--------------------------------------------------------------------------- */
+
+/* Signature moment (v1.0.7 → 2.4.1): twinkling sparkle field — vanilla-canvas
+   port of the 21st.dev / Aceternity "Sparkles" look (tiny light-dots fading in
+   and out in place). 2.6.2 adds two very slow colour fields and a grain tile
+   underneath it. The canvas paints from the theme tokens (js/sparkles.js) and
    pauses only while the auth section is hidden. The scene stays inert:
    pointer-events:none. */
 .auth-scene {
@@ -243,13 +251,456 @@
     display: block;
 }
 
+/* Two huge radial fields. A radial gradient needs no blur filter, so the
+   drift below stays a pure compositor transform on a cached paint. */
+.auth-bloom {
+    position: absolute;
+    width: 78vmax;
+    height: 78vmax;
+    border-radius: 50%;
+    pointer-events: none;
+}
+.auth-bloom-coral {
+    top: -34vmax;
+    right: -22vmax;
+    background: radial-gradient(closest-side, rgb(var(--c-coral) / 0.16), transparent 72%);
+    animation: auth-bloom-drift 52s var(--ease-in-out) infinite alternate;
+}
+.auth-bloom-amber {
+    bottom: -38vmax;
+    left: -26vmax;
+    background: radial-gradient(closest-side, rgb(var(--c-amber) / 0.13), transparent 72%);
+    animation: auth-bloom-drift 68s var(--ease-in-out) infinite alternate-reverse;
+}
+@keyframes auth-bloom-drift {
+    from { transform: translate3d(0, 0, 0) scale(1); }
+    to   { transform: translate3d(-5%, 6%, 0) scale(1.09); }
+}
+
+/* Paper grain: one cached SVG tile at ~3%, so the large gradients never band. */
+.auth-grain {
+    position: absolute;
+    inset: 0;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 160px 160px;
+    mix-blend-mode: multiply;
+}
+.dark .auth-grain {
+    opacity: 0.06;
+    mix-blend-mode: screen;
+}
+
 /* Vignette: settles the edges and keeps the card's immediate surroundings calm
    so the headline contrast stays honest at every viewport size. */
 .auth-scene::after {
     content: '';
     position: absolute;
     inset: 0;
-    background: radial-gradient(125% 95% at 50% 40%, transparent 42%, rgb(var(--c-canvas) / 0.8) 100%);
+    background: radial-gradient(125% 95% at 50% 45%, transparent 44%, rgb(var(--c-canvas) / 0.72) 100%);
+}
+
+/* --- Composition ---------------------------------------------------------- */
+
+.auth-shell {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+        "copy"
+        "card"
+        "proof";
+    row-gap: 2rem;
+    align-items: start;
+}
+.auth-copy  { grid-area: copy; }
+.auth-proof { grid-area: proof; }
+.auth-card-wrap { grid-area: card; }
+
+@media (min-width: 1024px) {
+    .auth-shell {
+        grid-template-columns: minmax(0, 1.04fr) minmax(0, 0.96fr);
+        grid-template-areas:
+            "copy  card"
+            "proof card";
+        column-gap: 4.5rem;
+        row-gap: 1.75rem;
+        align-items: center;
+    }
+    .auth-card-wrap { align-self: center; }
+}
+
+/* Entrance: one-shot, runs while the splash teardown paints — CSS animation,
+   so it stays on the compositor under load. `backwards` (not `both`) means the
+   element owns its final state once the animation ends. */
+.auth-rise {
+    animation: auth-rise 520ms var(--ease-out) backwards;
+}
+.auth-d1 { animation-delay: 40ms; }
+.auth-d2 { animation-delay: 110ms; }
+.auth-d3 { animation-delay: 190ms; }
+.auth-d4 { animation-delay: 270ms; }
+.auth-d5 { animation-delay: 350ms; }
+@keyframes auth-rise {
+    from { opacity: 0; transform: translate3d(0, 14px, 0); }
+    to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+/* --- The card ------------------------------------------------------------- */
+
+.auth-card {
+    position: relative;
+    padding: 1.75rem;
+    background: rgb(var(--c-raised));
+    border: 1px solid rgb(var(--c-hairline));
+    border-radius: 1.5rem;
+    /* one surface: the inset hairline highlight replaces the old bezel box */
+    box-shadow:
+        0 1px 0 0 rgb(255 255 255 / 0.65) inset,
+        0 32px 70px -34px rgb(var(--c-shadow) / 0.55),
+        0 10px 24px -18px rgb(var(--c-shadow) / 0.28);
+    transition: transform 220ms var(--ease-out);
+    transform-style: preserve-3d;
+}
+.dark .auth-card {
+    box-shadow:
+        0 1px 0 0 rgb(255 255 255 / 0.05) inset,
+        0 34px 80px -36px rgb(var(--c-shadow) / 0.85),
+        0 10px 24px -18px rgb(var(--c-shadow) / 0.6);
+}
+@media (min-width: 640px) {
+    .auth-card { padding: 2rem; }
+}
+
+/* Pointer glare: a coral light that follows the cursor across the card. The
+   circle is 620px of pre-painted radial gradient, moved by transform only. */
+.auth-glare {
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    overflow: hidden;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 320ms var(--ease-out);
+}
+.auth-glare span {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 620px;
+    height: 620px;
+    margin: -310px 0 0 -310px;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgb(var(--c-coral) / 0.10), transparent 70%);
+    transform: translate3d(50%, 25%, 0);
+    transition: transform 180ms var(--ease-out);
+}
+.dark .auth-glare span {
+    background: radial-gradient(closest-side, rgb(var(--c-coral) / 0.14), transparent 70%);
+}
+@media (hover: hover) and (pointer: fine) {
+    .auth-card-wrap:hover .auth-glare { opacity: 1; }
+}
+
+.auth-card-head {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    margin-bottom: 1.5rem;
+}
+
+/* --- Form atoms ----------------------------------------------------------- */
+
+.auth-label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    color: rgb(var(--c-body));
+}
+
+.auth-input {
+    width: 100%;
+    min-height: 46px;
+    padding: 11px 14px;
+    border-radius: 12px;
+    border: 1px solid rgb(var(--c-hairline));
+    background: rgb(var(--c-canvas));
+    color: rgb(var(--c-ink));
+    font-size: 14px;
+    transition:
+        border-color 160ms var(--ease-out),
+        box-shadow 160ms var(--ease-out),
+        background-color 160ms var(--ease-out);
+}
+.auth-input::placeholder { color: rgb(var(--c-muted) / 0.78); }
+.auth-input:focus {
+    outline: none;
+    border-color: rgb(var(--c-coral) / 0.55);
+    background: rgb(var(--c-raised));
+    box-shadow: 0 0 0 3px rgb(var(--c-coral) / 0.14);
+}
+.auth-input.input-error:focus {
+    box-shadow: 0 0 0 3px rgb(var(--c-danger) / 0.16);
+}
+.auth-input.input-success:focus {
+    box-shadow: 0 0 0 3px rgb(var(--c-ok) / 0.16);
+}
+
+.auth-primary {
+    width: 100%;
+    min-height: 46px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 1.25rem;
+    border-radius: 12px;
+    background: rgb(var(--c-coral));
+    color: rgb(var(--c-canvas));
+    font-size: 14px;
+    font-weight: 600;
+    transition: background-color 160ms var(--ease-out), transform 120ms var(--ease-out);
+}
+.auth-primary:hover { background: rgb(var(--c-coral-active)); }
+.auth-primary:active { transform: scale(0.985); }
+.auth-primary:focus-visible {
+    outline: 2px solid rgb(var(--c-coral) / 0.6);
+    outline-offset: 2px;
+}
+
+.auth-secondary {
+    width: 100%;
+    min-height: 46px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 0 1rem;
+    border-radius: 12px;
+    border: 1px solid rgb(var(--c-hairline));
+    background: rgb(var(--c-canvas));
+    color: rgb(var(--c-ink));
+    font-size: 14px;
+    font-weight: 500;
+    transition:
+        background-color 160ms var(--ease-out),
+        border-color 160ms var(--ease-out),
+        transform 120ms var(--ease-out);
+}
+.auth-secondary:hover {
+    background: rgb(var(--c-card));
+    border-color: rgb(var(--c-coral) / 0.35);
+}
+.auth-secondary:active { transform: scale(0.99); }
+.auth-secondary:focus-visible {
+    outline: 2px solid rgb(var(--c-coral) / 0.6);
+    outline-offset: 2px;
+}
+
+.auth-ghost {
+    width: 100%;
+    min-height: 44px;
+    border-radius: 12px;
+    background: transparent;
+    color: rgb(var(--c-muted));
+    font-size: 13px;
+    font-weight: 500;
+    transition: color 160ms var(--ease-out), background-color 160ms var(--ease-out);
+}
+.auth-ghost:hover {
+    color: rgb(var(--c-ink));
+    background: rgb(var(--c-card) / 0.7);
+}
+.auth-ghost:focus-visible {
+    outline: 2px solid rgb(var(--c-coral) / 0.6);
+    outline-offset: 2px;
+}
+
+.auth-eye {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 12px;
+    color: rgb(var(--c-muted));
+    transition: color 150ms var(--ease-out);
+}
+.auth-eye:hover { color: rgb(var(--c-ink)); }
+.auth-eye:focus-visible {
+    outline: 2px solid rgb(var(--c-coral) / 0.6);
+    outline-offset: 2px;
+    border-radius: 10px;
+}
+
+.auth-link {
+    color: rgb(var(--c-coral));
+    font-weight: 500;
+    border-radius: 4px;
+    transition: color 150ms var(--ease-out);
+}
+.auth-link:hover {
+    color: rgb(var(--c-coral-active));
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+.auth-link:focus-visible {
+    outline: 2px solid rgb(var(--c-coral) / 0.6);
+    outline-offset: 2px;
+}
+
+.auth-divider {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 1.25rem 0;
+}
+.auth-divider::before,
+.auth-divider::after {
+    content: '';
+    flex: 1 1 0;
+    height: 1px;
+    background: rgb(var(--c-hairline));
+}
+.auth-divider span {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgb(var(--c-muted));
+}
+
+.auth-switch {
+    margin-top: 1.25rem;
+    text-align: center;
+    font-size: 13px;
+    color: rgb(var(--c-muted));
+}
+
+.auth-card-foot {
+    margin-top: 1.25rem;
+    padding-top: 0.85rem;
+    border-top: 1px solid rgb(var(--c-hairline) / 0.8);
+}
+
+/* --- The proof: a silent, self-playing thread ----------------------------- */
+
+.auth-proof { margin-top: 0; }
+
+.auth-preview {
+    max-width: 30rem;
+}
+.auth-preview-head {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgb(var(--c-muted));
+}
+.auth-preview-live {
+    width: 6px;
+    height: 6px;
+    border-radius: 9999px;
+    background: rgb(var(--c-ok));
+    box-shadow: 0 0 0 3px rgb(var(--c-ok) / 0.16);
+    animation: auth-preview-pulse 2.6s var(--ease-in-out) infinite;
+}
+@keyframes auth-preview-pulse {
+    0%, 100% { opacity: 0.55; }
+    50%      { opacity: 1; }
+}
+
+.auth-preview-body {
+    margin-top: 0.85rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+.auth-preview-user { display: flex; justify-content: flex-end; }
+.auth-preview-bubble {
+    max-width: 88%;
+    padding: 0.55rem 0.85rem;
+    border-radius: 14px 14px 4px 14px;
+    background: rgb(var(--c-coral-soft));
+    color: rgb(var(--c-ink));
+    font-size: 13px;
+    line-height: 1.45;
+}
+.auth-preview-replies {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+.auth-preview-reply {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.55rem;
+    opacity: 0;
+    transform: translate3d(0, 6px, 0);
+    transition: opacity 260ms var(--ease-out), transform 260ms var(--ease-out);
+}
+.auth-preview-reply.is-in {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+}
+.auth-preview-dot {
+    flex: none;
+    width: 6px;
+    height: 6px;
+    margin-top: 0.45rem;
+    border-radius: 9999px;
+}
+.auth-preview-reply-text {
+    /* Two reserved lines: typing can never reflow the page under the pointer. */
+    min-height: 3em;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: rgb(var(--c-body));
+}
+.auth-preview-reply-text .who {
+    font-weight: 600;
+    color: rgb(var(--c-ink));
+}
+
+.auth-stats {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    font-size: 12px;
+    color: rgb(var(--c-muted));
+}
+.auth-stats strong {
+    font-size: 14px;
+    font-weight: 600;
+    color: rgb(var(--c-ink));
+}
+.auth-stats-sep {
+    width: 1px;
+    height: 13px;
+    background: rgb(var(--c-hairline));
+}
+
+.auth-footer {
+    position: relative;
+    z-index: 1;
+    margin-top: 2.25rem;
+    text-align: center;
+}
+
+/* Fewer and gentler, not zero: the layout lands instantly, colour/opacity
+   transitions that aid comprehension stay. */
+@media (prefers-reduced-motion: reduce) {
+    .auth-rise { animation: none; }
+    .auth-bloom,
+    .auth-preview-live { animation: none; }
+    .auth-card { transition: none; }
+    .auth-glare { display: none; }
+    .auth-preview-reply { transition: none; }
 }
 
 /* 2.4.3 (owner request): dot-matrix loader under the wordmark — a vanilla

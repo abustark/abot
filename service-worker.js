@@ -3,7 +3,7 @@
  * Provides offline caching for local assets only
  */
 
-const CACHE_NAME = 'abot-cache-v71'; // 2.6.1: inline message editing, dead free endpoints removed
+const CACHE_NAME = 'abot-cache-v72'; // 2.6.2: editorial auth page, live thread preview, card tilt
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -11,7 +11,7 @@ const STATIC_ASSETS = [
     '/favicon-32-light.png',
     '/favicon-32-dark.png',
     '/logo.png',
-    '/dist/output.css?v=p45',
+    '/dist/output.css?v=p46',
     '/js/app.js',
     '/js/config.js',
     '/js/dom.js',
@@ -22,6 +22,7 @@ const STATIC_ASSETS = [
     '/js/auth.js',
     '/js/chat.js',
     '/js/sparkles.js',
+    '/js/auth-preview.js',
     '/js/dotloader.js',
     '/vendor/marked.min.js',
     // A1/A2 (v1.0.5): atom-one-dark.css is injected with the lazy highlight.js

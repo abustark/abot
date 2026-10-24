@@ -24,7 +24,7 @@
     <meta name="theme-color" content="#181715">
     <link rel="preload" href="/dist/fonts/plus-jakarta-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/dist/fonts/source-serif-4-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link href="./dist/output.css?v=p45" rel="stylesheet">
+    <link href="./dist/output.css?v=p46" rel="stylesheet">
     <script src="/vendor/marked.min.js" defer></script>
     <!-- A1 (v1.0.5): highlight.js + its theme are lazy-loaded on the first code
          block (js/chat.js) — they were head-linked here, costing every visitor
@@ -171,155 +171,197 @@
     </div>
 
     <!-- This is the content, stacked on top of the backdrop. -->
-    <section id="auth-section" class="relative z-10 flex items-center justify-center w-full min-h-screen p-4 overflow-hidden"
+    <section id="auth-section" class="relative z-10 flex flex-col items-center justify-center w-full min-h-screen p-4 sm:p-6 overflow-hidden"
         style="display: none;">
-        <!-- 2.4.1 (owner request): twinkling sparkle field (vanilla canvas,
-             reference: 21st.dev / Aceternity "Sparkles") replaces the v1.0.7
-             blooms + grid. Inert: pointer-events:none all the way down. -->
+        <!-- 2.4.1: twinkling sparkle field. 2.6.2: two very slow colour blooms
+             and a cached SVG grain tile give the field depth — radial gradients
+             and one noise image, no blur filter on a live element. Inert:
+             pointer-events:none all the way down. -->
         <div id="auth-scene" class="auth-scene" aria-hidden="true">
+            <div class="auth-bloom auth-bloom-coral"></div>
+            <div class="auth-bloom auth-bloom-amber"></div>
             <canvas id="auth-sparkles" class="auth-sparkles"></canvas>
+            <div class="auth-grain"></div>
         </div>
 
-        <!-- Double-bezel card (skills audit: high-end-visual-design §4A) —
-             outer shell + inner core with concentric radii -->
-        <div class="relative z-10 w-full max-w-md mx-auto p-1.5 rounded-[2rem] bg-card/60 dark:bg-white/5 border border-hairline shadow-sm">
-        <div class="bg-canvas dark:bg-card border border-hairline/70 rounded-[1.625rem] p-8">
-            <div class="flex flex-col items-center justify-center mb-8">
-                <span class="mb-5 inline-flex items-center rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.2em] font-medium bg-coral-soft text-coral">Multi-model chat</span>
-        <!-- Old AB monogram — restored per owner request -->
-        <img src="/logo.png" alt="ABot logo" class="logo-mark h-16 w-16 mb-5 select-none" draggable="false">
-                <h1 class="text-3xl font-semibold font-heading text-ink">Welcome to ABot</h1>
-                <p class="mt-2 text-muted">Sign in to pick up where you left off</p>
-                <p class="mt-4 text-[10px] text-muted/70 select-all" id="build-badge"></p>
+        <div class="auth-shell w-full max-w-6xl">
+            <!-- LEFT — the editorial voice: what ABot is, in one line. -->
+            <div class="auth-copy">
+                <span class="auth-rise auth-d1 inline-flex items-center rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.2em] font-medium bg-coral-soft text-coral">Multi-model chat</span>
+                <h1 class="auth-rise auth-d2 font-display text-[2.55rem] leading-[1.04] tracking-[-0.02em] text-ink sm:text-[3.4rem] lg:text-[3.85rem] mt-6">
+                    Many models.<br>One conversation.
+                </h1>
+                <p class="auth-rise auth-d3 mt-5 max-w-[37ch] text-[15px] leading-relaxed text-body/85">
+                    Gemini, Groq, NVIDIA and OpenRouter in a single composer. Switch model mid-thread — the conversation stays exactly where it was.
+                </p>
             </div>
 
-            <div class="space-y-4">
-                <button type="button" id="google-signin-btn"
-                    class="w-full flex items-center justify-center py-3 px-4 bg-canvas dark:bg-card border border-hairline rounded-lg shadow-sm hover:bg-card transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-coral/40">
-                    <svg class="w-5 h-5 mr-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
-                        <path fill="#FFC107"
-                            d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z">
-                        </path>
-                        <path fill="#FF3D00"
-                            d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z">
-                        </path>
-                        <path fill="#4CAF50"
-                            d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.219,0-9.559-3.397-11.28-7.962l-6.522,5.025C9.505,39.556,16.227,44,24,44z">
-                        </path>
-                        <path fill="#1976D2"
-                            d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.574l6.19,5.238C39.99,35.59,44,29.89,44,24C44,22.659,43.862,21.35,43.611,20.083z">
-                        </path>
-                    </svg>
-                    <span class="font-medium text-body">Sign in with Google</span>
-                </button>
-                <div class="flex items-center my-6">
-                    <div class="flex-grow h-px bg-hairline"></div>
-                    <span class="px-4 text-sm text-muted">or</span>
-                    <div class="flex-grow h-px bg-hairline"></div>
+            <!-- THE PROOF — a silent, self-playing thread. The model names are
+                 read from MODEL_CONFIG in js/auth-preview.js, so this preview
+                 can never advertise a model the app does not actually have. -->
+            <div class="auth-proof">
+                <div class="auth-rise auth-d4 auth-preview" id="auth-preview" aria-hidden="true">
+                    <div class="auth-preview-head">
+                        <span class="auth-preview-live"></span>
+                        <span>One prompt · three models</span>
+                    </div>
+                    <div class="auth-preview-body">
+                        <div class="auth-preview-user">
+                            <span class="auth-preview-bubble">Why did the login button stop working on iOS?</span>
+                        </div>
+                        <div class="auth-preview-replies" id="auth-preview-replies"></div>
+                    </div>
                 </div>
-                <div class="bg-canvas dark:bg-card p-6 rounded-lg border border-hairline">
+
+                <div class="auth-rise auth-d5 auth-stats">
+                    <span><strong id="auth-stat-models">30</strong> models</span>
+                    <span class="auth-stats-sep"></span>
+                    <span><strong id="auth-stat-providers">4</strong> providers</span>
+                    <span class="auth-stats-sep"></span>
+                    <span>Free tier</span>
+                </div>
+            </div>
+
+            <!-- RIGHT — one surface, not three: the outer bezel, the inner core
+                 and the nested form panel of the 2.5.x page collapsed into a
+                 single card with a hairline and a soft lift. -->
+            <div class="auth-rise auth-d3 auth-card-wrap">
+                <div class="auth-card" id="auth-card">
+                    <div class="auth-glare" aria-hidden="true"><span></span></div>
+
+                    <div class="auth-card-head">
+                        <img src="/logo.png" alt="ABot logo" class="logo-mark h-10 w-10 select-none" draggable="false">
+                        <div>
+                            <h2 id="auth-card-title" class="font-display text-[1.6rem] leading-tight text-ink">Sign in</h2>
+                            <p id="auth-card-sub" class="mt-1 text-[13px] text-muted">Pick up where you left off.</p>
+                        </div>
+                    </div>
+
+                    <button type="button" id="google-signin-btn" class="auth-secondary">
+                        <svg class="w-[18px] h-[18px]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" aria-hidden="true">
+                            <path fill="#FFC107"
+                                d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z">
+                            </path>
+                            <path fill="#FF3D00"
+                                d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z">
+                            </path>
+                            <path fill="#4CAF50"
+                                d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.219,0-9.559-3.397-11.28-7.962l-6.522,5.025C9.505,39.556,16.227,44,24,44z">
+                            </path>
+                            <path fill="#1976D2"
+                                d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.574l6.19,5.238C39.99,35.59,44,29.89,44,24C44,22.659,43.862,21.35,43.611,20.083z">
+                            </path>
+                        </svg>
+                        <span>Continue with Google</span>
+                    </button>
+
+                    <div class="auth-divider"><span>or use email</span></div>
+
                     <div id="login-view">
                         <form id="login-form" class="space-y-4">
-                            <input type="email" id="login-email" autocomplete="email" placeholder="Email Address" required
-                                class="bg-canvas dark:bg-card border border-hairline text-body placeholder:text-muted text-sm rounded-lg focus:ring-coral/40 focus:border-coral block w-full p-3">
                             <div>
-                                <div class="relative">
-                                    <input type="password" id="login-password" autocomplete="current-password" placeholder="Password" required
-                                        class="bg-canvas dark:bg-card border border-hairline text-body placeholder:text-muted text-sm rounded-lg focus:ring-coral/40 focus:border-coral block w-full p-3 pr-11">
+                                <label class="auth-label" for="login-email">Email</label>
+                                <input type="email" id="login-email" autocomplete="email" placeholder="you@example.com" required
+                                    class="auth-input">
+                            </div>
+                            <div>
+                                <div class="flex items-baseline justify-between gap-3">
+                                    <label class="auth-label mb-0" for="login-password">Password</label>
+                                    <a href="#" id="show-forgot-password" class="auth-link text-[12px]">Forgot password?</a>
+                                </div>
+                                <div class="relative mt-2">
+                                    <input type="password" id="login-password" autocomplete="current-password" placeholder="Your password" required
+                                        class="auth-input pr-11">
                                     <button type="button" data-toggle-password="login-password"
-                                        class="absolute inset-y-0 right-0 pr-3 flex items-center text-muted hover:text-ink transition-colors"
+                                        class="auth-eye"
                                         aria-label="Show password">
                                         <svg class="w-5 h-5 eye-open" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                                         <svg class="w-5 h-5 eye-off hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" /></svg>
                                     </button>
                                 </div>
-                                <div class="text-right mt-2">
-                                    <a href="#" id="show-forgot-password"
-                                        class="text-xs text-coral hover:underline">Forgot
-                                        Password?</a>
-                                </div>
                             </div>
-                            <button type="submit"
-                                class="w-full text-white bg-coral hover:bg-coral-active focus:ring-4 focus:ring-coral/30 font-medium rounded-lg text-sm px-5 py-3 text-center transition-colors duration-fast ease-out active:scale-[0.98]">Login</button>
+                            <button type="submit" class="auth-primary">Login</button>
                         </form>
-                        <p class="text-sm text-center mt-5"><a href="#" id="show-signup"
-                                class="font-semibold text-coral hover:underline">Don't have an
-                                account? Sign Up</a></p>
+                        <p class="auth-switch">New here? <a href="#" id="show-signup"
+                                class="auth-link font-semibold">Create an account</a></p>
                     </div>
+
                     <div id="signup-view" style="display: none;">
                         <form id="signup-form" class="space-y-4">
-                            <input type="email" id="signup-email" autocomplete="email" placeholder="Email Address" required
-                                class="bg-canvas dark:bg-card border border-hairline text-body placeholder:text-muted text-sm rounded-lg focus:ring-coral/40 focus:border-coral block w-full p-3">
-                            <div class="relative">
-                                <input type="password" id="signup-password" autocomplete="new-password" placeholder="Password (min. 6 characters)"
-                                    required
-                                    class="bg-canvas dark:bg-card border border-hairline text-body placeholder:text-muted text-sm rounded-lg focus:ring-coral/40 focus:border-coral block w-full p-3 pr-11">
-                                <button type="button" data-toggle-password="signup-password"
-                                    class="absolute inset-y-0 right-0 pr-3 flex items-center text-muted hover:text-ink transition-colors"
-                                    aria-label="Show password">
-                                    <svg class="w-5 h-5 eye-open" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                                    <svg class="w-5 h-5 eye-off hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" /></svg>
-                                </button>
+                            <div>
+                                <label class="auth-label" for="signup-email">Email</label>
+                                <input type="email" id="signup-email" autocomplete="email" placeholder="you@example.com" required
+                                    class="auth-input">
                             </div>
-                            <button type="submit"
-                                class="w-full text-white bg-coral hover:bg-coral-active focus:ring-4 focus:ring-coral/30 font-medium rounded-lg text-sm px-5 py-3 text-center transition-colors duration-fast ease-out active:scale-[0.98]">Sign
-                                Up</button>
+                            <div>
+                                <label class="auth-label" for="signup-password">Password</label>
+                                <div class="relative">
+                                    <input type="password" id="signup-password" autocomplete="new-password" placeholder="At least 6 characters"
+                                        required
+                                        class="auth-input pr-11">
+                                    <button type="button" data-toggle-password="signup-password"
+                                        class="auth-eye"
+                                        aria-label="Show password">
+                                        <svg class="w-5 h-5 eye-open" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                        <svg class="w-5 h-5 eye-off hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" /></svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <button type="submit" class="auth-primary">Create account</button>
                         </form>
-                        <p class="text-sm text-center mt-5"><a href="#" id="show-login"
-                                class="font-semibold text-coral hover:underline">Already have
-                                an account? Login</a></p>
+                        <p class="auth-switch">Already have an account? <a href="#" id="show-login"
+                                class="auth-link font-semibold">Sign in</a></p>
                     </div>
+
                     <div id="forgot-password-view" style="display: none;">
-                        <h3 class="font-semibold text-lg mb-4 text-ink">Reset Password</h3>
-                        <p class="text-sm text-muted mb-4">Enter your email and we'll send you a
-                            link to reset your password.</p>
                         <form id="forgot-password-form" class="space-y-4">
-                            <input type="email" id="forgot-password-email" autocomplete="email" placeholder="Email Address" required
-                                class="bg-canvas dark:bg-card border border-hairline text-body placeholder:text-muted text-sm rounded-lg focus:ring-coral/40 focus:border-coral block w-full p-3">
-                            <button type="submit"
-                                class="w-full text-white bg-coral hover:bg-coral-active focus:ring-4 focus:ring-coral/30 font-medium rounded-lg text-sm px-5 py-3 text-center transition-colors duration-fast ease-out active:scale-[0.98]">Send
-                                Reset Link</button>
+                            <div>
+                                <label class="auth-label" for="forgot-password-email">Email</label>
+                                <input type="email" id="forgot-password-email" autocomplete="email" placeholder="you@example.com" required
+                                    class="auth-input">
+                            </div>
+                            <button type="submit" class="auth-primary">Send reset link</button>
                         </form>
-                        <p class="text-sm text-center mt-5"><a href="#" id="back-to-login"
-                                class="font-semibold text-coral hover:underline">Back to
-                                Login</a></p>
+                        <p class="auth-switch"><a href="#" id="back-to-login"
+                                class="auth-link font-semibold">Back to sign in</a></p>
                     </div>
+
                     <div id="verify-email-view" style="display: none;">
                         <div class="text-center">
                             <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-coral-soft text-coral mb-3">
-                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
                                 </svg>
                             </div>
-                            <h3 class="font-semibold text-lg text-ink mb-1">Verify Your Email</h3>
-                            <p class="text-sm text-muted mb-4">We sent a verification link to <strong id="verify-email-address" class="text-ink font-medium"></strong>. Please check your inbox and verify your account to continue.</p>
+                            <h3 class="font-display text-xl text-ink mb-1">Verify your email</h3>
+                            <p class="text-[13px] leading-relaxed text-muted mb-4">We sent a verification link to <strong id="verify-email-address" class="text-ink font-medium"></strong>. Verify it to continue.</p>
                         </div>
                         <div class="space-y-3">
                             <button type="button" id="check-verification-btn"
-                                class="w-full text-white bg-coral hover:bg-coral-active focus:ring-4 focus:ring-coral/30 font-medium rounded-lg text-sm px-5 py-3 text-center transition-colors duration-fast ease-out active:scale-[0.98]">I've Verified My Email</button>
-                            <button type="button" id="resend-verification-btn"
-                                class="w-full text-body bg-canvas dark:bg-card hover:bg-card border border-hairline font-medium rounded-lg text-sm px-5 py-2.5 text-center transition-colors">Resend Verification Email</button>
+                                class="auth-primary">I've verified my email</button>
+                            <button type="button" id="resend-verification-btn" class="auth-secondary">Resend verification email</button>
                         </div>
-                        <p class="text-sm text-center mt-5"><a href="#" id="verify-back-to-login"
-                                class="font-semibold text-coral hover:underline">Back to Login</a></p>
+                        <p class="auth-switch"><a href="#" id="verify-back-to-login"
+                                class="auth-link font-semibold">Back to sign in</a></p>
                     </div>
-                    <p id="error-message" class="text-center text-danger mt-4 min-h-[20px]"></p>
+
+                    <p id="error-message" class="text-center text-sm mt-4 min-h-[20px]" role="alert"></p>
+
+                    <div class="auth-card-foot">
+                        <button type="button" id="guest-signin-btn" class="auth-ghost">Continue as guest</button>
+                    </div>
                 </div>
             </div>
-            <div class="text-center mt-8">
-                <button type="button" id="guest-signin-btn"
-                    class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full border border-hairline text-sm font-medium text-body hover:text-coral hover:border-coral/50 hover:bg-coral-soft/50 focus:outline-none focus:ring-2 focus:ring-coral/40 transition-colors">Continue
-                    as Guest</button>
-            </div>
-            <footer class="text-center py-4 mt-4">
-                <p class="text-xs text-muted">
-                    &copy;
-                    <span id="footer-year">2026</span> Basith AbuSyed. All rights reserved.<br>
-                    This site is under active development. Check back occasionally for new features.
-                </p>
-            </footer>
         </div>
-        </div>
+
+        <footer class="auth-footer">
+            <p class="text-[11px] text-muted/80">
+                <span id="build-badge" class="select-all"></span>
+                <span aria-hidden="true"> · </span>
+                &copy; <span id="footer-year">2026</span> Basith AbuSyed
+            </p>
+            <p class="mt-1 text-[11px] text-muted/60">Under active development.</p>
+        </footer>
     </section>
 
     <!-- Line After -->
@@ -803,7 +845,7 @@
         <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js" defer></script>
         <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js" defer></script>
 
-        <script type="module" src="js/app.js?v=p45"></script>
+        <script type="module" src="js/app.js?v=p46"></script>
 
         <!--
       Tailwind CSS Purge-Safe-List:

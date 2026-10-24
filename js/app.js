@@ -22,6 +22,7 @@ import { renderSearchResults } from './chat.js';
 import { initFirebase, initAuth, registerInitApp } from './auth.js';
 import { initPalette } from './palette.js';
 import { initSparkles } from './sparkles.js';
+import { initAuthPreview } from './auth-preview.js'; // 2.6.2: auth page product preview + card tilt
 import { initMessageActions } from './chat.js';
 import { linkGuestToGoogle } from './auth.js';
 import { openPromptModal } from './ui.js';
@@ -1158,6 +1159,7 @@ function main() {
         ['initFirebase', initFirebase],
         ['initDomExtras', initDomExtras],
         ['initSparkles', () => initSparkles(dom.authSparkles)], // 2.4.1: auth backdrop starfield
+        ['initAuthPreview', initAuthPreview], // 2.6.2: self-playing thread + card tilt
         ['initDotLoader', () => initDotLoader(dom.loaderDots)], // 2.4.3: starting-site dot-matrix loader
         ['initMessageActions', initMessageActions], // was statements #43-44
         ['registerInitApp', () => registerInitApp(initApp)], // auth's onAuthStateChanged needs initApp

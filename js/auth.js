@@ -44,11 +44,22 @@ const setAuthMessage = (message = '', type = 'error') => {
     dom.errorMessage.classList.add(type === 'success' ? 'text-ok' : 'text-danger');
 };
 
+// 2.6.2: the redesigned auth card has ONE head shared by all four views, so the
+// title and the line under it have to follow the active view — otherwise the
+// card keeps saying "Sign in" while the signup form is on screen.
+const setCardHead = (title, subtitle) => {
+    const titleEl = document.getElementById('auth-card-title');
+    const subEl = document.getElementById('auth-card-sub');
+    if (titleEl) titleEl.textContent = title;
+    if (subEl) subEl.textContent = subtitle;
+};
+
 export const showLoginView = () => {
     dom.loginView.style.display = 'block';
     dom.signupView.style.display = 'none';
     dom.forgotPasswordView.style.display = 'none';
     if (dom.verifyEmailView) dom.verifyEmailView.style.display = 'none';
+    setCardHead('Sign in', 'Pick up where you left off.');
     setAuthMessage();
 };
 
@@ -57,6 +68,7 @@ export const showSignupView = () => {
     dom.signupView.style.display = 'block';
     dom.forgotPasswordView.style.display = 'none';
     if (dom.verifyEmailView) dom.verifyEmailView.style.display = 'none';
+    setCardHead('Create account', 'Free to try. No card needed.');
     setAuthMessage();
 };
 
@@ -65,6 +77,7 @@ export const showForgotPasswordView = () => {
     dom.signupView.style.display = 'none';
     dom.forgotPasswordView.style.display = 'block';
     if (dom.verifyEmailView) dom.verifyEmailView.style.display = 'none';
+    setCardHead('Reset password', 'We will email you a reset link.');
     setAuthMessage();
 };
 
@@ -74,6 +87,7 @@ export const showVerifyEmailView = (email = '') => {
     dom.forgotPasswordView.style.display = 'none';
     if (dom.verifyEmailView) dom.verifyEmailView.style.display = 'block';
     if (dom.verifyEmailAddress) dom.verifyEmailAddress.textContent = email;
+    setCardHead('Verify your email', 'One step left.');
     setAuthMessage();
 };
 

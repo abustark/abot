@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.6.2`** (current head is `2.6.1`)
+> - **`main` → `2.6.3`** (current head is `2.6.2`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -33,6 +33,17 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.6.2 - editorial auth page, self-playing thread, card depth
+- **Date**: 2026-10-24
+- **Why**: the auth page was a form on an empty backdrop — a recruiter landing on it saw a login box and nothing about what ABot is. Owner picked the direction: editorial calm + product truth + a little depth.
+- **Layout** (`index.html`): one stage instead of one card. Below 1024px it stacks copy → card → proof; at `lg` and up it becomes two columns (editorial left, card right, proof under the copy). The three nested surfaces of 2.5.x (bezel, core, form panel) collapsed into a single card with a hairline and a soft lift; the build badge moved from the hero to the page footer, where `auth.js` still finds `#build-badge`.
+- **Voice**: `font-display` (Source Serif 4) H1 — *Many models. One conversation.* — plus one sentence of what actually ships. No new copy claims: the model/provider counts are read from `MODEL_CONFIG`, not typed by hand.
+- **Proof** (`js/auth-preview.js`): a silent, self-playing thread. Three real models, one each from `google/`, `groq/` and `nvidia/`, pulled out of `MODEL_CONFIG` — a provider with no entry drops its row, so the preview can never advertise a model the app does not have. It types, holds, clears and loops; the loop stops dead while the auth section is hidden (`MutationObserver` on the section's `style` + `visibilitychange`), so a signed-in session costs nothing.
+- **Depth**: two very slow radial blooms (52s / 68s, `transform`-only drift), one cached SVG grain tile at ~3.5% so the large gradients do not band, and a pointer tilt (±2.2°) with a coral glare that follows the cursor. Tilt is pointer-fine only, is disabled while a field in the card has focus, and never runs under `prefers-reduced-motion`.
+- **A11y**: real `<label>` elements for every field (there were none — placeholders were doing the work), `role="alert"` on `#error-message`, 46px inputs/buttons and 44px ghost button targets, `focus-visible` rings on every new control, decorative scene + preview marked `aria-hidden`. Reduced motion kills the rise, the blooms, the pulse, the tilt and the typing; the finished thread renders statically instead.
+- **One head, four views**: the card's title/subtitle are shared by login, signup, reset and verify, so `auth.js`'s four `show*View()` helpers now retitle them (`#auth-card-title` / `#auth-card-sub`) instead of leaving "Sign in" over the signup form. The old per-view `<h3>`s in the reset and verify panes were dropped to avoid a second heading.
+- **Tokens**: new `--c-shadow` in `:root` / `.dark` for the card lift — no hex values in the new CSS. `auth-preview.js` is precached and `CACHE_NAME` bumped to `abot-cache-v72`; asset query `?v=p46`.
 
 ### 2.6.1 - inline message editing, dead OpenRouter free endpoints removed
 - **Date**: 2026-10-24
