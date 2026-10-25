@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.7.4`** (current head is `2.7.3`)
+> - **`main` → `2.7.5`** (current head is `2.7.4`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -33,6 +33,15 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.7.4 - presentation pass: screenshots, license, package metadata
+- **Date**: 2026-10-26
+- **Why**: the project is being shown to recruiters / job portals while the repo stays private. Three presentation gaps: the README's screenshot table pointed at gitignored placeholders, the license was ambiguous (`package.json` and `README` both claimed ISC, no `LICENSE` file existed), and `package.json` still carried the old project name and URLs.
+- **Screenshots** (`docs/screenshots/`): three real captures from the live site — `auth-light-desktop.webp`, `auth-dark-desktop.webp`, `auth-mobile.webp`. WebP q92 keeps them at 70 / 81 / 110 KB (the PNG originals were ~850 KB each). Captured at 1440×900 and 390×844 @2x, full page, after the rotating preview thread finished typing.
+- **README**: the screenshot table now renders the images (desktop pair side by side, mobile centred below); "20 models" corrected to **31** in both places — the app has shipped 31 for several versions and the screenshot shows it.
+- **License**: `private: true` + `"license": "UNLICENSED"` instead of adding an ISC/MIT file. The repo is private and "all rights reserved" is the accurate statement; a permissive `LICENSE` would grant rights the owner has not granted. The README's License section says the same in words.
+- **package.json**: `name` → `abot`, `version` → `2.7.4`, real description, `author`, 13 keywords, `repository` / `bugs` → `github.com/abustark/abot`, `homepage` → the live demo.
+- **No runtime assets changed** — README / package / docs only, so `CACHE_NAME` stays `abot-cache-v83` and the asset tags stay `?v=p58`.
 
 ### 2.7.3 - auth seam tucked under the lockup
 - **Date**: 2026-10-26

@@ -2,7 +2,7 @@
 
 > 📄 **[`PROJECT-INFO.md`](PROJECT-INFO.md)** — machine-readable project facts (stack + exact versions, architecture, metrics, keyword tags) designed so an AI can generate resume entries and portfolio project summaries from it alone.
 
-**One calm place to talk to 20 models from 4 providers** — Google Gemini, Groq, NVIDIA NIM, and OpenRouter's free tier — with streaming, markdown, and a warm, Claude-style design system. No framework, no build step for the app itself: vanilla ES modules all the way down.
+**One calm place to talk to 31 models from 4 providers** — Google Gemini, Groq, NVIDIA NIM, and OpenRouter's free tier — with streaming, markdown, and a warm, Claude-style design system. No framework, no build step for the app itself: vanilla ES modules all the way down.
 
 > **Live demo:** https://abot-eta.vercel.app/
 > **Repo:** https://github.com/abustark/abot
@@ -11,19 +11,20 @@
 
 ## Screenshots
 
-<!-- TODO(owner): captures pending — will live in artifacts/ and be referenced here
-     (light desktop, dark desktop, mobile). Requires running the app + browser, done on owner request. -->
+| Light · Desktop | Dark · Desktop |
+|:---:|:---:|
+| <img src="docs/screenshots/auth-light-desktop.webp" alt="ABot sign-in page — light theme, desktop" width="400"> | <img src="docs/screenshots/auth-dark-desktop.webp" alt="ABot sign-in page — dark theme, desktop" width="400"> |
 
-| Light · Desktop | Dark · Desktop | Mobile |
-|---|---|---|
-| `artifacts/readme-light-desktop.png` | `artifacts/readme-dark-desktop.png` | `artifacts/readme-mobile.png` |
+<p align="center">
+  <img src="docs/screenshots/auth-mobile.webp" alt="ABot sign-in page — mobile layout" width="300">
+</p>
 
 ---
 
 ## Highlights
 
 **Multi-model core**
-- 20 models across **Google Gemini** (direct API), **Groq**, **NVIDIA NIM**, and **OpenRouter** free tier
+- 31 models across **Google Gemini** (direct API), **Groq**, **NVIDIA NIM**, and **OpenRouter** free tier
 - **OpenRouter Auto (Free)** — an auto-failover router that picks the best available free model
 - Per-provider identity colors, per-chat model theming, per-request **web-search** and **thinking** toggles with capability gating (chips auto-disable where the provider doesn't support them)
 
@@ -140,5 +141,5 @@ docs/                 # commit log, roadmap, rules docs
 
 ## License
 
-ISC
+All rights reserved. The source is not licensed for reuse, modification, or redistribution.
 

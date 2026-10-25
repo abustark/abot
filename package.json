@@ -1,7 +1,33 @@
 {
-  "name": "ai-chat-hub-backend",
-  "version": "1.0.1",
-  "description": "Secure proxy for AI Chat Hub",
+  "name": "abot",
+  "version": "2.7.4",
+  "description": "ABot — multi-model AI chat (vanilla ES modules + Tailwind) with a hardened Vercel proxy, Firebase Auth/Firestore, and 31 models across four free-tier providers.",
+  "private": true,
+  "license": "UNLICENSED",
+  "author": "Basith AbuSyed",
+  "keywords": [
+    "ai-chat",
+    "llm",
+    "multi-model",
+    "gemini",
+    "groq",
+    "nvidia-nim",
+    "openrouter",
+    "vanilla-js",
+    "tailwindcss",
+    "firebase",
+    "pwa",
+    "sse-streaming",
+    "vercel"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abustark/abot.git"
+  },
+  "bugs": {
+    "url": "https://github.com/abustark/abot/issues"
+  },
+  "homepage": "https://abot-eta.vercel.app/",
   "main": "server.js",
   "scripts": {
     "build": "npm run build:css",
@@ -44,18 +70,7 @@
     "tailwindcss": "^3.4.13",
     "typescript": "^5.9.3"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/abustark/ai-chat-hub.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/abustark/ai-chat-hub/issues"
-  },
-  "homepage": "https://github.com/abustark/ai-chat-hub#readme",
   "overrides": {
     "fast-xml-parser": "^5.11.1"
   }
