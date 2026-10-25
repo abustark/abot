@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.6.10`** (current head is `2.6.9`)
+> - **`main` → `2.7.0`** (current head is `2.6.10`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -33,6 +33,17 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.6.10 - oxblood palette, auth wordmark, version badge
+- **Date**: 2026-10-25
+- **Why**: owner picked oxblood out of the 2.6.9 A/B switch and asked for three follow-ups — the whole site following that palette at every level, an "ABot" wordmark in the auth page's top-right corner, and the real version number (kept current automatically) in place of the hand-typed build stamp.
+- **Palette** (`src/input.css`): the token table arena rendered in `docs/palette-previews/` promoted into `:root` / `.dark` — bone canvas `#f7f6f3`, oxblood accent `#7d1f3d` (9.1:1 on canvas), hover `#5f152d`, soft `#f0e6ea`; dark canvas `#141210`, rose accent `#e08a9e` (7.4:1), hover `#f2a8b8`, soft `#2e1e24`. Code background `#1c1916`, shadow ink `18 15 12`. Measured pairs: ink 17.1, body 9.6, muted 5.3, accent 9.1, canvas-on-accent 9.8 light / 7.4 dark; focus ring (accent 60%) ≈ 3.45:1; avatar and chips (`coral-soft`/`coral`) ≈ 8:1. Provider hues untouched.
+- **Danger stays out of the wine family**: `--c-danger` → `194 65 12` (`#c2410c`, orange-red) with `--c-danger-strong` `178 58 10` light / `255 138 76` dark. The delete-chat confirm now uses `bg-danger` / `hover:bg-danger/90` / `text-white` (5.2:1) instead of Tailwind's raw `red-600`; sign-out already stripped both families and keeps the accent.
+- **Auth wordmark** (`index.html` + `src/input.css`): new `.auth-top` grid row spanning the shell (`"top top"` at `lg`), carrying the *Multi-model chat* pill on the left and a text-only `ABot` + 44px spectrum seam on the right, matching the sidebar brand. The pill moved out of `.auth-copy` and the `h1` lost its `mt-6`, so the extra row costs no height. Both brand marks stay for now (corner wordmark = page identity, card logo = form context) — owner will verify in person.
+- **Light-mode glow**: the blooms are mode-aware now — light uses accent 0.16 / sand 0.11, dark keeps 0.13 / 0.09 (`auth-bloom-steel` renamed `.auth-bloom-accent`), plus a faint accent halo behind the card (`.auth-card-wrap::before`, 10%, light only). Light can only tint, not glow, so both stay deliberately subtle.
+- **Version automation**: `APP_VERSION` in `js/config.js` is the single source; `app.js` exposes it as `window.ABOT_VERSION` (console + `#diag` row), `auth.js` renders `v2.6.10` in `#build-badge` — read from the module directly, because module imports evaluate before `app.js`'s body, which is why the old `window.ABOT_BUILD` stamp rendered `build ?`. `.githooks/commit-msg` + `tools/sync-version.js` now parse the version out of the commit subject, rewrite `APP_VERSION`, advance the `📌 Next version` line with the `.10` roll-over rule, refuse a commit whose version has no `COMMIT-HISTORY.md` entry, and stage whatever they changed.
+- **A/B machinery removed**: `.theme-oxblood`, `.palette-compare` / `.palette-chip`, `js/palette-switch.js`, both HTML chip groups, the script tag, the SW precache entry and the head-script `localStorage` branch.
+- **Chrome**: `theme-color` (static meta + inline script) and `manifest.json` → `#f7f6f3` / `#141210`. `CACHE_NAME` → `abot-cache-v79`, assets `?v=p54`; `dist/output.css` rebuilt and committed.
 
 ### 2.6.9 - temporary steel/oxblood A/B switch
 - **Date**: 2026-10-25

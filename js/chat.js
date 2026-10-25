@@ -224,8 +224,11 @@ export const deleteChat = (chatId) => {
     // 2. Configure Button
     const confirmBtn = dom.deleteConfirmBtn;
     confirmBtn.textContent = "Delete";
+    // 2.6.10: destructive actions use the danger token, which is deliberately
+    // outside the wine accent family (orange-red) so a delete never reads
+    // "on-brand". White label on #c2410c is 5.2:1.
     confirmBtn.classList.remove('bg-indigo-600', 'hover:bg-indigo-700', 'bg-coral', 'hover:bg-coral-active', 'text-canvas');
-    confirmBtn.classList.add('bg-red-600', 'hover:bg-red-700', 'text-white');
+    confirmBtn.classList.add('bg-danger', 'hover:bg-danger/90', 'text-white');
     confirmBtn.dataset.action = 'delete';
     confirmBtn.dataset.chatId = chatId;
 

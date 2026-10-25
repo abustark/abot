@@ -36,6 +36,16 @@ ABot is a **vanilla-JS, multi-model AI chat app** (no framework):
      **hashes**, never numbers. Never give a `main` commit a number from arena's sequence (or vice versa).
    - **Keep the `📌 Next version` line at the top of `COMMIT-HISTORY.md` current** so no session has to guess.
    - Every commit must also be logged in `COMMIT-HISTORY.md` with its version and what it did.
+   - **The version number is enforced, not remembered (2.6.10).** `.githooks/pre-commit` runs
+     `tools/sync-version.js --from-history` **before** the checks: it takes the newest
+     `### <version> - …` entry from `COMMIT-HISTORY.md`, writes `APP_VERSION` in
+     `js/config.js` (the single value the UI prints), advances the `📌 Next version` line
+     using the roll-over rule above, and stages both files. `.githooks/commit-msg` then
+     **aborts the commit** when the subject's version disagrees with `APP_VERSION` — i.e.
+     when the history entry is missing. So the order is: write the history entry →
+     `git add` → `git commit -m "<version> - …"`. A subject without a version (merge
+     commits) is skipped, and the sync can be re-run by hand:
+     `node tools/sync-version.js 2.6.10`.
 3. **Arena Synchronization (`arena/01a03fe9-abot`)**:
    - **⚠️ BEFORE ANY MIRROR, READ [§1b SYNC SAFETY](#1b-sync-safety--read-before-any-mirror-mandatory).**
      An Arena.ai session works only on arena and may hold unpushed commits there.

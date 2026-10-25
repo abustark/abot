@@ -7,7 +7,7 @@
 
 // Entry point. Execution order mirrors the original main() statement order:
 // SW registration -> firebase init -> dom extras -> message actions -> auth wiring.
-import { MODEL_CONFIG, getProviderColor } from './config.js';
+import { APP_VERSION, MODEL_CONFIG, getProviderColor } from './config.js';
 import { closeGuestLimitModal } from './ui.js';
 import { closePromptModal } from './ui.js';
 import { closeSidebar } from './ui.js';
@@ -1110,8 +1110,10 @@ function initApp() {
 
 // Phase 6.5: client-state reset + build identity
 // Visit <site>/#reset to wipe SW/caches/storage and reload (recovery tool).
-window.ABOT_BUILD = '2026-10-22.4';
-console.log(`[ABot] build ${window.ABOT_BUILD}`);
+// 2.6.10: the version now comes from config.js and is kept in sync with the
+// commit subject by tools/sync-version.js (see .githooks/commit-msg).
+window.ABOT_VERSION = APP_VERSION;
+console.log(`[ABot] version ${window.ABOT_VERSION}`);
 if (location.hash === '#reset') {
     (async () => {
         try {
@@ -1194,7 +1196,7 @@ async function runDiagnostics() {
     const add = (name, pass, detail = '') => results.push(`${pass ? 'PASS' : 'FAIL'}  ${name}${detail ? ' — ' + detail : ''}`);
     const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-    add('build', true, window.ABOT_BUILD || '?');
+    add('version', true, window.ABOT_VERSION || '?');
     add('viewport', true, window.innerWidth + 'x' + window.innerHeight);
     try {
         const dup = {};

@@ -11,6 +11,7 @@ import { dom } from './dom.js';
 import { loadUserChatsFromFirestore } from './chat.js';
 import { showToast, stopSpeaking } from './utils.js';
 import { state } from './state.js';
+import { APP_VERSION } from './config.js';
 // Single source of truth for the Google OAuth client id (was hardcoded 3x).
 const GOOGLE_CLIENT_ID = "784623545561-f9qumqjcsek7g368657cloq8rqc0kurj.apps.googleusercontent.com";
 import { switchChat } from './chat.js';
@@ -334,10 +335,13 @@ document.querySelectorAll('[data-toggle-password]').forEach(btn => {
     });
 });
 
-// build badge on the auth screen (confirms which build the client runs)
+// Version badge on the auth screen (confirms which release the client runs).
+// 2.6.10: reads config.js directly instead of window.ABOT_BUILD — module
+// imports evaluate before app.js's body, so the old global was still undefined
+// at this point and the badge rendered "build ?".
 {
     const badge = document.getElementById('build-badge');
-    if (badge) badge.textContent = `build ${window.ABOT_BUILD || '?'}`;
+    if (badge) badge.textContent = `v${APP_VERSION}`;
 }
 
 // 2.4.12: armed in initAuth; cleared by hideAppLoader. Forces the splash off

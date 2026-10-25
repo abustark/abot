@@ -1,0 +1,33 @@
+#!/bin/sh
+# commit-msg: the version gate.
+#
+# The subject carries the version ("2.6.10 - oxblood palette"). The sync itself
+# already happened in pre-commit (git builds the commit tree right after that
+# hook, so files staged here would miss the commit). This hook only refuses a
+# commit whose subject disagrees with js/config.js — which is exactly what
+# happens when a session bumps the number but forgets the COMMIT-HISTORY.md
+# entry the sync reads from.
+#
+# Subjects without a version (merge commits, quick owner fixes) are skipped.
+MSG_FILE="$1"
+
+cd "$(git rev-parse --show-toplevel)" || exit 1
+
+VERSION=$(head -n 1 "$MSG_FILE" \
+    | sed -n 's/^\([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\)[[:space:]]*-[[:space:]]*.*$/\1/p')
+
+if [ -z "$VERSION" ]; then
+    echo "[commit-msg] Subject has no '<version> - <description>' prefix; version check skipped."
+    exit 0
+fi
+
+APP_VERSION=$(sed -n "s/^export const APP_VERSION = '\([^']*\)'.*/\1/p" js/config.js)
+
+if [ "$VERSION" != "$APP_VERSION" ]; then
+    echo "[commit-msg] Subject says $VERSION but js/config.js says ${APP_VERSION:-<none>}."
+    echo "[commit-msg] Add the '### $VERSION - ...' entry at the top of COMMIT-HISTORY.md and retry."
+    echo "[commit-msg] (pre-commit syncs APP_VERSION and the Next version line from that entry.)"
+    exit 1
+fi
+
+echo "[commit-msg] Version $VERSION matches js/config.js."

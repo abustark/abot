@@ -60,35 +60,34 @@
 @tailwind utilities;
 
 /* ---------------------------------------------------------------------------
-   ABot design tokens — 2.6.8 "steel blue & sand" (owner pick).
-   Warm sand paper, deep steel-blue accent: the teal of 2.6.7 read green beside
-   the NVIDIA dot, so the hue moved to a desaturated navy. Neutrals lean cool so
-   nothing else carries a green cast. Provider hues are untouched.
+   ABot design tokens — 2.6.10 "oxblood & bone" (owner pick).
+   Bone paper with a wine accent. The accent is the only saturated chrome colour;
+   the four provider hues stay untouched and remain the app's data legend.
    RGB triplets so Tailwind opacity modifiers work: bg-ink/20 etc.
-   NOTE: `--c-coral*` is the historical name of the ACCENT slot. It is steel
-   blue now — every button/link/focus ring reads through it.
+   NOTE: `--c-coral*` is the historical name of the ACCENT slot. It is oxblood
+   now — every button/link/focus ring reads through it.
 --------------------------------------------------------------------------- */
 @layer base {
   :root {
-    --c-canvas: 248 247 243;   /* #f8f7f3 */
-    --c-surface: 243 241 235;  /* #f3f1eb */
-    --c-card: 237 235 227;     /* #edebe3 */
-    --c-raised: 255 254 250;   /* #fffefa — light: panels lift toward white */
-    --c-hairline: 227 224 214; /* #e3e0d6 */
-    --c-ink: 22 25 28;         /* #16191c */
-    --c-body: 62 68 73;        /* #3e4449 */
-    --c-muted: 102 109 115;    /* #666d73 */
-    --c-coral: 27 73 101;      /* #1b4965 — steel blue, ~9:1 on canvas */
-    --c-coral-active: 18 52 73; /* #123449 */
-    --c-coral-soft: 222 232 239; /* #dee8ef — pale steel wash */
+    --c-canvas: 247 246 243;   /* #f7f6f3 */
+    --c-surface: 242 240 236;  /* #f2f0ec */
+    --c-card: 239 236 230;     /* #efece6 */
+    --c-raised: 253 252 250;   /* #fdfcfa — light: panels lift toward white */
+    --c-hairline: 228 224 217; /* #e4e0d9 */
+    --c-ink: 22 19 15;         /* #16130f */
+    --c-body: 67 64 58;        /* #43403a */
+    --c-muted: 107 101 93;     /* #6b655d — 5.3:1 on canvas */
+    --c-coral: 125 31 61;      /* #7d1f3d — oxblood, 9.1:1 on canvas */
+    --c-coral-active: 95 21 45; /* #5f152d */
+    --c-coral-soft: 240 230 234; /* #f0e6ea */
     --c-ok: 93 184 114;        /* #5db872 */
     --c-warn: 212 160 23;      /* #d4a017 */
-    --c-danger: 198 69 69;     /* #c64545 */
-    --c-danger-strong: 217 45 32; /* #d92d20 — destructive row text (sign out) */
+    --c-danger: 194 65 12;     /* #c2410c — orange-red, kept out of the wine family */
+    --c-danger-strong: 178 58 10; /* #b23a0a — destructive row text (sign out) */
     --c-teal: 93 184 166;      /* #5db8a6 */
     --c-amber: 232 165 90;     /* #e8a55a */
-    --c-code-bg: 26 29 32;     /* #1a1d20 — code blocks stay dark in both themes */
-    --c-shadow: 16 18 20;      /* 2.6.2: cast-shadow ink (flips to true black on dark) */
+    --c-code-bg: 28 25 22;     /* #1c1916 — code blocks stay dark in both themes */
+    --c-shadow: 18 15 12;      /* 2.6.2: cast-shadow ink (flips to true black on dark) */
 
     /* Provider identity accents (skills audit: was raw Tailwind palette
        sky-500/purple-500/emerald-500/yellow-400 — now token-owned so the
@@ -106,21 +105,21 @@
   }
 
   .dark {
-    --c-canvas: 19 22 25;      /* #131619 */
-    --c-surface: 25 29 33;     /* #191d21 */
-    --c-card: 32 37 42;        /* #20252a */
-    --c-raised: 38 43 49;      /* #262b31 — dark: panels lift off the canvas */
-    --c-hairline: 51 58 64;    /* #333a40 */
-    --c-ink: 242 244 246;      /* #f2f4f6 */
-    --c-body: 221 226 230;     /* #dde2e6 */
-    --c-muted: 155 163 171;    /* #9ba3ab */
-    --c-coral: 127 175 207;    /* #7fafcf — steel lifted for dark contrast */
-    --c-coral-active: 155 198 226; /* #9bc6e2 */
-    --c-coral-soft: 28 43 54;  /* #1c2b36 */
+    --c-canvas: 20 18 16;      /* #141210 */
+    --c-surface: 27 24 21;     /* #1b1815 */
+    --c-card: 32 29 25;        /* #201d19 */
+    --c-raised: 38 34 30;      /* #26221e — dark: panels lift off the canvas */
+    --c-hairline: 52 47 42;    /* #342f2a */
+    --c-ink: 245 242 236;      /* #f5f2ec */
+    --c-body: 221 216 207;     /* #dcd8cf */
+    --c-muted: 162 154 143;    /* #a29a8f */
+    --c-coral: 224 138 158;    /* #e08a9e — rose, 7.4:1 on the dark canvas */
+    --c-coral-active: 242 168 184; /* #f2a8b8 */
+    --c-coral-soft: 46 30 36;  /* #2e1e24 */
     --c-ok: 93 184 114;
     --c-warn: 212 160 23;
-    --c-danger: 198 69 69;
-    --c-danger-strong: 255 99 105; /* #ff6369 — bright enough on dark panels */
+    --c-danger: 194 65 12;     /* #c2410c — same orange-red as light */
+    --c-danger-strong: 255 138 76; /* #ff8a4c — bright enough on dark panels */
     --c-teal: 93 184 166;
     --c-amber: 232 165 90;
     --c-provider-google: 125 190 235;    /* lightened for dark contrast */
@@ -129,39 +128,6 @@
     --c-provider-openrouter: 232 176 92;
     --c-shadow: 0 0 0;         /* 2.6.2: dark shadows are true black, not ink */
     color-scheme: dark;
-  }
-
-  /* --- 2.6.9: temporary palette A/B (owner request) ----------------------
-     Steel blue is the default. Adding .theme-oxblood on <html> retints the
-     whole app to the oxblood palette arena rendered in docs/palette-previews —
-     every surface, button, link and ring reads through these same tokens, so
-     nothing else has to know about it. Delete this block, js/palette-switch.js
-     and the two .palette-compare groups once the owner picks a winner. */
-  .theme-oxblood {
-    --c-canvas: 247 246 243;   /* #f7f6f3 — bone */
-    --c-surface: 242 240 236;  /* #f2f0ec */
-    --c-card: 239 236 230;     /* #efece6 */
-    --c-raised: 253 252 250;   /* #fdfcfa */
-    --c-hairline: 228 224 217; /* #e4e0d9 */
-    --c-ink: 22 19 15;         /* #16130f */
-    --c-body: 67 64 58;        /* #43403a */
-    --c-muted: 107 101 93;     /* #6b655d — 5.3:1 on canvas */
-    --c-coral: 125 31 61;      /* #7d1f3d — oxblood, 9.1:1 on canvas */
-    --c-coral-active: 95 21 45; /* #5f152d */
-    --c-coral-soft: 240 230 234; /* #f0e6ea */
-  }
-  .theme-oxblood.dark {
-    --c-canvas: 20 18 16;      /* #141210 */
-    --c-surface: 27 24 21;     /* #1b1815 */
-    --c-card: 32 29 25;        /* #201d19 */
-    --c-raised: 38 34 30;      /* #26221e */
-    --c-hairline: 52 47 42;    /* #342f2a */
-    --c-ink: 245 242 236;      /* #f5f2ec */
-    --c-body: 221 216 207;     /* #dcd8cf */
-    --c-muted: 162 154 143;    /* #a29a8f */
-    --c-coral: 224 138 158;    /* #e08a9e — rose, 7.4:1 on the dark canvas */
-    --c-coral-active: 242 168 184; /* #f2a8b8 */
-    --c-coral-soft: 46 30 36;  /* #2e1e24 */
   }
 
   html {
@@ -297,17 +263,25 @@
     border-radius: 50%;
     pointer-events: none;
 }
-.auth-bloom-steel {
+.auth-bloom-accent {
     top: -34vmax;
     right: -22vmax;
-    background: radial-gradient(closest-side, rgb(var(--c-coral) / 0.13), transparent 72%);
+    background: radial-gradient(closest-side, rgb(var(--c-coral) / 0.16), transparent 72%);
     animation: auth-bloom-drift 52s var(--ease-in-out) infinite alternate;
 }
 .auth-bloom-sand {
     bottom: -38vmax;
     left: -26vmax;
-    background: radial-gradient(closest-side, rgb(var(--c-amber) / 0.09), transparent 72%);
+    background: radial-gradient(closest-side, rgb(var(--c-amber) / 0.11), transparent 72%);
     animation: auth-bloom-drift 68s var(--ease-in-out) infinite alternate-reverse;
+}
+/* 2.6.10: the same alpha already reads as a glow on the dark canvas; light
+   needs more pigment before it is visible at all, so the modes differ here. */
+.dark .auth-bloom-accent {
+    background: radial-gradient(closest-side, rgb(var(--c-coral) / 0.13), transparent 72%);
+}
+.dark .auth-bloom-sand {
+    background: radial-gradient(closest-side, rgb(var(--c-amber) / 0.09), transparent 72%);
 }
 @keyframes auth-bloom-drift {
     from { transform: translate3d(0, 0, 0) scale(1); }
@@ -345,21 +319,54 @@
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
+        "top"
         "copy"
         "card"
         "proof";
     row-gap: 2rem;
     align-items: start;
 }
+/* 2.6.10 (owner request): the badge row now spans the shell so the brand mark
+   can sit in the page's top-right corner, level with the badge on the left. */
+.auth-top {
+    grid-area: top;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+.auth-brand {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.4rem;
+}
+.auth-brand-seam { width: 44px; }
 .auth-copy  { grid-area: copy; }
 .auth-proof { grid-area: proof; }
 .auth-card-wrap { grid-area: card; }
+
+/* 2.6.10: the light-mode counterpart of the dark bloom — a soft accent halo
+   behind the card. Light cannot glow, only tint, so it is deliberately faint
+   and simply absent in dark mode, which already has the real thing. */
+.auth-card-wrap { position: relative; }
+.auth-card-wrap::before {
+    content: '';
+    position: absolute;
+    inset: -14% -10%;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgb(var(--c-coral) / 0.10), transparent 72%);
+    pointer-events: none;
+    z-index: -1;
+}
+.dark .auth-card-wrap::before { content: none; }
 
 @media (min-width: 1024px) {
     .auth-shell {
         grid-template-columns: minmax(0, 1.04fr) minmax(0, 0.96fr);
         grid-template-areas:
-            "copy  card"
+            "top  top"
+            "copy card"
             "proof card";
         column-gap: 4.5rem;
         row-gap: 1.5rem;
@@ -761,33 +768,6 @@
 .auth-seam {
     width: 72px;
     margin-top: 1.25rem;
-}
-
-/* --- 2.6.9: palette A/B chips (temporary, owner request) ------------------
-   A two-option segmented control: one sits on the auth footer's build-badge
-   line, the other in the profile menu. Small enough not to change either
-   layout's height. Delete with the .theme-oxblood block. */
-.palette-compare {
-    display: inline-flex;
-    align-items: center;
-    gap: 2px;
-    padding: 2px;
-    border: 1px solid rgb(var(--c-hairline));
-    border-radius: 9999px;
-    background: rgb(var(--c-card) / 0.6);
-}
-.palette-chip {
-    font-size: 10px;
-    line-height: 1;
-    padding: 4px 8px;
-    border-radius: 9999px;
-    color: rgb(var(--c-muted));
-    transition: color 150ms var(--ease-out), background-color 150ms var(--ease-out);
-}
-.palette-chip:hover { color: rgb(var(--c-ink)); }
-.palette-chip[aria-pressed="true"] {
-    background: rgb(var(--c-coral));
-    color: rgb(var(--c-canvas));
 }
 
 /* Fewer and gentler, not zero: the layout lands instantly, colour/opacity
