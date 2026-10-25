@@ -24,7 +24,7 @@
     <meta name="theme-color" content="#141210">
     <link rel="preload" href="/dist/fonts/plus-jakarta-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/dist/fonts/source-serif-4-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link href="./dist/output.css?v=p56" rel="stylesheet">
+    <link href="./dist/output.css?v=p57" rel="stylesheet">
     <script src="/vendor/marked.min.js" defer></script>
     <!-- A1 (v1.0.5): highlight.js + its theme are lazy-loaded on the first code
          block (js/chat.js) — they were head-linked here, costing every visitor
@@ -185,17 +185,16 @@
         </div>
 
         <div class="auth-shell w-full max-w-6xl">
-            <!-- 2.7.1 (owner request): the brand lives here, top-right, and the
-                 card head no longer repeats it. Slightly larger than the 2.6.10
-                 text-only mark, with the logo and the provider-colour seam. -->
+            <!-- 2.7.2 (owner pick): logo + wordmark on one line, with the
+                 provider-hue seam running under both as a single underline. -->
             <div class="auth-top">
                 <span class="auth-rise auth-d1 inline-flex items-center rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.2em] font-medium bg-coral-soft text-coral">Multi-model chat</span>
                 <span class="auth-rise auth-d1 auth-brand" aria-hidden="true">
-                    <img src="/logo.png" alt="" class="logo-mark h-8 w-8 select-none" draggable="false">
-                    <span class="auth-brand-text">
+                    <span class="auth-brand-line">
+                        <img src="/logo.png" alt="" class="logo-mark h-8 w-8 select-none" draggable="false">
                         <span class="font-wordmark text-xl leading-none text-ink">ABot</span>
-                        <span class="auth-brand-seam spectrum-seam"></span>
                     </span>
+                    <span class="spectrum-seam"></span>
                 </span>
             </div>
 
@@ -860,7 +859,7 @@
         <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js" defer></script>
         <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js" defer></script>
 
-        <script type="module" src="js/app.js?v=p56"></script>
+        <script type="module" src="js/app.js?v=p57"></script>
 
         <!--
       Tailwind CSS Purge-Safe-List:

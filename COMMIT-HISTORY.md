@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.7.2`** (current head is `2.7.1`)
+> - **`main` → `2.7.3`** (current head is `2.7.2`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -33,6 +33,12 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.7.2 - auth corner lockup aligned
+- **Date**: 2026-10-26
+- **Why**: owner review of 2.7.1 — the 32px logo sat visually below the wordmark because it was centred against the whole column (wordmark + gap + seam), not against the text line. Owner asked to keep both marks but align them and give them one shared underline.
+- **Lockup** (`index.html`, `src/input.css`): new `.auth-brand-line` row holds the `h-8 w-8` logo and the `text-xl` wordmark on one line (`align-items: center`, `justify-content: flex-end`), and the seam sits under that row and stretches to the lockup's full width — one underline spanning both, using the four provider hues. The `.auth-brand-seam` width override is gone, so the seam follows the shared `.spectrum-seam` (100%) instead of a fixed 56px.
+- **Chrome**: `CACHE_NAME` → `abot-cache-v82`, assets `?v=p57`; `dist/output.css` rebuilt and committed.
 
 ### 2.7.1 - brand moved to the auth corner, card logo removed
 - **Date**: 2026-10-26
