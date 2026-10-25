@@ -11,7 +11,7 @@ declare const google: any;
 declare const VANTA: any;
 
 interface Window {
-  ABOT_BUILD?: string;
+  ABOT_VERSION?: string;
   __abotErrors?: string[];
   google?: any;
   firebase?: any;
