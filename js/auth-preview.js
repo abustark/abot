@@ -9,6 +9,8 @@
  *     the model inside a slot is picked at random. Nothing is invented here: if
  *     a provider has no entry in MODEL_CONFIG its slot is dropped, so the
  *     preview can never advertise a model the app does not actually have.
+ *     2.7.0: the thread also rotates through several prompts, each with its own
+ *     per-provider reply, so the panel shows range instead of one frozen Q&A.
  *
  *  2. Tilt the sign-in card toward the pointer (±2.2°) and slide its coral
  *     glare. Pointer-fine only, never while a field inside the card has focus,
@@ -22,11 +24,55 @@
 import { MODEL_CONFIG } from './config.js';
 
 const PROVIDER_META = {
-    google: { dot: 'bg-provider-google', line: 'Found it — the guard runs before the token check.' },
-    groq: { dot: 'bg-provider-groq', line: 'Same path, cheaper fix: bail out before the guard.' },
-    nvidia: { dot: 'bg-provider-nvidia', line: 'Patched, plus a test that reproduces it.' },
-    openrouter: { dot: 'bg-provider-openrouter', line: 'Reproduced on a free route, then fixed at the source.' }
+    google: { dot: 'bg-provider-google' },
+    groq: { dot: 'bg-provider-groq' },
+    nvidia: { dot: 'bg-provider-nvidia' },
+    openrouter: { dot: 'bg-provider-openrouter' }
 };
+
+// 2.7.0 (owner request): the thread used to show one frozen prompt. It now
+// rotates through several, so the panel reads as range rather than a single
+// screenshot. Each prompt carries a reply per provider, and every reply is kept
+// short enough to stay on one line at the preview's width — the typing loop
+// must never reflow the page.
+const QUESTIONS = [
+    {
+        q: 'Why did the login button stop working on iOS?',
+        replies: {
+            google: 'Found it — the guard runs before the token check.',
+            groq: 'Same path, cheaper fix: bail out before the guard.',
+            nvidia: 'Patched, plus a test that reproduces it.',
+            openrouter: 'Reproduced on a free route, then fixed at the source.'
+        }
+    },
+    {
+        q: 'Can you split this 400-line component into hooks?',
+        replies: {
+            google: 'Yes — three hooks, one render path, no new state.',
+            groq: 'Start with the fetch hook; that is the biggest win.',
+            nvidia: 'Split, plus a snapshot test for each hook.',
+            openrouter: 'Refactored on a free route; behaviour unchanged.'
+        }
+    },
+    {
+        q: 'Why is the sidebar jumpy when I scroll on Android?',
+        replies: {
+            google: 'The transform fights the scroll container.',
+            groq: 'Drop will-change — one class, no JS needed.',
+            nvidia: 'Fixed and covered by a layout test.',
+            openrouter: 'Reproduced on a low-end phone, then patched.'
+        }
+    },
+    {
+        q: "What's the cheapest way to stream a 200-token reply?",
+        replies: {
+            google: 'Trim the system prompt; it is most of the bill.',
+            groq: 'Flush per chunk instead of per sentence.',
+            nvidia: 'Measured: 38% fewer tokens, same answer.',
+            openrouter: 'Compared three routes; this one costs least.'
+        }
+    }
+];
 
 const prefersReducedMotion = () => {
     try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch { return false; }
@@ -59,6 +105,8 @@ const pickOne = (list) => list[Math.floor(Math.random() * list.length)];
 const initThread = () => {
     const host = document.getElementById('auth-preview-replies');
     const section = document.getElementById('auth-section');
+    const bubble = document.querySelector('#auth-preview .auth-preview-bubble');
+    const userRow = document.querySelector('#auth-preview .auth-preview-user');
     if (!host || !section) return;
 
     // 2.6.3: a different trio on every load. Every provider in MODEL_CONFIG gets
@@ -75,7 +123,7 @@ const initThread = () => {
     const slots = shuffled(Object.keys(PROVIDER_META))
         .filter((key) => byProvider.has(key))
         .slice(0, 3)
-        .map((key) => ({ ...PROVIDER_META[key], model: pickOne(byProvider.get(key)) }));
+        .map((key) => ({ key, ...PROVIDER_META[key], model: pickOne(byProvider.get(key)) }));
 
     const rows = [];
     for (const slot of slots) {
@@ -97,7 +145,7 @@ const initThread = () => {
         text.append(who, document.createTextNode(' — '), body);
         row.append(dot, text);
         host.append(row);
-        rows.push({ row, body, line: slot.line });
+        rows.push({ row, body, provider: slot.key });
     }
     if (!rows.length) return;
 
@@ -114,12 +162,25 @@ const initThread = () => {
 
     let token = 0;
     let running = false;
+    let cycle = 0;
 
     // The token invalidates an in-flight loop the moment the page is hidden —
     // every await re-checks it, so a hidden auth screen costs nothing.
     const play = async (myToken) => {
         while (myToken === token) {
+            // 2.7.0: rotate the prompt, one per cycle. The swap happens while
+            // the replies are empty and the bubble is faded out, so the reader
+            // never sees a half-changed thread.
+            const question = QUESTIONS[cycle % QUESTIONS.length];
+            cycle += 1;
+
+            userRow?.classList.add('is-swapping');
             reset();
+            await sleep(220);
+            if (myToken !== token) return;
+            if (bubble) bubble.textContent = question.q;
+            userRow?.classList.remove('is-swapping');
+            rows.forEach((r) => { r.line = question.replies[r.provider] || ''; });
             await sleep(260);
             for (const r of rows) {
                 if (myToken !== token) return;
@@ -149,6 +210,8 @@ const initThread = () => {
             running = false;
             token += 1;
             reset();
+            // 2.7.0: never leave the prompt mid-fade when the loop is stopped.
+            userRow?.classList.remove('is-swapping');
         }
     };
 

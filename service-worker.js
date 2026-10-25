@@ -3,7 +3,7 @@
  * Provides offline caching for local assets only
  */
 
-const CACHE_NAME = 'abot-cache-v79'; // 2.6.10: oxblood palette, auth wordmark
+const CACHE_NAME = 'abot-cache-v80'; // 2.7.0: rotating auth-preview prompts
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -11,7 +11,7 @@ const STATIC_ASSETS = [
     '/favicon-32-light.png',
     '/favicon-32-dark.png',
     '/logo.png',
-    '/dist/output.css?v=p54',
+    '/dist/output.css?v=p55',
     '/js/app.js',
     '/js/config.js',
     '/js/dom.js',

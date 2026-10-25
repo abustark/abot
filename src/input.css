@@ -326,8 +326,9 @@
     row-gap: 2rem;
     align-items: start;
 }
-/* 2.6.10 (owner request): the badge row now spans the shell so the brand mark
-   can sit in the page's top-right corner, level with the badge on the left. */
+/* 2.6.10: the badge has its own row spanning the shell, so the copy column
+   starts with the headline. 2.7.0: the wordmark that shared this row is gone
+   (owner request) — the row now holds the badge alone. */
 .auth-top {
     grid-area: top;
     display: flex;
@@ -335,13 +336,6 @@
     justify-content: space-between;
     gap: 1rem;
 }
-.auth-brand {
-    display: inline-flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 0.4rem;
-}
-.auth-brand-seam { width: 44px; }
 .auth-copy  { grid-area: copy; }
 .auth-proof { grid-area: proof; }
 .auth-card-wrap { grid-area: card; }
@@ -674,7 +668,14 @@
     flex-direction: column;
     gap: 0.65rem;
 }
-.auth-preview-user { display: flex; justify-content: flex-end; }
+.auth-preview-user {
+    display: flex;
+    justify-content: flex-end;
+    /* 2.7.0: the prompt rotates between cycles, so it fades while the replies
+       are empty — a hard text swap on an always-visible bubble reads as a jump. */
+    transition: opacity 220ms var(--ease-out);
+}
+.auth-preview-user.is-swapping { opacity: 0; }
 .auth-preview-bubble {
     max-width: 88%;
     padding: 0.55rem 0.85rem;
@@ -778,7 +779,8 @@
     .auth-preview-live { animation: none; }
     .auth-card { transition: none; }
     .auth-glare { display: none; }
-    .auth-preview-reply { transition: none; }
+    .auth-preview-reply,
+    .auth-preview-user { transition: none; }
 }
 
 /* 2.4.3 (owner request): dot-matrix loader under the wordmark — a vanilla

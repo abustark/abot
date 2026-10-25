@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.7.0`** (current head is `2.6.10`)
+> - **`main` → `2.7.1`** (current head is `2.7.0`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -33,6 +33,14 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.7.0 - auth preview prompts, wordmark removed
+- **Date**: 2026-10-26
+- **Why**: two owner requests — drop the top-right `ABot` wordmark added in 2.6.10, and give the auth page's self-playing thread more than one prompt so the preview shows range instead of a single frozen question.
+- **Wordmark removed** (`index.html`, `src/input.css`): the `.auth-brand` span and its `.auth-brand` / `.auth-brand-seam` rules are gone. The `.auth-top` row stays (it now holds the *Multi-model chat* badge alone), so the copy column still starts with the headline and the page height is unchanged.
+- **Rotating prompts** (`js/auth-preview.js`): `PROVIDER_META` keeps only the dot class; the copy moved into a `QUESTIONS` list of four prompts, each with a reply per provider (diagnosis / cheaper path / patch+test / free-route repro — the voices the preview already used). One prompt per cycle, `cycle % QUESTIONS.length`, so the sequence repeats in order rather than at random. All four questions are 46–53 characters, which keeps the bubble at the same line count at every breakpoint, and every reply stays on one line at the preview's width — the typing loop still cannot reflow the page.
+- **Prompt swap** (`src/input.css`): `.auth-preview-user` fades out (220ms) while the replies are empty, the text swaps, then it fades back — the bubble is never seen half-changed. The class is cleared when the loop stops so a hidden tab can never leave it invisible; the transition is disabled under `prefers-reduced-motion`.
+- **Chrome**: `CACHE_NAME` → `abot-cache-v80`, assets `?v=p55`; `dist/output.css` rebuilt and committed.
 
 ### 2.6.10 - oxblood palette, auth wordmark, version badge
 - **Date**: 2026-10-25

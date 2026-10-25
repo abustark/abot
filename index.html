@@ -24,7 +24,7 @@
     <meta name="theme-color" content="#141210">
     <link rel="preload" href="/dist/fonts/plus-jakarta-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/dist/fonts/source-serif-4-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link href="./dist/output.css?v=p54" rel="stylesheet">
+    <link href="./dist/output.css?v=p55" rel="stylesheet">
     <script src="/vendor/marked.min.js" defer></script>
     <!-- A1 (v1.0.5): highlight.js + its theme are lazy-loaded on the first code
          block (js/chat.js) — they were head-linked here, costing every visitor
@@ -185,16 +185,11 @@
         </div>
 
         <div class="auth-shell w-full max-w-6xl">
-            <!-- 2.6.10 (owner request): the page's own top line — the badge on
-                 the left, the ABot wordmark on the right, mirroring the sidebar
-                 brand. It used to sit inside .auth-copy; moving it into its own
-                 grid row costs no height because the copy column loses it. -->
+            <!-- 2.7.0: the page's own top line — the badge sits here instead of
+                 inside .auth-copy, so the copy column starts with the headline.
+                 (2.6.10 added an ABot wordmark on the right; removed on request.) -->
             <div class="auth-top">
                 <span class="auth-rise auth-d1 inline-flex items-center rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.2em] font-medium bg-coral-soft text-coral">Multi-model chat</span>
-                <span class="auth-rise auth-d1 auth-brand" aria-hidden="true">
-                    <span class="font-wordmark text-lg leading-none text-ink">ABot</span>
-                    <span class="auth-brand-seam spectrum-seam"></span>
-                </span>
             </div>
 
             <!-- LEFT — the editorial voice: what ABot is, in one line. -->
@@ -859,7 +854,7 @@
         <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js" defer></script>
         <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js" defer></script>
 
-        <script type="module" src="js/app.js?v=p54"></script>
+        <script type="module" src="js/app.js?v=p55"></script>
 
         <!--
       Tailwind CSS Purge-Safe-List:
