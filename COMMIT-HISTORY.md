@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.6.8`** (current head is `2.6.7`)
+> - **`main` → `2.6.9`** (current head is `2.6.8`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -33,6 +33,16 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.6.8 - steel blue retint, cool neutrals
+- **Date**: 2026-10-25
+- **Why**: owner read 2.6.7 as "too green". The cause is the hue itself — petrol is a teal (~168°), and beside the emerald NVIDIA dot it reads as a second green. Owner picked **steel blue** as the accent.
+- **Accent**: `#1b4965` (9.0:1 on canvas), hover `#123449`, soft `#dee8ef`; dark mode `#7fafcf` (7.8:1 on the dark canvas), hover `#9bc6e2`, soft `#1c2b36`.
+- **Neutrals cooled** so nothing else carries the green cast: ink `#16191c`, body `#3e4449`, muted `#666d73` (4.9:1 — same value as 2.6.7, just de-greened), code background `#1a1d20`, shadow ink `#101214`; dark chrome `#131619` canvas / `#191d21` surface / `#20252a` card / `#262b31` raised / `#333a40` hairline. The sand canvas `#f8f7f3` is unchanged — steel on sand is the blueprint pairing the owner chose.
+- **Auth field**: the top-right bloom is `.auth-bloom-steel` (same 13%); the warm sand bloom stays at 9%. Sparkles read the accent token, so they follow automatically.
+- **Browser chrome**: `theme-color` (static meta, inline head script, `syncThemeIcons`) and `manifest.json` move to `#131619` for dark; light stays `#f8f7f3`. Provider hues untouched.
+- **Arena sync**: arena was one commit ahead — `66f54ce` (2.4.17 palette preview renders + `tools/palette-preview.js`) — and was merged into `main` before the mirror, per §1b.2.
+- `CACHE_NAME` → `abot-cache-v77`, asset query `?v=p52`; `dist/output.css` rebuilt and committed.
 
 ### 2.6.7 - petrol & sand retint
 - **Date**: 2026-10-25

@@ -21,10 +21,10 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32-dark.png" media="(prefers-color-scheme: dark)">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#131715">
+    <meta name="theme-color" content="#131619">
     <link rel="preload" href="/dist/fonts/plus-jakarta-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/dist/fonts/source-serif-4-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link href="./dist/output.css?v=p51" rel="stylesheet">
+    <link href="./dist/output.css?v=p52" rel="stylesheet">
     <script src="/vendor/marked.min.js" defer></script>
     <!-- A1 (v1.0.5): highlight.js + its theme are lazy-loaded on the first code
          block (js/chat.js) — they were head-linked here, costing every visitor
@@ -64,7 +64,7 @@
             // 2.4.6: match the browser-chrome tint to the active theme (the
             // meta used to hardcode the dark canvas).
             document.querySelector('meta[name="theme-color"]').content =
-                document.documentElement.classList.contains('dark') ? '#131715' : '#f8f7f3';
+                document.documentElement.classList.contains('dark') ? '#131619' : '#f8f7f3';
         })();
     </script>
 
@@ -175,10 +175,10 @@
         style="display: none;">
         <!-- 2.4.1: twinkling sparkle field. 2.6.2: two very slow colour fields
              and a cached SVG grain tile give the field depth — radial gradients
-             and one noise image, no blur filter on a live element. 2.6.7: petrol
-             top-right, a warm sand field bottom-left. Inert: pointer-events:none. -->
+             and one noise image, no blur filter on a live element. 2.6.8: steel
+             blue top-right, a warm sand field bottom-left. Inert: pointer-events:none. -->
         <div id="auth-scene" class="auth-scene" aria-hidden="true">
-            <div class="auth-bloom auth-bloom-petrol"></div>
+            <div class="auth-bloom auth-bloom-steel"></div>
             <div class="auth-bloom auth-bloom-sand"></div>
             <canvas id="auth-sparkles" class="auth-sparkles"></canvas>
             <div class="auth-grain"></div>
@@ -848,7 +848,7 @@
         <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js" defer></script>
         <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js" defer></script>
 
-        <script type="module" src="js/app.js?v=p51"></script>
+        <script type="module" src="js/app.js?v=p52"></script>
 
         <!--
       Tailwind CSS Purge-Safe-List:

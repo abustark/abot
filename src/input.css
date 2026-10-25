@@ -60,12 +60,13 @@
 @tailwind utilities;
 
 /* ---------------------------------------------------------------------------
-   ABot design tokens — 2.6.7 "petrol & sand" (owner pick).
-   Warm sand paper with a deep petrol accent: the chrome stays quiet, the colour
-   lands on actions, links and focus rings. Provider hues are untouched.
+   ABot design tokens — 2.6.8 "steel blue & sand" (owner pick).
+   Warm sand paper, deep steel-blue accent: the teal of 2.6.7 read green beside
+   the NVIDIA dot, so the hue moved to a desaturated navy. Neutrals lean cool so
+   nothing else carries a green cast. Provider hues are untouched.
    RGB triplets so Tailwind opacity modifiers work: bg-ink/20 etc.
-   NOTE: `--c-coral*` is the historical name of the ACCENT slot. It is petrol
-   now, not terracotta — every button/link/focus ring reads through it.
+   NOTE: `--c-coral*` is the historical name of the ACCENT slot. It is steel
+   blue now — every button/link/focus ring reads through it.
 --------------------------------------------------------------------------- */
 @layer base {
   :root {
@@ -74,20 +75,20 @@
     --c-card: 237 235 227;     /* #edebe3 */
     --c-raised: 255 254 250;   /* #fffefa — light: panels lift toward white */
     --c-hairline: 227 224 214; /* #e3e0d6 */
-    --c-ink: 22 26 24;         /* #161a18 */
-    --c-body: 63 70 67;        /* #3f4643 */
-    --c-muted: 104 109 103;    /* #686d67 */
-    --c-coral: 15 91 84;       /* #0f5b54 — petrol, ~7.4:1 on canvas */
-    --c-coral-active: 11 68 63; /* #0b443f */
-    --c-coral-soft: 223 233 228; /* #dfe9e4 — pale petrol wash */
+    --c-ink: 22 25 28;         /* #16191c */
+    --c-body: 62 68 73;        /* #3e4449 */
+    --c-muted: 102 109 115;    /* #666d73 */
+    --c-coral: 27 73 101;      /* #1b4965 — steel blue, ~9:1 on canvas */
+    --c-coral-active: 18 52 73; /* #123449 */
+    --c-coral-soft: 222 232 239; /* #dee8ef — pale steel wash */
     --c-ok: 93 184 114;        /* #5db872 */
     --c-warn: 212 160 23;      /* #d4a017 */
     --c-danger: 198 69 69;     /* #c64545 */
     --c-danger-strong: 217 45 32; /* #d92d20 — destructive row text (sign out) */
     --c-teal: 93 184 166;      /* #5db8a6 */
     --c-amber: 232 165 90;     /* #e8a55a */
-    --c-code-bg: 31 30 27;     /* #1f1e1b — code blocks stay dark in both themes */
-    --c-shadow: 20 20 19;      /* 2.6.2: cast-shadow ink (flips to true black on dark) */
+    --c-code-bg: 26 29 32;     /* #1a1d20 — code blocks stay dark in both themes */
+    --c-shadow: 16 18 20;      /* 2.6.2: cast-shadow ink (flips to true black on dark) */
 
     /* Provider identity accents (skills audit: was raw Tailwind palette
        sky-500/purple-500/emerald-500/yellow-400 — now token-owned so the
@@ -105,17 +106,17 @@
   }
 
   .dark {
-    --c-canvas: 19 23 21;      /* #131715 */
-    --c-surface: 25 30 28;     /* #191e1c */
-    --c-card: 32 38 35;        /* #202623 */
-    --c-raised: 38 44 41;      /* #262c29 — dark: panels lift off the canvas */
-    --c-hairline: 51 58 55;    /* #333a37 */
-    --c-ink: 242 244 241;      /* #f2f4f1 */
-    --c-body: 221 226 222;     /* #dde2de */
-    --c-muted: 155 165 160;    /* #9ba5a0 */
-    --c-coral: 79 179 164;     /* #4fb3a4 — petrol lifted for dark contrast */
-    --c-coral-active: 111 198 184; /* #6fc6b8 */
-    --c-coral-soft: 30 46 43;  /* #1e2e2b */
+    --c-canvas: 19 22 25;      /* #131619 */
+    --c-surface: 25 29 33;     /* #191d21 */
+    --c-card: 32 37 42;        /* #20252a */
+    --c-raised: 38 43 49;      /* #262b31 — dark: panels lift off the canvas */
+    --c-hairline: 51 58 64;    /* #333a40 */
+    --c-ink: 242 244 246;      /* #f2f4f6 */
+    --c-body: 221 226 230;     /* #dde2e6 */
+    --c-muted: 155 163 171;    /* #9ba3ab */
+    --c-coral: 127 175 207;    /* #7fafcf — steel lifted for dark contrast */
+    --c-coral-active: 155 198 226; /* #9bc6e2 */
+    --c-coral-soft: 28 43 54;  /* #1c2b36 */
     --c-ok: 93 184 114;
     --c-warn: 212 160 23;
     --c-danger: 198 69 69;
@@ -263,7 +264,7 @@
     border-radius: 50%;
     pointer-events: none;
 }
-.auth-bloom-petrol {
+.auth-bloom-steel {
     top: -34vmax;
     right: -22vmax;
     background: radial-gradient(closest-side, rgb(var(--c-coral) / 0.13), transparent 72%);

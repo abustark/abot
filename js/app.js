@@ -99,7 +99,7 @@ function initApp() {
         // 2.4.6: keep the browser-chrome tint in step with the actual theme
         // (the meta used to hardcode the dark canvas).
         const meta = document.querySelector('meta[name="theme-color"]');
-        if (meta) meta.content = dark ? '#131715' : '#f8f7f3';
+        if (meta) meta.content = dark ? '#131619' : '#f8f7f3';
     };
     syncThemeIcons();
     // One owner of "set the theme", taking an explicit value so every entry

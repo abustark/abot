@@ -9,8 +9,8 @@
  * and click-to-push bursts (quantity 4). No third-party scripts.
  *
  * Rules it honours:
- *  - palette comes from the theme tokens (petrol accent + the four provider
- *    accents, 2.6.7) — no hardcoded hexes, so dark mode flips with the app;
+ *  - palette comes from the theme tokens (steel-blue accent + the four provider
+ *    accents, 2.6.8) — no hardcoded hexes, so dark mode flips with the app;
  *  - decoration only: the canvas is pointer-inert + aria-hidden;
  *  - the loop runs only while #auth-section is actually on screen
  *    (MutationObserver on its inline display) and the tab is visible

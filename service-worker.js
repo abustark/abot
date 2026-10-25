@@ -3,7 +3,7 @@
  * Provides offline caching for local assets only
  */
 
-const CACHE_NAME = 'abot-cache-v76'; // 2.6.7: petrol & sand retint, petrol blooms, petrol sparkles
+const CACHE_NAME = 'abot-cache-v77'; // 2.6.8: steel-blue retint, cool neutrals
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -11,7 +11,7 @@ const STATIC_ASSETS = [
     '/favicon-32-light.png',
     '/favicon-32-dark.png',
     '/logo.png',
-    '/dist/output.css?v=p51',
+    '/dist/output.css?v=p52',
     '/js/app.js',
     '/js/config.js',
     '/js/dom.js',
