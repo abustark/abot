@@ -24,7 +24,7 @@
     <meta name="theme-color" content="#141210">
     <link rel="preload" href="/dist/fonts/plus-jakarta-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/dist/fonts/source-serif-4-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link href="./dist/output.css?v=p55" rel="stylesheet">
+    <link href="./dist/output.css?v=p56" rel="stylesheet">
     <script src="/vendor/marked.min.js" defer></script>
     <!-- A1 (v1.0.5): highlight.js + its theme are lazy-loaded on the first code
          block (js/chat.js) — they were head-linked here, costing every visitor
@@ -185,11 +185,18 @@
         </div>
 
         <div class="auth-shell w-full max-w-6xl">
-            <!-- 2.7.0: the page's own top line — the badge sits here instead of
-                 inside .auth-copy, so the copy column starts with the headline.
-                 (2.6.10 added an ABot wordmark on the right; removed on request.) -->
+            <!-- 2.7.1 (owner request): the brand lives here, top-right, and the
+                 card head no longer repeats it. Slightly larger than the 2.6.10
+                 text-only mark, with the logo and the provider-colour seam. -->
             <div class="auth-top">
                 <span class="auth-rise auth-d1 inline-flex items-center rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.2em] font-medium bg-coral-soft text-coral">Multi-model chat</span>
+                <span class="auth-rise auth-d1 auth-brand" aria-hidden="true">
+                    <img src="/logo.png" alt="" class="logo-mark h-8 w-8 select-none" draggable="false">
+                    <span class="auth-brand-text">
+                        <span class="font-wordmark text-xl leading-none text-ink">ABot</span>
+                        <span class="auth-brand-seam spectrum-seam"></span>
+                    </span>
+                </span>
             </div>
 
             <!-- LEFT — the editorial voice: what ABot is, in one line. -->
@@ -237,7 +244,6 @@
                     <div class="auth-glare" aria-hidden="true"><span></span></div>
 
                     <div class="auth-card-head">
-                        <img src="/logo.png" alt="ABot logo" class="logo-mark h-10 w-10 select-none" draggable="false">
                         <div>
                             <h2 id="auth-card-title" class="font-display text-[1.6rem] leading-tight text-ink">Sign in</h2>
                             <p id="auth-card-sub" class="mt-1 text-[13px] text-muted">Pick up where you left off.</p>
@@ -854,7 +860,7 @@
         <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js" defer></script>
         <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js" defer></script>
 
-        <script type="module" src="js/app.js?v=p55"></script>
+        <script type="module" src="js/app.js?v=p56"></script>
 
         <!--
       Tailwind CSS Purge-Safe-List:

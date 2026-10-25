@@ -327,8 +327,7 @@
     align-items: start;
 }
 /* 2.6.10: the badge has its own row spanning the shell, so the copy column
-   starts with the headline. 2.7.0: the wordmark that shared this row is gone
-   (owner request) — the row now holds the badge alone. */
+   starts with the headline. 2.7.1: the brand lockup shares this row, right. */
 .auth-top {
     grid-area: top;
     display: flex;
@@ -336,6 +335,21 @@
     justify-content: space-between;
     gap: 1rem;
 }
+/* 2.7.1 (owner request): the brand lockup sits top-right — logo + wordmark,
+   with the provider-hue seam as its underline. It mirrors the sidebar brand one
+   step larger, because it is now the only mark on the page. */
+.auth-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+.auth-brand-text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.45rem;
+}
+.auth-brand-seam { width: 56px; }
 .auth-copy  { grid-area: copy; }
 .auth-proof { grid-area: proof; }
 .auth-card-wrap { grid-area: card; }

@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.7.1`** (current head is `2.7.0`)
+> - **`main` → `2.7.2`** (current head is `2.7.1`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -33,6 +33,13 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.7.1 - brand moved to the auth corner, card logo removed
+- **Date**: 2026-10-26
+- **Why**: owner's follow-up to 2.7.0 — take the logo out of the sign-in card and put the brand back in the page's top-right corner, one step larger than the 2.6.10 text-only mark, with a real logo and the provider-colour seam as its underline.
+- **Card head** (`index.html`): the `h-10` logo image is gone; the head is now just the title and sub-line. Head height is unchanged (the text block was already taller than the mark), so the card and the page fit are untouched.
+- **Corner lockup** (`index.html`, `src/input.css`): `.auth-brand` is a row — `logo-mark` at `h-8 w-8` (same black/white silhouette treatment as the sidebar) plus a right-aligned column holding the wordmark at `text-xl` (2.6.10 used `text-lg`) and a 56px `spectrum-seam` under it. The seam is the underline, and it uses the four provider hues, so the only colour in the chrome stays the app's data legend. The lockup is `aria-hidden` (decorative — the card title and document title carry the name), and the card logo's `alt="ABot logo"` disappears with it.
+- **Chrome**: `CACHE_NAME` → `abot-cache-v81`, assets `?v=p56`; `dist/output.css` rebuilt and committed.
 
 ### 2.7.0 - auth preview prompts, wordmark removed
 - **Date**: 2026-10-26

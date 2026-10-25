@@ -3,7 +3,7 @@
  * Provides offline caching for local assets only
  */
 
-const CACHE_NAME = 'abot-cache-v80'; // 2.7.0: rotating auth-preview prompts
+const CACHE_NAME = 'abot-cache-v81'; // 2.7.1: brand lockup back in the auth corner
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -11,7 +11,7 @@ const STATIC_ASSETS = [
     '/favicon-32-light.png',
     '/favicon-32-dark.png',
     '/logo.png',
-    '/dist/output.css?v=p55',
+    '/dist/output.css?v=p56',
     '/js/app.js',
     '/js/config.js',
     '/js/dom.js',
