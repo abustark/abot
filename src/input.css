@@ -131,6 +131,39 @@
     color-scheme: dark;
   }
 
+  /* --- 2.6.9: temporary palette A/B (owner request) ----------------------
+     Steel blue is the default. Adding .theme-oxblood on <html> retints the
+     whole app to the oxblood palette arena rendered in docs/palette-previews —
+     every surface, button, link and ring reads through these same tokens, so
+     nothing else has to know about it. Delete this block, js/palette-switch.js
+     and the two .palette-compare groups once the owner picks a winner. */
+  .theme-oxblood {
+    --c-canvas: 247 246 243;   /* #f7f6f3 — bone */
+    --c-surface: 242 240 236;  /* #f2f0ec */
+    --c-card: 239 236 230;     /* #efece6 */
+    --c-raised: 253 252 250;   /* #fdfcfa */
+    --c-hairline: 228 224 217; /* #e4e0d9 */
+    --c-ink: 22 19 15;         /* #16130f */
+    --c-body: 67 64 58;        /* #43403a */
+    --c-muted: 107 101 93;     /* #6b655d — 5.3:1 on canvas */
+    --c-coral: 125 31 61;      /* #7d1f3d — oxblood, 9.1:1 on canvas */
+    --c-coral-active: 95 21 45; /* #5f152d */
+    --c-coral-soft: 240 230 234; /* #f0e6ea */
+  }
+  .theme-oxblood.dark {
+    --c-canvas: 20 18 16;      /* #141210 */
+    --c-surface: 27 24 21;     /* #1b1815 */
+    --c-card: 32 29 25;        /* #201d19 */
+    --c-raised: 38 34 30;      /* #26221e */
+    --c-hairline: 52 47 42;    /* #342f2a */
+    --c-ink: 245 242 236;      /* #f5f2ec */
+    --c-body: 221 216 207;     /* #dcd8cf */
+    --c-muted: 162 154 143;    /* #a29a8f */
+    --c-coral: 224 138 158;    /* #e08a9e — rose, 7.4:1 on the dark canvas */
+    --c-coral-active: 242 168 184; /* #f2a8b8 */
+    --c-coral-soft: 46 30 36;  /* #2e1e24 */
+  }
+
   html {
     scroll-behavior: smooth;
   }
@@ -728,6 +761,33 @@
 .auth-seam {
     width: 72px;
     margin-top: 1.25rem;
+}
+
+/* --- 2.6.9: palette A/B chips (temporary, owner request) ------------------
+   A two-option segmented control: one sits on the auth footer's build-badge
+   line, the other in the profile menu. Small enough not to change either
+   layout's height. Delete with the .theme-oxblood block. */
+.palette-compare {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: 2px;
+    border: 1px solid rgb(var(--c-hairline));
+    border-radius: 9999px;
+    background: rgb(var(--c-card) / 0.6);
+}
+.palette-chip {
+    font-size: 10px;
+    line-height: 1;
+    padding: 4px 8px;
+    border-radius: 9999px;
+    color: rgb(var(--c-muted));
+    transition: color 150ms var(--ease-out), background-color 150ms var(--ease-out);
+}
+.palette-chip:hover { color: rgb(var(--c-ink)); }
+.palette-chip[aria-pressed="true"] {
+    background: rgb(var(--c-coral));
+    color: rgb(var(--c-canvas));
 }
 
 /* Fewer and gentler, not zero: the layout lands instantly, colour/opacity

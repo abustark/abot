@@ -1,4 +1,5 @@
 'use strict';
+/* global window, document, getComputedStyle */
 /**
  * Palette previewer — renders the REAL app under candidate colour themes and
  * screenshots each one, so the owner can compare before any code is committed.

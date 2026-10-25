@@ -3,7 +3,7 @@
  * Provides offline caching for local assets only
  */
 
-const CACHE_NAME = 'abot-cache-v77'; // 2.6.8: steel-blue retint, cool neutrals
+const CACHE_NAME = 'abot-cache-v78'; // 2.6.9: temporary steel/oxblood A/B switch
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -11,7 +11,7 @@ const STATIC_ASSETS = [
     '/favicon-32-light.png',
     '/favicon-32-dark.png',
     '/logo.png',
-    '/dist/output.css?v=p52',
+    '/dist/output.css?v=p53',
     '/js/app.js',
     '/js/config.js',
     '/js/dom.js',
@@ -23,6 +23,7 @@ const STATIC_ASSETS = [
     '/js/chat.js',
     '/js/sparkles.js',
     '/js/auth-preview.js',
+    '/js/palette-switch.js',
     '/js/dotloader.js',
     '/vendor/marked.min.js',
     // A1/A2 (v1.0.5): atom-one-dark.css is injected with the lazy highlight.js

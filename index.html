@@ -24,7 +24,7 @@
     <meta name="theme-color" content="#131619">
     <link rel="preload" href="/dist/fonts/plus-jakarta-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/dist/fonts/source-serif-4-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link href="./dist/output.css?v=p52" rel="stylesheet">
+    <link href="./dist/output.css?v=p53" rel="stylesheet">
     <script src="/vendor/marked.min.js" defer></script>
     <!-- A1 (v1.0.5): highlight.js + its theme are lazy-loaded on the first code
          block (js/chat.js) — they were head-linked here, costing every visitor
@@ -61,6 +61,13 @@
             if (stored === 'true' || (stored === null && prefersDark)) {
                 document.documentElement.classList.add('dark');
             }
+            // 2.6.9: apply the compared palette before paint so switching never
+            // flashes steel blue first. Temporary — see js/palette-switch.js.
+            try {
+                if (localStorage.getItem('abot-palette') === 'oxblood') {
+                    document.documentElement.classList.add('theme-oxblood');
+                }
+            } catch (e) { /* private mode */ }
             // 2.4.6: match the browser-chrome tint to the active theme (the
             // meta used to hardcode the dark canvas).
             document.querySelector('meta[name="theme-color"]').content =
@@ -356,7 +363,16 @@
         </div>
 
         <footer class="auth-footer">
-            <p class="text-[10px] text-muted/70 select-all" id="build-badge"></p>
+            <!-- 2.6.9 (owner request): temporary A/B control for the steel vs
+                 oxblood comparison; sits on the build-badge line so it costs
+                 the compressed stage almost no height. -->
+            <div class="flex items-center justify-center gap-3">
+                <p class="text-[10px] text-muted/70 select-all" id="build-badge"></p>
+                <div class="palette-compare" role="group" aria-label="Compare palettes">
+                    <button type="button" class="palette-chip" data-palette="steel" aria-pressed="true">Steel</button>
+                    <button type="button" class="palette-chip" data-palette="oxblood" aria-pressed="false">Oxblood</button>
+                </div>
+            </div>
             <p class="mt-1 text-xs text-muted">
                 &copy; <span id="footer-year">2026</span> ABu. All rights reserved.<br>
                 This site is under active development. Check back occasionally for new features.
@@ -489,6 +505,20 @@
                         <input type="checkbox" id="timestampsToggle" class="peer sr-only" aria-label="Show timestamps">
                         <span class="switch" aria-hidden="true"></span>
                     </label>
+                    <div class="h-px bg-hairline/70 mx-3"></div>
+                    <!-- 2.6.9: temporary palette A/B row (see js/palette-switch.js). -->
+                    <div class="menu-row">
+                        <span class="menu-label">
+                            <svg class="menu-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3.75c3.75 4.5 6 7.5 6 10.125A6 6 0 016 13.875C6 11.25 8.25 8.25 12 3.75z" />
+                            </svg>
+                            <span>Palette</span>
+                        </span>
+                        <div class="palette-compare" role="group" aria-label="Palette">
+                            <button type="button" class="palette-chip" data-palette="steel" aria-pressed="true">Steel</button>
+                            <button type="button" class="palette-chip" data-palette="oxblood" aria-pressed="false">Oxblood</button>
+                        </div>
+                    </div>
                     <div class="h-px bg-hairline/70 mx-3"></div>
                     <button type="button" id="signoutBtn" role="menuitem" class="menu-row menu-row-danger">
                         <span class="menu-label">
@@ -848,7 +878,9 @@
         <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js" defer></script>
         <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js" defer></script>
 
-        <script type="module" src="js/app.js?v=p52"></script>
+        <script type="module" src="js/app.js?v=p53"></script>
+        <!-- 2.6.9: temporary palette A/B switch (remove with .theme-oxblood). -->
+        <script type="module" src="js/palette-switch.js?v=p53"></script>
 
         <!--
       Tailwind CSS Purge-Safe-List:

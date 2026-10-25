@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.6.9`** (current head is `2.6.8`)
+> - **`main` → `2.6.10`** (current head is `2.6.9`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -33,6 +33,15 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.6.9 - temporary steel/oxblood A/B switch
+- **Date**: 2026-10-25
+- **Why**: owner wants to compare the two remaining candidates on the live site before committing to one, then delete the loser. Arena's `docs/palette-previews/` renders (merged in 2.6.8) already fix the oxblood token values, so this only has to make them switchable.
+- **`.theme-oxblood`** (`src/input.css`, inside `@layer base` after `.dark`): the oxblood table from arena's README — bone canvas `#f7f6f3`, accent `#7d1f3d` (9.1:1), soft `#f0e6ea`; dark canvas `#141210`, accent rose `#e08a9e` (7.4:1), soft `#2e1e24`. Specificity is deliberate: `.theme-oxblood` (0,1,0) is later than `:root`/`.dark`, and `.theme-oxblood.dark` (0,2,0) covers the dark twins. Steel stays the default with no class.
+- **Controls**: one `.palette-compare` group (two `.palette-chip` buttons) on the auth footer's build-badge line — zero added height on the compressed stage — and one in the profile menu above Sign out. Chips carry `aria-pressed`; the menu stays open on click because the popover only closes on outside pointerdown.
+- **`js/palette-switch.js`**: toggles the class on `<html>`, mirrors `aria-pressed`, persists to `localStorage['abot-palette']`. The head script applies the stored choice before first paint so a switch never flashes steel first.
+- **Removal is contained**: this entry's whole surface is the `.theme-oxblood` block, `.palette-compare`/`.palette-chip` CSS, the module, two HTML groups and one script tag. Nothing else in the app knows the palette exists.
+- `CACHE_NAME` → `abot-cache-v78`, asset query `?v=p53`; `dist/output.css` rebuilt and committed.
 
 ### 2.6.8 - steel blue retint, cool neutrals
 - **Date**: 2026-10-25
