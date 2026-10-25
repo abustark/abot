@@ -3,7 +3,7 @@
  * Provides offline caching for local assets only
  */
 
-const CACHE_NAME = 'abot-cache-v82'; // 2.7.2: auth corner lockup aligned
+const CACHE_NAME = 'abot-cache-v83'; // 2.7.3: auth seam tucked under the lockup
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -11,7 +11,7 @@ const STATIC_ASSETS = [
     '/favicon-32-light.png',
     '/favicon-32-dark.png',
     '/logo.png',
-    '/dist/output.css?v=p57',
+    '/dist/output.css?v=p58',
     '/js/app.js',
     '/js/config.js',
     '/js/dom.js',

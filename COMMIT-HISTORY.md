@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.7.3`** (current head is `2.7.2`)
+> - **`main` → `2.7.4`** (current head is `2.7.3`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -33,6 +33,12 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.7.3 - auth seam tucked under the lockup
+- **Date**: 2026-10-26
+- **Why**: owner request after seeing 2.7.2 live — the provider-hue rule sat too low under the logo + wordmark, reading as a separate caption line. It should sit slightly higher while keeping a visible gap.
+- **Change** (`src/input.css`): `.auth-brand` column gap `0.45rem` → `0.25rem` (7.2px → 4px). The wordmark uses `leading-none`, so the rule now sits ~4–5px under the baseline instead of ~8px — still clear of the type, no longer detached. Nothing else moves: the lockup height drops 3.2px, and the `.auth-top` row is centred.
+- **Chrome**: `CACHE_NAME` → `abot-cache-v83`, assets `?v=p58`; `dist/output.css` rebuilt and committed.
 
 ### 2.7.2 - auth corner lockup aligned
 - **Date**: 2026-10-26

@@ -335,14 +335,14 @@
     justify-content: space-between;
     gap: 1rem;
 }
-/* 2.7.2 (owner pick): logo + wordmark share one line and one underline — the
-   mark is centred on the wordmark's line, and the provider-hue seam runs the
-   full width of the lockup instead of sitting under the text alone. */
+/* 2.7.3 (owner request): the seam sits closer to the lockup — the old 0.45rem
+   gap read as a detached caption line, 0.25rem keeps a visible gap while the
+   rule tucks up under the wordmark. */
 .auth-brand {
     display: inline-flex;
     flex-direction: column;
     align-items: stretch;
-    gap: 0.45rem;
+    gap: 0.25rem;
 }
 .auth-brand-line {
     display: flex;
