@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.7.8`** (current head is `2.7.7`)
+> - **`main` → `2.7.9`** (current head is `2.7.8`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -33,6 +33,13 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.7.8 - remove the stale agent/ skill copy
+- **Date**: 2026-10-26
+- **Why**: `agent/skills/` was a second 19-file (234 KB) copy of the same 12 skills already live in `.agents/skills/`, with slightly different wording. No app module, hook, tool, test or doc referenced it — it only risked feeding a future agent stale instructions.
+- **Changes**: deleted `agent/` (19 files). `.agents/skills/` and `.claude/skills/` are untouched, and `skills-lock.json` still pins the upstream skill hashes.
+- **Local cleanup (not committed)**: the gitignored `artifacts/` scratch folder is gone — its 63 audit PNGs were deleted in 2.7.7, and the last six audit text logs were removed here.
+- **No app or cache impact** — no runtime file touched; `CACHE_NAME` stays `abot-cache-v83`.
 
 ### 2.7.7 - drop the unused 380 KB favicon
 - **Date**: 2026-10-26
