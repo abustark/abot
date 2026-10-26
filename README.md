@@ -1,10 +1,10 @@
 # ABot — AI Chat Hub
 
-> 📄 **[`PROJECT-INFO.md`](PROJECT-INFO.md)** — machine-readable project facts (stack + exact versions, architecture, metrics, keyword tags) designed so an AI can generate resume entries and portfolio project summaries from it alone.
+> 📄 **[`docs/PROJECT-INFO.md`](docs/PROJECT-INFO.md)** — machine-readable project facts (stack + exact versions, architecture, metrics, keyword tags) designed so an AI can generate resume entries and portfolio project summaries from it alone.
 
 **One calm place to talk to 31 models from 4 providers** — Google Gemini, Groq, NVIDIA NIM, and OpenRouter's free tier — with streaming, markdown, and a warm, Claude-style design system. No framework, no build step for the app itself: vanilla ES modules all the way down.
 
-> **Live demo:** https://abot-eta.vercel.app/
+> **Live demo:** https://abot-ai.vercel.app/
 > **Repo:** https://github.com/abustark/abot
 
 ---
@@ -130,13 +130,13 @@ server.js             # local dev mirror of api/chat.js
 lib/chat-security.js  # shared backend hardening
 src/input.css         # Tailwind source + design tokens → dist/output.css
 tests/ tools/         # security tests, interaction/cycle/smoke/visual suites
-docs/                 # commit log, roadmap, rules docs
+docs/                 # commit log, project info, bug registry, plans, paste-kits
 ```
 
 ## Docs worth reading
 
-- [`COMMIT-HISTORY.md`](COMMIT-HISTORY.md) — full versioned commit history
-- [`BUGS-AND-FIXES.md`](BUGS-AND-FIXES.md) — bug registry: symptom → root cause → fix, 49 entries and counting
+- [`docs/COMMIT-HISTORY.md`](docs/COMMIT-HISTORY.md) — full versioned commit history
+- [`docs/BUGS-AND-FIXES.md`](docs/BUGS-AND-FIXES.md) — bug registry: symptom → root cause → fix, 49 entries and counting
 - [`AGENTS.md`](AGENTS.md) — the operating brief (branch discipline, quality gates, hard rules)
 
 ## License

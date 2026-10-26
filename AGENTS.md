@@ -34,13 +34,13 @@ ABot is a **vanilla-JS, multi-model AI chat app** (no framework):
    - **Branch independence (strict):** `main` and `arena/01a03fe9-abot` each keep their **own** version
      numbers and commit names. The same number on the two branches is NOT the same work — always compare
      **hashes**, never numbers. Never give a `main` commit a number from arena's sequence (or vice versa).
-   - **Keep the `📌 Next version` line at the top of `COMMIT-HISTORY.md` current** so no session has to guess.
-   - Every commit must also be logged in `COMMIT-HISTORY.md` with its version and what it did.
+   - **Keep the `📌 Next version` line at the top of `docs/COMMIT-HISTORY.md` current** so no session has to guess.
+   - Every commit must also be logged in `docs/COMMIT-HISTORY.md` with its version and what it did.
    - **The version number is enforced, not remembered (2.6.10).** `.githooks/pre-commit` runs
      `tools/sync-version.js --from-history` **before** the checks: it takes the newest
-     `### <version> - …` entry from `COMMIT-HISTORY.md`, writes `APP_VERSION` in
+     `### <version> - …` entry from `docs/COMMIT-HISTORY.md`, writes `APP_VERSION` in
      `js/config.js` (the single value the UI prints), advances the `📌 Next version` line
-     using the roll-over rule above, and stages both files. `.githooks/commit-msg` then
+     using the roll-over rule above, and stages the files it rewrote. `.githooks/commit-msg` then
      **aborts the commit** when the subject's version disagrees with `APP_VERSION` — i.e.
      when the history entry is missing. So the order is: write the history entry →
      `git add` → `git commit -m "<version> - …"`. A subject without a version (merge
@@ -243,4 +243,4 @@ keep `artifacts/` from accumulating new captures.
 
 ---
 
-*Prepared 2026-08-30 · Updated 2026-10-17 · Commit log: `COMMIT-HISTORY.md`*
+*Prepared 2026-08-30 · Updated 2026-10-17 · Commit log: `docs/COMMIT-HISTORY.md`*

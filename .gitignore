@@ -42,3 +42,6 @@ __pycache__/
 # Local-only audit captures (never pushed)
 docs/audits/*.png
 docs/audits/ui-audit-results.txt
+
+# Agent scratch captures (never pushed)
+artifacts/

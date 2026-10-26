@@ -5,7 +5,7 @@
 # already happened in pre-commit (git builds the commit tree right after that
 # hook, so files staged here would miss the commit). This hook only refuses a
 # commit whose subject disagrees with js/config.js — which is exactly what
-# happens when a session bumps the number but forgets the COMMIT-HISTORY.md
+# happens when a session bumps the number but forgets the docs/COMMIT-HISTORY.md
 # entry the sync reads from.
 #
 # Subjects without a version (merge commits, quick owner fixes) are skipped.
@@ -25,7 +25,7 @@ APP_VERSION=$(sed -n "s/^export const APP_VERSION = '\([^']*\)'.*/\1/p" js/confi
 
 if [ "$VERSION" != "$APP_VERSION" ]; then
     echo "[commit-msg] Subject says $VERSION but js/config.js says ${APP_VERSION:-<none>}."
-    echo "[commit-msg] Add the '### $VERSION - ...' entry at the top of COMMIT-HISTORY.md and retry."
+    echo "[commit-msg] Add the '### $VERSION - ...' entry at the top of docs/COMMIT-HISTORY.md and retry."
     echo "[commit-msg] (pre-commit syncs APP_VERSION and the Next version line from that entry.)"
     exit 1
 fi

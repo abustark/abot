@@ -6,11 +6,11 @@
  */
 
 // --- 2.6.10: the app version, single source of truth. ------------------------
-// Mirrors the `### <version>` heading of the newest COMMIT-HISTORY.md entry and
+// Mirrors the `### <version>` heading of the newest docs/COMMIT-HISTORY.md entry and
 // the version in the commit subject. tools/sync-version.js rewrites this line
 // from the commit message via the .githooks/commit-msg hook, so it cannot drift
 // when a session forgets to bump it by hand.
-export const APP_VERSION = '2.7.5';
+export const APP_VERSION = '2.7.6';
 
 // --- Provider identity colors (owner spec: OpenRouter=amber, Groq=violet,
 // Gemini=blue, NVIDIA=green; OpenRouter-hosted models inherit amber).

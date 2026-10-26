@@ -16,7 +16,7 @@
 > 4. *(Optional)* If you use multiple branches, keep one section per branch — branches have
 >    independent version numbers; compare commits by hash, never by version.
 >
-> Protocol reference: see `BUG-FIX-PROTOCOL.md` (or: ABot repo → `bug and fixes summary/`).
+> Protocol reference: see `BUG-FIX-PROTOCOL.md` (or: ABot repo → `docs/bug-fix-protocol/`).
 
 ---
 
@@ -50,4 +50,4 @@ git diff --exit-code -- <built-assets>   # fail if a build product is stale
 
 ---
 
-*Started <YYYY-MM-DD>. Convention: `bug and fixes summary/BUG-FIX-PROTOCOL.md`.*
+*Started <YYYY-MM-DD>. Convention: `docs/bug-fix-protocol/BUG-FIX-PROTOCOL.md`.*

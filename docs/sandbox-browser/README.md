@@ -1,4 +1,4 @@
-# PASTE- sandbox browser — self-contained kit for online-only AI agents
+# sandbox-browser — self-contained kit for online-only AI agents
 
 > **Purpose:** hand this folder (whole) to any online-only AI agent and it gains the ability to run a
 > **real headless Chromium** inside a sandbox where the Playwright CDN is blocked, there is no system

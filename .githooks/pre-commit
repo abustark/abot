@@ -4,7 +4,7 @@
 # 2.6.10: the version sync runs FIRST because git writes the commit tree from
 # the index right after this hook — a file staged later (e.g. in commit-msg)
 # would miss the commit it belongs to. sync-version.js reads the newest
-# "### <version> - ..." entry from COMMIT-HISTORY.md, writes APP_VERSION in
+# "### <version> - ..." entry from docs/COMMIT-HISTORY.md, writes APP_VERSION in
 # js/config.js, advances the "Next version" line and stages both. commit-msg
 # then verifies that the subject agrees with it.
 echo "[pre-commit] Syncing release version..."

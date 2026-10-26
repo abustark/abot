@@ -1,6 +1,6 @@
 {
   "name": "abot",
-  "version": "2.7.5",
+  "version": "2.7.6",
   "description": "ABot — multi-model AI chat (vanilla ES modules + Tailwind) with a hardened Vercel proxy, Firebase Auth/Firestore, and 31 models across four free-tier providers.",
   "private": true,
   "license": "UNLICENSED",
@@ -27,7 +27,7 @@
   "bugs": {
     "url": "https://github.com/abustark/abot/issues"
   },
-  "homepage": "https://abot-eta.vercel.app/",
+  "homepage": "https://abot-ai.vercel.app/",
   "main": "server.js",
   "scripts": {
     "build": "npm run build:css",

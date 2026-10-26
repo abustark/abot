@@ -4,13 +4,13 @@
  *
  * Run automatically by .githooks/pre-commit (which has no access to the commit
  * subject) in `--from-history` mode: it reads the newest `### <version> - ...`
- * entry from COMMIT-HISTORY.md. It then does three things:
+ * entry from docs/COMMIT-HISTORY.md. It then does three things:
  *
  *   1. refuses to run when that version is malformed or its third number is
  *      past `.10` (the roll-over rule lives in AGENTS.md §1);
  *   2. writes `APP_VERSION` in js/config.js — the single value the UI reads;
  *   3. writes `version` in package.json, so npm metadata can't drift;
- *   4. advances the `📌 Next version` line in COMMIT-HISTORY.md (`x.y.10` →
+ *   4. advances the `📌 Next version` line in docs/COMMIT-HISTORY.md (`x.y.10` →
  *      `x.(y+1).0`, never `.11`).
  *
  * Any file it rewrites is staged, so the fix lands inside the same commit
@@ -27,7 +27,7 @@ const { execFileSync } = require('child_process');
 const ROOT = path.resolve(__dirname, '..');
 const CONFIG_FILE = path.join(ROOT, 'js', 'config.js');
 const PACKAGE_FILE = path.join(ROOT, 'package.json');
-const HISTORY_FILE = path.join(ROOT, 'COMMIT-HISTORY.md');
+const HISTORY_FILE = path.join(ROOT, 'docs/COMMIT-HISTORY.md');
 
 const fromHistory = process.argv.includes('--from-history');
 let version = '';
@@ -37,7 +37,7 @@ if (fromHistory) {
     // version in code follows it — one place for a session to get right.
     const newest = fs.readFileSync(HISTORY_FILE, 'utf8').match(/^### (\d+\.\d+\.\d+) - /m);
     if (!newest) {
-        console.error('[sync-version] COMMIT-HISTORY.md has no "### <version> - ..." entry.');
+        console.error('[sync-version] docs/COMMIT-HISTORY.md has no "### <version> - ..." entry.');
         process.exit(1);
     }
     version = newest[1];
@@ -67,7 +67,7 @@ const history = fs.readFileSync(HISTORY_FILE, 'utf8');
 const entryRe = new RegExp(`^### ${version.replace(/\./g, '\\.')} - `, 'm');
 
 if (!entryRe.test(history)) {
-    console.error(`[sync-version] COMMIT-HISTORY.md has no "### ${version} - ..." entry.`);
+    console.error(`[sync-version] docs/COMMIT-HISTORY.md has no "### ${version} - ..." entry.`);
     console.error('[sync-version] Add the entry first — the commit is refused until it exists.');
     process.exit(1);
 }
@@ -99,7 +99,7 @@ const nextPkg = pkg.replace(/^ {2}"version": "[^"]*",$/m, `  "version": "${versi
 const nextLineRe = /^> - \*\*`main` → `\d+\.\d+\.\d+`\*\* \(current head is `\d+\.\d+\.\d+`\)$/m;
 
 if (!nextLineRe.test(history)) {
-    console.error('[sync-version] could not find the "📌 Next version" main line in COMMIT-HISTORY.md.');
+    console.error('[sync-version] could not find the "📌 Next version" main line in docs/COMMIT-HISTORY.md.');
     process.exit(1);
 }
 
@@ -121,7 +121,7 @@ if (nextPkg !== pkg) {
 }
 if (nextHistory !== history) {
     fs.writeFileSync(HISTORY_FILE, nextHistory);
-    changed.push('COMMIT-HISTORY.md');
+    changed.push('docs/COMMIT-HISTORY.md');
 }
 
 if (changed.length) {

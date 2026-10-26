@@ -1,9 +1,9 @@
-# bug and fixes summary — paste-kit for the Bug & Fix Registry protocol
+# bug-fix-protocol — paste-kit for the Bug & Fix Registry protocol
 
 > **Purpose:** a self-contained kit you can hand to any other project (or its AI agent) so it adopts
-> the same bug-tracking discipline as this repo's `BUGS-AND-FIXES.md`.
+> the same bug-tracking discipline as this repo's `docs/BUGS-AND-FIXES.md`.
 >
-> **Source of truth:** ABot repo — root `BUGS-AND-FIXES.md` (the live registry, 46 entries) + the
+> **Source of truth:** ABot repo — `docs/BUGS-AND-FIXES.md` (the live registry, 49 entries) + the
 > `§Re-verification Checklist` inside it. Extracted as a protocol at v2.1.2 (commit `090bdaf`-era docs).
 
 ## Files

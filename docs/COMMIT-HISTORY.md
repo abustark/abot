@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.7.6`** (current head is `2.7.5`)
+> - **`main` → `2.7.7`** (current head is `2.7.6`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -33,6 +33,20 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.7.6 - new domain + repo tidy
+- **Date**: 2026-10-26
+- **Why**: the owner moved the Vercel project to `abot-ai.vercel.app` (the old `abot-eta` host now answers `404 DEPLOYMENT_NOT_FOUND`), and the repo root had accumulated docs and paste-kits that belong in `docs/`.
+- **Domain**: replaced every live-URL occurrence — `README.md`, `package.json` (`homepage`), `docs/PROJECT-INFO.md` (§1 + §9 LinkedIn draft) and the 2.1.5 history entry. Verified live: HTTP 200, `APP_VERSION 2.7.5`, new CSP hash present, dark boot correct (OS-dark → dark, stored `false` → light, stored `true` → dark, zero CSP violations).
+- **Root tidy** (all via `git mv`, so history follows the files):
+  - `COMMIT-HISTORY.md`, `PROJECT-INFO.md`, `BUGS-AND-FIXES.md`, `IMPLEMENTATION_PLAN.md`, `SUGGESTIONS.md` → `docs/`
+  - `chat bubble.txt` → `docs/archive/chat-bubble-notes.md`
+  - `bug and fixes summary/` → `docs/bug-fix-protocol/`
+  - `PASTE- sandbox browser/` → `docs/sandbox-browser/`
+  - removed the tracked 0-byte `npx` accident; `artifacts/` is now gitignored
+- **Reference sweep**: `tools/sync-version.js` reads `docs/COMMIT-HISTORY.md` (and stages that path), `.githooks/*` messages, `AGENTS.md` §1, the `js/config.js` header comment, `README.md` links, `docs/PROJECT-INFO.md` §5, `eslint.config.js` ignore (also dropped the stale `npx/**`), `docs/audits/ui-baseline.md`, `docs/bug-fix-protocol/*`, `docs/sandbox-browser/README.md`.
+- **Root now holds only what a root should**: app entry (`index.html`, `js/`, `api/`, `lib/`, `src/`, `dist/`, `vendor/`, `tests/`, `tools/`, `types/`), the server/config/manifest/service worker, the favicons + PWA icons (absolute root URLs served by an explicit allowlist and precached by the SW), `package.json` + lock, `README.md`, `AGENTS.md`, and dotfile configs.
+- **No app logic changed** — `index.html` and `src/` are untouched, so `CACHE_NAME` stays `abot-cache-v83` and the asset tags stay `?v=p58`.
 
 ### 2.7.5 - CSP hash re-pinned, version sync, project info
 - **Date**: 2026-10-26
@@ -649,7 +663,7 @@ This document tracks every commit made on `main` following the versioning schema
 
 ### 2.1.5 - docs: repo README + live demo URL + PROJECT-INFO.md resume sheet
 - **Date**: 2026-10-13
-- **Owner directive**: canonical live URL `https://abot-eta.vercel.app/` (matches GitHub About page); all six projects get an AI-readable `PROJECT-INFO.md` for resume/portfolio summaries.
+- **Owner directive**: canonical live URL `https://abot-ai.vercel.app/` (the domain was renamed from `abot-eta.vercel.app` on 2026-10-26; matches GitHub About page); all six projects get an AI-readable `PROJECT-INFO.md` for resume/portfolio summaries.
 - **Changes**:
   - New root `README.md` (drafted earlier, never committed — folded in here): pitch, live-demo URL, screenshots section (captures pending, will live in `artifacts/` per AGENTS.md §6), feature highlights, mermaid architecture diagram, security & quality-gate summary, local setup from `.env.example`, project layout, docs index.
   - New `PROJECT-INFO.md` — machine-readable facts (24 configured models across 4 providers, exact versions, architecture, metrics, ATS tags, ready-made resume bullets/paragraph/card) so future AI can summarize without reading the code; linked from `README.md`.
