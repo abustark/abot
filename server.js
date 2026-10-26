@@ -54,7 +54,9 @@ app.use(helmet({
             scriptSrc: [
                 "'self'",
                 // hash-pinned pre-render blocks: theme flicker guard + SW registration
-                "'sha256-RED5nqgiGvlxFeR+VShxFCDMt7eps9C9vbu9UNGV6I8='",
+                // 2.7.5: re-pinned after the 2.6.10 palette change altered the
+                // theme script's bytes (the stale hash blocked it in production).
+                "'sha256-hY31/ZovZjMjUl4DtSx+Ur3iWMQIbUTeJEQa+epI/zc='",
                 "'sha256-VWaPoUOlzYoe9zCTZaYlk6twkMHt+udfeNAaXcYGi+4='",
                 "https://www.gstatic.com",
                 "https://accounts.google.com"

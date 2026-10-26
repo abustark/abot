@@ -9,7 +9,8 @@
  *   1. refuses to run when that version is malformed or its third number is
  *      past `.10` (the roll-over rule lives in AGENTS.md §1);
  *   2. writes `APP_VERSION` in js/config.js — the single value the UI reads;
- *   3. advances the `📌 Next version` line in COMMIT-HISTORY.md (`x.y.10` →
+ *   3. writes `version` in package.json, so npm metadata can't drift;
+ *   4. advances the `📌 Next version` line in COMMIT-HISTORY.md (`x.y.10` →
  *      `x.(y+1).0`, never `.11`).
  *
  * Any file it rewrites is staged, so the fix lands inside the same commit
@@ -25,6 +26,7 @@ const { execFileSync } = require('child_process');
 
 const ROOT = path.resolve(__dirname, '..');
 const CONFIG_FILE = path.join(ROOT, 'js', 'config.js');
+const PACKAGE_FILE = path.join(ROOT, 'package.json');
 const HISTORY_FILE = path.join(ROOT, 'COMMIT-HISTORY.md');
 
 const fromHistory = process.argv.includes('--from-history');
@@ -83,7 +85,17 @@ const nextConfig = config.replace(
     `export const APP_VERSION = '${version}';`
 );
 
-// --- 3. the next-version line ------------------------------------------------
+// --- 3. package.json ---------------------------------------------------------
+const pkg = fs.readFileSync(PACKAGE_FILE, 'utf8');
+
+if (!/^ {2}"version": "[^"]*",$/m.test(pkg)) {
+    console.error('[sync-version] could not find the top-level "version" in package.json.');
+    process.exit(1);
+}
+
+const nextPkg = pkg.replace(/^ {2}"version": "[^"]*",$/m, `  "version": "${version}",`);
+
+// --- 4. the next-version line ------------------------------------------------
 const nextLineRe = /^> - \*\*`main` → `\d+\.\d+\.\d+`\*\* \(current head is `\d+\.\d+\.\d+`\)$/m;
 
 if (!nextLineRe.test(history)) {
@@ -103,6 +115,10 @@ if (nextConfig !== config) {
     fs.writeFileSync(CONFIG_FILE, nextConfig);
     changed.push('js/config.js');
 }
+if (nextPkg !== pkg) {
+    fs.writeFileSync(PACKAGE_FILE, nextPkg);
+    changed.push('package.json');
+}
 if (nextHistory !== history) {
     fs.writeFileSync(HISTORY_FILE, nextHistory);
     changed.push('COMMIT-HISTORY.md');
@@ -110,7 +126,7 @@ if (nextHistory !== history) {
 
 if (changed.length) {
     execFileSync('git', ['add', ...changed], { cwd: ROOT, stdio: 'inherit' });
-    console.log(`[sync-version] ${version} → APP_VERSION synced, next version is ${next} (${changed.join(', ')}).`);
+    console.log(`[sync-version] ${version} → version synced, next version is ${next} (${changed.join(', ')}).`);
 } else {
     console.log(`[sync-version] ${version} already in sync; next version is ${next}.`);
 }

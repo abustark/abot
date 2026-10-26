@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.7.5`** (current head is `2.7.4`)
+> - **`main` → `2.7.6`** (current head is `2.7.5`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -33,6 +33,14 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.7.5 - CSP hash re-pinned, version sync, project info
+- **Date**: 2026-10-26
+- **Why**: three follow-ups from the presentation pass, all owner-approved — dark mode was broken in production, `package.json`'s version was a second copy nothing updated, and `PROJECT-INFO.md` (the file used to generate resume copy) still described v2.4.6 with 20 models and an ISC license.
+- **CSP (security fix, owner sign-off)**: the inline theme-boot script's SHA-256 was re-pinned from the 2.6.10-era `RED5nqgi…` to the current `hY31/ZovZ…` in both `vercel.json` and `server.js`. The 2.6.10 palette change altered that script's bytes (canvas / theme-color values), so the browser had been blocking it: OS-dark visitors always got the light page, a saved theme was ignored on reload, and `meta[theme-color]` stayed dark on a light page. The SW-registration hash was already correct and is unchanged.
+- **Version automation** (`tools/sync-version.js`): now also writes `version` in `package.json` and stages it, so npm metadata can never drift from `APP_VERSION` again. The hook flow is otherwise unchanged.
+- **PROJECT-INFO.md** (rewritten): current to v2.7.5 — 31 models with the real provider split (3 Gemini · 2 Groq · 12 NVIDIA · 14 OpenRouter), the oxblood-and-bone design system, 12 modules / ~4,260 lines / 336 tracked files, committed WebP screenshots, `UNLICENSED` private license. Adds a new §0 "Instructions for the AI": what may be claimed, what must never be claimed (no scale or user numbers, not open source, no public repo link, no per-release "tests pass", free-tier caveats), voice by target, and a demo caveat line.
+- **No runtime assets changed** — `index.html`, `js/` and `src/` are untouched, so `CACHE_NAME` stays `abot-cache-v83` and the asset tags stay `?v=p58`.
 
 ### 2.7.4 - presentation pass: screenshots, license, package metadata
 - **Date**: 2026-10-26
