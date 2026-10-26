@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.7.7`** (current head is `2.7.6`)
+> - **`main` → `2.7.8`** (current head is `2.7.7`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -33,6 +33,13 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.7.7 - drop the unused 380 KB favicon
+- **Date**: 2026-10-26
+- **Why**: owner cleanup pass. `favicon.png` (1024×1024, 380 KB) had not been requested by any page since the Phase 4 favicon work — `index.html` declares only the three 32 px tab icons plus `apple-touch-icon.png`, and the file was absent from `manifest.json`, the service-worker precache and the Vercel cache rules. Only the local Express allowlist still exposed it.
+- **Changes**: deleted `favicon.png` and its `app.get('/favicon.png', …)` route in `server.js`. `logo.png` (the brand mark actually used) is untouched.
+- **Left as history**: `docs/IMPLEMENTATION_PLAN.md` and `docs/audits/perf-pwa.md` still mention the old file in their original context.
+- **No cache bump** — the file was never precached and `index.html` is unchanged.
 
 ### 2.7.6 - new domain + repo tidy
 - **Date**: 2026-10-26

@@ -3,7 +3,7 @@
 > **Purpose:** every fact an AI (or a person) needs to write a resume "Projects"
 > entry, a portfolio summary, a LinkedIn post, or interview talking points for
 > ABot — without reading the code.
-> **Current as of:** **v2.7.6** · 2026-10-26 · branch `main`.
+> **Current as of:** **v2.7.7** · 2026-10-26 · branch `main`.
 
 ---
 
@@ -54,7 +54,7 @@
 | Live site | https://abot-ai.vercel.app/ |
 | Source | private GitHub repo `abustark/abot` (access on request) |
 | License | private, all rights reserved (`"license": "UNLICENSED"`) |
-| Version | **2.7.6** (2026-10-26) |
+| Version | **2.7.7** (2026-10-26) |
 | Status | Actively maintained. 2.7.x is the brand + presentation pass: oxblood palette, auth-page lockup, rotating preview prompts, README screenshots, package metadata |
 | Stack | Vanilla ES modules · Tailwind 3.4 (compiled) · Vercel serverless + Express mirror · Firebase Auth/Firestore · 4 free-tier AI providers |
 
@@ -101,7 +101,7 @@
 | Types | TypeScript (check-only) | ^5.9.3 | `tsc -p jsconfig.json` (`allowJs`) |
 | Lint | ESLint | ^9.39.5 + `@eslint/js` + `globals` | `npm run lint`, pre-commit hook |
 | Hosting (prod) | Vercel Serverless | `api/chat.js`, `maxDuration 60` | Production deployment |
-| VCS | Git / GitHub | `main` + `arena/01a03fe9-abot` (fast-forward mirror) | v2.7.6, 2026-10-26 head |
+| VCS | Git / GitHub | `main` + `arena/01a03fe9-abot` (fast-forward mirror) | v2.7.7, 2026-10-26 head |
 
 ---
 
@@ -150,7 +150,7 @@
 
 ## 6. Scale metrics (quantifiables)
 
-- **335** git-tracked files (0 in `node_modules`).
+- **334** git-tracked files (0 in `node_modules`).
 - **~4,260 lines** across **12** `js/` ES modules (`app.js` 1,240 · `chat.js` 1,267 · `auth.js` 478 · `utils.js` 263 · `auth-preview.js` 248 · `sparkles.js` 152 · `config.js` 148 · `palette.js` 148 · `ui.js` 139 · `dom.js` 104 · `dotloader.js` 54 · `state.js` 23) + `server.js` 388 + `api/chat.js` 228 + `lib/chat-security.js` 194.
 - **841** lines of `index.html`, **1,751** lines of Tailwind source → **91 KB** compiled CSS.
 - **31 configured models** across **4 provider APIs**; **9** prompt presets; **49** bug-registry ids.
