@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.7.9`** (current head is `2.7.8`)
+> - **`main` → `2.7.10`** (current head is `2.7.9`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -33,6 +33,14 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.7.9 - README screenshots recaptured from the fixed live site
+- **Date**: 2026-10-26
+- **Why**: the committed captures predated the 2.7.5 CSP fix, and the dark shot had to force the `dark` class because the theme-boot script was blocked. Recaptured now that the fix is live.
+- **Changes**: all three `docs/screenshots/*.webp` replaced from `https://abot-ai.vercel.app/` (v2.7.8) — light desktop 1440×900, dark desktop 1440×900, mobile 390×844 viewport @2x. No stored theme and no class forcing: each image is the natural first-visit result of `prefers-color-scheme` (light → `rgb(247,246,243)` / `#f7f6f3` meta; dark → `rgb(20,18,16)` / `#141210` meta).
+- **Size**: 69 + 81 + 112 KB = 262 KB total (was 266 KB).
+- **Docs**: `docs/PROJECT-INFO.md` screenshot row + §5 refreshed.
+- **No cache bump** — images are README assets, not app assets.
 
 ### 2.7.8 - remove the stale agent/ skill copy
 - **Date**: 2026-10-26

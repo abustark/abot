@@ -3,7 +3,7 @@
 > **Purpose:** every fact an AI (or a person) needs to write a resume "Projects"
 > entry, a portfolio summary, a LinkedIn post, or interview talking points for
 > ABot — without reading the code.
-> **Current as of:** **v2.7.8** · 2026-10-26 · branch `main`.
+> **Current as of:** **v2.7.9** · 2026-10-26 · branch `main`.
 
 ---
 
@@ -54,7 +54,7 @@
 | Live site | https://abot-ai.vercel.app/ |
 | Source | private GitHub repo `abustark/abot` (access on request) |
 | License | private, all rights reserved (`"license": "UNLICENSED"`) |
-| Version | **2.7.8** (2026-10-26) |
+| Version | **2.7.9** (2026-10-26) |
 | Status | Actively maintained. 2.7.x is the brand + presentation pass: oxblood palette, auth-page lockup, rotating preview prompts, README screenshots, package metadata |
 | Stack | Vanilla ES modules · Tailwind 3.4 (compiled) · Vercel serverless + Express mirror · Firebase Auth/Firestore · 4 free-tier AI providers |
 
@@ -92,7 +92,7 @@
 | Highlight | highlight.js (vendored) | `vendor/highlight.min.js` 160 KB (+ npm `^11.12.0`) | Lazy on first code block |
 | Fonts | Self-hosted woff2 | 7 files in `dist/fonts/` (3 precached) | Plus Jakarta Sans / Cabinet Grotesk / JetBrains Mono / Source Serif 4 |
 | PWA | Hand-written service worker + manifest | `abot-cache-v83`, 24 precached assets | Installable, offline shell |
-| Screenshots | WebP captures | `docs/screenshots/` (light desktop 70 KB, dark desktop 81 KB, mobile 110 KB) | README |
+| Screenshots | WebP captures | `docs/screenshots/` (light desktop 69 KB, dark desktop 81 KB, mobile 112 KB) | README |
 | Versioning | `tools/sync-version.js` + `.githooks/` | one version per request batch, `.10` rollover | Writes `APP_VERSION` + `package.json` version, verifies the commit subject |
 | Testing | jsdom | ^30.0.1 | interaction / cycle / smoke suites |
 | Syntax | acorn + acorn-walk | ^8.18.0 / ^8.3.5 | `npm run check` |
@@ -101,7 +101,7 @@
 | Types | TypeScript (check-only) | ^5.9.3 | `tsc -p jsconfig.json` (`allowJs`) |
 | Lint | ESLint | ^9.39.5 + `@eslint/js` + `globals` | `npm run lint`, pre-commit hook |
 | Hosting (prod) | Vercel Serverless | `api/chat.js`, `maxDuration 60` | Production deployment |
-| VCS | Git / GitHub | `main` + `arena/01a03fe9-abot` (fast-forward mirror) | v2.7.8, 2026-10-26 head |
+| VCS | Git / GitHub | `main` + `arena/01a03fe9-abot` (fast-forward mirror) | v2.7.9, 2026-10-26 head |
 
 ---
 
@@ -144,7 +144,7 @@
 - **Parity proof:** `tools/verify-parity.js` — token parity 56/57 after de-monolithisation (1 documented deviation = an `innerHTML` → DOM XSS fix); `index.html` went from 2,555 lines to ~840, extracted into ES modules.
 - **Pre-commit hook** (`.githooks/`, wired by `prepare`): `tools/sync-version.js --from-history` writes `APP_VERSION` in `js/config.js` **and** `version` in `package.json`, advances the `📌 Next version` line, then syntax + lint run; `.githooks/commit-msg` aborts when the subject's version disagrees.
 - **Bug registry:** `docs/BUGS-AND-FIXES.md` (49 unique B-ids and counting), `docs/COMMIT-HISTORY.md` (full versioned log), `AGENTS.md` (operating brief).
-- **Screenshots:** three real captures committed in `docs/screenshots/` — light desktop, dark desktop, mobile — taken from the live site at 1440×900 and 390×844 @2x, WebP q92 (266 KB total).
+- **Screenshots:** three real captures committed in `docs/screenshots/` — light desktop, dark desktop, mobile — taken from the live site (v2.7.8) at 1440×900 and a 390×844 mobile viewport @2x, WebP q92 (262 KB total). No forced theme: light/dark are the natural `prefers-color-scheme` result.
 
 ---
 
@@ -204,3 +204,4 @@ AI chat, multi-model routing, LLM integration, prompt engineering, Google Gemini
 > Live demo: https://abot-ai.vercel.app/ — free-tier keys, so it may be busy; guest mode gives you 5 messages without signing up. Repo is private; happy to walk through the code.
 
 **Tone/length guide for the AI:** follow §0. Frame impact as user capability plus the hardest engineering problem solved — no business KPIs. Lead with verbs and the numbers from §6, use keywords from §8, and never cite a model count other than **31** or claim committed screenshots that are not in `docs/screenshots/`.
+                                                                                                      
