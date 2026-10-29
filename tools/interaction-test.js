@@ -152,6 +152,17 @@ function stubChain(label) {
         check('import chat lives in the menu', menu.contains($('importChatBtn')));
         check('read-aloud switch lives in the menu', menu.contains($('ttsToggle')));
         check('timestamps switch lives in the menu', menu.contains($('timestampsToggle')));
+        check('haptics switch lives in the menu', menu.contains($('hapticsToggle')));
+        const ht = $('hapticsToggle');
+        check('haptics switch defaults on', !!ht && ht.checked === true);
+        ht.checked = false;
+        ht.dispatchEvent(new window.Event('change', { bubbles: true }));
+        await sleep(30);
+        check('haptics preference persists off', window.localStorage.getItem('abot-haptics') === 'false');
+        ht.checked = true;
+        ht.dispatchEvent(new window.Event('change', { bubbles: true }));
+        await sleep(30);
+        check('haptics preference persists on', window.localStorage.getItem('abot-haptics') === 'true');
         const rows = [...menu.querySelectorAll('.menu-row')];
         check('sign out is the last row', rows.length > 0 && rows[rows.length - 1].id === 'signoutBtn');
         check('sign out is the red row',

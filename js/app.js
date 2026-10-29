@@ -23,6 +23,7 @@ import { initFirebase, initAuth, registerInitApp } from './auth.js';
 import { initPalette } from './palette.js';
 import { initSparkles } from './sparkles.js';
 import { initAuthPreview } from './auth-preview.js'; // 2.6.2: auth page product preview + card tilt
+import { hapticsEnabled, initHaptics, setHaptics } from './haptics.js'; // 2.7.10: tap vibration + preference
 import { initMessageActions } from './chat.js';
 import { linkGuestToGoogle } from './auth.js';
 import { openPromptModal } from './ui.js';
@@ -634,6 +635,12 @@ function initApp() {
             renderActiveChat();
         });
     }
+    if (dom.hapticsToggle) {
+        dom.hapticsToggle.checked = hapticsEnabled();
+        dom.hapticsToggle.addEventListener('change', () => {
+            setHaptics(dom.hapticsToggle.checked);
+        });
+    }
 
     // New chat (Header)
     document.getElementById('headerNewChatBtn')?.addEventListener('click', createNewChatWrapper);
@@ -1173,6 +1180,7 @@ function main() {
         ['initAuthPreview', initAuthPreview], // 2.6.2: self-playing thread + card tilt
         ['initDotLoader', () => initDotLoader(dom.loaderDots)], // 2.4.3: starting-site dot-matrix loader
         ['initMessageActions', initMessageActions], // was statements #43-44
+        ['initHaptics', initHaptics], // 2.7.10: one delegated tap listener for every control
         ['registerInitApp', () => registerInitApp(initApp)], // auth's onAuthStateChanged needs initApp
         ['initAuth', initAuth], // was statements #52,54-58,60-65
     ];

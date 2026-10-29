@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.7.10`** (current head is `2.7.9`)
+> - **`main` → `2.8.0`** (current head is `2.7.10`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -33,6 +33,15 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.7.10 - haptic feedback on taps (account-menu toggle)
+- **Date**: 2026-10-29
+- **Why**: owner request — a short vibration on mobile control taps, with a switch to turn it off.
+- **New module** `js/haptics.js` (64 lines): one delegated `click` listener covers every current and future control (`button`, `a[href]`, `[role="button"]`, `[role="menuitem"]`, `[role="switch"]`, `label`, checkbox/radio, `select`). It calls `navigator.vibrate(10)` only when the preference is on, the device reports a coarse pointer, and the Vibration API exists. A 90 ms gap guard stops a `<label>` + its checkbox from double-firing; disabled / `aria-disabled` controls are skipped.
+- **Preference**: `abot-haptics` in localStorage, default on; a "Haptic feedback" switch row sits after "Show timestamps" in the account menu and is read on boot.
+- **Platform limits**: iOS Safari does not expose the Vibration API, so the toggle is silent there; desktop pointers never vibrate.
+- **Cache**: `CACHE_NAME` → `abot-cache-v84`, assets `?v=p59`, `js/haptics.js` added to the precache.
+- **Tests**: interaction suite now asserts the switch is in the menu, defaults on, and persists off/on.
 
 ### 2.7.9 - README screenshots recaptured from the fixed live site
 - **Date**: 2026-10-26

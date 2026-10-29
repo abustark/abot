@@ -87,6 +87,7 @@ dom.profileMenuBtn = document.getElementById('profileMenuBtn');
 dom.profileMenu = document.getElementById('profileMenu');
 dom.timestampsToggle = document.getElementById('timestampsToggle');
 dom.ttsToggle = document.getElementById('ttsToggle');
+dom.hapticsToggle = document.getElementById('hapticsToggle');
 dom.webSearchChip = document.getElementById('webSearchChip');
 dom.thinkingChip = document.getElementById('thinkingChip');
 dom.jumpToLatest = document.getElementById('jumpToLatest');
