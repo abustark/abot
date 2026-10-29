@@ -1,26 +1,15 @@
 /**
  * ABot — haptics.js
- * A short vibration on control taps for touch devices, with a saved on/off
- * preference (account menu → Haptic feedback).
+ * A short vibration on every tap, with a saved on/off preference
+ * (account menu → Haptic feedback; the row only exists on touch devices).
  *
  * Platform limits: the Vibration API exists on Android Chrome/Firefox and some
- * other Android browsers; iOS Safari does not expose it, so the toggle is
- * silent there. Desktop pointers never vibrate.
+ * other Android browsers; iOS Safari does not expose it, so taps are silent
+ * there. Desktop pointers never vibrate, so the switch is hidden on them.
  */
 const STORAGE_KEY = 'abot-haptics';
 const TICK_MS = 10;
 const MIN_GAP_MS = 90;
-const CONTROL_SELECTOR = [
-    'button',
-    'a[href]',
-    '[role="button"]',
-    '[role="menuitem"]',
-    '[role="switch"]',
-    'label',
-    'input[type="checkbox"]',
-    'input[type="radio"]',
-    'select'
-].join(', ');
 
 const isTouch = () => typeof window.matchMedia === 'function'
     && window.matchMedia('(pointer: coarse)').matches;
@@ -49,18 +38,36 @@ export const tick = () => {
 };
 
 /**
- * One delegated listener covers every current and future control, including
- * the ones rendered after this runs (chat rows, model options, toasts).
- * A short gap guard stops a <label> and its checkbox from double-firing.
+ * 2.8.0 (owner request): a desktop pointer can never vibrate, so the switch is
+ * hidden where it cannot do anything — and revealed again if a coarse pointer
+ * shows up (tablet, hybrid laptop used in touch mode).
+ */
+const syncToggleVisibility = () => {
+    const input = document.getElementById('hapticsToggle');
+    const row = input && input.closest('.menu-row');
+    if (row) row.classList.toggle('hidden', !isTouch());
+};
+
+/**
+ * One delegated listener covers every current and future tap — buttons, chat
+ * rows, the sidebar backdrop, model options, composer chips, chat-name
+ * actions, toasts and menu items. A short gap guard stops a <label> and its
+ * checkbox from double-firing.
  */
 export const initHaptics = () => {
+    syncToggleVisibility();
+    if (typeof window.matchMedia === 'function') {
+        const mq = window.matchMedia('(pointer: coarse)');
+        const onChange = () => syncToggleVisibility();
+        if (typeof mq.addEventListener === 'function') mq.addEventListener('change', onChange);
+        else if (typeof mq.addListener === 'function') mq.addListener(onChange);
+    }
+
     let lastTick = 0;
     document.addEventListener('click', (event) => {
         const target = event.target;
         if (!target || typeof target.closest !== 'function') return;
-        const control = target.closest(CONTROL_SELECTOR);
-        if (!control) return;
-        if (control.disabled || control.getAttribute('aria-disabled') === 'true') return;
+        if (target.closest('[aria-disabled="true"]')) return;
         const now = Date.now();
         if (now - lastTick < MIN_GAP_MS) return;
         lastTick = now;

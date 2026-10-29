@@ -3,7 +3,7 @@
 > **Purpose:** every fact an AI (or a person) needs to write a resume "Projects"
 > entry, a portfolio summary, a LinkedIn post, or interview talking points for
 > ABot — without reading the code.
-> **Current as of:** **v2.7.10** · 2026-10-26 · branch `main`.
+> **Current as of:** **v2.8.0** · 2026-10-26 · branch `main`.
 
 ---
 
@@ -54,7 +54,7 @@
 | Live site | https://abot-ai.vercel.app/ |
 | Source | private GitHub repo `abustark/abot` (access on request) |
 | License | private, all rights reserved (`"license": "UNLICENSED"`) |
-| Version | **2.7.10** (2026-10-29) |
+| Version | **2.8.0** (2026-10-29) |
 | Status | Actively maintained. 2.7.x is the brand + presentation pass: oxblood palette, auth-page lockup, rotating preview prompts, README screenshots, package metadata |
 | Stack | Vanilla ES modules · Tailwind 3.4 (compiled) · Vercel serverless + Express mirror · Firebase Auth/Firestore · 4 free-tier AI providers |
 
@@ -77,7 +77,7 @@
 | Auth (server) | firebase-admin | ^12.7.0 | `verifyIdToken` + email-verification gate |
 | Env | dotenv | ^16.3.1 | `.env` config |
 | Legacy | cors | ^2.8.5 | Installed, unused (same-origin, no `cors()`) |
-| Frontend | Vanilla HTML/CSS/JS | ES modules, **zero frameworks, zero app build step** | `index.html` (851 lines) + `js/` (13 modules, ~4,340 lines) |
+| Frontend | Vanilla HTML/CSS/JS | ES modules, **zero frameworks, zero app build step** | `index.html` (853 lines) + `js/` (13 modules, ~4,340 lines) |
 | Styling | Tailwind CSS | ^3.4.13 | `src/input.css` (1,751 lines) → `dist/output.css` (91 KB) |
 | Styling plugin | @tailwindcss/typography | ^0.5.16 | Markdown prose |
 | CSS pipeline | autoprefixer + postcss | ^10.4.21 / ^8.5.6 | `npm run build:css` |
@@ -101,7 +101,7 @@
 | Types | TypeScript (check-only) | ^5.9.3 | `tsc -p jsconfig.json` (`allowJs`) |
 | Lint | ESLint | ^9.39.5 + `@eslint/js` + `globals` | `npm run lint`, pre-commit hook |
 | Hosting (prod) | Vercel Serverless | `api/chat.js`, `maxDuration 60` | Production deployment |
-| VCS | Git / GitHub | `main` + `arena/01a03fe9-abot` (fast-forward mirror) | v2.7.10, 2026-10-29 head |
+| VCS | Git / GitHub | `main` + `arena/01a03fe9-abot` (fast-forward mirror) | v2.8.0, 2026-10-29 head |
 
 ---
 
@@ -131,8 +131,8 @@
 10. **Command palette + shortcuts** — `Ctrl+K` palette, `Alt+N` new chat, `Alt+/` search focus, Enter/Shift+Enter send, Esc handling, model-panel typeahead.
 11. **Design system — oxblood & bone** (2.6.10): light canvas `#f7f6f3`, ink `#16130f`, oxblood accent `#7d1f3d` (9.1:1), danger orange-red `#c2410c`; dark canvas `#141210`, rose accent `#e08a9e` (7.4:1). Serif display + sans body, provider identity colours, and a four-hue "provider seam" used as the brand underline on the auth page.
 12. **Auth page as a product demo** — a three-model reply thread that types itself, rotating through 4 real developer questions (220 ms bubble fade between prompts), plus a branded top-right lockup and a responsive single-column mobile layout.
-13. **PWA** — `manifest` (standalone, `#141210`), service worker `abot-cache-v84` precaching 25 assets (same-origin GET only, skips `/api/`), safe-area insets, mobile keyboard dock.
-14. **Chrome details** — toast stack with swipe-dismiss, skeleton shimmer, tooltips, dark/light theme with a pre-paint guard (no flash) and a View-Transition crossfade, plus an optional 10 ms haptic tick on control taps (Vibration API, touch pointers only; switch in the account menu).
+13. **PWA** — `manifest` (standalone, `#141210`), service worker `abot-cache-v85` precaching 25 assets (same-origin GET only, skips `/api/`), safe-area insets, mobile keyboard dock.
+14. **Chrome details** — toast stack with swipe-dismiss, skeleton shimmer, tooltips, dark/light theme with a pre-paint guard (no flash) and a View-Transition crossfade, plus an optional 10 ms haptic tick on every tap (Vibration API, coarse pointers only; the switch is hidden on desktop).
 15. **Security headers** — `nosniff`, `DENY`, `Referrer-Policy`, `Permissions-Policy`, HSTS, `no-store` on `/api/*`, immutable fonts/vendor, hourly JS/CSS.
 
 ---
@@ -151,10 +151,10 @@
 ## 6. Scale metrics (quantifiables)
 
 - **316** git-tracked files (0 in `node_modules`).
-- **~4,337 lines** across **13** `js/` ES modules (`chat.js` 1,267 · `app.js` 1,248 · `auth.js` 478 · `utils.js` 263 · `auth-preview.js` 248 · `sparkles.js` 152 · `config.js` 148 · `palette.js` 148 · `ui.js` 139 · `dom.js` 105 · `haptics.js` 64 · `dotloader.js` 54 · `state.js` 23) + `server.js` 388 + `api/chat.js` 228 + `lib/chat-security.js` 194.
-- **851** lines of `index.html`, **1,751** lines of Tailwind source → **91 KB** compiled CSS.
+- **~4,342 lines** across **13** `js/` ES modules (`chat.js` 1,267 · `app.js` 1,248 · `auth.js` 478 · `utils.js` 263 · `auth-preview.js` 248 · `sparkles.js` 152 · `config.js` 148 · `palette.js` 148 · `ui.js` 139 · `dom.js` 105 · `haptics.js` 69 · `dotloader.js` 54 · `state.js` 23) + `server.js` 388 + `api/chat.js` 228 + `lib/chat-security.js` 194.
+- **853** lines of `index.html`, **1,751** lines of Tailwind source → **91 KB** compiled CSS.
 - **31 configured models** across **4 provider APIs**; **9** prompt presets; **49** bug-registry ids.
-- **4 test suites** in `npm test`; **24** service-worker precached assets; **7** self-hosted font files.
+- **4 test suites** in `npm test`; **25** service-worker precached assets; **7** self-hosted font files.
 - **60 s** serverless max duration with **55 s** upstream abort; **30 req/15 min** per-identity chat limit + **100 req/15 min** per-IP general limit.
 - **10 security issues (S1–S10)** remediated in Phase 1 (2026-08-27); favicon 380 KB → 1.2 KB in Phase 4.
 

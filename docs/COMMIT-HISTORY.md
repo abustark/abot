@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.8.0`** (current head is `2.7.10`)
+> - **`main` → `2.8.1`** (current head is `2.8.0`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -33,6 +33,15 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.8.0 - universal tap haptics, switch hidden on desktop
+- **Date**: 2026-10-29
+- **Why**: owner request — haptics should fire on *every* tap, not only on elements in a fixed control selector, and the switch should not appear on desktop where it can never do anything.
+- **Universal listener**: `js/haptics.js` no longer filters by `CONTROL_SELECTOR`. One delegated `click` listener on `document` ticks for any tap inside the page — sidebar open/collapse and its backdrop, model selector options, the web/thinking chips, chat-row menus (rename / export / delete) and their toast actions, search results, modal backdrops, palette rows, and plain elements too. Only `[aria-disabled="true"]` is skipped; disabled controls never emit clicks anyway.
+- **Desktop hiding**: the "Haptic feedback" row now carries `hidden` in `index.html` and `initHaptics()` reveals it only when `(pointer: coarse)` matches, so it never flashes on desktop and reappears on a hybrid/touch device via the media-query `change` listener. `tick()` still refuses to vibrate on fine pointers.
+- **Unchanged**: 10 ms tick, 90 ms gap guard (a label plus its checkbox still counts once), `abot-haptics` preference default on.
+- **Cache**: `CACHE_NAME` → `abot-cache-v85`, assets `?v=p60` (no CSS change, no rebuild needed).
+- **Tests**: interaction suite now asserts the row is hidden on fine pointers and that a click on a plain `<div>` (with a stubbed coarse pointer + `navigator.vibrate`) produces exactly one tick.
 
 ### 2.7.10 - haptic feedback on taps (account-menu toggle)
 - **Date**: 2026-10-29

@@ -163,6 +163,23 @@ function stubChain(label) {
         ht.dispatchEvent(new window.Event('change', { bubbles: true }));
         await sleep(30);
         check('haptics preference persists on', window.localStorage.getItem('abot-haptics') === 'true');
+        // 2.8.0: the switch is meaningless without a coarse pointer, so it is hidden there.
+        check('haptics row hidden on fine pointers', ht.closest('.menu-row').classList.contains('hidden'));
+        // 2.8.0: every tap vibrates — not just buttons. Stub a coarse pointer plus
+        // the Vibration API, then click a plain <div> (the menu panel itself).
+        {
+            const realMM = window.matchMedia;
+            const realVibrate = window.navigator.vibrate;
+            const buzzes = [];
+            window.navigator.vibrate = (ms) => { buzzes.push(ms); return true; };
+            window.matchMedia = (q) => ({ matches: String(q).includes('pointer: coarse'), media: String(q), addEventListener() {}, addListener() {}, removeEventListener() {}, removeListener() {} });
+            menu.click();
+            await sleep(30);
+            check('a plain div tap vibrates', buzzes.length === 1, buzzes.length + ' ticks');
+            window.matchMedia = realMM || ((q) => ({ matches: false, media: String(q), addEventListener() {}, addListener() {}, removeEventListener() {}, removeListener() {} }));
+            if (realVibrate) window.navigator.vibrate = realVibrate;
+            else delete window.navigator.vibrate;
+        }
         const rows = [...menu.querySelectorAll('.menu-row')];
         check('sign out is the last row', rows.length > 0 && rows[rows.length - 1].id === 'signoutBtn');
         check('sign out is the red row',
