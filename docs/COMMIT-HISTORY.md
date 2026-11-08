@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.9.1`** (current head is `2.9.0`)
+> - **`main` → `2.9.2`** (current head is `2.9.1`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -33,6 +33,17 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.9.1 - UI work order: composer density, prompt library, code-block polish
+- **Date**: 2026-11-09
+- **Why**: exec the revised `docs/UI-WORK-ORDER.md` (auth page frozen; G06 overflow disproved).
+- **Task 1 composer density**: empty textarea `min-h-[56px]` → `min-h-[44px]`, disclaimer block deleted, send/stop `44px` → `36px` (`w-9 h-9 md:w-9 md:h-9`, still co-located), dock `pt-3` → `pt-2`, composer box `py-1.5` → `py-1`.
+- **Task 2 code-block cosmetics**: language label sentence-case `0.75rem`, copy button `11px` → `12px`, `.prose pre` gains hairline border `0.5rem`.
+- **Task 3 prompt library**: joke presets moved to `FUN_PROMPTS` (Sarcastic Pirate, Game Master), added Code Reviewer, Debugger, SQL Helper, Explain Code; modal grouped under Assistant/Fun, `gap-y-5` → `gap-y-2`.
+- **Task 4 contrast**: DROPPED per frozen auth page.
+- **Task 5 text floor**: raised in-app palette `10px` → `11px` (kbd + hint); auth-page `10px` left untouched per freeze.
+- **Cache**: `CACHE_NAME` → `abot-cache-v86`, assets `?v=p61`.
+- **No gate runs** (owner-only per AGENTS.md §3).
 
 ### 2.9.0 - UI work order revised after the real-browser audit
 - **Date**: 2026-11-08

@@ -24,7 +24,7 @@
     <meta name="theme-color" content="#141210">
     <link rel="preload" href="/dist/fonts/plus-jakarta-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/dist/fonts/source-serif-4-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link href="./dist/output.css?v=p60" rel="stylesheet">
+    <link href="./dist/output.css?v=p61" rel="stylesheet">
     <script src="/vendor/marked.min.js" defer></script>
     <!-- A1 (v1.0.5): highlight.js + its theme are lazy-loaded on the first code
          block (js/chat.js) — they were head-linked here, costing every visitor
@@ -626,15 +626,15 @@
                 <!-- --kb-h lives in CSS (see #composerDock in src/input.css) rather
                      than an inline style, so the empty-chat layout can override it. -->
                 <div id="composerDock"
-                    class="fixed bottom-0 left-0 right-0 md:static z-10 pt-3 px-3 md:px-5 pb-[max(env(safe-area-inset-bottom),0.75rem)] composer-anim">
+                    class="fixed bottom-0 left-0 right-0 md:static z-10 pt-2 px-3 md:px-5 pb-[max(env(safe-area-inset-bottom),0.75rem)] composer-anim">
                     <!-- v1.0.6 new-chat landing: the greeting moves in here, above
                          the composer, so the whole block centres as one unit. -->
                     <div id="emptyWelcome" class="hidden w-full max-w-3xl mx-auto px-1 pb-6"></div>
                     <div class="max-w-3xl mx-auto">
                         <div
-                            class="flex flex-col bg-raised dark:bg-raised border border-hairline shadow-lift rounded-2xl px-2 py-1.5 transition-[border-color,box-shadow] duration-base ease-out focus-within:border-coral/50 focus-within:ring-2 focus-within:ring-coral/15">
+                            class="flex flex-col bg-raised dark:bg-raised border border-hairline shadow-lift rounded-2xl px-2 py-1 transition-[border-color,box-shadow] duration-base ease-out focus-within:border-coral/50 focus-within:ring-2 focus-within:ring-coral/15">
                             <textarea id="messageInput"
-                                class="w-full bg-transparent px-2.5 pt-2.5 pb-1 resize-none focus:outline-none text-body placeholder:text-muted min-h-[56px] max-h-[40vh]"
+                                class="w-full bg-transparent px-2.5 pt-2.5 pb-1 resize-none focus:outline-none text-body placeholder:text-muted min-h-[44px] max-h-[40vh]"
                                 placeholder="Message ABot…" rows="1"></textarea>
                             <!-- v1.0.7: one explicit row, no flex-wrap. The old layout
                                  re-ordered the chips into the same wrapped line as the
@@ -661,7 +661,7 @@
                                     class="model-panel fixed top-0 left-0 grid grid-cols-2 gap-x-2 w-[calc(100vw-2rem)] max-w-[26rem] overflow-y-auto bg-canvas dark:bg-card border border-hairline rounded-xl shadow-lift z-30 hidden scrollbar-custom"></div>
                             </div>
                             <div class="relative flex items-center order-last flex-shrink-0" style="position:relative;">
-                                <button type="button" id="sendBtn" aria-label="Send message" data-tooltip="Send (Enter)" class="w-[44px] h-[44px] flex items-center justify-center rounded-full bg-coral text-canvas shadow-sm transition-transform hover:bg-coral-active active:scale-95">
+                                <button type="button" id="sendBtn" aria-label="Send message" data-tooltip="Send (Enter)" class="w-9 h-9 md:w-9 md:h-9 flex items-center justify-center rounded-full bg-coral text-canvas shadow-sm transition-transform hover:bg-coral-active active:scale-95">
                                     <!-- 2.3.5 (owner request): one clean centred arrow — the old
                                          underline bar read as a stray square under the glyph. -->
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
@@ -673,7 +673,7 @@
                                 </button>
                                 <button type="button" id="stopBtn" aria-label="Stop generating" data-tooltip="Stop"
                                     style="position:absolute;inset:0;background:rgb(var(--c-danger));"
-                                    class="stop-hidden absolute inset-0 w-[44px] h-[44px] flex items-center justify-center rounded-full text-white bg-danger hover:bg-danger/90 transition-opacity duration-150">
+                                    class="stop-hidden absolute inset-0 w-9 h-9 md:w-9 md:h-9 flex items-center justify-center rounded-full text-white bg-danger hover:bg-danger/90 transition-opacity duration-150">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
                                         fill="currentColor" aria-hidden="true">
                                         <!-- 2.3.5 (owner request): softer rounded square, optically
@@ -708,12 +708,6 @@
                             </div><!-- /chips -->
                             </div><!-- /composer action row -->
                         </div><!-- /composer box -->
-                        <!-- 2.3.4: only the disclaimer stays under the composer
-                             (owner request) — the Enter hint and the Ctrl-K hint
-                             are gone from here. -->
-                        <div class="items-center justify-center mt-3 hidden md:flex">
-                            <span class="text-[11px] text-muted/70">ABot can make mistakes. Verify important information.</span>
-                        </div>
                         <!-- 2.3.4: suggestions live INSIDE the dock, below the
                              composer. As an outside sibling they stayed in normal
                              flow at the top of an empty main, and the centred
@@ -759,7 +753,7 @@
 
                 <p class="text-sm text-muted mb-3">Choose a preset or write your own custom
                     instructions for the AI.</p>
-                <div id="promptLibrary" class="grid grid-cols-3 md:grid-cols-5 gap-x-2 gap-y-5 mb-4">
+                <div id="promptLibrary" class="grid grid-cols-3 md:grid-cols-5 gap-x-2 gap-y-2 mb-4">
 
 
                     <!-- Preset buttons will be dynamically inserted here -->
@@ -871,7 +865,7 @@
         <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js" defer></script>
         <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js" defer></script>
 
-        <script type="module" src="js/app.js?v=p60"></script>
+        <script type="module" src="js/app.js?v=p61"></script>
 
         <!--
       Tailwind CSS Purge-Safe-List:

@@ -5,7 +5,7 @@
  * Verify with: node tools/verify-parity.js
  */
 
-import { SYSTEM_PROMPTS, getProviderColor, modelCapabilities } from './config.js';
+import { SYSTEM_PROMPTS, FUN_PROMPTS, getProviderColor, modelCapabilities } from './config.js';
 import { dom } from './dom.js';
 import { state } from './state.js';
 // Single source of truth for the sidebar. Two regimes:
@@ -87,7 +87,7 @@ export const renderPromptLibrary = () => {
     dom.promptLibrary.innerHTML = '';
     const currentPrompt = dom.promptTextarea.value;
 
-    SYSTEM_PROMPTS.forEach(p => {
+    const makeButton = (p) => {
         const button = document.createElement('button');
         const isActive = currentPrompt === p.prompt;
 
@@ -103,7 +103,23 @@ export const renderPromptLibrary = () => {
             dom.promptTextarea.value = p.prompt;
             renderPromptLibrary(); // Re-render to update the active state
         });
-        dom.promptLibrary.appendChild(button);
+        return button;
+    };
+
+    const makeHeading = (text) => {
+        const heading = document.createElement('div');
+        heading.className = 'col-span-full text-[11px] uppercase tracking-wide text-muted';
+        heading.textContent = text;
+        return heading;
+    };
+
+    dom.promptLibrary.appendChild(makeHeading('Assistant'));
+    SYSTEM_PROMPTS.forEach((p) => {
+        dom.promptLibrary.appendChild(makeButton(p));
+    });
+    dom.promptLibrary.appendChild(makeHeading('Fun'));
+    FUN_PROMPTS.forEach((p) => {
+        dom.promptLibrary.appendChild(makeButton(p));
     });
 };
 

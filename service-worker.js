@@ -3,7 +3,7 @@
  * Provides offline caching for local assets only
  */
 
-const CACHE_NAME = 'abot-cache-v85'; // 2.8.0: universal tap haptics, desktop switch hidden
+const CACHE_NAME = 'abot-cache-v86'; // 2.9.1: composer density, prompt library, code-block polish
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -11,7 +11,7 @@ const STATIC_ASSETS = [
     '/favicon-32-light.png',
     '/favicon-32-dark.png',
     '/logo.png',
-    '/dist/output.css?v=p60',
+    '/dist/output.css?v=p61',
     '/js/app.js',
     '/js/config.js',
     '/js/dom.js',
