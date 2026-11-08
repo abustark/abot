@@ -424,7 +424,12 @@ async function runViewport(browser, { w, h, label, mobile }) {
             // Owner-approved exceptions: the 2.4.4 sidebar glide (deliberate
             // 480ms drawer curve) + decorative loops (cursor blink, dotmark,
             // typing "A", sparkles, spinners).
-            const ALLOW = ['.blinking-cursor', '.dotmark circle', '.typing-a circle', '.sparkle', '.sidebar', '.animate-spin'];
+            // 2.8.10 (owner directive 2026-11-08): the auth page is frozen as
+            // built. `.auth-bloom` is two huge background colour washes that
+            // drift over 52s/68s — atmosphere, not UI feedback, so the 300ms
+            // interaction ceiling does not apply. `.auth-rise` is the 520ms
+            // staged entrance of the sign-in column, kept deliberately.
+            const ALLOW = ['.blinking-cursor', '.dotmark circle', '.typing-a circle', '.sparkle', '.sidebar', '.animate-spin', '.auth-bloom', '.auth-rise'];
             const bad = [];
             document.querySelectorAll('body *').forEach((el) => {
                 if (ALLOW.some((s) => el.matches(s))) return;

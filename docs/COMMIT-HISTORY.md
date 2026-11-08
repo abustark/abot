@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.8.10`** (current head is `2.8.9`)
+> - **`main` → `2.9.0`** (current head is `2.8.10`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -33,6 +33,13 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.8.10 - auth page motion is an approved exception
+- **Date**: 2026-11-08
+- **Why**: `bun run ui:audit` (the repo's own 11-group real-browser audit) failed exactly one group — G08 motion, on both desktop and mobile. The offenders are `.auth-bloom-accent` (52s), `.auth-bloom-sand` (68s) and the `.auth-rise` 520ms entrance. Owner reviewed them and directed: **keep the auth page exactly as it is.**
+- **`tools/ui-audit.js`**: `.auth-bloom` and `.auth-rise` added to the existing owner-approved `ALLOW` list, with a comment recording the directive and the reasoning — the blooms are atmosphere (two full-bleed background colour washes that drift), not interaction feedback, so the 300ms ceiling does not apply; the entrance is a deliberate staged reveal.
+- **No visual change.** Nothing in `src/input.css`, `index.html` or `dist/` was touched. This commit only stops the audit from flagging approved design as a defect on every future run, and stops a future agent from "fixing" it.
+- **Unchanged**: every other G08 allowance (sidebar glide, cursor blink, dotmark, sparkles, spinner).
 
 ### 2.8.9 - UI work order + two-strikes rule
 - **Date**: 2026-11-08
