@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.8.8`** (current head is `2.8.7`)
+> - **`main` → `2.8.9`** (current head is `2.8.8`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -33,6 +33,14 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.8.8 - bun as the package manager
+- **Date**: 2026-11-08
+- **Why**: owner directive — use `bun` instead of `npm`/`npx` across the project.
+- **`AGENTS.md` §0**: new package-manager rule — `bun install`, `bun run <script>`, `bunx <pkg>`; `node <file>` stays correct for direct script runs; one lockfile only (do not add `bun.lock` beside `package-lock.json` without agreeing which wins).
+- **`AGENTS.md` §3**: the gate command block now uses `bun` (`bun install` replaces `npm ci`, `bun run X` replaces `npm run X`), with a conversion note.
+- **`.githooks/pre-commit`**: prefers `bun` when it is on PATH, falls back to `npm` otherwise, so the hook still works on machines without bun.
+- **Not changed**: `package.json` scripts (they are package-manager agnostic — `bun run` executes them as-is), and `package-lock.json` stays the single committed lockfile.
 
 ### 2.8.7 - remove completed plans and generated audit output from docs
 - **Date**: 2026-11-08

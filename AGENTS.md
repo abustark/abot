@@ -16,6 +16,12 @@ ABot is a **vanilla-JS, multi-model AI chat app** (no framework):
 
 **Constraint:** all AI providers are FREE-TIER keys. Never add features that make extra AI API calls without asking the owner.
 
+**Package manager: `bun` (owner directive, 2026-11-08).** Use `bun` instead of `npm`/`npx` for everything: `bun install`, `bun run <script>`, `bunx <pkg>`. Bun is installed at `C:\Users\abu\.bun\bin\bun.exe` (v1.4.4). Notes:
+- `bun run <script>` is the drop-in for `npm run <script>` — every `package.json` script keeps working unchanged.
+- `node <file>` is still correct for direct script runs (the gate scripts are plain Node).
+- `.githooks/pre-commit` prefers `bun` and falls back to `npm` when bun is absent, so the hook stays portable.
+- Do **not** introduce `bun.lock` alongside `package-lock.json` without agreeing on one lockfile with the owner first — two lockfiles is a real drift risk.
+
 ---
 
 ## 1. Branch discipline & Commit Versioning (strict)
@@ -196,17 +202,20 @@ git merge origin/main    # on the arena branch, resolve, commit
 3. When the owner says yes, **ALL** of the following must pass before push:
 
 ```bash
-npm ci                      # first time
-npm run lint                # eslint — 0 errors (warnings ≤ 30 acceptable)
-npm run check               # acorn syntax check of every JS file
-npm run typecheck           # tsc -p jsconfig.json (check-only) — 0 errors
-npm run build:css           # rebuild Tailwind after any CSS/config/markup class change
+bun install                 # first time (replaces `npm ci`)
+bun run lint                # eslint — 0 errors (warnings ≤ 30 acceptable)
+bun run check               # acorn syntax check of every JS file
+bun run typecheck           # tsc -p jsconfig.json (check-only) — 0 errors
+bun run build:css           # rebuild Tailwind after any CSS/config/markup class change
 git diff --exit-code -- dist/output.css   # stale CSS = fail; commit the rebuild
-npm run test                # security tests + jsdom smoke + interaction test
-npm run test:html           # html-validate on index.html — hard fail
-npm run test:security       # python tools/test-security.py — headers + endpoint auth (needs `node server.js` on :3000)
-npm run ui:audit            # tools/ui-audit.js — 11 hard-fail groups, desktop + mobile (needs `node server.js` on :3000)
+bun run test                # security tests + jsdom smoke + interaction test
+bun run test:html           # html-validate on index.html — hard fail
+bun run test:security       # python tools/test-security.py — headers + endpoint auth (needs `node server.js` on :3000)
+bun run ui:audit            # tools/ui-audit.js — 11 hard-fail groups, desktop + mobile (needs `node server.js` on :3000)
 ```
+
+> **Package manager:** `bun` (see §0). `npm ci` → `bun install`; `npm run X` → `bun run X`;
+> `npx X` → `bunx X`. The scripts themselves are unchanged.
 
 `tools/interaction-test.js` clicks every shell control in jsdom and asserts the visible effect — if you broke a toggle, this is where it shows. Add a case there for every new interactive element you build. `tools/ui-audit.js` is the real-browser counterpart (sizes, contrast, stacking, fonts, overflow); keep both green.
 

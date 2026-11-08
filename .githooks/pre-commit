@@ -10,10 +10,18 @@
 echo "[pre-commit] Syncing release version..."
 node tools/sync-version.js --from-history || { echo "[pre-commit] Version sync failed! Aborting commit."; exit 1; }
 
+# Package manager: bun (owner directive, 2026-11-08). Falls back to npm if bun
+# is not on PATH, so the hook still works on machines without it.
+if command -v bun >/dev/null 2>&1; then
+    PM=bun
+else
+    PM=npm
+fi
+
 echo "[pre-commit] Checking syntax of JavaScript files..."
-npm run check || { echo "[pre-commit] Syntax check failed! Aborting commit."; exit 1; }
+$PM run check || { echo "[pre-commit] Syntax check failed! Aborting commit."; exit 1; }
 
 echo "[pre-commit] Running ESLint..."
-npm run lint || { echo "[pre-commit] Lint check failed! Aborting commit."; exit 1; }
+$PM run lint || { echo "[pre-commit] Lint check failed! Aborting commit."; exit 1; }
 
 echo "[pre-commit] Pre-commit quality gates passed! Proceeding with commit."
