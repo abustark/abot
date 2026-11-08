@@ -36,6 +36,9 @@ temp/
 .playwright/
 .playwright-cli/
 
+# Local AI-tool runtime dirs (48 MB of nested node_modules, never tracked)
+.mimocode/
+
 __pycache__/
 *.pyc
 

@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.8.1`** (current head is `2.8.0`)
+> - **`main` → `2.8.2`** (current head is `2.8.1`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -33,6 +33,18 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.8.1 - repo hygiene for portfolio review
+- **Date**: 2026-11-08
+- **Why**: owner is preparing the project to be shown to recruiters/social. Code stays **private**; this commit only removes dead weight and puts CI where GitHub actually looks.
+- **CI fixed**: `docs/.github/workflows/ci.yml` → **`.github/workflows/ci.yml`**. GitHub only reads workflows from the repo root, so the 8-lane gate suite had never run on push. Note: workflows do **not** execute while the repo is private.
+- **Deleted — exact duplicate**: `docs/ci-workflow.yml.txt` (byte-identical to the CI yml, verified by hash).
+- **Deleted — stale copy**: `docs/sandbox-browser/` (4 files). It self-documented as a verbatim copy of `docs/SANDBOX-BROWSER-VISUAL-TESTS.md` + `tools/visual-check.js` pinned at commit `f1e79bf` (v2.0.28) and had already drifted from `tools/visual-check.js`. The repo copies remain the source of truth.
+- **Deleted — abandoned work**: `docs/palette-previews/` (22 files, ~1.6 MB). Four unused colour-theme explorations (citron / copper / oxblood / current-petrol) that were never adopted.
+- **Branch rule restored**: removed `docs/updates.md` from `main` — AGENTS.md §1.3 restricts it to the `arena` branch.
+- **`.gitignore`**: added `.mimocode/` (48 MB of nested `node_modules` from a local AI tool, was showing as untracked noise).
+- **`eslint.config.js`**: dropped the now-dead `docs/sandbox-browser/**` ignore entry.
+- **No app code touched** — `js/`, `index.html`, `api/`, `lib/`, `server.js`, `dist/` unchanged; no CSS rebuild needed, no cache bump.
 
 ### 2.8.0 - universal tap haptics, switch hidden on desktop
 - **Date**: 2026-10-29
