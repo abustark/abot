@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.8.7`** (current head is `2.8.6`)
+> - **`main` → `2.8.8`** (current head is `2.8.7`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -33,6 +33,21 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.8.7 - remove completed plans and generated audit output from docs
+- **Date**: 2026-11-08
+- **Why**: completes the cleanup the owner asked for in the original request. 2.8.1 only covered the four items that were called out by name; the rest of `docs/` still carried finished planning documents and a generated file. None are referenced by the app, and none describe the project as it stands.
+- **Removed (completed → historical)**:
+  - `docs/IMPLEMENTATION_PLAN.md` — Phase 0–5 revamp plan, marked "in execution"; all phases it tracked are done.
+  - `docs/PHASE2_PLAN.md` — de-monolithisation plan, completed (ES modules shipped long ago).
+  - `docs/PHASE3_PLAN.md` — design revamp spec, marked "awaiting approval"; the revamp shipped in 2.6.10.
+  - `docs/SUGGESTIONS.md` — an open-ended idea list, superseded by the finished backlog.
+  - `docs/BUG-BRIEF-tap-blocking.md` — handoff brief from 2026-08-30 still marked **OPEN**, for a bug long since fixed.
+  - `docs/archive/chat-bubble-notes.md` — pasted conversation dump, not a document.
+- **Removed (generated)**: `docs/audits/visual-check-results.txt` — rewritten on every `npm run visual:local` run by `tools/visual-check.js`; committing it just churns.
+- **Reference fix**: `docs/audits/ui-baseline.md` pointed at the now-deleted implementation plan; reworded to "Phase 0 baseline (plan completed and removed)".
+- **Kept deliberately**: `docs/BUGS-AND-FIXES.md`, `docs/COMMIT-HISTORY.md`, `docs/PROJECT-INFO.md`, `docs/screenshots/`, `docs/bug-fix-protocol/`, `docs/firestore-rules.md` (rules documentation), `docs/SANDBOX-BROWSER-VISUAL-TESTS.md` (setup guide for `tools/visual-check.js`, still present), and `docs/audits/{perf-pwa,ui-baseline,ui-final}.md` (records of completed phases).
+- **No app code touched** — docs only, no CSS rebuild, no cache bump.
 
 ### 2.8.6 - mirroring is on demand only; PROJECT-INFO is main-only
 - **Date**: 2026-11-08
