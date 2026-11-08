@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.8.4`** (current head is `2.8.3`)
+> - **`main` → `2.8.5`** (current head is `2.8.4`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -33,6 +33,16 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.8.4 - PROJECT-INFO refreshed through 2.8.3
+- **Date**: 2026-11-08
+- **Why**: `docs/PROJECT-INFO.md` is the fact sheet AI assistants read to write resume and portfolio copy *without* the source. It was stamped v2.8.0 / 2026-10-26 and had drifted on every number a summary would quote — a stale sheet silently produces wrong résumés.
+- **Recounts**: 316 → **293** tracked files (2.8.1 removal), `js/` 4,342 → **4,770** lines across the same 13 modules, `index.html` 853 → **909**, `src/input.css` 1,751 → **1,868**, backend 388/228/194 → **427/241/215**, 116 versioned releases.
+- **Screenshots**: §2 and §5 now describe the 5 real product captures (chat light/dark, model selector, command palette, mobile) added in 2.8.3 plus the 3 demoted auth captures, replacing the outdated "three WebP captures" claim.
+- **Visibility section added** — the sheet previously only said "private repo"; it now separates *public site* from *private source*, records the exact footer/README copyright wording, and states that screenshots exist. This is the section most likely to produce a bad public post if stale.
+- **CI recorded**: `.github/workflows/ci.yml` at the repo root, with the explicit caveat that workflows do not execute on a private repo — so no generated copy can claim a running pipeline.
+- **§7** gained a "repository hygiene as a release activity" practice drawn from 2.8.1; **§3** gained a repo-layout bullet; **§8** gained GitHub Actions / repository hygiene / technical documentation keywords.
+- **Not changed**: the substantive claims, prohibitions and voice guidance — only facts and dates.
 
 ### 2.8.3 - real product screenshots in the README
 - **Date**: 2026-11-08

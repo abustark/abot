@@ -3,7 +3,7 @@
 > **Purpose:** every fact an AI (or a person) needs to write a resume "Projects"
 > entry, a portfolio summary, a LinkedIn post, or interview talking points for
 > ABot — without reading the code.
-> **Current as of:** **v2.8.0** · 2026-10-26 · branch `main`.
+> **Current as of:** **v2.8.3** · 2026-11-08 · branch `main`.
 
 ---
 
@@ -17,7 +17,14 @@
 - never put the repo URL in a public post — outsiders get a 404. Link the live demo instead, and offer a code walkthrough on request;
 - never offer the code for reuse or imply a license to copy it.
 
-**Claims you may make:** 31 models across 4 provider APIs (Gemini, Groq, NVIDIA NIM, OpenRouter) · vanilla ES modules, no framework, no app bundler · compiled Tailwind design system with a warm oxblood-and-bone palette · SSE streaming through a hardened serverless proxy · Firebase Auth (email, Google, guest) + Firestore · installable PWA · strict CSP and security headers · 4 automated test suites · 49-entry bug registry · enforced one-version-per-release workflow.
+**Claims you may make:** 31 models across 4 provider APIs (Gemini, Groq, NVIDIA NIM, OpenRouter) · vanilla ES modules, no framework, no app bundler · compiled Tailwind design system with a warm oxblood-and-bone palette · SSE streaming through a hardened serverless proxy · Firebase Auth (email, Google, guest) + Firestore · installable PWA · strict CSP and security headers · 4 automated test suites · 49-entry bug registry · enforced one-version-per-release workflow · 116 versioned releases logged.
+
+**Claims about visibility — read carefully before writing a public post:**
+
+- The **live site is public** and may be linked and screenshotted freely.
+- The **repo is private**. Never publish the repo URL (outsiders get a 404) and never imply the source is open source or reusable.
+- The README and the site footer read **"© 2026 ABu. All rights reserved."** with an *"In active development — new features ship regularly"* line. You may quote that positioning, but don't describe a formal license beyond "proprietary / all rights reserved."
+- The project ships **real product screenshots** (chat, model selector, command palette, mobile) — describe them as present; they are in `docs/screenshots/`.
 
 **Claims you must not make:**
 
@@ -53,9 +60,9 @@
 | Author | ABu / Basith AbuSyed (`abustark` on GitHub) |
 | Live site | https://abot-ai.vercel.app/ |
 | Source | private GitHub repo `abustark/abot` (access on request) |
-| License | private, all rights reserved (`"license": "UNLICENSED"`) |
-| Version | **2.8.0** (2026-10-29) |
-| Status | Actively maintained. 2.7.x is the brand + presentation pass: oxblood palette, auth-page lockup, rotating preview prompts, README screenshots, package metadata |
+| License | private, all rights reserved (`"license": "UNLICENSED"`); site footer © 2026 ABu |
+| Version | **2.8.3** (2026-11-08) |
+| Status | Actively maintained. 2.8.x is the portfolio-readiness pass: repo hygiene (CI moved to root `.github/`), footer copy, and real product screenshots in the README |
 | Stack | Vanilla ES modules · Tailwind 3.4 (compiled) · Vercel serverless + Express mirror · Firebase Auth/Firestore · 4 free-tier AI providers |
 
 **One-liners (pick by context):**
@@ -77,8 +84,8 @@
 | Auth (server) | firebase-admin | ^12.7.0 | `verifyIdToken` + email-verification gate |
 | Env | dotenv | ^16.3.1 | `.env` config |
 | Legacy | cors | ^2.8.5 | Installed, unused (same-origin, no `cors()`) |
-| Frontend | Vanilla HTML/CSS/JS | ES modules, **zero frameworks, zero app build step** | `index.html` (853 lines) + `js/` (13 modules, ~4,340 lines) |
-| Styling | Tailwind CSS | ^3.4.13 | `src/input.css` (1,751 lines) → `dist/output.css` (91 KB) |
+| Frontend | Vanilla HTML/CSS/JS | ES modules, **zero frameworks, zero app build step** | `index.html` (909 lines) + `js/` (13 modules, ~4,770 lines) |
+| Styling | Tailwind CSS | ^3.4.13 | `src/input.css` (1,868 lines) → `dist/output.css` (91 KB) |
 | Styling plugin | @tailwindcss/typography | ^0.5.16 | Markdown prose |
 | CSS pipeline | autoprefixer + postcss | ^10.4.21 / ^8.5.6 | `npm run build:css` |
 | Auth (client) | Firebase compat SDKs | v9.22.1 (deferred) | Email/password, Google, anonymous guest |
@@ -92,7 +99,7 @@
 | Highlight | highlight.js (vendored) | `vendor/highlight.min.js` 160 KB (+ npm `^11.12.0`) | Lazy on first code block |
 | Fonts | Self-hosted woff2 | 7 files in `dist/fonts/` (3 precached) | Plus Jakarta Sans / Cabinet Grotesk / JetBrains Mono / Source Serif 4 |
 | PWA | Hand-written service worker + manifest | `abot-cache-v83`, 24 precached assets | Installable, offline shell |
-| Screenshots | WebP captures | `docs/screenshots/` (light desktop 69 KB, dark desktop 81 KB, mobile 112 KB) | README |
+| Screenshots | 5 PNG product captures + 3 WebP auth captures in `docs/screenshots/` (1.1 MB total) | README hero section |
 | Versioning | `tools/sync-version.js` + `.githooks/` | one version per request batch, `.10` rollover | Writes `APP_VERSION` + `package.json` version, verifies the commit subject |
 | Testing | jsdom | ^30.0.1 | interaction / cycle / smoke suites |
 | Syntax | acorn + acorn-walk | ^8.18.0 / ^8.3.5 | `npm run check` |
@@ -101,7 +108,8 @@
 | Types | TypeScript (check-only) | ^5.9.3 | `tsc -p jsconfig.json` (`allowJs`) |
 | Lint | ESLint | ^9.39.5 + `@eslint/js` + `globals` | `npm run lint`, pre-commit hook |
 | Hosting (prod) | Vercel Serverless | `api/chat.js`, `maxDuration 60` | Production deployment |
-| VCS | Git / GitHub | `main` + `arena/01a03fe9-abot` (fast-forward mirror) | v2.8.0, 2026-10-29 head |
+| VCS | Git / GitHub | `main` + `arena/01a03fe9-abot` (fast-forward mirror) | v2.8.3, 2026-11-08 head |
+| CI | GitHub Actions | `.github/workflows/ci.yml` | Runs on push to `main`/arena — **only executes when the repo is public** |
 
 ---
 
@@ -114,6 +122,7 @@
 - **Key isolation:** the browser never holds provider keys — `POST /api/chat` (SSE) with a Bearer Firebase JWT → server verifies, rate-limits and validates (40 messages / 8k chars per message / 200k total / 256 KB JSON) → upstream fetch with server-side keys → streamed passthrough (Google non-stream is assembled).
 - **Static allowlist:** `server.js` + `vercel.json` serve only `index.html`, `dist/`, `js/`, `vendor/`, the service worker, manifest and icons; `.env`, `service-account-key.json` and `.git/` return 404.
 - **Strict CSP:** `script-src 'self'` plus two SHA-256-pinned inline pre-paint blocks (theme boot + service-worker registration), with `connect-src` locked to exactly the APIs used. **The two hashes are byte-exact and must be re-pinned in `vercel.json` and `server.js` whenever either inline script changes** — 2.7.5 fixed a stale hash that had been silently blocking the theme boot in production since the 2.6.10 palette change.
+- **Repo layout:** CI lives at `.github/workflows/ci.yml` (repo root — GitHub only reads workflows there; it previously sat under `docs/.github/` and never ran). `docs/` holds the commit log, bug registry, project info and screenshots; `tools/` holds the gate scripts; `js/` has its own `README.md` documenting the module graph.
 
 ---
 
@@ -144,17 +153,18 @@
 - **Parity proof:** `tools/verify-parity.js` — token parity 56/57 after de-monolithisation (1 documented deviation = an `innerHTML` → DOM XSS fix); `index.html` went from 2,555 lines to ~840, extracted into ES modules.
 - **Pre-commit hook** (`.githooks/`, wired by `prepare`): `tools/sync-version.js --from-history` writes `APP_VERSION` in `js/config.js` **and** `version` in `package.json`, advances the `📌 Next version` line, then syntax + lint run; `.githooks/commit-msg` aborts when the subject's version disagrees.
 - **Bug registry:** `docs/BUGS-AND-FIXES.md` (49 unique B-ids and counting), `docs/COMMIT-HISTORY.md` (full versioned log), `AGENTS.md` (operating brief).
-- **Screenshots:** three real captures committed in `docs/screenshots/` — light desktop, dark desktop, mobile — taken from the live site (v2.7.8) at 1440×900 and a 390×844 mobile viewport @2x, WebP q92 (262 KB total). No forced theme: light/dark are the natural `prefers-color-scheme` result.
+- **Screenshots:** **8 committed captures** in `docs/screenshots/` — 5 real product shots (chat light, chat dark, model selector, command palette, mobile chat, PNG, taken from the live app at 1366×608 / 706×1374) plus the 3 earlier auth-page WebP captures, now demoted into a collapsed `<details>` block in the README so the product leads the page.
+- **CI:** `.github/workflows/ci.yml` runs the gate suite on push to `main` and `arena/01a03fe9-abot`. Caveat — GitHub only executes workflows on **public** repos, so while the repo stays private this is a ready-to-activate config, not a running pipeline.
 
 ---
 
 ## 6. Scale metrics (quantifiables)
 
-- **316** git-tracked files (0 in `node_modules`).
-- **~4,342 lines** across **13** `js/` ES modules (`chat.js` 1,267 · `app.js` 1,248 · `auth.js` 478 · `utils.js` 263 · `auth-preview.js` 248 · `sparkles.js` 152 · `config.js` 148 · `palette.js` 148 · `ui.js` 139 · `dom.js` 105 · `haptics.js` 69 · `dotloader.js` 54 · `state.js` 23) + `server.js` 388 + `api/chat.js` 228 + `lib/chat-security.js` 194.
-- **853** lines of `index.html`, **1,751** lines of Tailwind source → **91 KB** compiled CSS.
-- **31 configured models** across **4 provider APIs**; **9** prompt presets; **49** bug-registry ids.
-- **4 test suites** in `npm test`; **25** service-worker precached assets; **7** self-hosted font files.
+- **293** git-tracked files (0 in `node_modules`). *Was 316 before the 2.8.1 hygiene pass, which removed a duplicate CI file, a stale sandbox-browser copy and an abandoned palette-previews set.*
+- **~4,770 lines** across **13** `js/` ES modules (`chat.js` 1,378 · `app.js` 1,349 · `auth.js` 532 · `utils.js` 295 · `auth-preview.js` 288 · `sparkles.js` 169 · `ui.js` 166 · `palette.js` 163 · `config.js` 161 · `dom.js` 108 · `haptics.js` 76 · `dotloader.js` 60 · `state.js` 25) + `server.js` 427 + `api/chat.js` 241 + `lib/chat-security.js` 215.
+- **909** lines of `index.html`, **1,868** lines of Tailwind source → **91 KB** compiled CSS.
+- **31 configured models** across **4 provider APIs**; **9** prompt presets; **49** bug-registry ids; **116** versioned releases logged in `docs/COMMIT-HISTORY.md`.
+- **4 test suites** in `npm test`; **25** service-worker precached assets; **7** self-hosted font files; **8** committed screenshots.
 - **60 s** serverless max duration with **55 s** upstream abort; **30 req/15 min** per-identity chat limit + **100 req/15 min** per-IP general limit.
 - **10 security issues (S1–S10)** remediated in Phase 1 (2026-08-27); favicon 380 KB → 1.2 KB in Phase 4.
 
@@ -171,12 +181,13 @@
 - **Stream-safe proxying** — chunk passthrough with timeout + null-body guards, truncated server-only logs, generic client envelopes.
 - **Degradation by design** — in-memory limiter with a documented per-warm-instance limit and a Tier-2 Firestore-counter recommendation; vendored, pinned, deferred third-party code.
 - **Trunk discipline** — `main` is the source of truth, `arena/01a03fe9-abot` is a fast-forward mirror, AI work is governed by `AGENTS.md`.
+- **Repository hygiene as a release activity** — 2.8.1 removed a byte-identical duplicate config, a stale self-described "verbatim copy" that had drifted from its source of truth, and four abandoned theme explorations; moved CI where the platform actually reads it; and added a 48 MB local tool directory to `.gitignore` that had been sitting exposed as untracked. Reads the tree for what a *reviewer* sees, not just what the build needs.
 
 ---
 
 ## 8. ATS / keyword tags
 
-AI chat, multi-model routing, LLM integration, prompt engineering, Google Gemini, Groq, NVIDIA NIM, OpenRouter, server-sent events, SSE streaming, markdown rendering, syntax highlighting, Firebase Authentication, Google OAuth, Firestore, NoSQL, per-user isolation, rate limiting, Content-Security-Policy, CSP hash pinning, security headers, PWA, service worker, TTS, vanilla JavaScript, ES modules, Tailwind CSS, design system, responsive design, dark mode, accessibility, command palette, automated testing, jsdom, ESLint, TypeScript checking, Vercel serverless, Express, Git/GitHub, WebP.
+AI chat, multi-model routing, LLM integration, prompt engineering, Google Gemini, Groq, NVIDIA NIM, OpenRouter, server-sent events, SSE streaming, markdown rendering, syntax highlighting, Firebase Authentication, Google OAuth, Firestore, NoSQL, per-user isolation, rate limiting, Content-Security-Policy, CSP hash pinning, security headers, PWA, service worker, TTS, vanilla JavaScript, ES modules, Tailwind CSS, design system, responsive design, dark mode, accessibility, command palette, automated testing, jsdom, ESLint, TypeScript checking, Vercel serverless, Express, GitHub Actions, Git/GitHub, WebP, repository hygiene, technical documentation.
 
 ---
 
@@ -189,7 +200,7 @@ AI chat, multi-model routing, LLM integration, prompt engineering, Google Gemini
 - Implemented chat depth (Firestore per-user CRUD, search, TTS, JSON/Markdown export/import, a 9-preset prompt library, `Ctrl+K` palette, 5-message guest mode) inside an installable dark/light PWA.
 - Built a warm oxblood-and-bone design system (tokenised light/dark palettes, serif-display pairing, provider identity colours) and a self-demoing auth page whose three-model reply thread rotates through real developer questions.
 - Closed 10 security findings (open static root, missing limiter, CORS combo, query-token auth, URL key, token-burn caps, error leakage, client-only guest cap, hung lambdas, inline CSP) with an allowlist static server, header-only auth and a strict CSP.
-- Verified with 4 Node suites (security contract, jsdom smoke, full-shell interaction, cycle regressions) plus ESLint, acorn syntax checking, `tsc` check-only types, Playwright E2E and browser UI audits; de-monolithised `index.html` from 2,555 to ~840 lines with 56/57 token parity.
+- Verified with 4 Node suites (security contract, jsdom smoke, full-shell interaction, cycle regressions) plus ESLint, acorn syntax checking, `tsc` check-only types, Playwright E2E and browser UI audits; de-monolithised `index.html` from 2,555 to ~840 lines with 56/57 token parity (it has since grown back to ~909 lines as features landed).
 
 **Resume project paragraph (3 lines):** Multi-model AI chat hub built with vanilla JS modules and Tailwind, proxying 31 models from 4 free-tier providers via a hardened Vercel/Express backend with Firebase Auth and Firestore. Features streaming with markdown/highlighting, search/TTS, export/import and a command palette in an installable dark/light PWA. Ships with strict CSP headers, per-user isolation, and 4 automated test suites covering security, smoke, interaction and cycles.
 
@@ -201,7 +212,8 @@ AI chat, multi-model routing, LLM integration, prompt engineering, Google Gemini
 >
 > The parts I'm proudest of are the boring ones: provider keys never reach the browser, the CSP is hash-pinned, and every release is versioned by a hook that refuses a mismatched commit.
 >
-> Live demo: https://abot-ai.vercel.app/ — free-tier keys, so it may be busy; guest mode gives you 5 messages without signing up. Repo is private; happy to walk through the code.
+> Live demo: https://abot-ai.vercel.app/ — free-tier keys, so it may be busy; guest mode gives you 5 messages without signing up. The source is private; happy to walk through the code on request.
 
 **Tone/length guide for the AI:** follow §0. Frame impact as user capability plus the hardest engineering problem solved — no business KPIs. Lead with verbs and the numbers from §6, use keywords from §8, and never cite a model count other than **31** or claim committed screenshots that are not in `docs/screenshots/`.
-                                                                                                      
+
+**When asked to write a LinkedIn/portfolio post:** lead with the live demo, not the repo. Offer a screenshot (chat, model selector or mobile) as the visual — never a code screenshot, since the source is private.
