@@ -141,5 +141,7 @@ docs/                 # commit log, project info, bug registry, plans, paste-kit
 
 ## License
 
-All rights reserved. The source is not licensed for reuse, modification, or redistribution.
+© 2026 ABu. All rights reserved. The source is not licensed for reuse, modification, or redistribution.
+
+In active development — new features ship regularly.
 

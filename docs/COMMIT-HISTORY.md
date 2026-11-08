@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.8.2`** (current head is `2.8.1`)
+> - **`main` → `2.8.3`** (current head is `2.8.2`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -33,6 +33,14 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.8.2 - footer copy: active development line
+- **Date**: 2026-11-08
+- **Why**: owner request. *"Check back occasionally for new features"* read as passive and slightly apologetic on a portfolio-facing sign-in page — the same information works better as confident momentum. Name stays **ABu** (owner directive), copyright line untouched.
+- **`index.html`** (`auth-footer`): second line → *"In active development — new features ship regularly."* (`&mdash;`). Two-line `<br>` structure unchanged, `#footer-year` span and `#build-badge` untouched, no CSS change.
+- **`README.md`** (License section): same copy applied, with the substantive source-usage restriction kept. Now reads *"© 2026 ABu. All rights reserved. The source is not licensed for reuse, modification, or redistribution."* + the active-development line.
+- **Wording position (for the record):** "All rights reserved" is never legally required — copyright is automatic. It is redundant in a private repo's README (no `LICENSE` already grants nothing) but appropriate in the public site footer, which is what visitors actually see.
+- **Not changed**: `package.json` still `"license": "UNLICENSED"` / `"author": "Basith AbuSyed"`, and `docs/PROJECT-INFO.md`'s factual licence statements. No app logic touched; no cache bump.
 
 ### 2.8.1 - repo hygiene for portfolio review
 - **Date**: 2026-11-08
