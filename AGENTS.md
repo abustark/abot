@@ -59,6 +59,7 @@ ABot is a **vanilla-JS, multi-model AI chat app** (no framework):
      **Exception:** while an Arena session holds unpushed commits, arena legitimately leads —
      merge it into `main` first (§1b.2), then mirror.
    - **`docs/updates.md`**: Exists **only on the `arena` branch** (never commit to `main`). It is updated only after major updates (not for every small commit) and documents the contrast between the old workflow and the updated workflow.
+   - **`docs/PROJECT-INFO.md`**: **main-only for edit ownership** (owner directive, 2026-11-08). It is the AI fact sheet — the current state of the project, written so an AI can generate resume/portfolio copy **without reading the code**. Rules: it holds **only current facts** (latest stack, architecture, instructions, metrics) and **never changelog narration** — "was X, now Y", "previously", "this release removed…" belong in `docs/COMMIT-HISTORY.md`, not here. The file still exists on `arena` because the branches are byte-identical mirrors; **only edit it as part of `main` work**, and never open a divergence just to delete it from arena.
 4. **Secrets**: Never commit secrets (`.env`, `service-account-key.json` are gitignored — keep them that way).
 
 ---

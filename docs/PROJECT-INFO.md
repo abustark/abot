@@ -122,7 +122,7 @@
 - **Key isolation:** the browser never holds provider keys — `POST /api/chat` (SSE) with a Bearer Firebase JWT → server verifies, rate-limits and validates (40 messages / 8k chars per message / 200k total / 256 KB JSON) → upstream fetch with server-side keys → streamed passthrough (Google non-stream is assembled).
 - **Static allowlist:** `server.js` + `vercel.json` serve only `index.html`, `dist/`, `js/`, `vendor/`, the service worker, manifest and icons; `.env`, `service-account-key.json` and `.git/` return 404.
 - **Strict CSP:** `script-src 'self'` plus two SHA-256-pinned inline pre-paint blocks (theme boot + service-worker registration), with `connect-src` locked to exactly the APIs used. **The two hashes are byte-exact and must be re-pinned in `vercel.json` and `server.js` whenever either inline script changes** — 2.7.5 fixed a stale hash that had been silently blocking the theme boot in production since the 2.6.10 palette change.
-- **Repo layout:** CI lives at `.github/workflows/ci.yml` (repo root — GitHub only reads workflows there; it previously sat under `docs/.github/` and never ran). `docs/` holds the commit log, bug registry, project info and screenshots; `tools/` holds the gate scripts; `js/` has its own `README.md` documenting the module graph.
+- **Repo layout:** CI lives at `.github/workflows/ci.yml` (the only path GitHub reads workflows from). `docs/` holds the commit log, bug registry, project info and screenshots; `tools/` holds the gate scripts; `js/` has its own `README.md` documenting the module graph.
 
 ---
 
@@ -153,14 +153,14 @@
 - **Parity proof:** `tools/verify-parity.js` — token parity 56/57 after de-monolithisation (1 documented deviation = an `innerHTML` → DOM XSS fix); `index.html` went from 2,555 lines to ~840, extracted into ES modules.
 - **Pre-commit hook** (`.githooks/`, wired by `prepare`): `tools/sync-version.js --from-history` writes `APP_VERSION` in `js/config.js` **and** `version` in `package.json`, advances the `📌 Next version` line, then syntax + lint run; `.githooks/commit-msg` aborts when the subject's version disagrees.
 - **Bug registry:** `docs/BUGS-AND-FIXES.md` (49 unique B-ids and counting), `docs/COMMIT-HISTORY.md` (full versioned log), `AGENTS.md` (operating brief).
-- **Screenshots:** **8 committed captures** in `docs/screenshots/` — 5 real product shots (chat light, chat dark, model selector, command palette, mobile chat, PNG, taken from the live app at 1366×608 / 706×1374) plus the 3 earlier auth-page WebP captures, now demoted into a collapsed `<details>` block in the README so the product leads the page.
+- **Screenshots:** **8 committed captures** in `docs/screenshots/` — 5 product shots (chat light, chat dark, model selector, command palette, mobile chat; PNG, 1366×608 desktop and 706×1374 mobile) presented in the README, plus 3 auth-page captures (WebP) inside a collapsed `<details>` block so the product leads the page.
 - **CI:** `.github/workflows/ci.yml` runs the gate suite on push to `main` and `arena/01a03fe9-abot`. Caveat — GitHub only executes workflows on **public** repos, so while the repo stays private this is a ready-to-activate config, not a running pipeline.
 
 ---
 
 ## 6. Scale metrics (quantifiables)
 
-- **293** git-tracked files (0 in `node_modules`). *Was 316 before the 2.8.1 hygiene pass, which removed a duplicate CI file, a stale sandbox-browser copy and an abandoned palette-previews set.*
+- **293** git-tracked files (0 in `node_modules`).
 - **~4,770 lines** across **13** `js/` ES modules (`chat.js` 1,378 · `app.js` 1,349 · `auth.js` 532 · `utils.js` 295 · `auth-preview.js` 288 · `sparkles.js` 169 · `ui.js` 166 · `palette.js` 163 · `config.js` 161 · `dom.js` 108 · `haptics.js` 76 · `dotloader.js` 60 · `state.js` 25) + `server.js` 427 + `api/chat.js` 241 + `lib/chat-security.js` 215.
 - **909** lines of `index.html`, **1,868** lines of Tailwind source → **91 KB** compiled CSS.
 - **31 configured models** across **4 provider APIs**; **9** prompt presets; **49** bug-registry ids; **116** versioned releases logged in `docs/COMMIT-HISTORY.md`.
@@ -181,7 +181,7 @@
 - **Stream-safe proxying** — chunk passthrough with timeout + null-body guards, truncated server-only logs, generic client envelopes.
 - **Degradation by design** — in-memory limiter with a documented per-warm-instance limit and a Tier-2 Firestore-counter recommendation; vendored, pinned, deferred third-party code.
 - **Trunk discipline** — `main` is the source of truth, `arena/01a03fe9-abot` is a fast-forward mirror, AI work is governed by `AGENTS.md`.
-- **Repository hygiene as a release activity** — 2.8.1 removed a byte-identical duplicate config, a stale self-described "verbatim copy" that had drifted from its source of truth, and four abandoned theme explorations; moved CI where the platform actually reads it; and added a 48 MB local tool directory to `.gitignore` that had been sitting exposed as untracked. Reads the tree for what a *reviewer* sees, not just what the build needs.
+- **Repository hygiene as a release activity** — the tree is read for what a *reviewer* sees, not just what the build needs: no duplicate configs, no stale copies of documents that have a single source of truth, no abandoned design explorations, no multi-megabyte local tool directories left untracked, and CI where the platform actually looks for it.
 
 ---
 
@@ -200,7 +200,7 @@ AI chat, multi-model routing, LLM integration, prompt engineering, Google Gemini
 - Implemented chat depth (Firestore per-user CRUD, search, TTS, JSON/Markdown export/import, a 9-preset prompt library, `Ctrl+K` palette, 5-message guest mode) inside an installable dark/light PWA.
 - Built a warm oxblood-and-bone design system (tokenised light/dark palettes, serif-display pairing, provider identity colours) and a self-demoing auth page whose three-model reply thread rotates through real developer questions.
 - Closed 10 security findings (open static root, missing limiter, CORS combo, query-token auth, URL key, token-burn caps, error leakage, client-only guest cap, hung lambdas, inline CSP) with an allowlist static server, header-only auth and a strict CSP.
-- Verified with 4 Node suites (security contract, jsdom smoke, full-shell interaction, cycle regressions) plus ESLint, acorn syntax checking, `tsc` check-only types, Playwright E2E and browser UI audits; de-monolithised `index.html` from 2,555 to ~840 lines with 56/57 token parity (it has since grown back to ~909 lines as features landed).
+- Verified with 4 Node suites (security contract, jsdom smoke, full-shell interaction, cycle regressions) plus ESLint, acorn syntax checking, `tsc` check-only types, Playwright E2E and browser UI audits; `index.html` was de-monolithised from 2,555 inline lines into 13 ES modules, verified at 56/57 token parity.
 
 **Resume project paragraph (3 lines):** Multi-model AI chat hub built with vanilla JS modules and Tailwind, proxying 31 models from 4 free-tier providers via a hardened Vercel/Express backend with Firebase Auth and Firestore. Features streaming with markdown/highlighting, search/TTS, export/import and a command palette in an installable dark/light PWA. Ships with strict CSP headers, per-user isolation, and 4 automated test suites covering security, smoke, interaction and cycles.
 

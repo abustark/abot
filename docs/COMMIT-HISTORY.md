@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.8.5`** (current head is `2.8.4`)
+> - **`main` → `2.8.6`** (current head is `2.8.5`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -33,6 +33,13 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.8.5 - PROJECT-INFO is current facts only; AGENTS.md rule added
+- **Date**: 2026-11-08
+- **Why**: owner clarification — `docs/PROJECT-INFO.md` is the AI fact sheet (current state of the project so an AI can write resume/portfolio copy without the code). Changelog narration does not belong in it; that is `docs/COMMIT-HISTORY.md`'s job.
+- **Stripped narration from PROJECT-INFO**: removed "Was 316 before the 2.8.1 hygiene pass…", "it previously sat under `docs/.github/` and never ran", "now demoted into a collapsed `<details>` block", "it has since grown back to ~909 lines", and the 2.8.1-specific list in §7. Each is now a statement of current state only, with no before/after framing.
+- **`AGENTS.md` §1.3**: new bullet — `docs/PROJECT-INFO.md` is **main-only for edit ownership**; holds current facts only, never changelog narration. It remains physically present on `arena` because the branches are byte-identical mirrors — a divergence is explicitly not the fix (a plain mirror push would restore it on the next sync anyway).
+- **Not changed**: the technical content, numbers, prohibitions and voice guidance.
 
 ### 2.8.4 - PROJECT-INFO refreshed through 2.8.3
 - **Date**: 2026-11-08
