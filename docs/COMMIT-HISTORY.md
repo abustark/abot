@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.8.6`** (current head is `2.8.5`)
+> - **`main` → `2.8.7`** (current head is `2.8.6`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -33,6 +33,15 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.8.6 - mirroring is on demand only; PROJECT-INFO is main-only
+- **Date**: 2026-11-08
+- **Why**: owner directive — the standing "always mirror main → arena after every commit" rule is removed. Arena is now synced **only when the owner explicitly says so**; between those orders it is expected to lag behind `main`. Separately, `docs/PROJECT-INFO.md` must not exist on arena at all.
+- **`AGENTS.md` §1.3**: replaced the automatic-mirror instruction with **🚫 NO AUTOMATIC MIRRORING** — agents must never run `git push origin main:arena/...` on their own. When the owner does ask, mirror only the files/code involved with a plain fast-forward push.
+- **`AGENTS.md` §1.3**: `docs/PROJECT-INFO.md` promoted from "main-only for edit ownership" to **`main`-only, must NOT exist on arena**, with the explicit pre-sync check (`git cat-file -e origin/arena/...:docs/PROJECT-INFO.md`) so no future agent silently restores it.
+- **`AGENTS.md` §1b**: added an on-demand banner to the sync-safety preamble; §1b.4 no longer asks Arena sessions to auto-mirror into `main`; §1b.5 gained the on-demand rule and the PROJECT-INFO-must-not-exist-on-arena rule.
+- **Arena side**: `docs/PROJECT-INFO.md` deleted from `arena/01a03fe9-abot` in a separate arena-side commit. Because the file stays tracked on `main`, a naive mirror would restore it — that is exactly why the check above is mandatory before any future sync.
+- **Not changed**: `docs/updates.md` stays arena-only; no app code touched.
 
 ### 2.8.5 - PROJECT-INFO is current facts only; AGENTS.md rule added
 - **Date**: 2026-11-08

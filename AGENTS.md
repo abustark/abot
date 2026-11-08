@@ -49,17 +49,26 @@ ABot is a **vanilla-JS, multi-model AI chat app** (no framework):
 3. **Arena Synchronization (`arena/01a03fe9-abot`)**:
    - **⚠️ BEFORE ANY MIRROR, READ [§1b SYNC SAFETY](#1b-sync-safety--read-before-any-mirror-mandatory).**
      An Arena.ai session works only on arena and may hold unpushed commits there.
-   - After updating `main`, mirror onto arena with a **plain fast-forward push only**:
-     `git push origin main:arena/01a03fe9-abot`. If it is rejected, arena is ahead —
-     merge it into `main` first (§1b.2), then retry. **Force-push is not part of the
-     workflow** — it happens only when the owner explicitly asks for it in chat
-     (owner directive, 2026-10-22).
-     The two branches stay **identical** — `main` is the single source of truth, and arena normally
-     keeps no commits of its own (the old `merge main <version> into arena/...` flow is retired).
+   - **🚫 NO AUTOMATIC MIRRORING (owner directive, 2026-11-08).** Agents **must not** run
+     `git push origin main:arena/01a03fe9-abot` on their own, ever — not after a commit, not
+     "to keep them in sync", not at the end of a session. Mirroring happens **only when the
+     owner explicitly asks for it in chat** ("sync arena", "mirror to arena", "update arena").
+     Between those orders arena is expected to lag behind `main` — that is the intended state,
+     not drift to be corrected. When the owner does ask, mirror only the files/code involved
+     with a **plain fast-forward push**: `git push origin main:arena/01a03fe9-abot`
+     (owner directive, 2026-10-22: force-push happens only when the owner explicitly asks for
+     it in chat). If the push is rejected, arena is ahead → merge it into `main` first (§1b.2).
      **Exception:** while an Arena session holds unpushed commits, arena legitimately leads —
-     merge it into `main` first (§1b.2), then mirror.
+     merge it into `main` first (§1b.2), then (if asked) mirror.
    - **`docs/updates.md`**: Exists **only on the `arena` branch** (never commit to `main`). It is updated only after major updates (not for every small commit) and documents the contrast between the old workflow and the updated workflow.
-   - **`docs/PROJECT-INFO.md`**: **main-only for edit ownership** (owner directive, 2026-11-08). It is the AI fact sheet — the current state of the project, written so an AI can generate resume/portfolio copy **without reading the code**. Rules: it holds **only current facts** (latest stack, architecture, instructions, metrics) and **never changelog narration** — "was X, now Y", "previously", "this release removed…" belong in `docs/COMMIT-HISTORY.md`, not here. The file still exists on `arena` because the branches are byte-identical mirrors; **only edit it as part of `main` work**, and never open a divergence just to delete it from arena.
+   - **`docs/PROJECT-INFO.md`**: **`main`-only — must NOT exist on `arena`** (owner directive, 2026-11-08). It is the AI fact sheet: the current state of the project, written so an AI can generate resume/portfolio copy **without reading the code**. Rules:
+     - It holds **only current facts** (latest stack, architecture, instructions, metrics) and **never changelog narration** — "was X, now Y", "previously", "this release removed…" belong in `docs/COMMIT-HISTORY.md`.
+     - It is **removed from the arena branch** and must stay removed. It was deleted there in `2.8.6`; because it is tracked on `main`, a future mirror would silently restore it on arena.
+     - **Every agent must check before any arena sync:**
+       ```bash
+       git cat-file -e origin/arena/01a03fe9-abot:docs/PROJECT-INFO.md && echo "PRESENT — remove it before/after syncing"
+       ```
+       If it is present on arena, delete it from arena's tree in a follow-up arena-side commit so it does not remain. Never mirror it into arena deliberately.
 4. **Secrets**: Never commit secrets (`.env`, `service-account-key.json` are gitignored — keep them that way).
 
 ---
@@ -73,6 +82,11 @@ ABot is a **vanilla-JS, multi-model AI chat app** (no framework):
 > that session's commits are destroyed — silently, with no reflog recovery on the
 > remote. Mirrors are **fast-forward only**; force-push never happens on its own
 > (owner directive, 2026-10-22) — only when the owner explicitly says so in chat.
+>
+> **Mirroring is ON DEMAND ONLY (owner directive, 2026-11-08).** Nothing in this
+> section authorises an agent to mirror on its own. Sections 1b.1–1b.3 describe
+> *how* to mirror safely **once the owner has asked**; they are not a standing
+> instruction to do it.
 
 ### 1b.1 The pre-mirror check (ALWAYS run first)
 
@@ -114,16 +128,18 @@ only when the owner explicitly asks for it in chat.
 ### 1b.4 Rules for Arena sessions (the other direction)
 
 An agent working inside an **Arena.ai session** is pinned to `arena/01a03fe9-abot`
-and should mirror its work **into main** at the end of every feature, so the two
-never diverge:
+and pushes its work there. Per the 2026-11-08 directive it does **not** mirror into
+`main` on its own either — it reports what it needs and waits for the owner. When
+the owner asks, bring arena's work into `main` with a **fast-forward push**, not a
+force-push:
 
 ```bash
 git fetch origin
 git push origin arena/01a03fe9-abot:main
 ```
 
-This is a **fast-forward push, not a force-push** — if another agent committed to
-`main` meanwhile, it is rejected, and the arena session must merge `main` first:
+If another agent committed to `main` meanwhile, this is rejected; the arena session
+must merge `main` first:
 
 ```bash
 git merge origin/main    # on the arena branch, resolve, commit
@@ -134,15 +150,20 @@ git merge origin/main    # on the arena branch, resolve, commit
 
 1. `main` is the single source of truth for released work. Arena is a mirror **except**
    while an Arena session holds unpushed commits there.
-2. **Never** force-push — not `main`, not `main:arena`. The mirror is always a plain
+2. **Mirroring is on demand only** — never push `main:arena` unless the owner asked
+   in chat (owner directive, 2026-11-08). Arena lagging behind `main` is normal.
+3. **Never** force-push — not `main`, not `main:arena`. The mirror is always a plain
    fast-forward push; a rejection means arena is ahead → merge first (§1b.2).
-3. The **only** exception: the owner explicitly asks for a force-push **in chat**
+4. The **only** exception: the owner explicitly asks for a force-push **in chat**
    (owner directive, 2026-10-22). Even then, create a backup tag of the current tip
    first and use `--force-with-lease`.
-4. If you are unsure whether arena is ahead, **stop and ask the owner.** A refused
+5. If you are unsure whether arena is ahead, **stop and ask the owner.** A refused
    push costs seconds; a destroyed feature costs a session.
-5. Any agent that finds arena ahead of main must report it in its response
+6. Any agent that finds arena ahead of main must report it in its response
    ("arena was ahead by N commits; merged into main before mirroring").
+7. `docs/PROJECT-INFO.md` must never exist on `arena` — check with
+   `git cat-file -e origin/arena/01a03fe9-abot:docs/PROJECT-INFO.md` before and after
+   any arena sync, and remove it from arena if present.
 
 ---
 
