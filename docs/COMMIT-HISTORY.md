@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.9.0`** (current head is `2.8.10`)
+> - **`main` → `2.9.1`** (current head is `2.9.0`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -33,6 +33,15 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.9.0 - UI work order revised after the real-browser audit
+- **Date**: 2026-11-08
+- **Why**: the first draft of `docs/UI-WORK-ORDER.md` was written before `bun run ui:audit` ran. The audit's results (0 failures) disproved one suspected bug and cleared another, so handing the original order to an executor would have produced wasted work.
+- **Task 4 (contrast) → DROPPED.** All four detector findings were on the **auth page**, which the owner froze in 2.8.10. Independently, the audit proved the **chat surface already meets WCAG AA in both themes** (body 9.56:1 light / 13.17:1 dark, model label 4.91:1, icons ≥3:1). Nothing to fix on the product surface.
+- **Task 2 (code blocks) → cosmetic only, P1 → P2.** The audit's G06 group ran a reply containing an inline code span, a fenced block and a 140-char unbroken URL: **overflow passed on desktop and mobile** (`proseContained: true`, `overflow=0px`). The suspected horizontal-scroll bug does not exist. The `overflow-x` change was removed from the order and replaced with an explicit **"do not add it"** warning; only the language-label and copy-button typography remain.
+- **Task 5 (text floor) → probably a no-op.** Both detector hits are auth-page text, so the order now says: skip auth, apply to the in-app surface only, and report no-op if nothing remains.
+- **Header + execution order rewritten** with a status table, the frozen-auth rule, and the current `ui:audit` baseline (**0 failures** — any new failure is a regression the executor introduced).
+- **No app code touched.**
 
 ### 2.8.10 - auth page motion is an approved exception
 - **Date**: 2026-11-08

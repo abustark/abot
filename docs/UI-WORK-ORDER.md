@@ -1,11 +1,22 @@
-# UI WORK ORDER — composer density, code blocks, prompt library, a11y
+# UI WORK ORDER — composer density, prompt library, code-block polish
 
 > **For:** an executor agent (OpenCode or any harness).
 > **From:** audit by DeepSeek Harness, 2026-11-08.
 > **Repo:** `D:\projects\abot` · branch `main` · package manager **bun**.
-> **Status:** every item below was measured or read from source. Items marked
-> `UNVERIFIED` were not confirmed in a rendered browser — treat those as
-> "fix defensively", not "reproduce this bug".
+> **Status:** revised after `bun run ui:audit` (the repo's own real-browser
+> audit) returned **0 failures**. The audit disproved one suspected bug and
+> cleared another, so this order is smaller than its first draft:
+>
+> | Task | Status |
+> |---|---|
+> | 1. Composer density | **Do this** — measured 389px dock, no audit coverage |
+> | 2. Code blocks | **Cosmetic only** — overflow bug disproved (G06 passes) |
+> | 3. Prompt library | **Do this** — code-level finding |
+> | 4. Contrast | **DROPPED** — findings were auth-page only, which is frozen |
+> | 5. Text floor | **Probably a no-op** — check scope before editing |
+> | 6. Optional | Needs owner approval |
+>
+> **The auth page is frozen.** Owner directive 2026-11-08: leave it alone.
 
 ---
 
@@ -90,7 +101,7 @@ Net: ~12px.
 
 ---
 
-## Task 2 — Code-block styling and horizontal scroll (P1)
+## Task 2 — Code-block polish, cosmetic only (P2)
 
 ### Facts
 
@@ -100,25 +111,18 @@ Net: ~12px.
 - header lang label: `0.7rem` **uppercase**, `letter-spacing 0.05em`
 - copy button: `11px` (a11y-detector: undersized)
 
-`UNVERIFIED` — the owner reported code clipping on mobile; a page-level
-overflow measurement returned **0**, so if clipping exists it is *inside* the
-block (horizontal scroll), not page overflow.
+**⛔ The horizontal-overflow bug does NOT exist — do not "fix" it.**
+`bun run ui:audit` (2026-11-08) ran a real reply containing an inline `code`
+span, a fenced ```js``` block and a 140-character unbroken URL, and **G06
+overflow passed on desktop and mobile** (`proseContained: true`,
+`overflow=0px`). An earlier page-level measurement also returned 0.
+Do **not** add `overflow-x` rules or restructure the `<pre>` — there is nothing
+to fix, and changing it risks breaking a passing group.
 
-### Changes
+What remains here is **cosmetic only (P2)**: the block looks plainer than it
+should, not broken.
 
-**2a. Guarantee internal horizontal scroll** — `src/input.css`, `.prose pre`
-```css
-.prose pre {
-    position: relative;
-    overflow-x: auto;
-    max-width: 100%;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior-x: contain;
-}
-.prose pre > code { display: block; min-width: min-content; }
-```
-**Why `overscroll-behavior-x: contain`:** stops a horizontal swipe inside a code
-block from triggering browser back-navigation on Android.
+### Changes (cosmetic only)
 
 **2b. Language label: information, not decoration**
 Drop `text-transform: uppercase`, raise `font-size: 0.7rem` → `0.75rem`.
@@ -137,10 +141,9 @@ In light mode the dark code plate sits on a light card with no boundary. Add:
 
 ### Acceptance
 
-- At 390px, a long code line scrolls **inside** its block; the page does not
-  scroll horizontally
+- **G06 overflow still passes** (this is a regression guard, not a fix)
+- Language label renders sentence case at ≥0.75rem
 - Copy button is ≥12px and passes contrast in both themes
-- `tools/ui-audit.js` overflow group passes
 - Screenshot of a conversation containing a long code block (390px + 1440px)
 
 ---
@@ -197,35 +200,23 @@ row gap). With 11+ presets this becomes a tall block. Change:
 
 ---
 
-## Task 4 — Accessibility contrast (P0 for a portfolio)
+## Task 4 — DROPPED (auth page is frozen)
 
-Detector findings on `index.html` (static pass). These are **real WCAG AA
-failures** — a recruiter running Lighthouse will see them.
+The static detector reported four `low-contrast` findings, all on the **auth
+page** (search placeholder 2.2:1, muted text 2.8:1 and 3.4:1, hover 4.48:1).
 
-| Finding | Ratio | Requirement |
-|---|---|---|
-| Search placeholder `#9ca3af` on `#f2f0ec` | **2.2:1** | 4.5:1 |
-| Muted text `#948f88` on `#f2f0ec` | **2.8:1** | 4.5:1 |
-| Muted text `#86817a` on `#f2f0ec` | **3.4:1** | 4.5:1 |
-| Hover state `#ffffff` on `#c75323` | 4.48:1 (1.02% short) | 4.5:1 |
+**Owner directive (2026-11-08): the auth page is frozen — keep it exactly as it
+is.** The owner reviewed the auth page's motion and contrast together and chose
+to leave the page untouched.
 
-### Changes
+Independently, `bun run ui:audit` proved the **chat surface already passes WCAG
+AA in both themes** — every tested pair is green (body 9.56:1 light / 13.17:1
+dark, model label 4.91:1, timestamps 5.33:1, icons ≥3:1). So there is no
+contrast work to do on the actual product surface.
 
-Fix in **tokens**, not markup (`src/input.css` `:root` / `.dark`), because
-AGENTS.md forbids hardcoded colours:
-- Raise `--c-muted` in light mode until body and placeholder text reach **≥4.5:1**
-  against `--c-canvas`.
-- Darken `--c-coral-active` slightly until white-on-coral hover hits 4.5:1.
-
-**Do not** change the palette's character — the oxblood/bone identity is a
-deliberate choice. Adjust lightness only, keep hue.
-
-### Acceptance
-
-- `npx impeccable detect http://localhost:3000` reports **0** `low-contrast`
-  findings on the auth page and the chat surface
-- Visually verified in both themes — the palette still reads as oxblood and bone
-- `tools/ui-audit.js` contrast group passes
+**Do not touch `--c-muted`, `--c-coral-active`, or any auth-page token as part
+of this work order.** If the owner ever unfreezes the auth page, the four
+findings above are the list to revisit.
 
 ---
 
@@ -239,9 +230,20 @@ Raise every functional 10px instance to **≥11px**. Legal/footer microprint may
 stay 10px. Affected declarations in `src/input.css` around lines 631, 661,
 1561, 1582 (verify before editing — line numbers drift).
 
+⚠️ **Scope check before editing.** The two detector hits named "Multi-model
+chat" and "or use email" are on the **auth page**, which is **frozen** by owner
+directive (see Task 4). So:
+- **Skip** any 10px instance that renders on the auth page.
+- **Apply** the ≥11px floor only to the in-app chat surface (sidebar, composer,
+  message meta, menus).
+- If every remaining instance turns out to be on the auth page, **Task 5 is a
+  no-op — report that and change nothing.**
+
 ### Acceptance
-- Detector: 0 `undersized-ui-text`
-- Auth page layout does not reflow badly
+- Detector: 0 `undersized-ui-text` **on the in-app surface**
+- Chat-surface layout does not reflow badly at 1440px or 390px
+- Auth page byte-identical (`git diff --exit-code src/input.css` shows no
+  auth-related change)
 
 ---
 
@@ -253,13 +255,16 @@ These are **not** bugs. Do not implement without explicit sign-off:
   the surface to test.
 - **`PRODUCT.md` / `DESIGN.md`** via `impeccable init` / `document`. Adds files
   to a repo the owner shows publicly — owner decides.
-- **Auth-page `pulsing-dot`** — the detector flags it as fake liveness. It is a
-  deliberate "this product is alive" cue. Leave unless the owner asks.
 
 ---
 
 ## Do NOT do
 
+- **Do not touch the auth page.** Owner directive 2026-11-08: it is frozen —
+  motion (the 52s/68s blooms, the 520ms entrance), contrast and text sizes are
+  all approved as built. They are already exempted in `tools/ui-audit.js`.
+- **Do not add `overflow-x` to code blocks.** G06 already passes; there is no
+  overflow bug. Task 2 is cosmetic only.
 - **Do not** change the typeface because of the `overused-font` finding.
   Plus Jakarta Sans is the owner's brief; the skill's own rule is "the brief wins".
 - **Do not** run `impeccable typeset` or `impeccable bolder` — they would fight
@@ -272,12 +277,16 @@ These are **not** bugs. Do not implement without explicit sign-off:
 
 ## Suggested execution order
 
-1. Task 4 + 5 (contrast/text — smallest diff, biggest a11y win)
-2. Task 1 (composer — the owner's main complaint)
-3. Task 3 (prompt library — no CSS dependency)
-4. Task 2 (code blocks — needs a rendered conversation to verify)
+1. **Task 1 — composer density** (the owner's main complaint, ~90px recoverable)
+2. **Task 3 — prompt library** (JS only, no CSS dependency)
+3. **Task 2 — code-block cosmetics** (P2, small diff)
+4. **Task 5** — probably a no-op; check scope first
 
-Rebuild CSS after 1, 2, 4, 5. Task 3 is JS-only but re-check after any CSS pass.
+Rebuild CSS after Tasks 1 and 2. Task 3 is JS-only.
+
+**Baseline to preserve:** `bun run ui:audit` currently reports **0 failures**
+(the two motion exceptions are approved). Any new failure after your changes
+is a regression you introduced.
 
 ---
 
