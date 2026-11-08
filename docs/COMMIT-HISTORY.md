@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.8.3`** (current head is `2.8.2`)
+> - **`main` → `2.8.4`** (current head is `2.8.3`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -33,6 +33,14 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.8.3 - real product screenshots in the README
+- **Date**: 2026-11-08
+- **Why**: the README only ever showed the **sign-in page** — three variations of a screen nobody evaluates. A portfolio reader could not see the actual product: no conversation, no streaming, no model selector, no dark-mode chat. The real UI is the strongest asset and it was invisible.
+- **Added** (owner-supplied captures, `docs/screenshots/`): `chat-light-desktop.png`, `chat-dark-desktop.png`, `model-selector.png`, `command-palette.png`, `chat-mobile.png`.
+- **README**: Screenshots section rebuilt as product-first — chat light/dark hero row, then model selector + command palette, then the mobile chat. The three original sign-in images are kept but demoted into a collapsed `<details>` block so they no longer lead the page.
+- **Alt text**: written per image (what is on screen, not "screenshot") since these carry the a11y burden the rest of the page can't.
+- **No app code touched** — docs/assets only, no CSS rebuild, no cache bump.
 
 ### 2.8.2 - footer copy: active development line
 - **Date**: 2026-11-08

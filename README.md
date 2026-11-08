@@ -11,6 +11,21 @@
 
 ## Screenshots
 
+| Chat · light | Chat · dark |
+|:---:|:---:|
+| <img src="docs/screenshots/chat-light-desktop.png" alt="ABot chat in the light theme: a question and a markdown answer with a heading, list and code block" width="520"> | <img src="docs/screenshots/chat-dark-desktop.png" alt="The same chat in the dark theme" width="520"> |
+
+| Model selector — 31 models, 4 providers | Command palette — `Ctrl+K` |
+|:---:|:---:|
+| <img src="docs/screenshots/model-selector.png" alt="Model selector open, grouped by Groq, Google Gemini, NVIDIA and OpenRouter" width="520"> | <img src="docs/screenshots/command-palette.png" alt="Command palette open over a chat, listing actions and recent chats" width="520"> |
+
+<p align="center">
+  <img src="docs/screenshots/chat-mobile.png" alt="ABot chat on a phone — dark theme, streaming answer" width="300">
+</p>
+
+<details>
+<summary><strong>Sign-in screens</strong> · light, dark, mobile</summary>
+
 | Light · Desktop | Dark · Desktop |
 |:---:|:---:|
 | <img src="docs/screenshots/auth-light-desktop.webp" alt="ABot sign-in page — light theme, desktop" width="400"> | <img src="docs/screenshots/auth-dark-desktop.webp" alt="ABot sign-in page — dark theme, desktop" width="400"> |
@@ -18,6 +33,8 @@
 <p align="center">
   <img src="docs/screenshots/auth-mobile.webp" alt="ABot sign-in page — mobile layout" width="300">
 </p>
+
+</details>
 
 ---
 
