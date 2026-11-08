@@ -259,6 +259,15 @@ For PHASE D: load `emil-design-eng` + `animate` + `taste-skill` before writing U
    choices and wait. Never re-decide the same thing repeatedly or debate it internally.
 9. **Finish the owner's asked task first; report side-findings afterward** — never derail mid-task.
    (Owner directive, 2026-10-18.)
+10. **Two strikes, then stop.** If an approach fails twice for any reason — a tool won't run, a
+    script errors, a command behaves unexpectedly — **stop and ask the owner** before a third
+    attempt, stating what failed and what you would try next. Do not patch a scratch tool more
+    than twice; the cost of one question is a message, the cost of thrashing is the owner's budget.
+    **Before building any custom script** for testing, rendering, screenshotting or verification,
+    check whether the repo already has a tool for it (`tools/`, `package.json` scripts) and use
+    that first — `tools/visual-check.js`, `tools/ui-audit.js`, `tools/interaction-test.js`,
+    `tools/smoke-node.js` already mock Firebase and drive a real browser.
+    (Owner directive, 2026-11-08 — after a session spent rebuilding this tooling by hand.)
 
 ---
 

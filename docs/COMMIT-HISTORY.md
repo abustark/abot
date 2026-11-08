@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.8.9`** (current head is `2.8.8`)
+> - **`main` → `2.8.10`** (current head is `2.8.9`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -33,6 +33,13 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.8.9 - UI work order + two-strikes rule
+- **Date**: 2026-11-08
+- **Why**: owner requested a written plan for the UI/UX pass so a separate agent can execute it, plus a rule to stop agents burning budget on repeated failed attempts.
+- **`docs/UI-WORK-ORDER.md`** (new): six tasks with file/line targets and acceptance criteria — composer density (measured 389px dock, 56px empty textarea), code-block scroll + type legibility, prompt-library refresh (two joke presets isolated, four developer presets added), WCAG contrast token fixes (2.2:1 placeholder), 10px→11px text floor, and an explicitly-optional list requiring owner approval.
+- **`AGENTS.md` §5 rule 10** — "two strikes, then stop": after two failed attempts, ask before a third; and check `tools/` for an existing script before writing custom test/render tooling.
+- **Not changed**: no app code. The audit's unverified items are labelled `UNVERIFIED` in the work order rather than presented as confirmed bugs.
 
 ### 2.8.8 - bun as the package manager
 - **Date**: 2026-11-08
