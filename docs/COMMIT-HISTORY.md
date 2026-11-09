@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.9.4`** (current head is `2.9.3`)
+> - **`main` → `2.9.5`** (current head is `2.9.4`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -33,6 +33,16 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.9.4 - verification requests must split fast vs. slow checks
+- **Date**: 2026-11-09
+- **Why**: owner directive — "when you ask me to run tests, tell me which ones, and warn me about the visual ones that take a long time and burn tokens." A vague *"want me to run the gates?"* gave the owner no way to approve the cheap checks without also authorising a multi-minute Chrome run.
+- **`AGENTS.md` §3 rule 2**: the mandatory post-update question must now **name the exact commands and mark each FAST or SLOW**, with a worked example. Vague "run the gates?" is explicitly disallowed.
+- **`AGENTS.md` §3.0 (new)**: the fast/slow split written down in one place —
+  - **FAST** (no browser, no server, seconds): `lint`, `check`, `typecheck`, `test:html`, `test` (the four jsdom suites).
+  - **SLOW** (real Chrome, screenshots, needs `:3000`, minutes, token-heavy): `ui:audit`, `test:security`, `visual:local`, `build:css` + dist check.
+- **Approval rule**: a "yes, verify" given after a FAST-only offer does **not** authorise a SLOW check; each slow check needs its own explicit approval. If only FAST runs, the agent must state what stayed unverified.
+- **Docs only** — no code, CSS or test behaviour changed.
 
 ### 2.9.3 - one test entry point; retire verify-parity
 - **Date**: 2026-11-09

@@ -199,6 +199,45 @@ git merge origin/main    # on the arena branch, resolve, commit
    is done, the agent reports what changed and then asks: *"Update done — want me to run
    the gate passes / tests to verify, or leave it?"* Then it **waits for the answer**.
    This reminder is mandatory and may not be skipped or folded into other text.
+   **When asking, always name WHICH checks would run and split them into fast vs. slow**
+   (see §3.0 below) so the owner can approve part of the set. Example:
+   *"Fast (≈20s, no browser): lint, check, typecheck, test:html, test-runner. Slow
+   (Chrome + screenshots, minutes): ui:audit, test:security, visual:local. Which — fast only,
+   all, or none?"* Never ask a vague "run the gates?".
+
+### 3.0 Fast vs. slow checks — ALWAYS disclose this when asking (owner directive, 2026-11-09)
+
+The owner budgets tokens and time. **Never bundle a slow visual check into a vague "tests?"**
+request. Always state the split explicitly:
+
+**FAST — no browser, no server, no screenshots (seconds):**
+
+| Command | What it does |
+|---|---|
+| `bun run lint` | ESLint — static analysis of JS files |
+| `bun run check` | acorn parse of every JS file |
+| `bun run typecheck` | `tsc` check-only (JSDoc types) |
+| `bun run test:html` | html-validate on `index.html` |
+| `bun run test` | the four Node/jsdom suites via `tools/test-runner.js` (security · smoke · interaction · cycle) — no real browser |
+
+**SLOW — launches a real browser, renders pages, writes screenshots, needs `node server.js`
+on :3000 (minutes, heavy on tokens because output is large):**
+
+| Command | Why it is slow |
+|---|---|
+| `bun run ui:audit` | Real Chrome, **desktop + mobile**, 11 groups, screenshots |
+| `bun run test:security` | Needs the server running; live HTTP header + endpoint probes |
+| `bun run visual:local` | Real Chrome, screenshot capture/compare per viewport and theme |
+| `bun run build:css` + `git diff --exit-code -- dist/output.css` | Tailwind rebuild (not visual, but slow) |
+
+**Rules for the agent:**
+- Every "want me to verify?" question **must** list the exact commands and mark each FAST or SLOW.
+- **Never run a SLOW check without explicit approval for that specific check.** "Yes, verify" after a FAST-only
+  offer does **not** authorise `ui:audit`, `test:security` or `visual:local`.
+- If the owner approves FAST only, say plainly what remains unverified (e.g. "touch-target sizes and
+  stacking are NOT covered by the fast set").
+- Do not repeat a slow check the owner already declined in the same session.
+
 3. When the owner says yes, **ALL** of the following must pass before push:
 
 ```bash
