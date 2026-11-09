@@ -2,7 +2,6 @@
  * ABot — dom.js
  * Extracted from index.html inline module (Phase 2 de-monolithization).
  * Logic frozen; only imports/exports/state.* renames were applied.
- * Verify with: node tools/verify-parity.js
  */
 export const dom = {
     authSection: document.getElementById('auth-section'),

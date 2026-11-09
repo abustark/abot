@@ -99,7 +99,7 @@ flowchart LR
 
 **Why no framework?** Deliberate, settled decision (owner, 2026-08-30) — [`AGENTS.md`](AGENTS.md) §5 rule 1 lists the conditions that would trigger a revisit.
 
-**Frontend modules** (`js/`, dependency order): `config.js` (model registry, colors, prompts) → `dom.js` → `state.js` → `utils.js` → `ui.js` → `auth.js` → `chat.js` → `app.js` (entry). Extracted verbatim from the original inline monolith with **token-level parity verification** (`tools/verify-parity.js`). Details: [`js/README.md`](js/README.md).
+**Frontend modules** (`js/`, dependency order): `config.js` (model registry, colors, prompts) → `dom.js` → `state.js` → `utils.js` → `ui.js` → `auth.js` → `chat.js` → `app.js` (entry). Extracted from the original inline monolith with token-level parity verification (the one-off `tools/verify-parity.js` was retired in 2.9.3 once the migration was long finished). Details: [`js/README.md`](js/README.md).
 
 **Backend mirror:** `server.js` replicates `api/chat.js` for local dev, sharing `lib/chat-security.js` so prod and local enforce identical rules.
 
@@ -112,11 +112,11 @@ This is the part most portfolio projects skip.
 - **Hardened serverless proxy** (`api/chat.js`): rate limiting, request size caps, verified-email enforcement (Firebase Admin), generic error envelopes — provider keys never reach the browser
 - **Strict CSP + security headers** in `vercel.json` (nosniff, frame-deny, HSTS, locked-down connect-src to exactly the APIs used)
 - **Firestore rules**: per-user isolation (`users/{uid}` only, everything else denied) — [`firestore.rules`](firestore.rules)
-- **Test suite** (`npm run test`):
+- **Test suite** (`bun run test`) — one entry point, `tools/test-runner.js`, running four suites and aggregating their results:
   - `tests/chat-security.test.js` — backend security contract
+  - `tools/smoke-node.js` — jsdom runtime walk of logged-out/logged-in init paths
   - `tools/interaction-test.js` — clicks **every shell control** in jsdom and asserts the visible effect
   - `tools/cycle-test.js` — behavior regressions (e.g. mobile keyboard dismissal after send)
-  - `tools/smoke-node.js` — jsdom runtime walk of logged-out/logged-in init paths
 - **Plus**: ESLint (`npm run lint`), acorn syntax check of every JS file (`npm run check`), TypeScript checking via JSDoc (`npm run typecheck`), HTML validity (`npm run test:html`, html-validate), Python security-header + endpoint audit (`npm run test:security`, needs local server), real-browser UI audit with 11 hard-fail groups (`npm run ui:audit`, needs local server), Playwright E2E (`tools/test-playwright.py`), visual regression (`npm run visual:local`)
 - **Pre-commit hook** runs syntax + lint on every commit (`.githooks/`, wired by `npm ci`)
 

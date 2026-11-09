@@ -1,6 +1,6 @@
 {
   "name": "abot",
-  "version": "2.9.2",
+  "version": "2.9.3",
   "description": "ABot — multi-model AI chat (vanilla ES modules + Tailwind) with a hardened Vercel proxy, Firebase Auth/Firestore, and 31 models across four free-tier providers.",
   "private": true,
   "license": "UNLICENSED",
@@ -33,7 +33,7 @@
     "build": "npm run build:css",
     "build:css": "tailwindcss -i ./src/input.css -o ./dist/output.css --minify",
     "watch:css": "tailwindcss -i ./src/input.css -o ./dist/output.css --watch",
-    "test": "node tests/chat-security.test.js && node tools/smoke-node.js && node tools/interaction-test.js && node tools/cycle-test.js",
+    "test": "node tools/test-runner.js",
     "lint": "eslint .",
     "check": "node tools/syntax-check.js",
     "typecheck": "tsc -p jsconfig.json",
@@ -75,3 +75,4 @@
     "fast-xml-parser": "^5.11.1"
   }
 }
+

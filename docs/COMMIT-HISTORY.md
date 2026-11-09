@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.9.3`** (current head is `2.9.2`)
+> - **`main` → `2.9.4`** (current head is `2.9.3`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -33,6 +33,17 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.9.3 - one test entry point; retire verify-parity
+- **Date**: 2026-11-09
+- **Why**: `npm test` chained four commands; adding a suite meant editing `package.json`, README, CI and AGENTS.md. And `tools/verify-parity.js` (401 lines) has been dead weight since the de-monolithisation finished — nothing calls it except a comment in every `js/` module.
+- **`tools/test-runner.js` (new, ~90 lines)** — the single entry point. Spawns each suite as a child process in a fixed order (security → smoke → interaction → cycle), streams output live, aggregates exit codes, prints a per-suite timing summary, and exits non-zero if any suite fails or crashes. Supports `--only=<name>` for iterating on one suite.
+  - **Why a runner and not a merge:** all three jsdom suites call `process.exit()` themselves, so they cannot be `require()`d into a single process. A runner is the honest form of "one file to remember" — **coverage is unchanged**, every suite still runs exactly as before.
+- **`package.json`**: `test` → `node tools/test-runner.js`.
+- **`.github/workflows/ci.yml`**: the lone "Runtime smoke test" step replaced by the full runner; the separate security-test step removed because the runner already includes it (it previously ran twice).
+- **Deleted `tools/verify-parity.js`** and every reference to it: the provenance comment in all 8 `js/` modules, the `syntax-check.js` file list, `js/README.md` (3 places), `README.md`, and `docs/PROJECT-INFO.md`. All JS still parses cleanly after the comment strip.
+- **`tools/ui-audit.js` UNCHANGED** — the owner reviewed a proposal to trim it and directed it stays as-is. It covers checks Impeccable does not (touch targets, stacking, action contracts).
+- **No app logic touched**; no CSS change.
 
 ### 2.9.2 - restore the mobile touch target, finish the audit allowlist, refresh PROJECT-INFO
 - **Date**: 2026-11-09

@@ -2,7 +2,6 @@
  * ABot — state.js
  * Extracted from index.html inline module (Phase 2 de-monolithization).
  * Logic frozen; only imports/exports/state.* renames were applied.
- * Verify with: node tools/verify-parity.js
  */
 
 // Shared mutable state — the closure variables of the original main(),

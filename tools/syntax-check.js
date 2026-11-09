@@ -29,7 +29,7 @@ for (const f of fs.readdirSync(path.join(ROOT, 'js'))) {
 check(path.join('api', 'chat.js'), 'module');
 
 // Node files (CJS)
-for (const rel of ['server.js', 'lib/chat-security.js', 'tests/chat-security.test.js', 'service-worker.js', 'tools/build-split.js', 'tools/verify-parity.js', 'tools/extract-inline.js']) {
+for (const rel of ['server.js', 'lib/chat-security.js', 'tests/chat-security.test.js', 'service-worker.js', 'tools/build-split.js', 'tools/extract-inline.js']) {
     check(rel, 'commonjs');
 }
 
@@ -38,3 +38,4 @@ if (failures) {
     process.exit(1);
 }
 console.log('\nAll files parse cleanly.');
+

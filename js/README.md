@@ -3,8 +3,8 @@
 These are the **live application modules** (Phase 2 de-monolithization). They are loaded by
 `index.html` via `<script type="module" src="js/app.js"></script>`.
 
-> Logic is extracted verbatim from the former 1,670-line inline module — verified by
-> `node tools/verify-parity.js` (token-level parity) and `node tools/smoke-node.js`
+> Logic is extracted verbatim from the former 1,670-line inline module — verified at
+> token parity when the migration ran, and by `node tools/smoke-node.js`
 > (jsdom runtime walk of the logged-out and logged-in init paths).
 
 ## Modules (dependency order)
@@ -31,7 +31,6 @@ init sequence as the original closure statements (module-load evaluation would p
 
 - `tools/extract-inline.js` — pulls the inline script blocks out of `index.html`
 - `tools/build-split.js` — regenerates the modules from the extracted block (mechanical)
-- `tools/verify-parity.js` — proves token-level parity with the original inline code
 - `tools/smoke-node.js` — jsdom runtime smoke test with stubbed firebase/marked/hljs/Vanta
 
-Re-run after any generator change: `node tools/build-split.js && node tools/verify-parity.js && node tools/smoke-node.js`
+Re-run after any generator change: `node tools/build-split.js && node tools/smoke-node.js`

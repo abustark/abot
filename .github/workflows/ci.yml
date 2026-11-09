@@ -26,9 +26,6 @@ jobs:
       - name: Syntax check (all JS)
         run: npm run check
 
-      - name: Security tests (chat API core)
-        run: node tests/chat-security.test.js
-
       - name: Build CSS
         run: npm run build:css
 
@@ -40,5 +37,5 @@ jobs:
             exit 1
           fi
 
-      - name: Runtime smoke test (jsdom)
-        run: node tools/smoke-node.js
+      - name: jsdom suites (security · smoke · interaction · cycle)
+        run: node tools/test-runner.js
