@@ -76,6 +76,16 @@ function stubChain(label) {
     let fails = 0;
     const check = (name, ok, detail = '') => { console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}${detail ? ' — ' + detail : ''}`); if (!ok) fails++; };
 
+    // A reply comfortably above END_ACTIONS_MIN_CHARS (240) in js/chat.js, so
+    // the static end-of-reply action row is expected. Kept as a real sentence
+    // rather than 'x'.repeat() so the length is obvious if the threshold moves.
+    const LONG_REPLY = 'Here is a longer answer so the reply is tall enough that '
+        + 'its model header line scrolls out of the way. The static end row of '
+        + 'copy and read-aloud buttons only appears for replies like this one, '
+        + 'which exceed the threshold the app sets for that behaviour. Short '
+        + 'replies keep those two controls on the header row alone, because '
+        + 'showing both at once put two identical rows on screen.';
+
     // GATE: no duplicate element ids (regression guard — sidebarToggle,
     // modelSelectorPanel and modal-title were all shipped duplicated before).
     {
@@ -165,17 +175,45 @@ function stubChain(label) {
         check('haptics preference persists on', window.localStorage.getItem('abot-haptics') === 'true');
         // 2.8.0: the switch is meaningless without a coarse pointer, so it is hidden there.
         check('haptics row hidden on fine pointers', ht.closest('.menu-row').classList.contains('hidden'));
-        // 2.8.0: every tap vibrates — not just buttons. Stub a coarse pointer plus
-        // the Vibration API, then click a plain <div> (the menu panel itself).
+        // 2.9.10 (owner directive): haptics fire on INTERACTIVE controls only.
+        // 2.8.0 fired on every tap anywhere, which made the phone buzz on plain
+        // text and empty space. Stub a coarse pointer + the Vibration API, then
+        // assert BOTH halves: a real button ticks, a plain div does not.
         {
             const realMM = window.matchMedia;
             const realVibrate = window.navigator.vibrate;
             const buzzes = [];
             window.navigator.vibrate = (ms) => { buzzes.push(ms); return true; };
             window.matchMedia = (q) => ({ matches: String(q).includes('pointer: coarse'), media: String(q), addEventListener() {}, addListener() {}, removeEventListener() {}, removeListener() {} });
+
+            // (a) a plain non-interactive element must stay silent
             menu.click();
-            await sleep(30);
-            check('a plain div tap vibrates', buzzes.length === 1, buzzes.length + ' ticks');
+            await sleep(120);
+            check('a plain div tap does NOT vibrate', buzzes.length === 0, buzzes.length + ' ticks');
+
+            // (b) a real button must tick exactly once. Use a throwaway button —
+            // clicking a real menu control here (signoutBtn) would sign the user
+            // out, and appending it to <body> would count as an outside click and
+            // close the account menu. Append it inside the menu instead.
+            {
+                const probeBtn = window.document.createElement('button');
+                probeBtn.type = 'button';
+                probeBtn.textContent = 'haptic probe';
+                menu.appendChild(probeBtn);
+                probeBtn.click();
+                await sleep(120);
+                check('a button tap vibrates once', buzzes.length === 1, buzzes.length + ' ticks');
+
+                // (c) an aria-disabled control must stay silent
+                const before = buzzes.length;
+                probeBtn.setAttribute('aria-disabled', 'true');
+                probeBtn.click();
+                await sleep(120);
+                check('aria-disabled control does NOT vibrate', buzzes.length === before, (buzzes.length - before) + ' ticks');
+
+                probeBtn.remove();
+            }
+
             window.matchMedia = realMM || ((q) => ({ matches: false, media: String(q), addEventListener() {}, addListener() {}, removeEventListener() {}, removeListener() {} }));
             if (realVibrate) window.navigator.vibrate = realVibrate;
             else delete window.navigator.vibrate;
@@ -722,7 +760,15 @@ function stubChain(label) {
             id: 7777, name: 'Actions Test', model,
             messages: [
                 { role: 'user', content: 'ping', model, ts: Date.now() },
-                { role: 'assistant', content: 'pong', model, ts: Date.now() },
+                // 2.6.0 (owner request): a short reply deliberately keeps
+                // copy · read-aloud only on its model header line — the static
+                // end row is reserved for replies long enough that the header
+                // has scrolled away (END_ACTIONS_MIN_CHARS = 240). This fixture
+                // used to be 'pong' (4 chars), which was written before that
+                // rule existed, so the four end-row assertions below could
+                // never pass. Use a reply above the threshold so the row is
+                // expected, and add an explicit short-reply case after it.
+                { role: 'assistant', content: LONG_REPLY, model, ts: Date.now() },
             ],
         };
         state.activeChatId = '7777';
@@ -790,6 +836,24 @@ function stubChain(label) {
         check('AI hover row keeps its copy + read aloud pair',
             aiContainer ? aiContainer.querySelectorAll('.copy-message-btn').length === 2 && aiContainer.querySelectorAll('.speak-btn').length === 2 : false);
 
+        // 2.6.0 counterpart: a SHORT reply must NOT get the static end row —
+        // copy · read-aloud stay on the model header line only. Without this
+        // case the threshold could be deleted and the suite would still pass.
+        {
+            state.chats['7777'].messages.push({ role: 'assistant', content: 'pong', model, ts: Date.now() });
+            chatMod.renderActiveChat();
+            await sleep(30);
+            const shortContainer = aiContainers().pop();
+            check('short reply does NOT get the static end row', !shortContainer?.querySelector('.msg-actions-end'));
+            check('short reply keeps its header copy + speak pair',
+                shortContainer ? shortContainer.querySelectorAll('.copy-message-btn').length === 1
+                    && shortContainer.querySelectorAll('.speak-btn').length === 1 : false);
+            // put the fixture back so later assertions see the long reply again
+            state.chats['7777'].messages.pop();
+            chatMod.renderActiveChat();
+            await sleep(30);
+        }
+
         // A mid-stream placeholder (no index, not history) must defer the row.
         chatMod.appendMessage({ role: 'assistant', content: '', model, ts: Date.now() }, false, {});
         check('streaming placeholder defers the end row', !aiContainers().pop()?.querySelector('.msg-actions-end'));
@@ -819,9 +883,12 @@ function stubChain(label) {
         state.auth.currentUser = fakeUser;
         fakeUser.getIdToken = async () => 'test-token';
         const fakeFetch = async () => {
+            // The reply must exceed END_ACTIONS_MIN_CHARS (240) or the static
+            // end row is correctly withheld. Streamed in two chunks so the
+            // incremental render path is still exercised.
             const parts = [
                 sse({ choices: [{ delta: { content: 'Hello ' } }] }),
-                sse({ choices: [{ delta: { content: 'world' } }] }),
+                sse({ choices: [{ delta: { content: LONG_REPLY } }] }),
                 enc.encode('data: [DONE]\n\n'),
             ];
             let i = 0;
@@ -836,7 +903,7 @@ function stubChain(label) {
         await sleep(80);
         const streamed = aiContainers().pop();
         check('streamed reply renders + gains the end row once finished',
-            !!streamed?.querySelector('.msg-actions-end') && streamed?.querySelector('.prose')?.textContent.includes('Hello world'));
+            !!streamed?.querySelector('.msg-actions-end') && streamed?.querySelector('.prose')?.textContent.includes('Hello'));
         window.fetch = realFetch;
         global.fetch = realGlobalFetch;
         state.auth.currentUser = prevCurrentUser;

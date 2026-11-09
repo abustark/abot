@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.9.10`** (current head is `2.9.9`)
+> - **`main` → `2.10.0`** (current head is `2.9.10`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -33,6 +33,26 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.9.10 - code-block mobile scroll, haptics scoped to controls, interaction tests repaired
+- **Date**: 2026-11-09
+- **Why**: three owner reports — code blocks cannot be scrolled sideways on mobile, haptics buzz on every touch rather than on controls, and GitHub CI has been red since the workflow became live.
+
+**1. Code-block horizontal scroll (`src/input.css`) — the real bug.**
+`.prose pre > code` used `width: max-content`, which let the `<code>` **grow to fit its content** — so it never overflowed itself, never produced a scrollbar, and the parent `.prose pre { overflow: hidden }` silently clipped long lines with no way to reach them. Now `width: 100%; max-width: 100%; min-width: 0` so the inline content overflows *inside* the block, which is what makes `overflow-x: auto` actually scroll. Added `overflow-y: hidden`, `overscroll-behavior-x: contain`, `-webkit-overflow-scrolling: touch`, `white-space: pre`, `tab-size: 4`, and slim scrollbar styling (thin, 8px, muted thumb) so a long line reads as scrollable rather than cut off.
+**Browser-verified** (real Chrome + real marked/hljs): mobile 390px — code clientWidth 366 vs scrollWidth **916**, `horizontalScrollable: true`, page overflow **0**; desktop 1440px — 673 vs **916**, page overflow **0**. Header renders with language label `JavaScript` and a `Copy` button in both.
+
+**2. Haptics scoped to interactive controls (`js/haptics.js`) — owner directive.**
+2.8.0 fired on **every** tap anywhere: message text, backdrops, empty space. That reads as a fault, not feedback. Added `INTERACTIVE_SELECTOR` (`button`, `a[href]`, `label`, `select`, `summary`, checkbox/radio/submit inputs, the button/menuitem/switch/tab/option/checkbox/radio/combobox/link roles, `[tabindex]:not([tabindex="-1"])`, `[data-haptic]`) and the delegated listener now returns early unless the target is inside one of them. Also skips `[aria-disabled="true"]`, `control.disabled`, and opts out of `[data-haptic="off"]` subtrees. Tick length and the 90 ms gap guard are unchanged.
+**Tests:** plain `<div>` tap must NOT vibrate · button tap vibrates exactly once · `aria-disabled` control does NOT vibrate.
+
+**3. Interaction suite repaired (`tools/interaction-test.js`) — the app was correct, the test was stale.**
+Four end-row assertions could never pass: the fixture reply was `content: 'pong'` (**4 characters**) while `js/chat.js` deliberately withholds the static end-of-reply row below `END_ACTIONS_MIN_CHARS = 240` (owner rule, 2.6.0: short replies keep copy + read-aloud on the model header line only). The same bug hid in the streamed-reply fixture (`'Hello world'`). Both now use a shared `LONG_REPLY` constant above the threshold, and the previously-missing **counterpart case** was added: a short reply gets no end row and keeps exactly one copy + one speak button. This failure pre-dates recent work — it also fails at `40d6a8a`.
+⚠️ Note for future edits: the haptics probe button is created **inside the menu**; appending it to `<body>` counts as an outside click and closes the account menu, and clicking `#signoutBtn` signs the user out.
+
+**Verification (owner-authorised run):** `bun run test` → `All suites passed ✅` (chat-security · smoke · interaction · cycle). `bun run ui:audit` → **0 failures**, desktop + mobile. `bun run build:css` rebuilt `dist/output.css`.
+**Cache**: `CACHE_NAME` → `abot-cache-v89`, assets `?v=p63` → `?v=p64`.
+**Not verified**: light-theme screenshot of the code block (see `docs/HANDOFF-code-blocks-haptics.md` §6 for the exact remaining step).
 
 ### 2.9.9 - standing approval for build:css on commit-and-push
 - **Date**: 2026-11-09

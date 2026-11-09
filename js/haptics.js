@@ -49,10 +49,45 @@ const syncToggleVisibility = () => {
 };
 
 /**
- * One delegated listener covers every current and future tap — buttons, chat
- * rows, the sidebar backdrop, model options, composer chips, chat-name
- * actions, toasts and menu items. A short gap guard stops a <label> and its
- * checkbox from double-firing.
+ * 2.9.10 (owner directive): haptics on INTERACTIVE controls only.
+ *
+ * 2.8.0 fired on every tap anywhere in the page — including plain text, the
+ * message body, the sidebar backdrop, empty space and scroll gestures. That
+ * made the phone buzz at times when nothing had been "pressed", which reads as
+ * a fault rather than feedback. A tap now ticks only when it lands on (or
+ * inside) one of the affordances below.
+ *
+ * Adding a new interactive element? Give it the right tag or role and it is
+ * covered automatically; otherwise add `data-haptic` to opt it in explicitly.
+ */
+const INTERACTIVE_SELECTOR = [
+    'button',
+    'a[href]',
+    'label',
+    'select',
+    'summary',
+    'input[type="checkbox"]',
+    'input[type="radio"]',
+    'input[type="button"]',
+    'input[type="submit"]',
+    '[role="button"]',
+    '[role="menuitem"]',
+    '[role="menuitemcheckbox"]',
+    '[role="switch"]',
+    '[role="tab"]',
+    '[role="option"]',
+    '[role="checkbox"]',
+    '[role="radio"]',
+    '[role="combobox"]',
+    '[role="link"]',
+    '[tabindex]:not([tabindex="-1"])',
+    '[data-haptic]',
+].join(',');
+
+/**
+ * One delegated listener covers every interactive control, including ones
+ * created after load (chat rows, toast actions, palette results). A short gap
+ * guard stops a <label> and its checkbox from double-firing.
  */
 export const initHaptics = () => {
     syncToggleVisibility();
@@ -67,7 +102,20 @@ export const initHaptics = () => {
     document.addEventListener('click', (event) => {
         const target = event.target;
         if (!target || typeof target.closest !== 'function') return;
-        if (target.closest('[aria-disabled="true"]')) return;
+
+        // Only real controls. A tap on message text, the background or a
+        // backdrop must stay silent.
+        const control = target.closest(INTERACTIVE_SELECTOR);
+        if (!control) return;
+
+        // Disabled / aria-disabled controls never act, so they must not buzz.
+        if (control.closest('[aria-disabled="true"]')) return;
+        if (control.disabled === true) return;
+
+        // An explicitly opted-out subtree stays silent (e.g. a decorative pill
+        // nested inside a button that already ticked).
+        if (control.closest('[data-haptic="off"]')) return;
+
         const now = Date.now();
         if (now - lastTick < MIN_GAP_MS) return;
         lastTick = now;

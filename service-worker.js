@@ -3,7 +3,7 @@
  * Provides offline caching for local assets only
  */
 
-const CACHE_NAME = 'abot-cache-v88'; // 2.9.7: ChatGPT-style code blocks + language labels
+const CACHE_NAME = 'abot-cache-v89'; // 2.9.10: code-block scroll fix, haptics scoped to controls
 const STATIC_ASSETS = [
     '/',
     '/index.html',
