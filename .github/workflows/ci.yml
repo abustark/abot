@@ -12,22 +12,32 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Node 22, not 20: jsdom now depends on undici, whose CacheStorage uses
+      # webidl.util.markAsUncloneable — added in Node 22. On Node 20 every jsdom
+      # suite crashes at import ("markAsUncloneable is not a function") even
+      # though it passes locally, where Node 22 is installed.
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      # bun is the documented package manager (AGENTS.md §0); package-lock.json
+      # stays the committed lockfile, so `bun install` consumes it.
       - name: Install dependencies
-        run: npm ci
+        run: bun install
 
       - name: Lint
-        run: npm run lint
+        run: bun run lint
 
       - name: Syntax check (all JS)
-        run: npm run check
+        run: bun run check
 
       - name: Build CSS
-        run: npm run build:css
+        run: bun run build:css
 
       - name: Verify dist/output.css is committed and fresh
         run: |

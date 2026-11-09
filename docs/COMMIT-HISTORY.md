@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.9.6`** (current head is `2.9.5`)
+> - **`main` → `2.9.7`** (current head is `2.9.6`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -33,6 +33,14 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.9.6 - CI: run Node 22 so the jsdom suites can import
+- **Date**: 2026-11-09
+- **Why**: GitHub Actions has failed on every push since 2.8.1 moved the workflow to `.github/workflows/` (before that the file sat at `docs/.github/`, where GitHub never reads it — so it had never actually run). CI #22 on 2.9.5 finally showed the cause.
+- **Root cause** — `TypeError: webidl.util.markAsUncloneable is not a function` at `undici/lib/web/cache/cachestorage.js:20`, thrown from `jsdom/lib/api.js`. jsdom now depends on undici, whose `CacheStorage` calls `webidl.util.markAsUncloneable`, which **exists only on Node 22+**. CI pinned **Node 20**, so smoke, interaction and cycle all crashed **at import** — before a single test ran. Locally it passed because Node 22.23.4 is installed.
+- **`ci.yml`**: `node-version: 20` → **22**, with a comment recording why. `chat-security`, lint, syntax check and the CSS build had all been passing; only the three jsdom suites were affected.
+- **`ci.yml`**: also switched to **bun** to match AGENTS.md §0 — added `oven-sh/setup-bun@v2`, `npm ci` → `bun install`, `npm run X` → `bun run X`. `package-lock.json` stays the committed lockfile; bun consumes it, so no `bun.lock` is introduced.
+- **Unchanged**: the `dist/output.css` freshness check stays. It was **not** the failure.
 
 ### 2.9.5 - verification questions need a fixed template
 - **Date**: 2026-11-09
