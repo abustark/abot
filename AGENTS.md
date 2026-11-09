@@ -237,12 +237,22 @@ on :3000 (minutes, heavy on tokens because output is large):**
 | `bun run ui:audit` | Real Chrome, **desktop + mobile**, 11 groups, screenshots |
 | `bun run test:security` | Needs the server running; live HTTP header + endpoint probes |
 | `bun run visual:local` | Real Chrome, screenshot capture/compare per viewport and theme |
-| `bun run build:css` + `git diff --exit-code -- dist/output.css` | Tailwind rebuild (not visual, but slow) |
+| `bun run build:css` + `git diff --exit-code -- dist/output.css` | Tailwind rebuild (not visual, but slow) — **standing approval, see below** |
+
+**✅ Standing approval: `build:css` on every "commit and push" (owner directive, 2026-11-09).**
+When the owner says *"commit and push"* (or any equivalent hand-off instruction), the agent **must**
+run `bun run build:css` first, without asking and without a separate permission prompt, then commit
+the rebuilt `dist/output.css`. Rationale: `dist/` is committed, so a stale build means the change
+is not live — and CI fails the push. This is a **build step, not a verification step**: it does not
+render, screenshot, or launch a browser, which is why it is carved out of the approval rule below.
+The `git diff --exit-code -- dist/output.css` half remains part of the gate suite when the owner
+does trigger gates. **Nothing else is covered by this carve-out.**
 
 **Rules for the agent:**
 - Every "want me to verify?" question **must** list the exact commands and mark each FAST or SLOW.
 - **Never run a SLOW check without explicit approval for that specific check.** "Yes, verify" after a FAST-only
   offer does **not** authorise `ui:audit`, `test:security` or `visual:local`.
+- `build:css` is **excepted**: it runs automatically on every commit-and-push instruction.
 - If the owner approves FAST only, say plainly what remains unverified (e.g. "touch-target sizes and
   stacking are NOT covered by the fast set").
 - Do not repeat a slow check the owner already declined in the same session.

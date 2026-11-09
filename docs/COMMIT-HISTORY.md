@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.9.9`** (current head is `2.9.8`)
+> - **`main` → `2.9.10`** (current head is `2.9.9`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -33,6 +33,14 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.9.9 - standing approval for build:css on commit-and-push
+- **Date**: 2026-11-09
+- **Why**: owner directive — "whenever I say commit and push, run build:css, you don't need to ask permission for this."
+- **`AGENTS.md` §3.0**: added a **standing approval** block. On any "commit and push" instruction the agent now runs `bun run build:css` first, without asking, and commits the rebuilt `dist/output.css`.
+- **Scope is narrow and explicit**: only `build:css` is carved out. It is a build step, not a verification step — it renders nothing, launches no browser, takes no screenshots. `ui:audit`, `test:security` and `visual:local` still each need their own explicit approval.
+- **Why it matters**: `dist/` is committed, so a stale build means the change never reaches the live site — the failure mode that shipped broken CSS at 2.7.5, and which the CI dist-freshness check exists to catch.
+- **Docs only** — no code, CSS or behaviour change.
 
 ### 2.9.8 - rebuild dist for the new code blocks
 - **Date**: 2026-11-09

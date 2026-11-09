@@ -1,6 +1,6 @@
 {
   "name": "abot",
-  "version": "2.9.8",
+  "version": "2.9.9",
   "description": "ABot — multi-model AI chat (vanilla ES modules + Tailwind) with a hardened Vercel proxy, Firebase Auth/Firestore, and 31 models across four free-tier providers.",
   "private": true,
   "license": "UNLICENSED",
