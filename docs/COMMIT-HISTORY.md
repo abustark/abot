@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.9.8`** (current head is `2.9.7`)
+> - **`main` → `2.9.9`** (current head is `2.9.8`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -33,6 +33,12 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.9.8 - rebuild dist for the new code blocks
+- **Date**: 2026-11-09
+- **Why**: `2.9.7` changed `src/input.css` but `dist/output.css` was not rebuilt, so the new code-block styles were **not live**. This repo has shipped stale CSS to production before (2.7.5), and `.github/workflows/ci.yml` fails a push when dist is stale.
+- **`dist/output.css`**: rebuilt via `bun run build:css` (**93,734 bytes**). Verified the new rules actually landed: `code-block-header` ×1, `code-lang-name` ×2, `copy-code-btn` ×5, `c-code-header-bg` ×3, `c-code-fg` ×4.
+- **No source change** — build output only.
 
 ### 2.9.7 - ChatGPT-style code blocks with working language labels
 - **Date**: 2026-11-09
