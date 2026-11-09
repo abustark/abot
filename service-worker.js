@@ -3,7 +3,7 @@
  * Provides offline caching for local assets only
  */
 
-const CACHE_NAME = 'abot-cache-v87'; // 2.9.2: send-button touch target restored, audit allowlist
+const CACHE_NAME = 'abot-cache-v88'; // 2.9.7: ChatGPT-style code blocks + language labels
 const STATIC_ASSETS = [
     '/',
     '/index.html',

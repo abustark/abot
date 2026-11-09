@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.9.7`** (current head is `2.9.6`)
+> - **`main` → `2.9.8`** (current head is `2.9.7`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -33,6 +33,16 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.9.7 - ChatGPT-style code blocks with working language labels
+- **Date**: 2026-11-09
+- **Why**: owner reported the code blocks look bad. Reading the source showed they were not merely styled badly — they were **structurally incomplete**.
+- **Bug found**: `.code-block-header` and `.code-lang-name` were defined in `src/input.css` but **nothing ever created them** (zero references in `js/`). Every block rendered as a bare `<pre>` with a `position: absolute` Copy button floating over the first line and vanishing on hover-out.
+- **Bug found**: `--c-code-bg: #1c1916` was deliberately dark "in both themes", so on the warm cream canvas (`#f7f6f3`) every block was a near-black slab. That is what made them read as foreign.
+- **`js/chat.js`** — new `decorateCodeBlock()` + `detectLanguage()` + a 35-entry `LANGUAGE_LABELS` map. Reads the `language-xxx` class marked emits (and still finds it after highlight.js rewrites the class). Builds a real header with the language name and a Copy button, inserted as the **first child of the `<pre>`** so it scrolls with the code. Called from **both** render paths (`appendMessage` and the streaming finaliser), which previously duplicated their own copy-button code and could drift.
+- **`src/input.css`** — code tokens are now **theme-aware**: light `#f9f8f5` plate with a `#f2f0ec` header strip, dark `#171513` plate with `#1e1b18`. Header always visible; Copy is a static ghost button with icon + label (no hover-reveal). Body is JetBrains Mono 13px / 1.6, horizontal scroll confined to the code body, shared 12px outer radius. Removed the old single-theme `--c-code-bg` from `:root`.
+- **Cache**: `CACHE_NAME` → `abot-cache-v88`, assets `?v=p62` → `?v=p63`.
+- **Not verified in a browser** (owner instruction: code-only). `js/chat.js` parses cleanly; the visual result needs a screenshot from the owner.
 
 ### 2.9.6 - CI: run Node 22 so the jsdom suites can import
 - **Date**: 2026-11-09

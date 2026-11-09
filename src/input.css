@@ -86,7 +86,7 @@
     --c-danger-strong: 178 58 10; /* #b23a0a — destructive row text (sign out) */
     --c-teal: 93 184 166;      /* #5db8a6 */
     --c-amber: 232 165 90;     /* #e8a55a */
-    --c-code-bg: 28 25 22;     /* #1c1916 — code blocks stay dark in both themes */
+    /* --c-code-bg moved to the 2.9.7 code-block block below (theme-aware). */
     --c-shadow: 18 15 12;      /* 2.6.2: cast-shadow ink (flips to true black on dark) */
 
     /* Provider identity accents (skills audit: was raw Tailwind palette
@@ -1038,45 +1038,114 @@
 .message-container:hover .copy-message-btn { opacity: 1; }
 .copy-message-btn { opacity: 0; transition: opacity 0.2s ease-out; }
 
-/* Code block chrome (dark in both themes, per tokens) */
-.prose pre { position: relative; border: 1px solid rgb(var(--c-hairline)); border-radius: 0.5rem; }
+/* ---------------------------------------------------------------------------
+   Code blocks — ChatGPT-style (2.9.7).
+   Theme-aware: a near-white plate on the light theme, a dark plate on dark.
+   The old single `--c-code-bg: #1c1916` painted a near-black slab onto the warm
+   cream canvas, which is why blocks read as foreign rather than as part of the
+   page. Structure: header (language + Copy) sits INSIDE the <pre> as its first
+   child, so the button scrolls with the code instead of floating over line 1.
+--------------------------------------------------------------------------- */
+:root {
+    --c-code-bg: 249 248 245;   /* #f9f8f5 — near-white plate on light */
+    --c-code-header-bg: 242 240 236; /* slightly recessed header strip */
+    --c-code-fg: 32 29 25;
+}
+.dark {
+    --c-code-bg: 23 21 19;      /* #171513 — softer than the canvas, not pure black */
+    --c-code-header-bg: 30 27 24;
+    --c-code-fg: 236 232 225;
+}
+
+.prose pre {
+    position: relative;
+    margin: 1.25em 0;
+    padding: 0;
+    overflow: hidden;             /* header + body share one rounded container */
+    background-color: rgb(var(--c-code-bg));
+    border: 1px solid rgb(var(--c-hairline));
+    border-radius: 0.75rem;
+    color: rgb(var(--c-code-fg));
+}
+
 .code-block-header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    background-color: rgb(var(--c-code-bg));
-    padding: 0.3rem 0.75rem;
-    border-top-left-radius: 0.375rem;
-    border-top-right-radius: 0.375rem;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.5rem 0.875rem;
+    background-color: rgb(var(--c-code-header-bg));
+    border-bottom: 1px solid rgb(var(--c-hairline));
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 12px;
+    line-height: 1;
 }
+
 .code-lang-name {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.75rem;
-    letter-spacing: 0.05em;
-    color: rgb(var(--c-muted));
-}
-.copy-code-btn {
-    position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
-    background-color: rgb(var(--c-card));
-    color: rgb(var(--c-muted));
+    font-family: 'Plus Jakarta Sans', sans-serif;
     font-size: 12px;
     font-weight: 500;
-    padding: 0.25rem 0.6rem;
+    letter-spacing: 0;
+    text-transform: none;
+    color: rgb(var(--c-muted));
+    user-select: none;
+}
+
+/* Copy lives in the header now, so it is always visible — no hover-reveal and
+   no absolute positioning over the code. */
+.copy-code-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    flex-shrink: 0;
+    background: transparent;
+    border: 1px solid transparent;
+    color: rgb(var(--c-muted));
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1;
+    padding: 0.3125rem 0.5rem;
     border-radius: 0.375rem;
-    opacity: 0;
-    transition: opacity 0.15s ease, color 0.2s;
+    opacity: 1;
+    position: static;
+    transition: color 150ms var(--ease-out), background-color 150ms var(--ease-out),
+        border-color 150ms var(--ease-out);
 }
-.copy-code-btn:hover { color: rgb(var(--c-ink)); }
-pre:hover .copy-code-btn,
-pre:focus-within .copy-code-btn { opacity: 1; }
-@media (hover: none) {
-    .copy-code-btn { opacity: 1; }
+.copy-code-btn:hover {
+    color: rgb(var(--c-ink));
+    background-color: rgb(var(--c-hairline) / 0.6);
+    border-color: rgb(var(--c-hairline));
 }
+.copy-code-btn:focus-visible {
+    outline: 2px solid rgb(var(--c-coral) / 0.6);
+    outline-offset: 1px;
+}
+
+/* The code body: horizontal scroll only, comfortable padding, no radius of its
+   own (the <pre> owns the shape). */
 .prose pre > code {
-    border-top-left-radius: 0 !important;
-    border-top-right-radius: 0 !important;
+    display: block;
+    width: max-content;
+    min-width: 100%;
+    padding: 0.875rem 1rem 1rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8125rem;
+    line-height: 1.6;
+    color: rgb(var(--c-code-fg));
+}
+
+/* highlight.js replaces the light-theme colours with its dark palette; the
+   theme tokens above take precedence for body text, and the vendored
+   atom-one-dark stylesheet only styles token classes. */
+.prose pre > code .hljs {
+    background: transparent;
+    padding: 0;
 }
 
 /* Search match jump highlight */

@@ -52,6 +52,71 @@ const highlightWhenReady = (block) => {
     });
 };
 
+// ---------------------------------------------------------------------------
+// 2.9.7: code-block chrome (ChatGPT-style).
+// `.code-block-header` / `.code-lang-name` existed in src/input.css but nothing
+// ever created them, so every block rendered as a bare <pre> with a floating
+// Copy button. This builds the real header and lights up the language name.
+// Shared by both render paths (appendMessage + the streaming finaliser) so the
+// two can never drift apart again.
+// ---------------------------------------------------------------------------
+const LANGUAGE_LABELS = {
+    js: 'JavaScript', javascript: 'JavaScript', jsx: 'JSX', ts: 'TypeScript',
+    typescript: 'TypeScript', tsx: 'TSX', py: 'Python', python: 'Python',
+    sh: 'Shell', bash: 'Bash', shell: 'Shell', zsh: 'Shell', ps1: 'PowerShell',
+    powershell: 'PowerShell', json: 'JSON', html: 'HTML', xml: 'XML',
+    css: 'CSS', scss: 'SCSS', sql: 'SQL', yml: 'YAML', yaml: 'YAML',
+    md: 'Markdown', markdown: 'Markdown', java: 'Java', c: 'C', cpp: 'C++',
+    cs: 'C#', go: 'Go', rs: 'Rust', php: 'PHP', rb: 'Ruby', kt: 'Kotlin',
+    swift: 'Swift', diff: 'Diff', ini: 'INI', toml: 'TOML', dockerfile: 'Dockerfile',
+};
+
+// marked emits <code class="language-xxx">. highlight.js later overwrites the
+// class with `hljs language-xxx`, so this stays correct after highlighting.
+const detectLanguage = (block) => {
+    const cls = `${block.className} ${block.parentElement?.className || ''}`;
+    const m = cls.match(/language-([\w+#-]+)/i);
+    if (!m) return '';
+    const raw = m[1].toLowerCase();
+    return LANGUAGE_LABELS[raw] || m[1];
+};
+
+const decorateCodeBlock = (block) => {
+    const pre = block.parentElement;
+    if (!pre || pre.dataset.decorated === '1') return;
+    pre.dataset.decorated = '1';
+    pre.classList.add('code-block');
+
+    const header = document.createElement('div');
+    header.className = 'code-block-header';
+
+    const lang = document.createElement('span');
+    lang.className = 'code-lang-name';
+    lang.textContent = detectLanguage(block) || 'Code';
+
+    const copyBtn = document.createElement('button');
+    copyBtn.type = 'button';
+    copyBtn.className = 'copy-code-btn';
+    copyBtn.setAttribute('aria-label', 'Copy code');
+    copyBtn.innerHTML = '<svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M7 3.5A1.5 1.5 0 018.5 2h5A1.5 1.5 0 0115 3.5v5a1.5 1.5 0 01-1.5 1.5h-5A1.5 1.5 0 017 8.5v-5z"/><path d="M5 6.5A1.5 1.5 0 003.5 8v5A1.5 1.5 0 005 14.5h5a1.5 1.5 0 001.5-1.5v-1h-1.5v1h-5v-5h1V6.5H5z"/></svg><span>Copy</span>';
+    copyBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(block.textContent).then(() => flashCopiedState(copyBtn, 'w-3.5 h-3.5'));
+    });
+
+    header.appendChild(lang);
+    header.appendChild(copyBtn);
+    // Insert the header INSIDE the <pre> as its first child, so the copy button
+    // scrolled with the code instead of floating over it.
+    pre.insertBefore(header, block);
+
+    // Re-detect after highlight.js runs: it can add a language class that
+    // marked did not emit (e.g. a plain ``` block inferred from content).
+    loadHighlightJs().then(() => {
+        const better = detectLanguage(block);
+        if (better && better !== lang.textContent) lang.textContent = better;
+    });
+};
+
 // 2.4.6 (motion): copy feedback morphs the button itself to a check for ~1.2s
 // (inline, at the pointer) — the code-block button used to swap only its text
 // ("Copied!") and the message-copy button gave toast-only feedback.
@@ -753,17 +818,7 @@ export const appendMessage = (message, isHistory = false, options = {}) => {
     if (!isUser) {
         messageEl.querySelectorAll('pre code').forEach(block => {
             highlightWhenReady(block);
-            // Add Copy Code button (simplified logic)
-            const pre = block.parentElement;
-            const copyCodeBtn = document.createElement('button');
-            copyCodeBtn.className = 'copy-code-btn';
-            copyCodeBtn.textContent = 'Copy';
-            pre.classList.add('group'); // Enable hover
-            copyCodeBtn.addEventListener('click', () => {
-                navigator.clipboard.writeText(block.textContent);
-                flashCopiedState(copyCodeBtn, 'w-3.5 h-3.5');
-            });
-            pre.appendChild(copyCodeBtn);
+            decorateCodeBlock(block); // 2.9.7: header + language label + Copy
         });
     }
 
@@ -1112,15 +1167,7 @@ export const sendMessage = async () => {
         if (cursor) cursor.remove();
 
         latestBotMessageSpan.closest('.prose').querySelectorAll('pre code').forEach(block => {
-            const pre = block.parentElement;
-            if (pre.querySelector('.copy-code-btn')) return;
-            const copyBtn = document.createElement('button');
-            copyBtn.className = 'copy-code-btn';
-            copyBtn.textContent = 'Copy';
-            copyBtn.addEventListener('click', () => {
-                navigator.clipboard.writeText(block.textContent).then(() => flashCopiedState(copyBtn, 'w-3.5 h-3.5'));
-            });
-            pre.appendChild(copyBtn);
+            decorateCodeBlock(block); // 2.9.7: header + language label + Copy
             highlightWhenReady(block);
         });
 
