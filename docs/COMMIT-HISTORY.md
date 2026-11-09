@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.9.2`** (current head is `2.9.1`)
+> - **`main` → `2.9.3`** (current head is `2.9.2`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -33,6 +33,15 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.9.2 - restore the mobile touch target, finish the audit allowlist, refresh PROJECT-INFO
+- **Date**: 2026-11-09
+- **Why**: verification of 2.9.1 surfaced a real regression plus two stale facts.
+- **Regression fixed** — `index.html` `#sendBtn` / `#stopBtn`: 2.9.1 wrote `w-9 h-9 md:w-9 md:h-9`, which is **34px at every breakpoint** (9 Tailwind units = 2.25rem). The brief was "keep 44px on touch, shrink on desktop only", so mobile lost its touch target and `G01 size` failed at 44→34px. Now **`w-[44px] h-[44px] md:w-9 md:h-9`**: 44px on phones, 36px from `md` up. Both buttons keep identical geometry (`#stopBtn` still `absolute inset-0`, so the B-35 co-location contract holds).
+- **Audit allowlist completed** — `tools/ui-audit.js`: added `.auth-preview-live` (2.6s pulsing presence dot on the scripted demo reply) and `.auth-glare` (320ms pointer-follow glare on the sign-in card). Both are auth-page animations, and the auth page is frozen by owner directive (2.8.10). Nothing visual changed.
+- **`docs/PROJECT-INFO.md` refreshed** — stamped v2.8.3 → **v2.9.2**; preset count 9 → **13** (11 Assistant + 2 Fun), listing the four developer presets added in 2.9.1; release count 116 → 118.
+- **Cache**: `CACHE_NAME` → `abot-cache-v87`, assets `?v=p61` → `?v=p62`.
+- **Unchanged**: no CSS token, no prompt content, no auth-page styling.
 
 ### 2.9.1 - UI work order: composer density, prompt library, code-block polish
 - **Date**: 2026-11-09

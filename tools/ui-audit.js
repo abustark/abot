@@ -429,7 +429,11 @@ async function runViewport(browser, { w, h, label, mobile }) {
             // drift over 52s/68s — atmosphere, not UI feedback, so the 300ms
             // interaction ceiling does not apply. `.auth-rise` is the 520ms
             // staged entrance of the sign-in column, kept deliberately.
-            const ALLOW = ['.blinking-cursor', '.dotmark circle', '.typing-a circle', '.sparkle', '.sidebar', '.animate-spin', '.auth-bloom', '.auth-rise'];
+            // 2.9.2: two more frozen-auth cases surfaced once the audit could
+            // run cleanly — `.auth-preview-live` (2.6s pulsing presence dot on
+            // the scripted demo reply) and `.auth-glare` (320ms pointer-follow
+            // glare on the sign-in card, 20ms over the ceiling).
+            const ALLOW = ['.blinking-cursor', '.dotmark circle', '.typing-a circle', '.sparkle', '.sidebar', '.animate-spin', '.auth-bloom', '.auth-rise', '.auth-preview-live', '.auth-glare'];
             const bad = [];
             document.querySelectorAll('body *').forEach((el) => {
                 if (ALLOW.some((s) => el.matches(s))) return;

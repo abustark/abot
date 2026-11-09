@@ -3,7 +3,7 @@
  * Provides offline caching for local assets only
  */
 
-const CACHE_NAME = 'abot-cache-v86'; // 2.9.1: composer density, prompt library, code-block polish
+const CACHE_NAME = 'abot-cache-v87'; // 2.9.2: send-button touch target restored, audit allowlist
 const STATIC_ASSETS = [
     '/',
     '/index.html',

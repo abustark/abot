@@ -3,7 +3,7 @@
 > **Purpose:** every fact an AI (or a person) needs to write a resume "Projects"
 > entry, a portfolio summary, a LinkedIn post, or interview talking points for
 > ABot — without reading the code.
-> **Current as of:** **v2.8.3** · 2026-11-08 · branch `main`.
+> **Current as of:** **v2.9.2** · 2026-11-09 · branch `main`.
 
 ---
 
@@ -61,7 +61,7 @@
 | Live site | https://abot-ai.vercel.app/ |
 | Source | private GitHub repo `abustark/abot` (access on request) |
 | License | private, all rights reserved (`"license": "UNLICENSED"`); site footer © 2026 ABu |
-| Version | **2.8.3** (2026-11-08) |
+| Version | **2.9.2** (2026-11-09) |
 | Status | Actively maintained. 2.8.x is the portfolio-readiness pass: repo hygiene (CI moved to root `.github/`), footer copy, and real product screenshots in the README |
 | Stack | Vanilla ES modules · Tailwind 3.4 (compiled) · Vercel serverless + Express mirror · Firebase Auth/Firestore · 4 free-tier AI providers |
 
@@ -135,7 +135,7 @@
 5. **Timestamps + message search** — per-message timestamp toggle, per-chat search with jump-and-highlight.
 6. **TTS** — per-message speak/stop + auto-read toggle (`abot-auto-tts`), `stripForSpeech` cleanup.
 7. **Export/import** — JSON + Markdown export, JSON import with `{name,messages,model,systemPrompt}` validation.
-8. **Prompt library** — 9 presets (Standard, Code Helper, Sarcastic Pirate, Creative Writer, Email Assistant, Technical Writer, ELI5, Brainstorm Partner, Game Master) per chat.
+8. **Prompt library** — 13 presets in two groups per chat. **Assistant (11):** Standard, Code Helper, Creative Writer, Email Assistant, Technical Writer, ELI5, Brainstorm Partner, Code Reviewer, Debugger, SQL Helper, Explain Code. **Fun (2):** Sarcastic Pirate, Game Master.
 9. **Auth trio** — email/password (signup, login, forgot-password, verification gate blocking unverified password accounts with 403), Google sign-in, anonymous guest (5-message limit + upgrade modal, `linkGuestToGoogle` merge path).
 10. **Command palette + shortcuts** — `Ctrl+K` palette, `Alt+N` new chat, `Alt+/` search focus, Enter/Shift+Enter send, Esc handling, model-panel typeahead.
 11. **Design system — oxblood & bone** (2.6.10): light canvas `#f7f6f3`, ink `#16130f`, oxblood accent `#7d1f3d` (9.1:1), danger orange-red `#c2410c`; dark canvas `#141210`, rose accent `#e08a9e` (7.4:1). Serif display + sans body, provider identity colours, and a four-hue "provider seam" used as the brand underline on the auth page.
@@ -163,7 +163,7 @@
 - **293** git-tracked files (0 in `node_modules`).
 - **~4,770 lines** across **13** `js/` ES modules (`chat.js` 1,378 · `app.js` 1,349 · `auth.js` 532 · `utils.js` 295 · `auth-preview.js` 288 · `sparkles.js` 169 · `ui.js` 166 · `palette.js` 163 · `config.js` 161 · `dom.js` 108 · `haptics.js` 76 · `dotloader.js` 60 · `state.js` 25) + `server.js` 427 + `api/chat.js` 241 + `lib/chat-security.js` 215.
 - **909** lines of `index.html`, **1,868** lines of Tailwind source → **91 KB** compiled CSS.
-- **31 configured models** across **4 provider APIs**; **9** prompt presets; **49** bug-registry ids; **116** versioned releases logged in `docs/COMMIT-HISTORY.md`.
+- **31 configured models** across **4 provider APIs**; **13** prompt presets (11 assistant + 2 fun); **49** bug-registry ids; **118** versioned releases logged in `docs/COMMIT-HISTORY.md`.
 - **4 test suites** in `npm test`; **25** service-worker precached assets; **7** self-hosted font files; **8** committed screenshots.
 - **60 s** serverless max duration with **55 s** upstream abort; **30 req/15 min** per-identity chat limit + **100 req/15 min** per-IP general limit.
 - **10 security issues (S1–S10)** remediated in Phase 1 (2026-08-27); favicon 380 KB → 1.2 KB in Phase 4.
