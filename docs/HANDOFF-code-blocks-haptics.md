@@ -1,21 +1,23 @@
 # HANDOFF — code-block scroll + haptics scope + interaction tests
 
 > **Read this first if you are an AI harness picking this up.**
-> Written 2026-11-09 by a previous agent that ran out of budget mid-task.
-> **Your job:** verify the claims marked `VERIFIED` below still hold, finish what
-> is `OUTSTANDING`, then report to the owner. Do not re-do completed work.
+> Written 2026-11-09 by a previous agent that ran out of budget mid-task;
+> **updated after the work was committed.**
+> **Your job:** check §6 — only ONE item remains. Do not re-do completed work.
 
 ---
 
-## 0. TL;DR state
+## 0. TL;DR state (UPDATED — work is COMMITTED)
 
-- **Work is UNCOMMITTED.** `main` HEAD is `2f7a407` (`2.9.9`). Pending version is **`2.10.0`**.
-- **All four test suites passed** after the changes (`bun run test` → `All suites passed ✅`).
-- **`bun run ui:audit` reported 0 failures** (first clean run ever, thanks to the auth-motion allowlist in `2.8.10`).
-- **`dist/output.css` was rebuilt and is current** (`bun run build:css` ran after the CSS change).
-- **NOT verified:** light-theme visual of the code block. The probe kept failing on a stale
-  Puppeteer profile lock before the light-mode screenshot could be taken.
-- **NOT done:** service-worker cache bump, `index.html` `?v=` bump, `COMMIT-HISTORY.md` entry, commit, push.
+- **COMMITTED and PUSHED.** `main` = `5761661` (`2.9.10`). Working tree clean.
+- **All four test suites pass** (`bun run test` → `All suites passed ✅`).
+- **`bun run ui:audit` reported 0 failures**, desktop + mobile.
+- **`dist/output.css` is rebuilt and current**, committed with the change.
+- **Cache/asset versions bumped**: `abot-cache-v89`, `?v=p64`.
+- Next version: **`2.10.0`**.
+- **ONE item outstanding:** the light-theme screenshot of the code block. See §6.
+
+**Do NOT re-commit or re-bump anything from §6 items 2–5 — they are done.**
 
 ---
 
@@ -127,24 +129,34 @@ bun run build:css →  dist/output.css rebuilt; verified overflow-x / scrollbar-
 
 ---
 
-## 6. OUTSTANDING — finish these
+## 6. OUTSTANDING
 
-1. **Light-theme code block visual never captured.** Force the theme with
-   `document.documentElement.classList.toggle('dark', false)` **and** `localStorage.setItem('theme','light')`
-   *before* the screenshot; clicking `#sidebarThemeSwitch` did not take effect. Expected light
-   values from `src/input.css`: plate `#f9f8f5`, header strip `#f2f0ec`, body text `#201d19`.
-   If those do not appear, the `:root` token block near the code-block rules is not winning.
-2. **Service-worker cache bump** — `service-worker.js` `CACHE_NAME` is currently `abot-cache-v88`;
-   go to `v89` (CSS + JS changed). Comment should name this change.
-3. **`index.html` asset version** — currently `./dist/output.css?v=p63` → `?v=p64`.
-4. **`docs/COMMIT-HISTORY.md`** — write a `### 2.10.0 - …` entry **before** committing
-   (`.githooks/commit-msg` aborts if the subject's version disagrees with `APP_VERSION`), and
-   advance the `📌 Next version` line to `2.10.1`.
-5. **Commit** as `2.10.0 - code-block scroll, haptics scope, interaction tests`, then push
-   `origin main`. **Do NOT push to `arena`** — mirroring is on-demand only.
-6. **Clean up** `tmp/probe.js` (gitignored scratch, safe to delete) and any stale
-   `%TEMP%\puppeteer_dev_chrome_profile-*` directories; also make sure no orphan `node server.js`
-   is left holding port 3000.
+### 6a. The ONE remaining item — light-theme code-block visual
+
+Never captured. The probe forced the theme two ways and both failed to take effect, so
+only **dark** mode is visually confirmed (`rgb(23,21,19)` plate, `rgb(30,27,24)` header).
+
+**What to do:** boot the app with a REAL light theme — set `localStorage.setItem('theme','light')`
+**before** the first paint (a `page.evaluateOnNewDocument` hook, not a post-load `evaluate`), then
+assert these computed values from `src/input.css`:
+
+| Element | Expected (light) |
+|---|---|
+| `.prose pre` background | `rgb(249, 248, 245)` |
+| `.code-block-header` background | `rgb(242, 240, 236)` |
+| `.prose pre > code` colour | `rgb(32, 29, 25)` |
+
+If those do not appear, the `:root` token block declared just above the code-block rules in
+`src/input.css` is not winning the cascade — check it comes **after** the main `:root` and is not
+being overridden by `.dark`.
+
+### 6b. Already DONE — do not repeat
+
+- ✅ Cache bump → `abot-cache-v89`
+- ✅ `index.html` asset `?v=p64`
+- ✅ `docs/COMMIT-HISTORY.md` `2.9.10` entry written; next line advanced to `2.10.0`
+- ✅ Committed `2.9.10` and pushed to `origin main` (**never** pushed to `arena`)
+- ✅ `tmp/` scratch removed, port 3000 freed, stale Puppeteer profiles cleared
 
 ---
 
