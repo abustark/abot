@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.9.5`** (current head is `2.9.4`)
+> - **`main` → `2.9.6`** (current head is `2.9.5`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -33,6 +33,12 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.9.5 - verification questions need a fixed template
+- **Date**: 2026-11-09
+- **Why**: the 2.9.4 rule said "split fast vs slow" but gave only an *example*, so the very next post-update question reverted to the old vague phrasing ("fast set would suffice: lint, check, test:html") with no FAST/SLOW labels and no SLOW line. The rule had room to paraphrase badly.
+- **`AGENTS.md` §3 rule 2**: replaced the example with a **literal template to copy**, and made both lines mandatory — writing `SLOW: none proposed` is now required, not optional. Adds an explicit "is the fast set enough?" line and a `Which — fast only, fast + SLOW, or none?` closer.
+- **Docs only** — no behaviour, code or test change.
 
 ### 2.9.4 - verification requests must split fast vs. slow checks
 - **Date**: 2026-11-09

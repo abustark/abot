@@ -200,10 +200,19 @@ git merge origin/main    # on the arena branch, resolve, commit
    the gate passes / tests to verify, or leave it?"* Then it **waits for the answer**.
    This reminder is mandatory and may not be skipped or folded into other text.
    **When asking, always name WHICH checks would run and split them into fast vs. slow**
-   (see §3.0 below) so the owner can approve part of the set. Example:
-   *"Fast (≈20s, no browser): lint, check, typecheck, test:html, test-runner. Slow
-   (Chrome + screenshots, minutes): ui:audit, test:security, visual:local. Which — fast only,
-   all, or none?"* Never ask a vague "run the gates?".
+   (see §3.0 below) so the owner can approve part of the set. **Copy this template — do not
+   paraphrase it:**
+
+   ```
+   **FAST** (seconds, no browser): <exact commands, e.g. bun run lint, bun run check>
+   **SLOW** (Chrome + screenshots, minutes, token-heavy): <exact commands, or "none proposed">
+
+   <one line: is the fast set enough for this change? yes/no + why>
+   Which — fast only, fast + SLOW, or none?
+   ```
+
+   Never ask a vague "run the gates?". Never ask the post-update question **without** both
+   FAST and SLOW lines present — writing "none proposed" for SLOW is required, not optional.
 
 ### 3.0 Fast vs. slow checks — ALWAYS disclose this when asking (owner directive, 2026-11-09)
 
