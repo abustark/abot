@@ -3,7 +3,7 @@
  * Provides offline caching for local assets only
  */
 
-const CACHE_NAME = 'abot-cache-v90'; // 2.10.0: centre loader dot stays white
+const CACHE_NAME = 'abot-cache-v90'; // 2.9.10: centre loader dot stays white (shipped as 2.10.0)
 const STATIC_ASSETS = [
     '/',
     '/index.html',

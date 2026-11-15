@@ -3,10 +3,11 @@
 This document tracks every commit made on `main` following the versioning schema:
 - Structure: `2.0.1` … `2.0.10` ➔ **rolls over to `2.1.0`**; then `2.1.1` … `2.1.10` ➔ **`2.2.0`**; then `2.2.1` … `2.2.10` ➔ **`2.3.0`**, and so on.
 - **The third number NEVER exceeds `.10`.** When it would, roll the second number. Do not write `2.0.11`, `2.1.11`, … — that is the drift this rule exists to prevent.
+- **The second number NEVER exceeds `.9` either** (owner directive, 2026-11-15). A minor line runs `.0`–`.9` only, so the top of a line closes the MAJOR: **`2.9.10` → `3.0.0`** — not `2.10.0`, not `2.11.0`. Never write a two-digit minor (`2.10.x`).
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.10.1`** (current head is `2.10.0`)
+> - **`main` → `3.0.1`** (current head is `3.0.0`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -34,7 +35,15 @@ This document tracks every commit made on `main` following the versioning schema
 
 ## Commit History
 
-### 2.10.0 - centre loader dot stays white
+### 3.0.0 - centre loader dot stays white; version roll-over closes at 3.0.0
+- **Date**: 2026-11-15
+- **Why**: owner request — (a) in the starting-site dot-matrix loader (the 7×7 grid under the dotted "abot" wordmark) the centre dot should be white while the other 48 stay on the theme colours, and it must stay visible in BOTH themes; (b) the commit schema itself was wrong at the top of a line — `2.10.0` was allowed, but a minor line only runs `.0`–`.9`, so the line must close the MAJOR: **`2.9.10` → `3.0.0`**.
+- **`src/input.css`**: `.dot-loader span:nth-child(22)` (grid index 21 = row 4, col 4, the exact centre, present in 12 of the 16 frames in `js/dotloader.js`) pinned to `background-color: #fff !important` so it beats `.active` (coral). Added `box-shadow: inset 0 0 0 1px rgb(var(--c-ink) / 0.18)` — pure `#fff` on the light canvas `#f7f6f3` is only ~1.07:1 and would all but vanish in light mode; the theme-coloured ring defines the disc in light and is a faint inner highlight in dark. No markup/JS change.
+- **Version schema (`AGENTS.md` §1, `docs/COMMIT-HISTORY.md` header, `tools/sync-version.js`)**: the second number now never exceeds `.9`. `nextAfter()` computes `x.y.10 → x.(y+1).0`, and `x.9.10 → (x+1).0.0`; the `patch > 10` error now suggests the correct roll-over instead of `x.(y+1).0`. Doc headers updated so no session has to guess.
+- **This commit is the first under the corrected rule**: the `2.x` line closes at `2.9.10`; numbering continues at **`3.0.0`**. (The white-dot commit had already shipped as `2.10.0` — `c34f762`, pushed before the schema was corrected — so its history entry is relabelled `2.9.10` here; the commit subject on the remote still reads `2.10.0`.)
+- **Cache**: `CACHE_NAME` → `abot-cache-v90`, CSS `?v=p65`.
+
+### 2.9.10 - centre loader dot stays white
 - **Date**: 2026-11-15
 - **Why**: owner request — in the starting-site dot-matrix loader (the 7×7 grid under the dotted "abot" wordmark), the centre dot is the one the frame sequence keeps lit while the rest snake around it. Owner asked for that single dot to be white; the other 48 stay on the theme colours.
 - **`src/input.css`**: `.dot-loader span:nth-child(22)` pinned to `background-color: #fff !important`. The 22nd span is grid index 21 (row 4, col 4) — the exact centre of the 7×7 grid, and the dot present in 12 of the 16 frames in `js/dotloader.js`. `!important` is required so it beats `.dot-loader span.active` (coral) in the frames where it is lit.

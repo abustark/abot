@@ -10,8 +10,9 @@
  *      past `.10` (the roll-over rule lives in AGENTS.md §1);
  *   2. writes `APP_VERSION` in js/config.js — the single value the UI reads;
  *   3. writes `version` in package.json, so npm metadata can't drift;
- *   4. advances the `📌 Next version` line in docs/COMMIT-HISTORY.md (`x.y.10` →
- *      `x.(y+1).0`, never `.11`).
+ *   4. advances the `📌 Next version` line in docs/COMMIT-HISTORY.md —
+ *      `x.y.10` → `x.(y+1).0`, and at the top of a minor line
+ *      (`x.9.10`) → `(x+1).0.0`, never `.11` and never a two-digit minor.
  *
  * Any file it rewrites is staged, so the fix lands inside the same commit
  * (which is why it must run in pre-commit: git builds the tree right after).
@@ -52,15 +53,23 @@ if (!/^\d+\.\d+\.\d+$/.test(version)) {
 
 const [major, minor, patch] = version.split('.').map(Number);
 
+// Roll-over (AGENTS.md §1): the third number never exceeds .10, and the SECOND
+// number never exceeds .9 — so 2.9.10 closes the 2.x line at 3.0.0.
+const nextAfter = (v) => {
+    const [maj, min, pat] = v.split('.').map(Number);
+    if (pat >= 10) {
+        return min >= 9 ? `${maj + 1}.0.0` : `${maj}.${min + 1}.0`;
+    }
+    return `${maj}.${min}.${pat + 1}`;
+};
+
 if (patch > 10) {
     console.error(`[sync-version] ${version}: the third number never exceeds .10.`);
-    console.error(`[sync-version] Use ${major}.${minor + 1}.0 instead.`);
+    console.error(`[sync-version] Use ${nextAfter(version)} instead.`);
     process.exit(1);
 }
 
-const next = patch >= 10
-    ? `${major}.${minor + 1}.0`
-    : `${major}.${minor}.${patch + 1}`;
+const next = nextAfter(version);
 
 // --- 1. the history entry must exist -----------------------------------------
 const history = fs.readFileSync(HISTORY_FILE, 'utf8');

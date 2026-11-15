@@ -31,6 +31,10 @@ ABot is a **vanilla-JS, multi-model AI chat app** (no framework):
    - Structure: `2.0.1` … `2.0.10` ➔ **rolls over to `2.1.0`**; then `2.1.1` … `2.1.10` ➔ **`2.2.0`**; and so on.
      **The third number NEVER exceeds `.10`** — when it would, roll the second number
      (`2.0.10` → `2.1.0`, `2.1.10` → `2.2.0`, `2.2.10` → `2.3.0`, …).
+   - **The second number NEVER exceeds `.9` either.** A minor line runs `.0`–`.9` only, so the top
+     of a line closes the MAJOR: **`2.9.10` → `3.0.0`**, not `2.10.0` and not `2.11.0`
+     (owner directive, 2026-11-15). Never write a two-digit minor (`2.10.x`) — `tools/sync-version.js`
+     computes the roll-over, so it cannot drift.
    - **One version number per agent response / request batch** — not per issue, not per commit.
      A single owner request (even if it fixes many issues) consumes exactly ONE version number.
      Multiple commits inside one response are NOT allowed to each take a new number; if a follow-up
