@@ -6,7 +6,7 @@ This document tracks every commit made on `main` following the versioning schema
 - Format: `<version> - <short sentence>`
 
 > ### 📌 Next version — **keep this line current, every commit**
-> - **`main` → `2.10.0`** (current head is `2.9.10`)
+> - **`main` → `2.10.1`** (current head is `2.10.0`)
 > - **`arena/01a03fe9-abot` → mirrors `main`** via **plain fast-forward only**
 >   (`git push origin main:arena/01a03fe9-abot`). Rejected = arena is ahead → merge arena
 >   into main first. No force-push unless the owner explicitly asks in chat
@@ -33,6 +33,14 @@ This document tracks every commit made on `main` following the versioning schema
 ---
 
 ## Commit History
+
+### 2.10.0 - centre loader dot stays white
+- **Date**: 2026-11-15
+- **Why**: owner request — in the starting-site dot-matrix loader (the 7×7 grid under the dotted "abot" wordmark), the centre dot is the one the frame sequence keeps lit while the rest snake around it. Owner asked for that single dot to be white; the other 48 stay on the theme colours.
+- **`src/input.css`**: `.dot-loader span:nth-child(22)` pinned to `background-color: #fff !important`. The 22nd span is grid index 21 (row 4, col 4) — the exact centre of the 7×7 grid, and the dot present in 12 of the 16 frames in `js/dotloader.js`. `!important` is required so it beats `.dot-loader span.active` (coral) in the frames where it is lit.
+- **No markup/JS change** — the grid is untouched; only the one selector was added.
+- **Cache**: `CACHE_NAME` → `abot-cache-v90`, CSS `?v=p65`.
+- **Repair**: the working tree arrived corrupted (`.git/index` bad signature; `js/config.js`, `package.json`, `docs/COMMIT-HISTORY.md`, `service-worker.js` zero-filled with NUL bytes). Index rebuilt from HEAD and the four files restored from HEAD — no work was lost (the only intended edits were `src/input.css` + the `dist/` rebuild, both intact).
 
 ### 2.9.10 - code-block mobile scroll, haptics scoped to controls, interaction tests repaired
 - **Date**: 2026-11-09

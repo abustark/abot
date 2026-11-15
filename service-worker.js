@@ -3,7 +3,7 @@
  * Provides offline caching for local assets only
  */
 
-const CACHE_NAME = 'abot-cache-v89'; // 2.9.10: code-block scroll fix, haptics scoped to controls
+const CACHE_NAME = 'abot-cache-v90'; // 2.10.0: centre loader dot stays white
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -11,7 +11,7 @@ const STATIC_ASSETS = [
     '/favicon-32-light.png',
     '/favicon-32-dark.png',
     '/logo.png',
-    '/dist/output.css?v=p61',
+    '/dist/output.css?v=p65',
     '/js/app.js',
     '/js/config.js',
     '/js/dom.js',

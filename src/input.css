@@ -814,6 +814,13 @@
 .dot-loader span.active {
     background-color: rgb(var(--c-coral));
 }
+/* The centre dot of the 7×7 grid (the 22nd span = index 21, row 4 col 4) is
+   the one the frame sequence keeps lit while the others snake around it — the
+   owner asked for it to stay white in BOTH themes, so it is pinned here rather
+   than following --c-ink/--c-coral. `!important` beats `.active`. */
+.dot-loader span:nth-child(22) {
+    background-color: #fff !important;
+}
 
 /* Empty-state ambient glow — a whisper of the auth coral radial, so the new-chat
    screen has a focal warmth instead of a flat void. Compositor-only. */
